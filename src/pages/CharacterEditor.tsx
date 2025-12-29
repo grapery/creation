@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Save, Sparkles, MessageCircle, Video, Image, MoreVertical } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -8,8 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Badge } from '../components/ui/badge';
 import { MobileHeader } from '../components/MobileHeader';
-import { mockCharacters } from '../lib/mockData';
-import { mockChatThreads } from '../lib/mockChatData';
+import { useCharacterStore, useChatStore } from '../stores';
+import { toast } from 'sonner';
 
 interface CharacterEditorProps {
   characterId?: string;
@@ -17,44 +17,114 @@ interface CharacterEditorProps {
 }
 
 export function CharacterEditor({ characterId, onNavigate }: CharacterEditorProps) {
-  const character = characterId ? mockCharacters.find(c => c.id === characterId) : null;
+  const { currentCharacter, fetchCharacter, createCharacter, updateCharacter, isLoading } = useCharacterStore();
+  const { threads, fetchThreads } = useChatStore();
 
-  const [name, setName] = useState(character?.name || '');
-  const [description, setDescription] = useState(character?.description || '');
-  const [traits, setTraits] = useState<string[]>(character?.traits || []);
-  const [newTrait, setNewTrait] = useState('');
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [skills, setSkills] = useState<string[]>([]);
+  const [newSkill, setNewSkill] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleAddTrait = () => {
-    if (newTrait.trim()) {
-      setTraits([...traits, newTrait.trim()]);
-      setNewTrait('');
+  useEffect(() => {
+    if (characterId) {
+      fetchCharacter(characterId);
+    }
+    fetchThreads();
+  }, [characterId, fetchCharacter, fetchThreads]);
+
+  useEffect(() => {
+    if (currentCharacter) {
+      setName(currentCharacter.name || '');
+      setDescription(currentCharacter.description || '');
+      setSkills(currentCharacter.skills || []);
+    }
+  }, [currentCharacter]);
+
+  const handleAddSkill = () => {
+    if (newSkill.trim() && !skills.includes(newSkill.trim())) {
+      setSkills([...skills, newSkill.trim()]);
+      setNewSkill('');
     }
   };
 
-  const handleRemoveTrait = (trait: string) => {
-    setTraits(traits.filter(t => t !== trait));
+  const handleRemoveSkill = (skill: string) => {
+    setSkills(skills.filter(s => s !== skill));
+  };
+
+  const handleSave = async () => {
+    if (!name.trim()) {
+      toast.error('Please enter a character name');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      if (characterId && currentCharacter) {
+        // Update existing character
+        await updateCharacter(characterId, {
+          name,
+          description,
+          skills,
+        });
+        toast.success('Character updated successfully');
+      } else {
+        // Create new character
+        const newCharacter = await createCharacter({
+          name,
+          description,
+          skills,
+        });
+        toast.success('Character created successfully');
+        onNavigate('character-editor', newCharacter.id);
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || error.message || 'Failed to save character');
+    } finally {
+      setIsSaving(false);
+    }
   };
   
-  const handleStartChat = () => {
-    // Find existing chat thread with this character
-    const existingThread = mockChatThreads.find(t => t.characterId === characterId);
-    if (existingThread) {
-      onNavigate('chat-conversation', existingThread.id);
-    } else {
-      // Create new chat thread (in a real app, this would be an API call)
-      onNavigate('chat-conversation', characterId);
+  const handleStartChat = async () => {
+    if (!characterId && !currentCharacter?.id) {
+      toast.error('Please save the character first');
+      return;
+    }
+
+    const charId = characterId || currentCharacter?.id;
+    if (!charId) return;
+
+    try {
+      // Find existing chat thread with this character
+      const existingThread = threads.find(t => t.characterId === charId);
+      if (existingThread) {
+        onNavigate('chat-conversation', existingThread.id);
+      } else {
+        // Navigate to chat, which will create thread if needed
+        onNavigate('chat-conversation', charId);
+      }
+    } catch (error: any) {
+      toast.error('Failed to start chat');
     }
   };
+
+  if (isLoading && characterId) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center text-muted-foreground">Loading character...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
       <MobileHeader 
-        title={character ? character.name : 'New Character'}
+        title={currentCharacter ? currentCharacter.name : 'New Character'}
         showBack
         onBack={() => onNavigate('dashboard')}
         actions={
           <>
-            {character && (
+            {currentCharacter && (
               <Button variant="ghost" size="icon" onClick={handleStartChat}>
                 <MessageCircle className="h-5 w-5" />
               </Button>
@@ -67,28 +137,47 @@ export function CharacterEditor({ characterId, onNavigate }: CharacterEditorProp
       />
       
       <div className="p-4 space-y-4">
+        {/* Quick Actions */}
+        <div className="flex gap-2 overflow-x-auto pb-2">
+          <Button 
+            size="sm" 
+            className="flex-shrink-0"
+            onClick={handleSave}
+            disabled={isSaving}
+          >
+            <Save className="mr-2 h-4 w-4" />
+            {isSaving ? 'Saving...' : 'Save'}
+          </Button>
+        </div>
+
         {/* Character Header */}
-        {character && (
+        {currentCharacter && (
           <Card>
             <CardContent className="p-4">
               <div className="flex gap-4">
-                <img
-                  src={character.avatar}
-                  alt={character.name}
-                  className="h-24 w-24 rounded-lg object-cover flex-shrink-0"
-                />
+                {currentCharacter.avatar && (
+                  <img
+                    src={currentCharacter.avatar}
+                    alt={currentCharacter.name}
+                    className="h-24 w-24 rounded-lg object-cover flex-shrink-0"
+                  />
+                )}
                 <div className="flex-1 min-w-0">
-                  <h2 className="mb-1">{character.name}</h2>
-                  <p className="text-muted-foreground mb-3 line-clamp-2">
-                    {character.description}
-                  </p>
-                  <div className="flex gap-2 flex-wrap mb-3">
-                    {character.traits.slice(0, 3).map((trait) => (
-                      <Badge key={trait} variant="secondary">
-                        {trait}
-                      </Badge>
-                    ))}
-                  </div>
+                  <h2 className="mb-1">{currentCharacter.name}</h2>
+                  {currentCharacter.description && (
+                    <p className="text-muted-foreground mb-3 line-clamp-2">
+                      {currentCharacter.description}
+                    </p>
+                  )}
+                  {skills.length > 0 && (
+                    <div className="flex gap-2 flex-wrap mb-3">
+                      {skills.slice(0, 3).map((skill) => (
+                        <Badge key={skill} variant="secondary">
+                          {skill}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                   <Button onClick={handleStartChat} className="w-full">
                     <MessageCircle className="mr-2 h-4 w-4" />
                     Start Conversation
@@ -141,7 +230,7 @@ export function CharacterEditor({ characterId, onNavigate }: CharacterEditorProp
                   <Input
                     id="role"
                     placeholder="Protagonist, Antagonist, etc."
-                    defaultValue={character?.role || ''}
+                    defaultValue={currentCharacter?.role || ''}
                   />
                 </div>
               </CardContent>
@@ -158,8 +247,8 @@ export function CharacterEditor({ characterId, onNavigate }: CharacterEditorProp
                 <div className="space-y-2">
                   <Label>Character Avatar</Label>
                   <div className="aspect-square rounded-lg overflow-hidden bg-muted flex items-center justify-center">
-                    {character?.avatar ? (
-                      <img src={character.avatar} alt="Avatar" className="w-full h-full object-cover" />
+                    {currentCharacter?.avatar ? (
+                      <img src={currentCharacter.avatar} alt="Avatar" className="w-full h-full object-cover" />
                     ) : (
                       <p className="text-muted-foreground">Upload avatar</p>
                     )}
@@ -172,8 +261,8 @@ export function CharacterEditor({ characterId, onNavigate }: CharacterEditorProp
                 <div className="space-y-2">
                   <Label>Full Character Poster</Label>
                   <div className="aspect-[3/4] rounded-lg overflow-hidden bg-muted flex items-center justify-center">
-                    {character?.poster ? (
-                      <img src={character.poster} alt="Poster" className="w-full h-full object-cover" />
+                    {currentCharacter?.poster ? (
+                      <img src={currentCharacter.poster} alt="Poster" className="w-full h-full object-cover" />
                     ) : (
                       <p className="text-muted-foreground">Upload poster</p>
                     )}
@@ -191,30 +280,30 @@ export function CharacterEditor({ characterId, onNavigate }: CharacterEditorProp
           <TabsContent value="personality" className="space-y-4 mt-4">
             <Card>
               <CardHeader>
-                <CardTitle>Personality Traits</CardTitle>
+                <CardTitle>Skills & Traits</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {traits.map((trait) => (
+                  {skills.map((skill) => (
                     <Badge
-                      key={trait}
+                      key={skill}
                       variant="secondary"
                       className="cursor-pointer"
-                      onClick={() => handleRemoveTrait(trait)}
+                      onClick={() => handleRemoveSkill(skill)}
                     >
-                      {trait} ×
+                      {skill} ×
                     </Badge>
                   ))}
                 </div>
 
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Add a trait..."
-                    value={newTrait}
-                    onChange={(e) => setNewTrait(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleAddTrait()}
+                    placeholder="Add a skill..."
+                    value={newSkill}
+                    onChange={(e) => setNewSkill(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleAddSkill()}
                   />
-                  <Button onClick={handleAddTrait}>Add</Button>
+                  <Button onClick={handleAddSkill}>Add</Button>
                 </div>
               </CardContent>
             </Card>
@@ -243,7 +332,7 @@ export function CharacterEditor({ characterId, onNavigate }: CharacterEditorProp
                   />
                 </div>
 
-                {character && (
+                {currentCharacter && (
                   <Button onClick={handleStartChat} className="w-full">
                     <MessageCircle className="mr-2 h-4 w-4" />
                     Test Chat
@@ -253,12 +342,6 @@ export function CharacterEditor({ characterId, onNavigate }: CharacterEditorProp
             </Card>
           </TabsContent>
         </Tabs>
-
-        {/* Save Button */}
-        <Button className="w-full">
-          <Save className="mr-2 h-4 w-4" />
-          Save Character
-        </Button>
       </div>
     </div>
   );

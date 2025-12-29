@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Heart, Share2, MessageCircle, Sparkles, Users, Zap, Plus, Pencil, Trash2, Image as ImageIcon, Upload, X } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -9,15 +9,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
-import { 
-  mockCharacters, 
-  mockCharacterPosters, 
-  mockCharacterAnalytics, 
-  mockCurrentUser,
-  mockGroups,
-  type CharacterPoster 
-} from '../lib/mockData';
-import { toast } from 'sonner@2.0.3';
+import { useCharacterStore, useAuthStore, useChatStore } from '../stores';
+import { toast } from 'sonner';
 
 interface CharacterProfileProps {
   characterId?: string;
@@ -25,34 +18,75 @@ interface CharacterProfileProps {
 }
 
 export function CharacterProfile({ characterId, onNavigate }: CharacterProfileProps) {
-  const character = mockCharacters.find(c => c.id === characterId) || mockCharacters[0];
-  const analytics = mockCharacterAnalytics.find(a => a.characterId === character.id);
-  const posters = mockCharacterPosters.filter(p => p.characterId === character.id);
-  const characterGroup = character.groupId ? mockGroups.find(g => g.id === character.groupId) : undefined;
+  const { currentCharacter, fetchCharacter, updateCharacter, isLoading } = useCharacterStore();
+  const { user: currentUser } = useAuthStore();
+  const { threads, getOrCreateThread } = useChatStore();
   
-  const isCreator = character.author.id === mockCurrentUser.id;
   const [isFollowing, setIsFollowing] = useState(false);
-  const [skills, setSkills] = useState(character.skills || []);
+  const [skills, setSkills] = useState<string[]>([]);
   const [showSkillDialog, setShowSkillDialog] = useState(false);
   const [showPosterDialog, setShowPosterDialog] = useState(false);
   const [newSkill, setNewSkill] = useState('');
   const [posterTitle, setPosterTitle] = useState('');
   const [posterPrompt, setPosterPrompt] = useState('');
   const [posterReferenceImage, setPosterReferenceImage] = useState<string | null>(null);
-  const [localPosters, setLocalPosters] = useState<CharacterPoster[]>(posters);
+  const [posters, setPosters] = useState<any[]>([]);
 
-  const handleAddSkill = () => {
-    if (newSkill.trim()) {
-      setSkills([...skills, newSkill.trim()]);
-      setNewSkill('');
-      setShowSkillDialog(false);
+  useEffect(() => {
+    if (characterId) {
+      fetchCharacter(characterId);
+    }
+  }, [characterId, fetchCharacter]);
+
+  useEffect(() => {
+    if (currentCharacter) {
+      setSkills(currentCharacter.skills || []);
+    }
+  }, [currentCharacter]);
+
+  const isCreator = currentCharacter?.author?.id === currentUser?.id;
+
+  const handleAddSkill = async () => {
+    if (!newSkill.trim() || !currentCharacter) return;
+    
+    const updatedSkills = [...skills, newSkill.trim()];
+    setSkills(updatedSkills);
+    setNewSkill('');
+    setShowSkillDialog(false);
+    
+    try {
+      await updateCharacter(currentCharacter.id, { skills: updatedSkills });
       toast.success('Skill added successfully');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || error.message || 'Failed to add skill');
+      setSkills(skills); // Revert on error
     }
   };
 
-  const handleRemoveSkill = (skillToRemove: string) => {
-    setSkills(skills.filter(s => s !== skillToRemove));
-    toast.success('Skill removed');
+  const handleRemoveSkill = async (skillToRemove: string) => {
+    if (!currentCharacter) return;
+    
+    const updatedSkills = skills.filter(s => s !== skillToRemove);
+    setSkills(updatedSkills);
+    
+    try {
+      await updateCharacter(currentCharacter.id, { skills: updatedSkills });
+      toast.success('Skill removed');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || error.message || 'Failed to remove skill');
+      setSkills(skills); // Revert on error
+    }
+  };
+
+  const handleStartChat = async () => {
+    if (!currentCharacter?.id) return;
+    
+    try {
+      const thread = await getOrCreateThread(currentCharacter.id);
+      onNavigate('chat-conversation', thread.id);
+    } catch (error: any) {
+      toast.error('Failed to start chat');
+    }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -71,22 +105,24 @@ export function CharacterProfile({ characterId, onNavigate }: CharacterProfilePr
   };
 
   const handleCreatePoster = () => {
+    if (!currentCharacter) return;
+    
     if (posterTitle.trim() && (posterPrompt.trim() || posterReferenceImage)) {
-      // Simulate AI poster generation
+      // TODO: Implement actual poster creation API
       toast.info('Generating poster with AI...', { duration: 2000 });
       
       setTimeout(() => {
-        const newPoster: CharacterPoster = {
+        const newPoster = {
           id: `poster-${Date.now()}`,
-          characterId: character.id,
+          characterId: currentCharacter.id,
           title: posterTitle,
-          image: posterReferenceImage || character.poster || character.avatar || '',
-          author: mockCurrentUser,
+          image: posterReferenceImage || currentCharacter.poster || currentCharacter.avatar || '',
+          author: currentUser,
           likes: 0,
           shares: 0,
           createdAt: new Date().toISOString(),
         };
-        setLocalPosters([newPoster, ...localPosters]);
+        setPosters([newPoster, ...posters]);
         setPosterTitle('');
         setPosterPrompt('');
         setPosterReferenceImage(null);
@@ -99,24 +135,38 @@ export function CharacterProfile({ characterId, onNavigate }: CharacterProfilePr
   };
 
   const handleLikePoster = (posterId: string) => {
-    setLocalPosters(localPosters.map(p => 
-      p.id === posterId ? { ...p, likes: p.likes + 1 } : p
+    setPosters(posters.map(p => 
+      p.id === posterId ? { ...p, likes: (p.likes || 0) + 1 } : p
     ));
   };
 
-  // For public characters: anyone can create posters
-  // For private/group-only characters: only group members can create posters
-  // For simplicity in this demo, we'll allow poster creation if:
-  // - Character is public, OR
-  // - Character has a groupId (meaning it's group-only) and we assume current user is a member
-  const canCreatePoster = character.isPublic || (!!character.groupId);
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center text-muted-foreground">Loading character...</div>
+      </div>
+    );
+  }
+
+  if (!currentCharacter) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <p className="text-muted-foreground mb-4">Character not found</p>
+          <Button onClick={() => onNavigate('dashboard')}>Back to Dashboard</Button>
+        </div>
+      </div>
+    );
+  }
+
+  const canCreatePoster = true; // Simplified for now
 
   return (
     <div className="min-h-screen pb-20 md:pb-0">
       <MobileHeader 
-        title={character.name}
+        title={currentCharacter.name}
         showBack
-        onBack={() => onNavigate('characters')}
+        onBack={() => onNavigate('dashboard')}
         actions={
           <>
             <Button variant="ghost" size="icon" onClick={() => toast.info('Share character')}>
@@ -132,45 +182,49 @@ export function CharacterProfile({ characterId, onNavigate }: CharacterProfilePr
           <CardContent className="pt-6">
             <div className="flex items-start gap-4">
               <Avatar className="h-24 w-24 border-4 border-background">
-                <AvatarImage src={character.avatar} />
-                <AvatarFallback>{character.name[0]}</AvatarFallback>
+                <AvatarImage src={currentCharacter.avatar} />
+                <AvatarFallback>{currentCharacter.name[0]}</AvatarFallback>
               </Avatar>
               
               <div className="flex-1 space-y-3">
                 <div>
+                  <h2 className="text-2xl font-bold mb-2">{currentCharacter.name}</h2>
+                </div>
+                
+                {currentCharacter.description && (
+                  <p className="text-muted-foreground">{currentCharacter.description}</p>
+                )}
+                
+                {currentCharacter.author && (
                   <div className="flex items-center gap-2">
-                    <Badge variant={character.isPublic ? 'default' : 'secondary'}>
-                      {character.isPublic ? 'Public' : 'Group Only'}
-                    </Badge>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onNavigate('profile', currentCharacter.author.id)}
+                      className="p-0 h-auto hover:bg-transparent"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-6 w-6">
+                          <AvatarImage src={currentCharacter.author.avatar} />
+                          <AvatarFallback>{currentCharacter.author.displayName?.[0] || 'U'}</AvatarFallback>
+                        </Avatar>
+                        <span className="text-sm">@{currentCharacter.author.username || 'unknown'}</span>
+                      </div>
+                    </Button>
+                    {currentCharacter.createdAt && (
+                      <>
+                        <span className="text-sm text-muted-foreground">•</span>
+                        <span className="text-sm text-muted-foreground">
+                          Created {new Date(currentCharacter.createdAt).toLocaleDateString()}
+                        </span>
+                      </>
+                    )}
                   </div>
-                </div>
-                
-                <p className="text-muted-foreground">{character.description}</p>
-                
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onNavigate('profile', character.author.id)}
-                    className="p-0 h-auto hover:bg-transparent"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Avatar className="h-6 w-6">
-                        <AvatarImage src={character.author.avatar} />
-                        <AvatarFallback>{character.author.displayName[0]}</AvatarFallback>
-                      </Avatar>
-                      <span className="text-sm">@{character.author.username}</span>
-                    </div>
-                  </Button>
-                  <span className="text-sm text-muted-foreground">•</span>
-                  <span className="text-sm text-muted-foreground">
-                    Created {new Date(character.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
+                )}
 
                 <div className="flex gap-2">
                   {isCreator ? (
-                    <Button variant="outline" size="sm" onClick={() => onNavigate('character-editor', character.id)}>
+                    <Button variant="outline" size="sm" onClick={() => onNavigate('character-editor', currentCharacter.id)}>
                       <Pencil className="h-4 w-4 mr-2" />
                       Edit Character
                     </Button>
@@ -190,7 +244,7 @@ export function CharacterProfile({ characterId, onNavigate }: CharacterProfilePr
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => onNavigate('chat-conversation', character.id)}
+                        onClick={handleStartChat}
                       >
                         <MessageCircle className="h-4 w-4 mr-2" />
                         Chat
@@ -203,8 +257,8 @@ export function CharacterProfile({ characterId, onNavigate }: CharacterProfilePr
           </CardContent>
         </Card>
 
-        {/* Communication & Usage Analytics */}
-        {analytics && (
+        {/* Analytics Section - TODO: Implement real analytics API */}
+        {isCreator && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -216,17 +270,17 @@ export function CharacterProfile({ characterId, onNavigate }: CharacterProfilePr
               <div className="grid grid-cols-3 gap-4">
                 <div className="text-center p-4 rounded-lg bg-muted/50">
                   <Users className="h-5 w-5 mx-auto mb-2 text-blue-500" />
-                  <div className="text-2xl">{analytics.usersWhoChattedCount}</div>
+                  <div className="text-2xl">0</div>
                   <div className="text-sm text-muted-foreground">Users Chatted</div>
                 </div>
                 <div className="text-center p-4 rounded-lg bg-muted/50">
                   <MessageCircle className="h-5 w-5 mx-auto mb-2 text-green-500" />
-                  <div className="text-2xl">{analytics.totalMessagesSent}</div>
+                  <div className="text-2xl">0</div>
                   <div className="text-sm text-muted-foreground">Messages Sent</div>
                 </div>
                 <div className="text-center p-4 rounded-lg bg-muted/50">
                   <Zap className="h-5 w-5 mx-auto mb-2 text-yellow-500" />
-                  <div className="text-2xl">{analytics.totalTokensConsumed.toLocaleString()}</div>
+                  <div className="text-2xl">0</div>
                   <div className="text-sm text-muted-foreground">AI Tokens</div>
                 </div>
               </div>
@@ -296,9 +350,7 @@ export function CharacterProfile({ characterId, onNavigate }: CharacterProfilePr
                   Promotional Posters
                 </CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {character.isPublic 
-                    ? 'Community-created promotional artwork (anyone can contribute)'
-                    : 'Group-only promotional artwork'}
+                  Community-created promotional artwork
                 </p>
               </div>
               {canCreatePoster && (
@@ -314,9 +366,9 @@ export function CharacterProfile({ characterId, onNavigate }: CharacterProfilePr
             </div>
           </CardHeader>
           <CardContent>
-            {localPosters.length > 0 ? (
+            {posters.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {localPosters.map((poster) => (
+                {posters.map((poster: any) => (
                   <div key={poster.id} className="space-y-2">
                     <div className="relative aspect-video overflow-hidden rounded-lg border">
                       <img 
@@ -327,11 +379,15 @@ export function CharacterProfile({ characterId, onNavigate }: CharacterProfilePr
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <Avatar className="h-6 w-6">
-                          <AvatarImage src={poster.author.avatar} />
-                          <AvatarFallback>{poster.author.displayName[0]}</AvatarFallback>
-                        </Avatar>
-                        <span className="text-sm">@{poster.author.username}</span>
+                        {poster.author && (
+                          <>
+                            <Avatar className="h-6 w-6">
+                              <AvatarImage src={poster.author.avatar} />
+                              <AvatarFallback>{poster.author.displayName?.[0] || 'U'}</AvatarFallback>
+                            </Avatar>
+                            <span className="text-sm">@{poster.author.username || 'unknown'}</span>
+                          </>
+                        )}
                       </div>
                       <div className="flex items-center gap-3">
                         <button 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Save, Eye, Share2, Users, Settings, Plus, Sparkles, MoreVertical } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -9,7 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Badge } from '../components/ui/badge';
 import { MobileHeader } from '../components/MobileHeader';
-import { mockStories, mockPanels, mockCharacters } from '../lib/mockData';
+import { useStoryStore, useCharacterStore } from '../stores';
+import { toast } from 'sonner';
 
 interface StoryEditorProps {
   storyId?: string;
@@ -17,24 +18,88 @@ interface StoryEditorProps {
 }
 
 export function StoryEditor({ storyId, onNavigate }: StoryEditorProps) {
-  const story = storyId ? mockStories.find(s => s.id === storyId) : null;
-  const panels = storyId ? mockPanels.filter(p => p.storyId === storyId) : [];
+  const { currentStory, fetchStory, createStory, updateStory, isLoading } = useStoryStore();
+  const { characters, fetchCharacters } = useCharacterStore();
 
-  const [title, setTitle] = useState(story?.title || '');
-  const [description, setDescription] = useState(story?.description || '');
-  const [genre, setGenre] = useState(story?.genre || 'Fantasy');
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [content, setContent] = useState('');
+  const [genre, setGenre] = useState('Fantasy');
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (storyId) {
+      fetchStory(storyId);
+    }
+    fetchCharacters(1, 50); // Load all characters for selection
+  }, [storyId, fetchStory, fetchCharacters]);
+
+  useEffect(() => {
+    if (currentStory) {
+      setTitle(currentStory.title || '');
+      setDescription(currentStory.description || '');
+      setContent(currentStory.content || '');
+    }
+  }, [currentStory]);
+
+  const handleSave = async () => {
+    if (!title.trim()) {
+      toast.error('Please enter a title');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      if (storyId && currentStory) {
+        // Update existing story
+        await updateStory(storyId, {
+          title,
+          description,
+          content,
+        });
+        toast.success('Story updated successfully');
+      } else {
+        // Create new story
+        const newStory = await createStory({
+          title,
+          description,
+          content,
+          status: 'draft',
+        });
+        toast.success('Story created successfully');
+        onNavigate('story-editor', newStory.id);
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || error.message || 'Failed to save story');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (isLoading && storyId) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center text-muted-foreground">Loading story...</div>
+      </div>
+    );
+  }
+
+  const storyScenes = currentStory?.scenes || [];
+  const storyCharacters = currentStory?.characters || [];
 
   return (
     <div className="min-h-screen">
       <MobileHeader 
-        title={story ? 'Edit Story' : 'New Story'}
+        title={currentStory ? 'Edit Story' : 'New Story'}
         showBack
         onBack={() => onNavigate('dashboard')}
         actions={
           <>
-            <Button variant="ghost" size="icon" onClick={() => onNavigate('story-viewer', storyId)}>
-              <Eye className="h-5 w-5" />
-            </Button>
+            {currentStory && (
+              <Button variant="ghost" size="icon" onClick={() => onNavigate('story-viewer', storyId)}>
+                <Eye className="h-5 w-5" />
+              </Button>
+            )}
             <Button variant="ghost" size="icon">
               <MoreVertical className="h-5 w-5" />
             </Button>
@@ -45,9 +110,14 @@ export function StoryEditor({ storyId, onNavigate }: StoryEditorProps) {
       <div className="p-4 space-y-4">
         {/* Quick Actions */}
         <div className="flex gap-2 overflow-x-auto pb-2">
-          <Button size="sm" className="flex-shrink-0">
+          <Button 
+            size="sm" 
+            className="flex-shrink-0"
+            onClick={handleSave}
+            disabled={isSaving}
+          >
             <Save className="mr-2 h-4 w-4" />
-            Save
+            {isSaving ? 'Saving...' : 'Save'}
           </Button>
           <Button size="sm" variant="outline" className="flex-shrink-0">
             <Share2 className="mr-2 h-4 w-4" />
@@ -113,8 +183,8 @@ export function StoryEditor({ storyId, onNavigate }: StoryEditorProps) {
                 <div className="space-y-2">
                   <Label>Cover Image</Label>
                   <div className="aspect-video rounded-lg overflow-hidden bg-muted flex items-center justify-center">
-                    {story?.coverImage ? (
-                      <img src={story.coverImage} alt="Cover" className="w-full h-full object-cover" />
+                    {currentStory?.cover ? (
+                      <img src={currentStory.cover} alt="Cover" className="w-full h-full object-cover" />
                     ) : (
                       <p className="text-muted-foreground">Upload cover image</p>
                     )}
@@ -129,28 +199,36 @@ export function StoryEditor({ storyId, onNavigate }: StoryEditorProps) {
 
           <TabsContent value="panels" className="space-y-3 mt-4">
             <div className="flex items-center justify-between">
-              <h3>Panels ({panels.length})</h3>
-              <Button size="sm" onClick={() => onNavigate('storyboard-editor', storyId)}>
+              <h3>Scenes ({storyScenes.length})</h3>
+              <Button size="sm" onClick={() => onNavigate('storyboard-editor', storyId || currentStory?.id)}>
                 <Plus className="mr-2 h-4 w-4" />
-                Add Panel
+                Add Scene
               </Button>
             </div>
 
-            {panels.length > 0 ? (
+            {storyScenes.length > 0 ? (
               <div className="space-y-2">
-                {panels.map((panel, index) => (
-                  <Card key={panel.id} className="active:scale-98 transition-transform">
+                {storyScenes.map((scene: any, index: number) => (
+                  <Card 
+                    key={scene.id || index} 
+                    className="active:scale-98 transition-transform cursor-pointer"
+                    onClick={() => onNavigate('storyboard-viewer', scene.storyboardId)}
+                  >
                     <CardContent className="p-3">
                       <div className="flex gap-3">
-                        <div className="w-16 h-20 flex-shrink-0 rounded overflow-hidden bg-muted">
-                          <img src={panel.image} alt={`Panel ${index + 1}`} className="w-full h-full object-cover" />
-                        </div>
+                        {scene.image && (
+                          <div className="w-16 h-20 flex-shrink-0 rounded overflow-hidden bg-muted">
+                            <img src={scene.image} alt={`Scene ${index + 1}`} className="w-full h-full object-cover" />
+                          </div>
+                        )}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between mb-1">
-                            <span>Panel {panel.order}</span>
-                            <Badge variant="secondary">{panel.type}</Badge>
+                            <span>{scene.title || `Scene ${index + 1}`}</span>
+                            {scene.location && (
+                              <Badge variant="secondary">{scene.location}</Badge>
+                            )}
                           </div>
-                          <p className="text-muted-foreground line-clamp-2">{panel.text || 'No caption'}</p>
+                          <p className="text-muted-foreground line-clamp-2">{scene.description || 'No description'}</p>
                         </div>
                       </div>
                     </CardContent>
@@ -160,10 +238,10 @@ export function StoryEditor({ storyId, onNavigate }: StoryEditorProps) {
             ) : (
               <Card>
                 <CardContent className="p-8 text-center">
-                  <p className="text-muted-foreground mb-4">No panels yet</p>
-                  <Button onClick={() => onNavigate('storyboard-editor', storyId)}>
+                  <p className="text-muted-foreground mb-4">No scenes yet</p>
+                  <Button onClick={() => onNavigate('storyboard-editor', storyId || currentStory?.id)}>
                     <Sparkles className="mr-2 h-4 w-4" />
-                    Create First Panel
+                    Create First Scene
                   </Button>
                 </CardContent>
               </Card>
@@ -172,33 +250,55 @@ export function StoryEditor({ storyId, onNavigate }: StoryEditorProps) {
 
           <TabsContent value="characters" className="space-y-3 mt-4">
             <div className="flex items-center justify-between">
-              <h3>Characters ({mockCharacters.length})</h3>
-              <Button size="sm">
+              <h3>Characters ({storyCharacters.length || characters.length})</h3>
+              <Button size="sm" onClick={() => onNavigate('character-editor')}>
                 <Plus className="mr-2 h-4 w-4" />
-                Add
+                Add Character
               </Button>
             </div>
 
-            <div className="space-y-2">
-              {mockCharacters.map((character) => (
-                <Card key={character.id} className="active:scale-98 transition-transform" onClick={() => onNavigate('character-editor', character.id)}>
-                  <CardContent className="p-3">
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={character.avatar}
-                        alt={character.name}
-                        className="h-12 w-12 rounded-full object-cover flex-shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="truncate">{character.name}</div>
-                        <p className="text-muted-foreground truncate">{character.role}</p>
+            {(storyCharacters.length > 0 || characters.length > 0) ? (
+              <div className="space-y-2">
+                {(storyCharacters.length > 0 ? storyCharacters : characters).map((character: any) => (
+                  <Card 
+                    key={character.id} 
+                    className="active:scale-98 transition-transform cursor-pointer" 
+                    onClick={() => onNavigate('character-editor', character.id)}
+                  >
+                    <CardContent className="p-3">
+                      <div className="flex items-center gap-3">
+                        {character.avatar && (
+                          <img
+                            src={character.avatar}
+                            alt={character.name}
+                            className="h-12 w-12 rounded-full object-cover flex-shrink-0"
+                          />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="truncate">{character.name}</div>
+                          {character.description && (
+                            <p className="text-muted-foreground truncate">{character.description}</p>
+                          )}
+                        </div>
+                        {character.skills && character.skills.length > 0 && (
+                          <Badge variant="secondary">{character.skills.length} skills</Badge>
+                        )}
                       </div>
-                      <Badge variant="secondary">{character.stories} stories</Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card>
+                <CardContent className="p-8 text-center">
+                  <p className="text-muted-foreground mb-4">No characters yet</p>
+                  <Button onClick={() => onNavigate('character-editor')}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create Character
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
         </Tabs>
       </div>

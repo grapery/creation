@@ -32,27 +32,6 @@ export function EditProfile({ onNavigate }: EditProfileProps) {
     onNavigate('profile');
   };
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setAvatarPreview(event.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleBackgroundChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setBackgroundPreview(event.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   return (
     <div className="min-h-screen">
@@ -61,8 +40,8 @@ export function EditProfile({ onNavigate }: EditProfileProps) {
         showBack
         onBack={() => onNavigate('profile')}
         actions={
-          <Button variant="ghost" size="sm" onClick={handleSave}>
-            Save
+          <Button variant="ghost" size="sm" onClick={handleSave} disabled={isSaving}>
+            {isSaving ? 'Saving...' : 'Save'}
           </Button>
         }
       />
@@ -86,7 +65,7 @@ export function EditProfile({ onNavigate }: EditProfileProps) {
               type="file"
               accept="image/*"
               className="hidden"
-              onChange={handleBackgroundChange}
+              onChange={handleBackgroundUpload}
             />
           </label>
         </div>
@@ -104,7 +83,7 @@ export function EditProfile({ onNavigate }: EditProfileProps) {
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={handleAvatarChange}
+                onChange={handleAvatarUpload}
               />
             </label>
           </div>

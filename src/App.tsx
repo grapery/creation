@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MobileNavigation } from './components/MobileNavigation';
 import { Toaster } from './components/ui/sonner';
+import { useAuthStore } from './stores';
 import { Dashboard } from './pages/Dashboard';
 import { StoryEditor } from './pages/StoryEditor';
 import { StoryboardEditor } from './pages/StoryboardEditor';
@@ -82,10 +83,55 @@ interface NavigationState {
 }
 
 export default function App() {
+  const { isAuthenticated, getCurrentUser } = useAuthStore();
   const [navState, setNavState] = useState<NavigationState>({ page: 'login' });
 
+  useEffect(() => {
+    // Check authentication on mount
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      getCurrentUser().then(() => {
+        // If authenticated and on login page, navigate to dashboard
+        if (isAuthenticated && navState.page === 'login') {
+          setNavState({ page: 'dashboard' });
+        }
+      }).catch(() => {
+        // Token invalid, stay on login
+        if (navState.page !== 'login') {
+          setNavState({ page: 'login' });
+        }
+      });
+    } else {
+      // No token, ensure we're on login page
+      if (navState.page !== 'login' && navState.page !== 'register' && navState.page !== 'password-reset') {
+        setNavState({ page: 'login' });
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    // Update navigation based on auth state changes
+    if (!isAuthenticated && navState.page !== 'login' && navState.page !== 'register' && navState.page !== 'password-reset') {
+      setNavState({ page: 'login' });
+    }
+  }, [isAuthenticated, navState.page]);
+
   const handleNavigate = (page: string, id?: string) => {
-    setNavState({ page: page as Page, id });
+    // If navigating to dashboard and authenticated, allow it
+    if (page === 'dashboard' && isAuthenticated) {
+      setNavState({ page: page as Page, id });
+    } 
+    // Allow navigation to auth pages
+    else if (['login', 'register', 'password-reset'].includes(page)) {
+      setNavState({ page: page as Page, id });
+    }
+    // For other pages, check authentication
+    else if (isAuthenticated) {
+      setNavState({ page: page as Page, id });
+    } else {
+      // Redirect to login if not authenticated
+      setNavState({ page: 'login' });
+    }
   };
 
   const renderPage = () => {

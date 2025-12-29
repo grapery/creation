@@ -1,13 +1,52 @@
-import axios from 'axios';
+import axios, { AxiosInstance } from 'axios';
+import { getApiBaseUrl } from './apiBase';
 
-// 配置API基础地址
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+// 创建多个API实例以支持不同的后端服务
+const createApiClient = (baseURL: string): AxiosInstance => {
+  const client = axios.create({
+    baseURL,
+    timeout: 30000, // 增加超时时间以支持流式响应
+  });
 
-// 创建API实例
-const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 10000,
-});
+  // 请求拦截器 - 添加认证令牌
+  client.interceptors.request.use(
+    (config) => {
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    },
+    (error) => {
+      return Promise.reject(error);
+    }
+  );
+
+  // 响应拦截器 - 处理错误
+  client.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response?.status === 401) {
+        console.error('未授权访问，请重新登录');
+        localStorage.removeItem('authToken');
+        // 可以在这里添加跳转到登录页的逻辑
+        // window.location.href = '/login';
+      }
+      return Promise.reject(error);
+    }
+  );
+
+  return client;
+};
+
+// 主API服务 (server)
+const apiClient = createApiClient(getApiBaseUrl('server'));
+
+// 聊天服务 (chatmcp)
+const chatApiClient = createApiClient(getApiBaseUrl('chat'));
+
+// VIP支付服务 (vippay)
+const vippayApiClient = createApiClient(getApiBaseUrl('vippay'));
 
 // 请求拦截器 - 添加认证令牌
 apiClient.interceptors.request.use(
@@ -387,4 +426,135 @@ export const activityApi = {
   getGlobalActivities: () => apiClient.get('/activities/global'),
 };
 
+// Agent Chat API (使用 chatmcp 服务)
+export const agentChatApi = {
+  // 发送消息
+  sendMessage: (data: {
+    characterId: string;
+    content: string;
+    threadId?: string;
+    image?: string;
+    storyboardBranchId?: string;
+  }) => chatApiClient.post('/agent/chat/send', data),
+  
+  // 流式发送消息
+  sendMessageStream: (data: {
+    characterId: string;
+    content: string;
+    threadId?: string;
+    image?: string;
+    storyboardBranchId?: string;
+  }) => chatApiClient.post('/agent/chat/send-stream', data, {
+    responseType: 'stream',
+  }),
+  
+  // 获取聊天历史
+  getChatHistory: (threadId: string, limit: number = 50, offset: number = 0) =>
+    chatApiClient.get(`/agent/chat/history/${threadId}`, { params: { limit, offset } }),
+  
+  // 获取聊天线程列表
+  listChatThreads: () => chatApiClient.get('/agent/chat/threads'),
+  
+  // 创建聊天线程
+  createChatThread: (data: { characterId: string }) =>
+    chatApiClient.post('/agent/chat/threads', data),
+  
+  // 获取故事板分支
+  getStoryboardBranches: (threadId: string) =>
+    chatApiClient.get(`/agent/chat/threads/${threadId}/storyboard-branches`),
+  
+  // 选择故事板分支
+  selectStoryboardBranch: (threadId: string, data: { storyboardBranchId: string; characterId: string }) =>
+    chatApiClient.post(`/agent/chat/threads/${threadId}/select-branch`, data),
+  
+  // 加载更多消息
+  loadMoreMessages: (threadId: string, beforeMessageId: string, limit: number = 20) =>
+    chatApiClient.get(`/agent/chat/threads/${threadId}/messages`, {
+      params: { before: beforeMessageId, limit },
+    }),
+  
+  // 获取线程统计
+  getThreadStats: (threadId: string) =>
+    chatApiClient.get(`/agent/chat/threads/${threadId}/stats`),
+  
+  // 归档线程
+  archiveThread: (threadId: string) =>
+    chatApiClient.post(`/agent/chat/threads/${threadId}/archive`),
+  
+  // 消息反应
+  reactToMessage: (messageId: string, data: { reactionType: string; emojiCode?: string }) =>
+    chatApiClient.post(`/agent/chat/messages/${messageId}/react`, data),
+  
+  // 归档消息
+  archiveMessage: (messageId: string) =>
+    chatApiClient.post(`/agent/chat/messages/${messageId}/archive`),
+};
+
+// Storyboard Chat API (使用 chatmcp 服务)
+export const storyboardChatApi = {
+  // 开始会话
+  startSession: (data: { storyId: string }) =>
+    chatApiClient.post('/agent/storyboard-chat/start', data),
+  
+  // 获取会话列表
+  listSessions: () => chatApiClient.get('/agent/storyboard-chat/sessions'),
+  
+  // 获取会话详情
+  getSession: (sessionId: string) =>
+    chatApiClient.get(`/agent/storyboard-chat/sessions/${sessionId}`),
+  
+  // 获取消息列表
+  getMessages: (sessionId: string) =>
+    chatApiClient.get(`/agent/storyboard-chat/sessions/${sessionId}/messages`),
+  
+  // 发送消息
+  sendMessage: (sessionId: string, data: { actionId?: string; content?: string; data?: any }) =>
+    chatApiClient.post(`/agent/storyboard-chat/sessions/${sessionId}/send`, data),
+  
+  // 获取会话状态
+  getStatus: (sessionId: string) =>
+    chatApiClient.get(`/agent/storyboard-chat/sessions/${sessionId}/status`),
+};
+
+// VIP Pay API (使用 vippay 服务)
+export const vippayApi = {
+  // 健康检查
+  health: () => vippayApiClient.get('/health'),
+  
+  // 版权信息
+  getCopyright: () => vippayApiClient.get('/copyright'),
+  
+  // Apple OAuth
+  appleOAuth: {
+    signin: (data: { redirect?: string }) => vippayApiClient.post('/apple-oauth/signin', data),
+    getStatus: () => vippayApiClient.get('/apple-oauth/status'),
+    getConfig: () => vippayApiClient.get('/apple-oauth/config'),
+  },
+  
+  // Google OAuth
+  googleOAuth: {
+    signin: (data: { redirect?: string }) => vippayApiClient.post('/google-oauth/signin', data),
+    getStatus: () => vippayApiClient.get('/google-oauth/status'),
+    getConfig: () => vippayApiClient.get('/google-oauth/config'),
+  },
+  
+  // VIP 信息
+  vip: {
+    getInfo: () => vippayApiClient.get('/vip/info'),
+    check: () => vippayApiClient.get('/vip/check'),
+    getQuota: () => vippayApiClient.get('/vip/quota'),
+    getMaxRoles: () => vippayApiClient.get('/vip/max-roles'),
+    getMaxContexts: () => vippayApiClient.get('/vip/max-contexts'),
+  },
+  
+  // IAP
+  iap: {
+    getProducts: () => vippayApiClient.get('/iap/products'),
+    getProductDetail: (id: string) => vippayApiClient.get(`/iap/products/${id}`),
+    verifyAppleReceipt: (data: any) => vippayApiClient.post('/iap/apple/verify', data),
+    verifyGooglePurchase: (data: any) => vippayApiClient.post('/iap/google/verify', data),
+  },
+};
+
 export default apiClient;
+export { chatApiClient, vippayApiClient };

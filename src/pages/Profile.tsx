@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Settings, MapPin, Calendar, Link as LinkIcon, Share2, MoreVertical } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
@@ -9,7 +9,10 @@ import { StoryCard } from '../components/StoryCard';
 import { CharacterCard } from '../components/CharacterCard';
 import { UserActivityFeed } from '../components/UserActivityFeed';
 import { AvatarPreview } from '../components/AvatarPreview';
-import { mockCurrentUser, mockStories, mockCharacters, mockUserActivities } from '../lib/mockData';
+import { useAuthStore, useStoryStore, useCharacterStore } from '../stores';
+import { userApi } from '../lib/api';
+import { toast } from 'sonner';
+import type { User } from '../stores/authStore';
 
 interface ProfileProps {
   userId?: string;
@@ -17,13 +20,77 @@ interface ProfileProps {
 }
 
 export function Profile({ userId, onNavigate }: ProfileProps) {
-  const user = mockCurrentUser; // In a real app, fetch based on userId
+  const { user: currentUser } = useAuthStore();
+  const { stories, getUserStories, isLoading: isLoadingStories } = useStoryStore();
+  const { characters, fetchCharacters, isLoading: isLoadingCharacters } = useCharacterStore();
+  
+  const [user, setUser] = useState<User | null>(null);
   const [isFollowing, setIsFollowing] = useState(false);
   const [showAvatarPreview, setShowAvatarPreview] = useState(false);
-  const isOwnProfile = !userId || userId === user.id;
+  const [isLoading, setIsLoading] = useState(true);
+  const [activities, setActivities] = useState<any[]>([]);
+  
+  const isOwnProfile = !userId || userId === currentUser?.id;
+  const profileUserId = userId || currentUser?.id || '';
 
-  const userStories = mockStories.filter(s => s.author.id === user.id);
-  const userCharacters = mockCharacters.filter(c => c.author.id === user.id);
+  useEffect(() => {
+    loadProfileData();
+  }, [userId]);
+
+  const loadProfileData = async () => {
+    if (!profileUserId) return;
+    
+    setIsLoading(true);
+    try {
+      // Load user profile
+      const userResponse = await userApi.getUserProfile(profileUserId);
+      const profileUser = userResponse.data.user || userResponse.data;
+      setUser(profileUser);
+
+      // Check if following
+      // Note: This would require a separate API call to check follow status
+      
+      // Load user stories
+      await getUserStories(profileUserId, 1, 20);
+      
+      // Load user characters
+      await fetchCharacters(1, 20);
+      
+      // Load user activities
+      try {
+        const activitiesResponse = await userApi.getUserActivityList(profileUserId, 1, 20);
+        const activitiesData = activitiesResponse.data.activities || activitiesResponse.data.data?.activities || activitiesResponse.data.data || [];
+        setActivities(activitiesData);
+      } catch (error) {
+        console.error('Failed to load activities:', error);
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || error.message || 'Failed to load profile');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleFollow = async () => {
+    if (!user) return;
+    
+    try {
+      if (isFollowing) {
+        await userApi.unfollowUser(user.id);
+        setIsFollowing(false);
+        toast.success('Unfollowed successfully');
+      } else {
+        await userApi.followUser(user.id);
+        setIsFollowing(true);
+        toast.success('Followed successfully');
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || error.message || 'Failed to update follow status');
+    }
+  };
+
+  const userStories = stories.filter(s => s.author.id === user?.id);
+  const userCharacters = characters.filter(c => c.author.id === user?.id);
 
   const handleActivityClick = (targetId: string, targetType?: string) => {
     if (targetType === 'story') {
@@ -34,6 +101,25 @@ export function Profile({ userId, onNavigate }: ProfileProps) {
       onNavigate('profile', targetId);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center text-muted-foreground">Loading profile...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <p className="text-muted-foreground mb-4">User not found</p>
+          <Button onClick={() => onNavigate('dashboard')}>Back to Dashboard</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
@@ -64,11 +150,15 @@ export function Profile({ userId, onNavigate }: ProfileProps) {
           <div className="relative">
             {/* Background Image */}
             <div className="h-32 overflow-hidden">
-              <img
-                src={user.background}
-                alt="Background"
-                className="w-full h-full object-cover"
-              />
+              {user.background ? (
+                <img
+                  src={user.background}
+                  alt="Background"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20" />
+              )}
             </div>
 
             {/* Profile Info */}
@@ -90,7 +180,7 @@ export function Profile({ userId, onNavigate }: ProfileProps) {
                     <Button 
                       variant={isFollowing ? 'outline' : 'default'}
                       size="sm"
-                      onClick={() => setIsFollowing(!isFollowing)}
+                      onClick={handleFollow}
                     >
                       {isFollowing ? 'Following' : 'Follow'}
                     </Button>
@@ -172,36 +262,58 @@ export function Profile({ userId, onNavigate }: ProfileProps) {
           </TabsList>
 
           <TabsContent value="activity" className="mt-4">
-            <UserActivityFeed 
-              activities={mockUserActivities} 
-              onActivityClick={handleActivityClick}
-            />
+            {activities.length > 0 ? (
+              <UserActivityFeed 
+                activities={activities} 
+                onActivityClick={handleActivityClick}
+              />
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                No activities yet
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="stories" className="space-y-3 mt-4">
-            {userStories.map((story) => (
-              <StoryCard
-                key={story.id}
-                story={story}
-                onView={() => onNavigate('story-viewer', story.id)}
-              />
-            ))}
+            {isLoadingStories ? (
+              <div className="text-center py-8 text-muted-foreground">Loading stories...</div>
+            ) : userStories.length > 0 ? (
+              userStories.map((story) => (
+                <StoryCard
+                  key={story.id}
+                  story={story}
+                  onView={() => onNavigate('story-viewer', story.id)}
+                />
+              ))
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                No stories yet
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="characters" className="space-y-3 mt-4">
-            {userCharacters.map((character) => (
-              <CharacterCard
-                key={character.id}
-                character={character}
-                onView={() => onNavigate('character-viewer', character.id)}
-              />
-            ))}
+            {isLoadingCharacters ? (
+              <div className="text-center py-8 text-muted-foreground">Loading characters...</div>
+            ) : userCharacters.length > 0 ? (
+              userCharacters.map((character) => (
+                <CharacterCard
+                  key={character.id}
+                  character={character}
+                  onView={() => onNavigate('character-viewer', character.id)}
+                />
+              ))
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                No characters yet
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="likes" className="space-y-3 mt-4">
-            <p className="text-muted-foreground text-center py-8">
-              No liked content yet
-            </p>
+            <div className="text-center py-8 text-muted-foreground">
+              Liked content feature coming soon
+            </div>
           </TabsContent>
         </Tabs>
       </div>

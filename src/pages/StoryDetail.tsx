@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Users, BookOpen, Plus, Edit2, Share2, UserPlus } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -10,8 +10,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
 import { Label } from '../components/ui/label';
-import { mockStoryCompositions, mockStoryboards, StoryboardCharacter, Scene } from '../lib/mockStoryboardData';
-import { mockStories } from '../lib/mockData';
+import { useStoryStore, useStoryboardStore, useCharacterStore, useAuthStore } from '../stores';
+import { toast } from 'sonner';
 
 interface StoryDetailProps {
   storyId?: string;
@@ -19,34 +19,55 @@ interface StoryDetailProps {
 }
 
 export function StoryDetail({ storyId, onNavigate }: StoryDetailProps) {
-  // Default to first story composition if no ID provided
-  const story = mockStoryCompositions[0];
+  const { currentStory, fetchStory, isLoading: isLoadingStory } = useStoryStore();
+  const { storyboards, fetchStoryboards } = useStoryboardStore();
+  const { characters, fetchCharacters } = useCharacterStore();
+  const { user: currentUser } = useAuthStore();
+  
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
-  
-  if (!story) return null;
+
+  useEffect(() => {
+    if (storyId) {
+      fetchStory(storyId);
+      fetchStoryboards(1, 50); // Load all storyboards
+      fetchCharacters(1, 50); // Load all characters
+    }
+  }, [storyId, fetchStory, fetchStoryboards, fetchCharacters]);
+
+  if (isLoadingStory) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center text-muted-foreground">Loading story...</div>
+      </div>
+    );
+  }
+
+  if (!currentStory) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <p className="text-muted-foreground mb-4">Story not found</p>
+          <Button onClick={() => onNavigate('dashboard')}>Back to Dashboard</Button>
+        </div>
+      </div>
+    );
+  }
 
   // Get all storyboards for this story
-  const storyboards = Object.values(mockStoryboards).filter(sb => sb.storyId === story.id);
-  const rootStoryboard = mockStoryboards[story.rootStoryboardId];
+  const storyStoryboards = storyboards.filter(sb => sb.storyId === currentStory.id);
+  const rootStoryboard = storyStoryboards.find(sb => !sb.parentId) || storyStoryboards[0];
 
   // Get all unique characters from storyboards
-  const allCharacters: StoryboardCharacter[] = [];
-  const characterIds = new Set<string>();
-  storyboards.forEach(sb => {
-    sb.characters.forEach(char => {
-      if (!characterIds.has(char.id)) {
-        characterIds.add(char.id);
-        allCharacters.push(char);
-      }
-    });
-  });
+  const allCharacters = characters.filter(char => 
+    storyStoryboards.some(sb => sb.characterRefs?.some((ref: any) => ref.storyCharacterId === char.id))
+  );
 
   // Get all unique scenes
-  const allScenes: Scene[] = [];
+  const allScenes: any[] = [];
   const sceneIds = new Set<string>();
-  storyboards.forEach(sb => {
-    sb.scenes.forEach(scene => {
+  storyStoryboards.forEach(sb => {
+    sb.scenes?.forEach((scene: any) => {
       if (!sceneIds.has(scene.id)) {
         sceneIds.add(scene.id);
         allScenes.push(scene);
@@ -54,49 +75,68 @@ export function StoryDetail({ storyId, onNavigate }: StoryDetailProps) {
     });
   });
 
+  const isOwner = currentStory.author?.id === currentUser?.id;
+
   const handleStartReading = () => {
-    onNavigate('storyboard-viewer', story.rootStoryboardId);
+    if (rootStoryboard) {
+      onNavigate('storyboard-viewer', rootStoryboard.id);
+    } else {
+      toast.error('No storyboard available');
+    }
   };
 
   return (
     <div className="min-h-screen pt-14">
       <MobileHeader
-        title={story.title}
+        title={currentStory.title}
         showBack
         onBack={() => onNavigate('dashboard')}
         actions={
-          <Button variant="ghost" size="icon" onClick={() => setEditDialogOpen(true)}>
-            <Edit2 className="h-5 w-5" />
-          </Button>
+          <>
+            {isOwner && (
+              <Button variant="ghost" size="icon" onClick={() => setEditDialogOpen(true)}>
+                <Edit2 className="h-5 w-5" />
+              </Button>
+            )}
+          </>
         }
       />
 
       <div className="space-y-4 pb-4">
         {/* Cover Image */}
         <div className="relative h-64 overflow-hidden">
-          <img src={story.coverImage} alt={story.title} className="w-full h-full object-cover" />
+          {currentStory.cover ? (
+            <img src={currentStory.cover} alt={currentStory.title} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20" />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
           <div className="absolute bottom-4 left-4 right-4">
-            <div className="flex gap-2 mb-2">
-              <Badge variant="secondary">{story.theme}</Badge>
-              <Badge variant="secondary">{story.genre}</Badge>
-            </div>
+            {currentStory.tags && currentStory.tags.length > 0 && (
+              <div className="flex gap-2 mb-2">
+                {currentStory.tags.slice(0, 2).map((tag: string) => (
+                  <Badge key={tag} variant="secondary">{tag}</Badge>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
         <div className="p-4 space-y-4">
           {/* Story Info */}
           <div>
-            <p className="text-muted-foreground mb-4">{story.backgroundDescription}</p>
+            {currentStory.description && (
+              <p className="text-muted-foreground mb-4">{currentStory.description}</p>
+            )}
             
             <div className="flex items-center gap-4 text-muted-foreground mb-4">
               <div className="flex items-center gap-1">
                 <BookOpen className="h-4 w-4" />
-                <span>{story.totalStoryboards} storyboards</span>
+                <span>{storyStoryboards.length} storyboards</span>
               </div>
               <div className="flex items-center gap-1">
                 <Share2 className="h-4 w-4" />
-                <span>{story.totalForks} forks</span>
+                <span>{storyStoryboards.filter(sb => sb.parentId).length} forks</span>
               </div>
             </div>
 
@@ -118,154 +158,199 @@ export function StoryDetail({ storyId, onNavigate }: StoryDetailProps) {
             <TabsContent value="storyboards" className="space-y-3 mt-4">
               <div className="flex items-center justify-between mb-3">
                 <h3>Story Branches</h3>
+                {isOwner && (
+                  <Button size="sm" variant="outline" onClick={() => onNavigate('storyboard-editor', storyId)}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Branch
+                  </Button>
+                )}
               </div>
               
-              {storyboards.map((sb) => (
-                <Card 
-                  key={sb.id} 
-                  className="active:scale-98 transition-transform"
-                  onClick={() => onNavigate('storyboard-viewer', sb.id)}
-                >
-                  <CardContent className="p-3">
-                    <div className="flex gap-3">
-                      <img
-                        src={sb.images[0]}
-                        alt={sb.title}
-                        className="w-20 h-20 rounded object-cover flex-shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2 mb-1">
-                          <h4 className="line-clamp-1">{sb.title}</h4>
-                          {sb.parentId && (
-                            <Badge variant="outline" className="flex-shrink-0">Fork</Badge>
+              {storyStoryboards.length > 0 ? (
+                storyStoryboards.map((sb) => (
+                  <Card 
+                    key={sb.id} 
+                    className="active:scale-98 transition-transform cursor-pointer"
+                    onClick={() => onNavigate('storyboard-viewer', sb.id)}
+                  >
+                    <CardContent className="p-3">
+                      <div className="flex gap-3">
+                        {sb.scenes?.[0]?.image && (
+                          <img
+                            src={sb.scenes[0].image}
+                            alt={sb.title}
+                            className="w-20 h-20 rounded object-cover flex-shrink-0"
+                          />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2 mb-1">
+                            <h4 className="line-clamp-1">{sb.title}</h4>
+                            {sb.parentId && (
+                              <Badge variant="outline" className="flex-shrink-0">Fork</Badge>
+                            )}
+                          </div>
+                          {sb.content && (
+                            <p className="text-muted-foreground line-clamp-2 mb-2">
+                              {sb.content}
+                            </p>
                           )}
-                        </div>
-                        <p className="text-muted-foreground line-clamp-2 mb-2">
-                          {sb.content}
-                        </p>
-                        <div className="flex items-center gap-3 text-muted-foreground">
-                          <span>{sb.likes} likes</span>
-                          <span>•</span>
-                          <span>{sb.views} views</span>
-                          {sb.forkCount > 0 && (
-                            <>
-                              <span>•</span>
-                              <span>{sb.forkCount} forks</span>
-                            </>
-                          )}
+                          <div className="flex items-center gap-3 text-muted-foreground text-sm">
+                            <span>{sb.likes || 0} likes</span>
+                            {sb.scenes && (
+                              <>
+                                <span>•</span>
+                                <span>{sb.scenes.length} scenes</span>
+                              </>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <p className="text-muted-foreground mb-4">No storyboards yet</p>
+                    {isOwner && (
+                      <Button onClick={() => onNavigate('storyboard-editor', storyId)}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Create First Storyboard
+                      </Button>
+                    )}
                   </CardContent>
                 </Card>
-              ))}
+              )}
             </TabsContent>
 
             {/* Characters Tab */}
             <TabsContent value="characters" className="space-y-3 mt-4">
               <div className="flex items-center justify-between mb-3">
                 <h3>Characters ({allCharacters.length})</h3>
-                <Button size="sm" variant="outline">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Character
-                </Button>
+                {isOwner && (
+                  <Button size="sm" variant="outline" onClick={() => onNavigate('character-editor')}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Character
+                  </Button>
+                )}
               </div>
 
-              {allCharacters.map((char) => (
-                <Card 
-                  key={char.id}
-                  className="active:scale-98 transition-transform"
-                  onClick={() => onNavigate('character-viewer', char.id)}
-                >
-                  <CardContent className="p-3">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-14 w-14">
-                        <AvatarImage src={char.avatar} />
-                        <AvatarFallback>{char.name[0]}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <h4>{char.name}</h4>
-                        <p className="text-muted-foreground">{char.role}</p>
+              {allCharacters.length > 0 ? (
+                allCharacters.map((char: any) => (
+                  <Card 
+                    key={char.id}
+                    className="active:scale-98 transition-transform cursor-pointer"
+                    onClick={() => onNavigate('character-profile', char.id)}
+                  >
+                    <CardContent className="p-3">
+                      <div className="flex items-center gap-3">
+                        {char.avatar && (
+                          <Avatar className="h-14 w-14">
+                            <AvatarImage src={char.avatar} />
+                            <AvatarFallback>{char.name[0]}</AvatarFallback>
+                          </Avatar>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <h4>{char.name}</h4>
+                          {char.description && (
+                            <p className="text-muted-foreground line-clamp-1">{char.description}</p>
+                          )}
+                        </div>
                       </div>
-                    </div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <p className="text-muted-foreground mb-4">No characters yet</p>
+                    {isOwner && (
+                      <Button onClick={() => onNavigate('character-editor')}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Create Character
+                      </Button>
+                    )}
                   </CardContent>
                 </Card>
-              ))}
+              )}
             </TabsContent>
 
             {/* Scenes Tab */}
             <TabsContent value="scenes" className="space-y-3 mt-4">
               <div className="flex items-center justify-between mb-3">
                 <h3>Scenes ({allScenes.length})</h3>
-                <Button size="sm" variant="outline">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Scene
-                </Button>
               </div>
 
-              {allScenes.map((scene) => (
-                <Card key={scene.id}>
-                  <CardContent className="p-3">
-                    <div className="flex gap-3">
-                      <img
-                        src={scene.image}
-                        alt={scene.title}
-                        className="w-24 h-24 rounded object-cover flex-shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <h4 className="mb-1">{scene.title}</h4>
-                        <p className="text-muted-foreground line-clamp-2 mb-2">
-                          {scene.description}
-                        </p>
-                        <div className="flex gap-2">
-                          {scene.location && (
-                            <Badge variant="secondary" className="text-xs">{scene.location}</Badge>
+              {allScenes.length > 0 ? (
+                allScenes.map((scene: any) => (
+                  <Card key={scene.id}>
+                    <CardContent className="p-3">
+                      <div className="flex gap-3">
+                        {scene.image && (
+                          <img
+                            src={scene.image}
+                            alt={scene.title}
+                            className="w-24 h-24 rounded object-cover flex-shrink-0"
+                          />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <h4 className="mb-1">{scene.title}</h4>
+                          {scene.description && (
+                            <p className="text-muted-foreground line-clamp-2 mb-2">
+                              {scene.description}
+                            </p>
                           )}
-                          {scene.timeOfDay && (
-                            <Badge variant="secondary" className="text-xs">{scene.timeOfDay}</Badge>
-                          )}
+                          <div className="flex gap-2">
+                            {scene.location && (
+                              <Badge variant="secondary" className="text-xs">{scene.location}</Badge>
+                            )}
+                            {scene.timeOfDay && (
+                              <Badge variant="secondary" className="text-xs">{scene.timeOfDay}</Badge>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <p className="text-muted-foreground">No scenes yet</p>
                   </CardContent>
                 </Card>
-              ))}
+              )}
             </TabsContent>
 
             {/* Team Tab */}
             <TabsContent value="team" className="space-y-3 mt-4">
               <div className="flex items-center justify-between mb-3">
-                <h3>Team ({story.participants.length})</h3>
-                <Button size="sm" variant="outline" onClick={() => setInviteDialogOpen(true)}>
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  Invite
-                </Button>
+                <h3>Team</h3>
+                {isOwner && (
+                  <Button size="sm" variant="outline" onClick={() => setInviteDialogOpen(true)}>
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Invite
+                  </Button>
+                )}
               </div>
 
-              {story.participants.map((participant) => (
-                <Card key={participant.id}>
+              {currentStory.author && (
+                <Card>
                   <CardContent className="p-3">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-12 w-12">
-                        <AvatarImage src={participant.avatar} />
-                        <AvatarFallback>{participant.name[0]}</AvatarFallback>
+                        <AvatarImage src={currentStory.author.avatar} />
+                        <AvatarFallback>{currentStory.author.displayName?.[0] || 'U'}</AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <h4>{participant.name}</h4>
-                        <p className="text-muted-foreground">
-                          {participant.role.charAt(0).toUpperCase() + participant.role.slice(1)}
-                        </p>
+                        <h4>{currentStory.author.displayName}</h4>
+                        <p className="text-muted-foreground">Creator</p>
                       </div>
-                      <Badge variant={
-                        participant.role === 'owner' ? 'default' :
-                        participant.role === 'collaborator' ? 'secondary' : 'outline'
-                      }>
-                        {participant.role}
-                      </Badge>
+                      <Badge variant="default">Owner</Badge>
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+              )}
             </TabsContent>
           </Tabs>
         </div>
@@ -281,20 +366,18 @@ export function StoryDetail({ storyId, onNavigate }: StoryDetailProps) {
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label>Title</Label>
-              <Input defaultValue={story.title} />
+              <Input defaultValue={currentStory.title} />
             </div>
             <div className="space-y-2">
-              <Label>Background</Label>
-              <Textarea defaultValue={story.backgroundDescription} rows={4} />
+              <Label>Description</Label>
+              <Textarea defaultValue={currentStory.description || ''} rows={4} />
             </div>
-            <div className="space-y-2">
-              <Label>Theme</Label>
-              <Input defaultValue={story.theme} />
-            </div>
-            <div className="space-y-2">
-              <Label>Genre</Label>
-              <Input defaultValue={story.genre} />
-            </div>
+            {currentStory.tags && currentStory.tags.length > 0 && (
+              <div className="space-y-2">
+                <Label>Tags</Label>
+                <Input defaultValue={currentStory.tags.join(', ')} />
+              </div>
+            )}
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => setEditDialogOpen(false)} className="flex-1">
                 Cancel

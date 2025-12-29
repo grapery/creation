@@ -29,7 +29,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../components/ui/dialog';
-import { mockChatThreads, mockChatMessages, ChatMessage } from '../lib/mockChatData';
+import { useChatStore, useCharacterStore } from '../stores';
+import { useChatSSE } from '../hooks/useSSE';
+import { toast } from 'sonner';
+import type { AgentChatMessage } from '../stores/chatStore';
 
 interface ChatConversationProps {
   chatId?: string;
@@ -37,19 +40,62 @@ interface ChatConversationProps {
 }
 
 export function ChatConversation({ chatId, onNavigate }: ChatConversationProps) {
-  const thread = chatId ? mockChatThreads.find((t) => t.id === chatId) : mockChatThreads[0];
-  const initialMessages = chatId ? mockChatMessages[chatId] || [] : mockChatMessages['1'];
+  const { threads, messages, isLoading, fetchThread, fetchMessages, sendMessage, setCurrentThread, addMessage } = useChatStore();
+  const { fetchCharacter } = useCharacterStore();
   
-  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [inputValue, setInputValue] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [analyticsDialogOpen, setAnalyticsDialogOpen] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Find thread - either by ID or characterId
+  const thread = chatId 
+    ? threads.find((t) => t.id === chatId) || threads.find((t) => t.characterId === chatId)
+    : threads[0];
+
+  useEffect(() => {
+    if (chatId) {
+      // Try to find thread first
+      const foundThread = threads.find((t) => t.id === chatId) || threads.find((t) => t.characterId === chatId);
+      if (foundThread) {
+        setCurrentThread(foundThread);
+        fetchMessages(foundThread.id);
+      } else {
+        // Thread not found, might need to create one or fetch from server
+        fetchThread(chatId);
+      }
+    }
+  }, [chatId, threads, fetchThread, fetchMessages, setCurrentThread]);
+
+  // SSE for real-time updates
+  useChatSSE(thread?.id || '', (sseMessage) => {
+    if (sseMessage.type === 'message' && sseMessage.messageId) {
+      // Handle new message from SSE
+      const newMessage: AgentChatMessage = {
+        id: sseMessage.messageId,
+        threadId: thread?.id || '',
+        senderId: sseMessage.isComplete ? 'user' : thread?.characterId || '',
+        senderName: sseMessage.isComplete ? 'You' : thread?.characterName || '',
+        senderAvatar: sseMessage.isComplete ? '' : thread?.characterAvatar || '',
+        content: sseMessage.content || sseMessage.data || '',
+        timestamp: Date.now(),
+        isUser: sseMessage.isComplete || false,
+      };
+      addMessage(newMessage);
+    }
+  });
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    if (thread?.characterId) {
+      fetchCharacter(thread.characterId);
+    }
+  }, [thread?.characterId, fetchCharacter]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -57,99 +103,83 @@ export function ChatConversation({ chatId, onNavigate }: ChatConversationProps) 
 
   if (!thread) return null;
 
-  const formatTime = (timestamp: string) => {
+  const formatTime = (timestamp: number) => {
     const date = new Date(timestamp);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  const handleSendMessage = () => {
-    if (!inputValue.trim()) return;
+  const handleSendMessage = async () => {
+    if (!inputValue.trim() || !thread) return;
 
-    const newMessage: ChatMessage = {
-      id: Date.now().toString(),
-      senderId: 'user',
-      senderName: 'You',
-      senderAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop',
-      content: inputValue,
-      timestamp: new Date().toISOString(),
-      isUser: true,
-    };
-
-    setMessages([...messages, newMessage]);
+    setIsSending(true);
+    const messageContent = inputValue;
     setInputValue('');
 
-    // Simulate character response after a delay
-    setTimeout(() => {
-      const characterResponse: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        senderId: thread.characterId,
-        senderName: thread.characterName,
-        senderAvatar: thread.characterAvatar,
-        content: generateCharacterResponse(inputValue),
-        timestamp: new Date().toISOString(),
-        isUser: false,
-      };
-      setMessages((prev) => [...prev, characterResponse]);
-    }, 1500);
+    try {
+      await sendMessage({
+        characterId: thread.characterId,
+        content: messageContent,
+        threadId: thread.id,
+      });
+      // Message will be added via SSE or response
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || error.message || 'Failed to send message');
+      setInputValue(messageContent); // Restore input on error
+    } finally {
+      setIsSending(false);
+    }
   };
 
-  const generateCharacterResponse = (userMessage: string) => {
-    const responses = [
-      `That's an interesting perspective on "${userMessage}". Let me think about that...`,
-      `I understand what you mean. In my experience with ${thread.storyTitle}, similar situations have taught me valuable lessons.`,
-      `${userMessage}? That reminds me of something that happened in the story...`,
-      `You raise a good point. Let me share my thoughts on that.`,
-    ];
-    return responses[Math.floor(Math.random() * responses.length)];
-  };
-
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file || !thread) return;
 
-    // In a real app, you would upload the file to a server
-    // For now, we'll create a local URL
+    // TODO: Upload image to server first, then send message with image URL
     const imageUrl = URL.createObjectURL(file);
 
-    const newMessage: ChatMessage = {
-      id: Date.now().toString(),
-      senderId: 'user',
-      senderName: 'You',
-      senderAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop',
-      content: '',
-      image: imageUrl,
-      timestamp: new Date().toISOString(),
-      isUser: true,
-    };
-
-    setMessages([...messages, newMessage]);
-
-    // Simulate character response
-    setTimeout(() => {
-      const characterResponse: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        senderId: thread.characterId,
-        senderName: thread.characterName,
-        senderAvatar: thread.characterAvatar,
-        content: 'What a fascinating image! Thank you for sharing that with me.',
-        timestamp: new Date().toISOString(),
-        isUser: false,
-      };
-      setMessages((prev) => [...prev, characterResponse]);
-    }, 1500);
+    try {
+      await sendMessage({
+        characterId: thread.characterId,
+        content: '',
+        threadId: thread.id,
+        image: imageUrl, // In production, this should be the uploaded image URL
+      });
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || error.message || 'Failed to send image');
+    }
   };
 
-  const handleClearHistory = () => {
-    setMessages([]);
+  const handleClearHistory = async () => {
+    if (!thread) return;
+    
+    try {
+      // Archive thread instead of clearing messages
+      await archiveThread(thread.id);
+      toast.success('Chat archived');
+      onNavigate('chat');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || error.message || 'Failed to archive chat');
+    }
     setDeleteDialogOpen(false);
   };
+
+  if (!thread) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <p className="text-muted-foreground mb-4">Chat not found</p>
+          <Button onClick={() => onNavigate('chat')}>Back to Chats</Button>
+        </div>
+      </div>
+    );
+  }
 
   const totalMessages = messages.length;
   const userMessages = messages.filter((m) => m.isUser).length;
   const characterMessages = messages.filter((m) => !m.isUser).length;
-  const daysActive = Math.ceil(
-    (new Date().getTime() - new Date(thread.createdAt).getTime()) / 86400000
-  );
+  const daysActive = thread.createdAt 
+    ? Math.ceil((Date.now() - thread.createdAt) / 86400000)
+    : 1;
 
   return (
     <div className="flex flex-col h-screen">
@@ -206,14 +236,21 @@ export function ChatConversation({ chatId, onNavigate }: ChatConversationProps) 
           </Avatar>
           <div className="flex-1 min-w-0">
             <h4>{thread.characterName}</h4>
-            <p className="text-muted-foreground">from {thread.storyTitle}</p>
+            {thread.storyTitle && (
+              <p className="text-muted-foreground">from {thread.storyTitle}</p>
+            )}
           </div>
         </div>
       </div>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-20">
-        {messages.map((message) => (
+        {isLoading && messages.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">Loading messages...</div>
+        ) : messages.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">No messages yet. Start the conversation!</div>
+        ) : (
+          messages.map((message) => (
           <div
             key={message.id}
             className={`flex gap-3 ${message.isUser ? 'flex-row-reverse' : 'flex-row'}`}
@@ -251,7 +288,7 @@ export function ChatConversation({ chatId, onNavigate }: ChatConversationProps) 
                 </div>
               )}
 
-              <span className="text-muted-foreground mt-1 px-2">
+              <span className="text-muted-foreground mt-1 px-2 text-xs">
                 {formatTime(message.timestamp)}
               </span>
             </div>
@@ -263,7 +300,8 @@ export function ChatConversation({ chatId, onNavigate }: ChatConversationProps) 
               </Avatar>
             )}
           </div>
-        ))}
+        ))
+        )}
         <div ref={messagesEndRef} />
       </div>
 
@@ -296,7 +334,7 @@ export function ChatConversation({ chatId, onNavigate }: ChatConversationProps) 
           <Button
             size="icon"
             onClick={handleSendMessage}
-            disabled={!inputValue.trim()}
+            disabled={!inputValue.trim() || isSending}
           >
             <Send className="h-5 w-5" />
           </Button>
@@ -356,8 +394,14 @@ export function ChatConversation({ chatId, onNavigate }: ChatConversationProps) 
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Conversation Started</span>
-                  <span>{new Date(thread.createdAt).toLocaleDateString()}</span>
+                  <span>{thread.createdAt ? new Date(thread.createdAt).toLocaleDateString() : 'N/A'}</span>
                 </div>
+                {thread.totalTokensUsed && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Total Tokens Used</span>
+                    <span>{thread.totalTokensUsed.toLocaleString()}</span>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

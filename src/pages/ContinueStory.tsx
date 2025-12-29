@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, Minimize2, Sparkles, Wand2, Image as ImageIcon, Video, Save, Send, Plus, X } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -8,7 +8,9 @@ import { Card, CardContent } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
-import { mockStoryboards, StoryboardCharacter } from '../lib/mockStoryboardData';
+import { useStoryboardStore, useCharacterStore, useStoryStore } from '../stores';
+import { storyboardChatApi } from '../lib/api';
+import { toast } from 'sonner';
 
 interface ContinueStoryProps {
   storyId?: string;
@@ -28,14 +30,19 @@ interface Scene {
 type Step = 1 | 2 | 3 | 4 | 5;
 
 export function ContinueStory({ storyId, parentStoryboardId, onNavigate }: ContinueStoryProps) {
+  const { currentStoryboard, fetchStoryboard } = useStoryboardStore();
+  const { characters, fetchCharacters } = useCharacterStore();
+  const { currentStory, fetchStory } = useStoryStore();
+  
   const [currentStep, setCurrentStep] = useState<Step>(1);
   const [selectedScene, setSelectedScene] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
 
   // Step 1: Storyboard Setup
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [selectedCharacters, setSelectedCharacters] = useState<StoryboardCharacter[]>([]);
+  const [selectedCharacters, setSelectedCharacters] = useState<any[]>([]);
 
   // Step 2-4: Scenes
   const [scenes, setScenes] = useState<Scene[]>([
@@ -53,9 +60,21 @@ export function ContinueStory({ storyId, parentStoryboardId, onNavigate }: Conti
   });
   const [isGeneratingVideo, setIsGeneratingVideo] = useState(false);
 
-  // Available characters from parent storyboard
-  const parentStoryboard = parentStoryboardId ? mockStoryboards[parentStoryboardId] : null;
-  const availableCharacters = parentStoryboard?.characters || [];
+  useEffect(() => {
+    if (parentStoryboardId) {
+      fetchStoryboard(parentStoryboardId);
+    }
+    if (storyId) {
+      fetchStory(storyId);
+    }
+    fetchCharacters(1, 50);
+  }, [parentStoryboardId, storyId, fetchStoryboard, fetchStory, fetchCharacters]);
+
+  // Available characters from parent storyboard or story
+  const availableCharacters = currentStoryboard?.characterRefs?.map((ref: any) => {
+    const char = characters.find(c => c.id === ref.storyCharacterId);
+    return char ? { ...char, ...ref } : null;
+  }).filter(Boolean) || characters || [];
 
   const steps = [
     { num: 1, label: 'Setup', icon: Sparkles },
@@ -66,23 +85,67 @@ export function ContinueStory({ storyId, parentStoryboardId, onNavigate }: Conti
   ];
 
   const handleGenerateAI = async () => {
-    setIsGenerating(true);
-    // Mock AI generation
-    setTimeout(() => {
-      setTitle('Chapter 3: The Hidden Truth');
-      setDescription(
-        'After discovering the ancient map, our heroes venture into the forbidden forest. Strange shadows move between the trees, and whispers echo through the mist. What secrets await them in the heart of darkness?'
-      );
-      setIsGenerating(false);
-    }, 2000);
-  };
-
-  const handleCreateStoryboard = () => {
-    if (!title || !description) {
-      alert('Please provide a title and description');
+    if (!storyId) {
+      toast.error('Story ID is required');
       return;
     }
-    setCurrentStep(2);
+
+    setIsGenerating(true);
+    try {
+      if (!sessionId) {
+        const response = await storyboardChatApi.startSession({ storyId });
+        setSessionId(response.data.session?.id || response.data.data?.session?.id);
+      }
+
+      // TODO: Send prompt to generate storyboard content
+      toast.info('Generating storyboard content...');
+      
+      // Simulate for now
+      setTimeout(() => {
+        setTitle('Chapter 3: The Hidden Truth');
+        setDescription(
+          'After discovering the ancient map, our heroes venture into the forbidden forest. Strange shadows move between the trees, and whispers echo through the mist. What secrets await them in the heart of darkness?'
+        );
+        setIsGenerating(false);
+      }, 2000);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || error.message || 'Failed to generate content');
+      setIsGenerating(false);
+    }
+  };
+
+  const handleCreateStoryboard = async () => {
+    if (!title.trim() || !storyId) {
+      toast.error('Please fill in title and ensure story ID is set');
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const { createStoryboard } = useStoryboardStore.getState();
+      const storyboard = await createStoryboard({
+        storyId,
+        title,
+        rawInput: description,
+        content: scenes.map(s => s.content).join('\n\n'),
+        parentId: parentStoryboardId || null,
+        characterRefs: selectedCharacters.map(char => ({
+          storyCharacterId: char.id,
+        })),
+        scenes: scenes.map((scene, index) => ({
+          title: scene.title,
+          description: scene.content,
+          image: scene.imageUrl,
+          sequence: index + 1,
+        })),
+      });
+
+      toast.success('Storyboard created successfully');
+      onNavigate('storyboard-viewer', storyboard.id);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || error.message || 'Failed to create storyboard');
+      setIsGenerating(false);
+    }
   };
 
   const handleEnhanceScene = async (sceneId: string) => {

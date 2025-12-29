@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, MoreVertical, Trash2, BarChart3 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -23,7 +23,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '../components/ui/alert-dialog';
-import { mockChatThreads } from '../lib/mockChatData';
+import { useChatStore } from '../stores';
+import { toast } from 'sonner';
 
 interface ChatListProps {
   onNavigate: (page: string, id?: string) => void;
@@ -31,18 +32,23 @@ interface ChatListProps {
 
 export function ChatList({ onNavigate }: ChatListProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [threads, setThreads] = useState(mockChatThreads);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [threadToDelete, setThreadToDelete] = useState<string | null>(null);
+  
+  const { threads, isLoading, fetchThreads, archiveThread } = useChatStore();
+
+  useEffect(() => {
+    fetchThreads();
+  }, [fetchThreads]);
 
   const filteredThreads = threads.filter(
     (thread) =>
       thread.characterName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      thread.storyTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (thread.storyTitle && thread.storyTitle.toLowerCase().includes(searchQuery.toLowerCase())) ||
       thread.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const formatTime = (timestamp: string) => {
+  const formatTime = (timestamp: number) => {
     const date = new Date(timestamp);
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
@@ -62,10 +68,15 @@ export function ChatList({ onNavigate }: ChatListProps) {
     setDeleteDialogOpen(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (threadToDelete) {
-      setThreads(threads.filter((t) => t.id !== threadToDelete));
-      setThreadToDelete(null);
+      try {
+        await archiveThread(threadToDelete);
+        toast.success('Chat archived successfully');
+        setThreadToDelete(null);
+      } catch (error: any) {
+        toast.error(error.response?.data?.message || error.message || 'Failed to archive chat');
+      }
     }
     setDeleteDialogOpen(false);
   };
@@ -95,7 +106,13 @@ export function ChatList({ onNavigate }: ChatListProps) {
 
         {/* Chat Threads */}
         <div className="space-y-2">
-          {filteredThreads.length > 0 ? (
+          {isLoading ? (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <p className="text-muted-foreground">Loading chats...</p>
+              </CardContent>
+            </Card>
+          ) : filteredThreads.length > 0 ? (
             filteredThreads.map((thread) => (
               <Card
                 key={thread.id}
@@ -128,11 +145,13 @@ export function ChatList({ onNavigate }: ChatListProps) {
                       <div className="flex items-start justify-between gap-2 mb-1">
                         <div className="flex-1 min-w-0">
                           <h4 className="truncate">{thread.characterName}</h4>
-                          <p className="text-muted-foreground truncate">
-                            {thread.storyTitle}
-                          </p>
+                          {thread.storyTitle && (
+                            <p className="text-muted-foreground truncate">
+                              {thread.storyTitle}
+                            </p>
+                          )}
                         </div>
-                        <span className="text-muted-foreground flex-shrink-0">
+                        <span className="text-muted-foreground flex-shrink-0 text-xs">
                           {formatTime(thread.lastMessageTime)}
                         </span>
                       </div>

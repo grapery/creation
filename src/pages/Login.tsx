@@ -5,6 +5,10 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Separator } from '../components/ui/separator';
+import { useAuthStore } from '../stores';
+import { vippayApi } from '../lib/api';
+import { getApiBaseUrl } from '../lib/apiBase';
+import { toast } from 'sonner';
 
 interface LoginProps {
   onNavigate: (page: string) => void;
@@ -13,17 +17,42 @@ interface LoginProps {
 export function Login({ onNavigate }: LoginProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { login } = useAuthStore();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock login - navigate to dashboard
-    onNavigate('dashboard');
+    setIsLoading(true);
+    
+    try {
+      await login(email, password);
+      toast.success('Login successful!');
+      onNavigate('dashboard');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || error.message || 'Login failed');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleSocialLogin = (provider: string) => {
-    // Mock social login
-    console.log(`Logging in with ${provider}`);
-    onNavigate('dashboard');
+  const handleAppleLogin = async () => {
+    try {
+      const redirectUrl = `${window.location.origin}/auth/callback/apple`;
+      const baseUrl = getApiBaseUrl('vippay');
+      window.location.href = `${baseUrl}/apple-oauth/signin?redirect=${encodeURIComponent(redirectUrl)}`;
+    } catch (error) {
+      toast.error('Failed to initiate Apple login');
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const redirectUrl = `${window.location.origin}/auth/callback/google`;
+      const baseUrl = getApiBaseUrl('vippay');
+      window.location.href = `${baseUrl}/google-oauth/signin?redirect=${encodeURIComponent(redirectUrl)}`;
+    } catch (error) {
+      toast.error('Failed to initiate Google login');
+    }
   };
 
   return (
@@ -48,6 +77,7 @@ export function Login({ onNavigate }: LoginProps) {
                   <Input
                     id="email"
                     type="email"
+                    disabled={isLoading}
                     placeholder="you@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -73,6 +103,7 @@ export function Login({ onNavigate }: LoginProps) {
                   <Input
                     id="password"
                     type="password"
+                    disabled={isLoading}
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -82,8 +113,8 @@ export function Login({ onNavigate }: LoginProps) {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" size="lg">
-                Sign In
+              <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+                {isLoading ? 'Signing in...' : 'Sign In'}
               </Button>
             </form>
 
@@ -99,7 +130,8 @@ export function Login({ onNavigate }: LoginProps) {
             <div className="grid grid-cols-2 gap-3">
               <Button
                 variant="outline"
-                onClick={() => handleSocialLogin('Apple')}
+                onClick={handleAppleLogin}
+                disabled={isLoading}
                 className="w-full"
               >
                 <Apple className="mr-2 h-5 w-5" />
@@ -107,7 +139,8 @@ export function Login({ onNavigate }: LoginProps) {
               </Button>
               <Button
                 variant="outline"
-                onClick={() => handleSocialLogin('Google')}
+                onClick={handleGoogleLogin}
+                disabled={isLoading}
                 className="w-full"
               >
                 <Chrome className="mr-2 h-5 w-5" />

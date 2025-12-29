@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Save, Sparkles, Image as ImageIcon, Users, MoreVertical } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -8,7 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge';
 import { MobileHeader } from '../components/MobileHeader';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
-import { mockStoryboards } from '../lib/mockStoryboardData';
+import { useStoryboardStore, useStoryStore } from '../stores';
+import { storyboardChatApi } from '../lib/api';
+import { toast } from 'sonner';
 
 interface StoryboardEditorProps {
   storyId?: string;
@@ -16,30 +18,104 @@ interface StoryboardEditorProps {
 }
 
 export function StoryboardEditor({ storyId, onNavigate }: StoryboardEditorProps) {
-  const parentStoryboard = storyId ? mockStoryboards[storyId] : null;
+  const { currentStoryboard, fetchStoryboard } = useStoryboardStore();
+  const { currentStory, fetchStory } = useStoryStore();
   
   const [title, setTitle] = useState('');
   const [rawInput, setRawInput] = useState('');
   const [generatedContent, setGeneratedContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
 
-  const handleGenerate = () => {
-    setIsGenerating(true);
-    // Simulate AI generation
-    setTimeout(() => {
-      setGeneratedContent(
-        `Building upon the previous events, the story continues with ${rawInput}. ` +
-        `The characters face new challenges as the narrative unfolds in unexpected ways. ` +
-        `This new chapter brings depth to the overarching plot while maintaining the established tone and themes.`
-      );
+  useEffect(() => {
+    if (storyId) {
+      fetchStory(storyId);
+      // Try to find parent storyboard if storyId is actually a storyboard ID
+      fetchStoryboard(storyId).catch(() => {
+        // If not found, it's probably a story ID, which is fine
+      });
+    }
+  }, [storyId, fetchStory, fetchStoryboard]);
+
+  const handleStartSession = async () => {
+    if (!storyId) {
+      toast.error('Story ID is required');
+      return;
+    }
+
+    try {
+      setIsGenerating(true);
+      const response = await storyboardChatApi.startSession({ storyId });
+      setSessionId(response.data.session?.id || response.data.data?.session?.id);
+      
+      if (response.data.message) {
+        const message = response.data.message || response.data.data?.message;
+        if (message.content) {
+          setGeneratedContent(message.content);
+        }
+      }
+      
+      toast.success('Session started');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || error.message || 'Failed to start session');
+    } finally {
       setIsGenerating(false);
-    }, 2000);
+    }
   };
 
-  const handleSave = () => {
-    // In a real app, this would save to backend
-    console.log('Saving new storyboard:', { title, rawInput, generatedContent });
-    onNavigate('storyboard-viewer', storyId);
+  const handleGenerate = async () => {
+    if (!sessionId) {
+      await handleStartSession();
+      return;
+    }
+
+    if (!rawInput.trim()) {
+      toast.error('Please enter story content');
+      return;
+    }
+
+    try {
+      setIsGenerating(true);
+      const response = await storyboardChatApi.sendMessage(sessionId, {
+        content: rawInput,
+      });
+      
+      const message = response.data.message || response.data.data?.message;
+      if (message?.content) {
+        setGeneratedContent(message.content);
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || error.message || 'Failed to generate content');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!title.trim() || !rawInput.trim()) {
+      toast.error('Please fill in title and content');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const { createStoryboard } = useStoryboardStore.getState();
+      const storyboard = await createStoryboard({
+        storyId: storyId || currentStory?.id || '',
+        title,
+        rawInput,
+        content: generatedContent,
+        parentId: currentStoryboard?.id || null,
+      });
+      
+      toast.success('Storyboard created successfully');
+      onNavigate('storyboard-viewer', storyboard.id);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || error.message || 'Failed to save storyboard');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -57,44 +133,52 @@ export function StoryboardEditor({ storyId, onNavigate }: StoryboardEditorProps)
 
       <div className="p-4 space-y-4">
         {/* Parent Storyboard Context */}
-        {parentStoryboard && (
+        {currentStoryboard && (
           <Card>
             <CardHeader>
               <CardTitle>Continuing from:</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex gap-3">
-                <img
-                  src={parentStoryboard.images[0]}
-                  alt={parentStoryboard.title}
-                  className="w-20 h-20 rounded object-cover flex-shrink-0"
-                />
+                {currentStoryboard.scenes?.[0]?.image && (
+                  <img
+                    src={currentStoryboard.scenes[0].image}
+                    alt={currentStoryboard.title}
+                    className="w-20 h-20 rounded object-cover flex-shrink-0"
+                  />
+                )}
                 <div className="flex-1 min-w-0">
-                  <h4 className="mb-1">{parentStoryboard.title}</h4>
-                  <p className="text-muted-foreground line-clamp-2">
-                    {parentStoryboard.content}
-                  </p>
+                  <h4 className="mb-1">{currentStoryboard.title}</h4>
+                  {currentStoryboard.content && (
+                    <p className="text-muted-foreground line-clamp-2">
+                      {currentStoryboard.content}
+                    </p>
+                  )}
                 </div>
               </div>
 
               {/* Characters in parent */}
-              <div>
-                <Label className="mb-2 block">Characters Available:</Label>
-                <div className="flex flex-wrap gap-2">
-                  {parentStoryboard.characters.map((char) => (
-                    <div
-                      key={char.id}
-                      className="flex items-center gap-2 bg-muted rounded-full px-3 py-1.5"
-                    >
-                      <Avatar className="h-5 w-5">
-                        <AvatarImage src={char.avatar} />
-                        <AvatarFallback>{char.name[0]}</AvatarFallback>
-                      </Avatar>
-                      <span className="text-sm">{char.name}</span>
-                    </div>
-                  ))}
+              {currentStoryboard.characterRefs && currentStoryboard.characterRefs.length > 0 && (
+                <div>
+                  <Label className="mb-2 block">Characters Available:</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {currentStoryboard.characterRefs.map((char: any, index: number) => (
+                      <div
+                        key={char.storyCharacterId || index}
+                        className="flex items-center gap-2 bg-muted rounded-full px-3 py-1.5"
+                      >
+                        {char.avatar && (
+                          <Avatar className="h-5 w-5">
+                            <AvatarImage src={char.avatar} />
+                            <AvatarFallback>{char.name?.[0] || 'C'}</AvatarFallback>
+                          </Avatar>
+                        )}
+                        <span className="text-sm">{char.name || `Character ${index + 1}`}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </CardContent>
           </Card>
         )}

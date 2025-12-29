@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Heart, Share2, Bookmark, ChevronLeft, ChevronRight, Eye, Users, MoreVertical } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
@@ -6,8 +6,10 @@ import { Badge } from '../components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 import { MobileHeader } from '../components/MobileHeader';
 import { CommentSection } from '../components/CommentSection';
-import { mockStories, mockPanels, mockComments } from '../lib/mockData';
 import { Separator } from '../components/ui/separator';
+import { useStoryStore } from '../stores';
+import { storyApi, userApi } from '../lib/api';
+import { toast } from 'sonner';
 
 interface StoryViewerProps {
   storyId?: string;
@@ -15,16 +17,39 @@ interface StoryViewerProps {
 }
 
 export function StoryViewer({ storyId, onNavigate }: StoryViewerProps) {
-  const story = storyId ? mockStories.find(s => s.id === storyId) : mockStories[0];
-  const panels = storyId ? mockPanels.filter(p => p.storyId === storyId) : mockPanels;
+  const { currentStory, fetchStory, isLoading, likeStory, unlikeStory } = useStoryStore();
   
   const [currentPanelIndex, setCurrentPanelIndex] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
 
-  if (!story) return null;
+  useEffect(() => {
+    if (storyId) {
+      fetchStory(storyId);
+    }
+  }, [storyId, fetchStory]);
 
-  const currentPanel = panels[currentPanelIndex];
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center text-muted-foreground">Loading story...</div>
+      </div>
+    );
+  }
+
+  if (!currentStory) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <p className="text-muted-foreground mb-4">Story not found</p>
+          <Button onClick={() => onNavigate('dashboard')}>Back to Dashboard</Button>
+        </div>
+      </div>
+    );
+  }
+
+  const scenes = currentStory.scenes || [];
+  const currentScene = scenes[currentPanelIndex];
 
   const goToPreviousPanel = () => {
     if (currentPanelIndex > 0) {
@@ -33,15 +58,49 @@ export function StoryViewer({ storyId, onNavigate }: StoryViewerProps) {
   };
 
   const goToNextPanel = () => {
-    if (currentPanelIndex < panels.length - 1) {
+    if (currentPanelIndex < scenes.length - 1) {
       setCurrentPanelIndex(currentPanelIndex + 1);
+    }
+  };
+
+  const handleLike = async () => {
+    if (!currentStory) return;
+    
+    try {
+      if (isLiked) {
+        await unlikeStory(currentStory.id);
+        setIsLiked(false);
+      } else {
+        await likeStory(currentStory.id);
+        setIsLiked(true);
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || error.message || 'Failed to update like');
+    }
+  };
+
+  const handleFollow = async () => {
+    if (!currentStory?.author?.id) return;
+    
+    try {
+      if (isFollowing) {
+        await userApi.unfollowUser(currentStory.author.id);
+        setIsFollowing(false);
+        toast.success('Unfollowed');
+      } else {
+        await userApi.followUser(currentStory.author.id);
+        setIsFollowing(true);
+        toast.success('Following');
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || error.message || 'Failed to update follow status');
     }
   };
 
   return (
     <div className="min-h-screen">
       <MobileHeader 
-        title={story.title}
+        title={currentStory.title}
         showBack
         onBack={() => onNavigate('dashboard')}
         actions={
@@ -61,47 +120,53 @@ export function StoryViewer({ storyId, onNavigate }: StoryViewerProps) {
         <div className="p-4 space-y-3 border-b">
           <div className="flex items-center gap-3">
             <Avatar className="h-10 w-10">
-              <AvatarImage src={story.author.avatar} />
-              <AvatarFallback>{story.author.displayName[0]}</AvatarFallback>
+              <AvatarImage src={currentStory.author?.avatar} />
+              <AvatarFallback>{currentStory.author?.displayName?.[0] || 'U'}</AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <div className="truncate">{story.author.displayName}</div>
+              <div className="truncate">{currentStory.author?.displayName || 'Unknown'}</div>
               <p className="text-muted-foreground">
-                {new Date(story.createdAt).toLocaleDateString()}
+                {new Date(currentStory.createdAt).toLocaleDateString()}
               </p>
             </div>
-            <Button 
-              variant={isFollowing ? 'outline' : 'default'}
-              size="sm"
-              onClick={() => setIsFollowing(!isFollowing)}
-            >
-              {isFollowing ? 'Following' : 'Follow'}
-            </Button>
+            {currentStory.author?.id && (
+              <Button 
+                variant={isFollowing ? 'outline' : 'default'}
+                size="sm"
+                onClick={handleFollow}
+              >
+                {isFollowing ? 'Following' : 'Follow'}
+              </Button>
+            )}
           </div>
 
-          <p className="text-muted-foreground">{story.description}</p>
+          {currentStory.description && (
+            <p className="text-muted-foreground">{currentStory.description}</p>
+          )}
 
           <div className="flex items-center gap-4 text-muted-foreground">
             <div className="flex items-center gap-1">
               <Heart className="h-4 w-4" />
-              <span>{story.likes + (isLiked ? 1 : 0)}</span>
+              <span>{currentStory.likes + (isLiked ? 1 : 0)}</span>
             </div>
             <div className="flex items-center gap-1">
               <Eye className="h-4 w-4" />
-              <span>{story.followers}</span>
+              <span>{currentStory.views || 0}</span>
             </div>
             <div className="flex items-center gap-1">
               <Users className="h-4 w-4" />
-              <span>{panels.length} panels</span>
+              <span>{scenes.length} scenes</span>
             </div>
-            <Badge variant="secondary" className="ml-auto">{story.genre}</Badge>
+            {currentStory.tags && currentStory.tags.length > 0 && (
+              <Badge variant="secondary" className="ml-auto">{currentStory.tags[0]}</Badge>
+            )}
           </div>
 
           <div className="flex gap-2">
             <Button 
               variant={isLiked ? 'default' : 'outline'} 
               className="flex-1"
-              onClick={() => setIsLiked(!isLiked)}
+              onClick={handleLike}
             >
               <Heart className={`mr-2 h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
               {isLiked ? 'Liked' : 'Like'}
