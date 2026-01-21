@@ -1,393 +1,182 @@
-import { useState, useEffect } from "react";
-import {
-  Users,
-  Settings,
-  Share2,
-  Bell,
-  Plus,
-  MoreVertical,
-} from "lucide-react";
-import { Button } from "../components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
-import { Badge } from "../components/ui/badge";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "../components/ui/tabs";
-import { ActivityHeatmap } from "../components/ActivityHeatmap";
-import { ActivityFeed } from "../components/ActivityFeed";
-import { MobileHeader } from "../components/MobileHeader";
-import { Separator } from "../components/ui/separator";
-import { groupApi } from "../lib/api";
-import { useStoryStore } from "../stores";
-import { toast } from "sonner";
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams, Link } from 'react-router-dom';
+import { apiClient } from '../lib/api';
+import { Button } from '../components/ui/button';
+import { Card, CardContent } from '../components/ui/card';
+import { StoryCard } from '../components/StoryCard';
+import { Avatar, AvatarImage, AvatarFallback } from '../components/ui/avatar';
+import { Users, Settings, Plus, UserPlus, ArrowLeft } from 'lucide-react';
+import type { Group, GenericResponse, Story } from '../types';
+import { useAuthStore } from '../stores/authStore';
+import { InviteMemberDialog } from '../components/InviteMemberDialog';
+import { EditGroupDialog } from '../components/EditGroupDialog';
+import { cn } from '../lib/utils';
 
-interface GroupDetailProps {
-  groupId?: string;
-  onNavigate: (page: string, id?: string) => void;
-}
+export default function GroupDetail() {
+    const { id } = useParams<{ id: string }>();
+    const navigate = useNavigate();
+    const { user } = useAuthStore();
+    const [group, setGroup] = useState<Group | null>(null);
+    const [stories, setStories] = useState<Story[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [inviteOpen, setInviteOpen] = useState(false);
+    const [editOpen, setEditOpen] = useState(false);
+    const [joining, setJoining] = useState(false);
 
-export function GroupDetail({
-  groupId,
-  onNavigate,
-}: GroupDetailProps) {
-  const [group, setGroup] = useState<any>(null);
-  const [stories, setStories] = useState<any[]>([]);
-  const [activities, setActivities] = useState<any[]>([]);
-  const [members, setMembers] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingMembers, setIsLoadingMembers] = useState(false);
-  const { fetchStories } = useStoryStore();
+    const fetchData = async () => {
+        if (!id) return;
+        setLoading(true);
+        try {
+            // Fetch Group
+            const groupRes = await apiClient.get<GenericResponse<Group>>(`/groups/${id}`);
+            setGroup(groupRes.data.data);
 
-  useEffect(() => {
-    if (groupId) {
-      loadGroupData();
-    }
-  }, [groupId]);
-
-  const loadGroupData = async () => {
-    setIsLoading(true);
-    try {
-      const groupResponse = await groupApi.getGroup(groupId!);
-      const groupData = groupResponse.data.group || groupResponse.data.data || groupResponse.data;
-      setGroup(groupData);
-
-      // Load group stories
-      try {
-        const storiesResponse = await fetchStories(1, 50);
-        const groupStories = storiesResponse.filter((s: any) => s.groupId === groupId);
-        setStories(groupStories);
-      } catch (error) {
-        console.error('Failed to load group stories:', error);
-      }
-
-      // Load group activities
-      try {
-        const activitiesResponse = await groupApi.getGroupActivities(groupId!);
-        const activitiesData = activitiesResponse.data.activities || activitiesResponse.data.data || [];
-        setActivities(activitiesData);
-      } catch (error) {
-        console.error('Failed to load group activities:', error);
-      }
-
-      // Load group members
-      loadMembers();
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || error.message || 'Failed to load group');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const loadMembers = async () => {
-    if (!groupId) return;
-    
-    setIsLoadingMembers(true);
-    try {
-      const response = await groupApi.getGroupMembers(groupId);
-      const membersData = response.data.members || response.data.data?.members || response.data.data || [];
-      setMembers(Array.isArray(membersData) ? membersData : []);
-    } catch (error: any) {
-      console.error('Failed to load members:', error);
-      setMembers([]);
-    } finally {
-      setIsLoadingMembers(false);
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center text-muted-foreground">Loading group...</div>
-      </div>
-    );
-  }
-
-  if (!group) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <p className="text-muted-foreground mb-4">Group not found</p>
-          <Button onClick={() => onNavigate('groups')}>Back to Groups</Button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen">
-      <MobileHeader
-        title={group.name}
-        showBack
-        onBack={() => onNavigate("groups")}
-        actions={
-          <>
-            <Button variant="ghost" size="icon">
-              <Share2 className="h-5 w-5" />
-            </Button>
-            <Button variant="ghost" size="icon">
-              <MoreVertical className="h-5 w-5" />
-            </Button>
-          </>
+            // Fetch Group Stories
+            const storiesRes = await apiClient.get<GenericResponse<{ stories: Story[] }>>('/stories', {
+                params: { groupId: id, limit: 20 }
+            });
+            setStories(storiesRes.data.data.stories || []);
+        } catch (error) {
+            console.error("Failed to fetch group data", error);
+        } finally {
+            setLoading(false);
         }
-      />
+    };
 
-      <div className="p-4 space-y-4">
-        {/* Group Header */}
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-start gap-3 mb-3">
-              <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Users className="h-6 w-6 text-primary" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap mb-1">
-                  <span className="text-muted-foreground">
-                    {group.memberCount || group.members || 0} members
-                  </span>
-                  <span className="text-muted-foreground">
-                    •
-                  </span>
-                  <span className="text-muted-foreground">
-                    {stories.length} stories
-                  </span>
-                </div>
-                <Badge variant="secondary">
-                  {group.isPublic ? "Public" : "Private"}
-                </Badge>
-              </div>
+    useEffect(() => {
+        fetchData();
+    }, [id]);
+
+    const handleJoin = async () => {
+        if (!group) return;
+        setJoining(true);
+        try {
+            await apiClient.post(`/groups/${group.id}/follow`);
+            // Refresh group to get updated membership status
+            const res = await apiClient.get<GenericResponse<Group>>(`/groups/${group.id}`);
+            setGroup(res.data.data);
+        } catch (err) {
+            console.error("Failed to join community", err);
+        } finally {
+            setJoining(false);
+        }
+    };
+
+    if (loading) return <div className="p-8 text-center bg-gray-50 min-h-screen">Loading community...</div>;
+    if (!group) return <div className="p-8 text-center text-red-500 bg-gray-50 min-h-screen">Community not found</div>;
+
+    // Admin check: Owner or Admin
+    const isAdmin = group.my_role === 'owner' || group.my_role === 'admin';
+
+    return (
+        <div className="bg-gray-50 min-h-screen">
+            {/* Header */}
+            <div className="h-40 bg-blue-600 relative">
+                {/* Banner Image if any */}
+                {group.cover_image && <img src={group.cover_image} className="w-full h-full object-cover" alt="Cover" />}
             </div>
+            <div className="container max-w-5xl mx-auto px-4 pb-4">
+                <div className="relative -mt-12 mb-4 bg-white rounded-lg shadow p-6 flex items-start gap-6">
+                    <Avatar className="w-24 h-24 border-4 border-white -mt-16 bg-white">
+                        <AvatarImage src={group.avatar} />
+                        <AvatarFallback className="text-2xl">{group.name[0]}</AvatarFallback>
+                    </Avatar>
 
-            <p className="text-muted-foreground mb-3">
-              {group.description}
-            </p>
-
-            {group.creator && (
-              <div className="flex items-center gap-1 text-muted-foreground">
-                <span>Created by</span>
-                <button
-                  className="hover:underline text-primary"
-                  onClick={() =>
-                    onNavigate("profile", group.creator.id)
-                  }
-                >
-                  {group.creator.displayName || group.creator.username || 'Unknown'}
-                </button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Main Content */}
-        <Tabs defaultValue="stories">
-          <TabsList className="w-full grid grid-cols-3">
-            <TabsTrigger value="stories">Stories</TabsTrigger>
-            <TabsTrigger value="activity">Activity</TabsTrigger>
-            <TabsTrigger value="members">Members</TabsTrigger>
-          </TabsList>
-
-          {/* Stories Tab */}
-          <TabsContent
-            value="stories"
-            className="space-y-3 mt-4"
-          >
-            <div className="flex items-center justify-between">
-              <h3>Group Stories ({stories.length})</h3>
-              <Button size="sm" onClick={() => onNavigate('story-editor')}>
-                <Plus className="mr-2 h-4 w-4" />
-                Create
-              </Button>
-            </div>
-
-            {stories.length > 0 ? (
-              <div className="space-y-3">
-                {stories.map((story: any) => (
-                <Card
-                  key={story.id}
-                  className="active:scale-98 transition-transform cursor-pointer"
-                  onClick={() =>
-                    onNavigate("story-detail", story.id)
-                  }
-                >
-                  <CardContent className="p-3">
-                    <div className="flex gap-3">
-                      {/* Story Cover */}
-                      <div className="w-20 h-14 flex-shrink-0 rounded overflow-hidden bg-muted">
-                        {story.cover ? (
-                          <img
-                            src={story.cover}
-                            alt={story.title}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
-                            No cover
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Story Info */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2 mb-1">
-                          <h4 className="line-clamp-1">
-                            {story.title}
-                          </h4>
-                          {story.status && (
-                            <Badge
-                              variant={
-                                story.status === "published"
-                                  ? "default"
-                                  : "secondary"
-                              }
-                              className="flex-shrink-0"
-                            >
-                              {story.status}
-                            </Badge>
-                          )}
+                    <div className="flex-1 pt-1">
+                        <h1 className="text-2xl font-bold flex items-center gap-2">
+                            r/{group.name}
+                            {!group.is_public && <span className="text-xs bg-gray-200 px-2 py-0.5 rounded text-gray-600 font-normal">Private</span>}
+                        </h1>
+                        <p className="text-gray-500 mt-1">{group.description}</p>
+                        <Link to="/groups" className="inline-flex items-center text-sm text-gray-500 hover:text-gray-900 mb-6">
+                            <ArrowLeft className="w-4 h-4 mr-1" /> Back to Spaces
+                        </Link>
+                        <div className="flex items-center gap-4 mt-4 text-sm text-gray-500">
+                            <div className="flex items-center gap-1">
+                                <Users className="w-4 h-4" />
+                                <span>{group.members} members</span>
+                            </div>
                         </div>
-
-                        {story.description && (
-                          <p className="text-muted-foreground line-clamp-1 mb-2">
-                            {story.description}
-                          </p>
-                        )}
-
-                        <div className="flex items-center gap-2 text-muted-foreground flex-wrap text-sm">
-                          {story.author && (
-                            <>
-                              <span>
-                                {story.author.displayName || story.author.username}
-                              </span>
-                              <span>•</span>
-                            </>
-                          )}
-                          <span>{story.scenes?.length || 0} scenes</span>
-                          <span>•</span>
-                          <span>{story.likes || 0} likes</span>
-                        </div>
-                      </div>
                     </div>
-                  </CardContent>
-                </Card>
-                ))}
-              </div>
-            ) : (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <p className="text-muted-foreground">No stories yet</p>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
 
-          {/* Activity Tab */}
-          <TabsContent
-            value="activity"
-            className="space-y-4 mt-4"
-          >
-            {/* Activity Heatmap */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Activity Overview</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ActivityHeatmap />
-              </CardContent>
-            </Card>
+                    <div className="flex flex-col gap-2 pt-1">
+                        <Button
+                            className={cn("w-full transition-all", group.my_role ? "bg-gray-200 text-gray-700 hover:bg-gray-300" : "bg-blue-600 hover:bg-blue-700")}
+                            onClick={handleJoin}
+                            disabled={joining}
+                        >
+                            {group.my_role ? 'Member' : 'Join Space'}
+                        </Button>
+                        {isAdmin && (
+                            <div className="flex gap-2">
+                                <Button variant="outline" size="sm" className="gap-2" onClick={() => setEditOpen(true)}>
+                                    <Settings className="w-4 h-4" /> Settings
+                                </Button>
+                                <Button variant="outline" size="sm" className="gap-2" onClick={() => setInviteOpen(true)}>
+                                    <UserPlus className="w-4 h-4" /> Invite
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+                </div>
 
-            {/* Activity Feed */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <ActivityFeed
-                  activities={activities}
-                  onStoryClick={(storyId) =>
-                    onNavigate("story-detail", storyId)
-                  }
-                />
-              </CardContent>
-            </Card>
-          </TabsContent>
+                {/* Content */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="md:col-span-2 space-y-4">
+                        {/* Create Post Bar */}
+                        <Card>
+                            <CardContent className="p-4 flex gap-4 items-center">
+                                <Avatar className="w-10 h-10">
+                                    <AvatarImage src={user?.avatar} />
+                                    <AvatarFallback>U</AvatarFallback>
+                                </Avatar>
+                                <input
+                                    type="text"
+                                    placeholder="Create a story in this community..."
+                                    className="flex-1 bg-gray-100 border-none rounded-full px-4 py-2 hover:bg-white hover:ring-1 hover:ring-blue-500 transition-all focus:ring-1 focus:ring-blue-500 outline-none cursor-pointer"
+                                    onClick={() => navigate('/submit', { state: { groupId: group.id } })}
+                                    readOnly
+                                />
+                                <Button size="icon" variant="ghost"><Plus className="w-5 h-5 text-gray-500" /></Button>
+                            </CardContent>
+                        </Card>
 
-          {/* Members Tab */}
-          <TabsContent
-            value="members"
-            className="space-y-3 mt-4"
-          >
-            <div className="flex items-center justify-between">
-              <h3>Members ({group.memberCount || group.members || 0})</h3>
-              <Button size="sm" variant="outline" onClick={() => toast.info('Invite feature coming soon')}>
-                <Plus className="mr-2 h-4 w-4" />
-                Invite
-              </Button>
+                        {/* Stories Feed */}
+                        {stories.length > 0 ? (
+                            stories.map(story => <StoryCard key={story.id} story={story} />)
+                        ) : (
+                            <div className="text-center py-12 text-gray-500 bg-white rounded-lg border border-gray-200">
+                                No stories yet.
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="space-y-4 hidden md:block">
+                        <Card>
+                            <CardContent className="p-4">
+                                <h3 className="font-bold border-b pb-2 mb-4">About Community</h3>
+                                <p className="text-sm text-gray-600 mb-4">{group.description || "No description."}</p>
+
+                                <div className="text-xs text-gray-400">
+                                    Created {new Date(group.created_at * 1000).toLocaleDateString()}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </div>
             </div>
 
-            {isLoadingMembers ? (
-              <div className="text-center py-8 text-muted-foreground">Loading members...</div>
-            ) : members.length > 0 ? (
-              <div className="space-y-3">
-                {members.map((member: any) => (
-                  <Card
-                    key={member.id || member.userId}
-                    className="active:scale-98 transition-transform cursor-pointer"
-                    onClick={() =>
-                      onNavigate("profile", member.id || member.userId)
-                    }
-                  >
-                    <CardContent className="p-3">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-12 w-12 flex-shrink-0">
-                          <AvatarImage src={member.avatar} />
-                          <AvatarFallback>{(member.displayName || member.username || 'U')[0]}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
-                          <div className="truncate">
-                            {member.displayName || member.username || 'Unknown'}
-                          </div>
-                          {member.username && (
-                            <p className="text-muted-foreground truncate">
-                              @{member.username}
-                            </p>
-                          )}
-                        </div>
-
-                        {member.role && (
-                          <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                            <Badge
-                              variant={
-                                member.role === "admin" || member.role === "Admin"
-                                  ? "default"
-                                  : "secondary"
-                              }
-                            >
-                              {member.role}
-                            </Badge>
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <p className="text-muted-foreground">No members yet</p>
-                </CardContent>
-              </Card>
+            {group && (
+                <>
+                    <InviteMemberDialog open={inviteOpen} onOpenChange={setInviteOpen} groupId={group.id} />
+                    <EditGroupDialog
+                        group={group}
+                        open={editOpen}
+                        onOpenChange={setEditOpen}
+                        onSuccess={(updatedGroup) => setGroup(updatedGroup)}
+                    />
+                </>
             )}
-          </TabsContent>
-        </Tabs>
-      </div>
-    </div>
-  );
+        </div>
+    );
 }

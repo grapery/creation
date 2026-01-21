@@ -1,260 +1,148 @@
-import { useState, useEffect } from 'react';
-import { Heart, UserPlus, MessageCircle, Bell, BookOpen, Sparkles } from 'lucide-react';
-import { MobileHeader } from '../components/MobileHeader';
+import { useEffect, useState } from 'react';
+import { apiClient } from '../lib/api';
+import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
-import { Badge } from '../components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { notificationApi } from '../lib/api';
-import { toast } from 'sonner';
+import { Bell, Check, Trash2, Heart, MessageSquare, UserPlus } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
+import type { Notification, GenericResponse } from '../types';
 
-interface NotificationsProps {
-  onNavigate: (page: string, id?: string) => void;
-}
+export default function Notifications() {
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
-type NotificationType = 'follow' | 'like' | 'comment' | 'update' | 'announcement' | 'ai-complete';
-
-interface Notification {
-  id: string;
-  type: NotificationType;
-  user?: {
-    name: string;
-    avatar: string;
-    id: string;
-  };
-  title: string;
-  message: string;
-  timestamp: string;
-  isRead: boolean;
-  actionId?: string;
-}
-
-export function Notifications({ onNavigate }: NotificationsProps) {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [unreadCount, setUnreadCount] = useState(0);
-
-  useEffect(() => {
-    loadNotifications();
-    loadUnreadCount();
-  }, []);
-
-  const loadNotifications = async () => {
-    setIsLoading(true);
-    try {
-      const response = await notificationApi.listNotifications();
-      const data = response.data.notifications || response.data.data || response.data || [];
-      
-      // Transform API response to Notification format
-      const transformedNotifications: Notification[] = data.map((n: any) => ({
-        id: n.id,
-        type: n.type || 'update',
-        user: n.user ? {
-          name: n.user.displayName || n.user.name || n.user.username,
-          avatar: n.user.avatar || '',
-          id: n.user.id,
-        } : undefined,
-        title: n.title || n.message || 'Notification',
-        message: n.message || n.content || '',
-        timestamp: formatTimestamp(n.createdAt || n.timestamp),
-        isRead: n.isRead || false,
-        actionId: n.actionId || n.targetId,
-      }));
-      
-      setNotifications(transformedNotifications);
-      setUnreadCount(transformedNotifications.filter(n => !n.isRead).length);
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || error.message || 'Failed to load notifications');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const loadUnreadCount = async () => {
-    try {
-      const response = await notificationApi.getUnreadCount();
-      const count = response.data.count || response.data.unreadCount || 0;
-      setUnreadCount(count);
-    } catch (error) {
-      // Silently fail, use count from notifications list
-    }
-  };
-
-  const formatTimestamp = (timestamp: string | number | Date): string => {
-    if (!timestamp) return 'Just now';
-    
-    const date = typeof timestamp === 'number' 
-      ? new Date(timestamp * 1000) 
-      : new Date(timestamp);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return date.toLocaleDateString();
-  };
-
-  const handleNotificationClick = async (notification: Notification) => {
-    // Mark as read if not already read
-    if (!notification.isRead) {
-      try {
-        await notificationApi.markAsRead(notification.id);
-        setNotifications(prev => 
-          prev.map(n => n.id === notification.id ? { ...n, isRead: true } : n)
-        );
-        setUnreadCount(prev => Math.max(0, prev - 1));
-      } catch (error) {
-        // Silently fail
-      }
-    }
-
-    // Navigate based on notification type
-    if (notification.type === 'follow' && notification.user) {
-      onNavigate('profile', notification.user.id);
-    } else if (notification.type === 'like' && notification.actionId) {
-      onNavigate('story-detail', notification.actionId);
-    } else if (notification.type === 'comment' && notification.actionId) {
-      onNavigate('storyboard-viewer', notification.actionId);
-    } else if (notification.type === 'update' && notification.actionId) {
-      onNavigate('story-detail', notification.actionId);
-    } else if (notification.type === 'ai-complete' && notification.actionId) {
-      onNavigate('storyboard-viewer', notification.actionId);
-    }
-  };
-
-  const handleMarkAllAsRead = async () => {
-    try {
-      await notificationApi.markAllAsRead();
-      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
-      setUnreadCount(0);
-      toast.success('All notifications marked as read');
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || error.message || 'Failed to mark all as read');
-    }
-  };
-  const getNotificationIcon = (type: NotificationType) => {
-    switch (type) {
-      case 'follow':
-        return <UserPlus className="h-5 w-5 text-blue-500" />;
-      case 'like':
-        return <Heart className="h-5 w-5 text-red-500" />;
-      case 'comment':
-        return <MessageCircle className="h-5 w-5 text-green-500" />;
-      case 'update':
-        return <BookOpen className="h-5 w-5 text-purple-500" />;
-      case 'ai-complete':
-        return <Sparkles className="h-5 w-5 text-yellow-500" />;
-      case 'announcement':
-        return <Bell className="h-5 w-5 text-primary" />;
-    }
-  };
-
-  const allNotifications = notifications;
-  const unreadNotifications = notifications.filter((n) => !n.isRead);
-
-  const NotificationCard = ({ notification }: { notification: Notification }) => (
-    <Card
-      className={`active:scale-98 transition-transform cursor-pointer ${
-        !notification.isRead ? 'bg-primary/5 border-primary/20' : ''
-      }`}
-      onClick={() => handleNotificationClick(notification)}
-    >
-      <CardContent className="p-3">
-        <div className="flex gap-3">
-          <div className="flex-shrink-0">
-            {notification.user ? (
-              <Avatar className="h-12 w-12">
-                <AvatarImage src={notification.user.avatar} />
-                <AvatarFallback>{notification.user.name[0]}</AvatarFallback>
-              </Avatar>
-            ) : (
-              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                {getNotificationIcon(notification.type)}
-              </div>
-            )}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-2 mb-1">
-              <h4 className="line-clamp-1">{notification.title}</h4>
-              {!notification.isRead && (
-                <div className="h-2 w-2 rounded-full bg-primary flex-shrink-0 mt-1" />
-              )}
-            </div>
-            <p className="text-muted-foreground line-clamp-2 mb-1">{notification.message}</p>
-            <p className="text-muted-foreground">{notification.timestamp}</p>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-
-  return (
-    <div className="min-h-screen pt-14">
-      <MobileHeader 
-        title="Notifications" 
-        showBack 
-        onBack={() => onNavigate('dashboard')}
-        actions={
-          unreadCount > 0 ? (
-            <button
-              onClick={handleMarkAllAsRead}
-              className="text-sm text-primary hover:underline"
-            >
-              Mark all read
-            </button>
-          ) : undefined
+    const fetchNotifications = async () => {
+        setLoading(true);
+        try {
+            const res = await apiClient.get<GenericResponse<{ notifications: Notification[], count: number }>>('/notifications');
+            setNotifications(res.data.data.notifications || []);
+            // Also refresh unread count in navbar? (Ideally handled by a store or SWR)
+        } catch (error) {
+            console.error("Failed to fetch notifications", error);
+        } finally {
+            setLoading(false);
         }
-      />
+    };
 
-      <div className="p-4">
-        {isLoading ? (
-          <div className="text-center py-12">
-            <div className="text-muted-foreground">Loading notifications...</div>
-          </div>
-        ) : (
-          <Tabs defaultValue="all">
-            <TabsList className="w-full grid grid-cols-2">
-              <TabsTrigger value="all">
-                All {allNotifications.length > 0 && `(${allNotifications.length})`}
-              </TabsTrigger>
-              <TabsTrigger value="unread">
-                Unread {unreadCount > 0 && `(${unreadCount})`}
-              </TabsTrigger>
-            </TabsList>
+    useEffect(() => {
+        fetchNotifications();
+    }, []);
 
-            <TabsContent value="all" className="space-y-3 mt-4">
-              {allNotifications.length > 0 ? (
-                allNotifications.map((notification) => (
-                  <NotificationCard key={notification.id} notification={notification} />
-                ))
-              ) : (
-                <div className="text-center py-12">
-                  <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">No notifications yet</p>
-                </div>
-              )}
-            </TabsContent>
+    const handleMarkAsRead = async (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        try {
+            await apiClient.post(`/notifications/${id}/read`);
+            setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+        } catch (err) {
+            console.error("Failed to mark as read", err);
+        }
+    };
 
-            <TabsContent value="unread" className="space-y-3 mt-4">
-              {unreadNotifications.length > 0 ? (
-                unreadNotifications.map((notification) => (
-                  <NotificationCard key={notification.id} notification={notification} />
-                ))
-              ) : (
-                <div className="text-center py-12">
-                  <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">All caught up!</p>
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
-        )}
-      </div>
-    </div>
-  );
+    const handleMarkAllAsRead = async () => {
+        try {
+            await apiClient.post('/notifications/read-all');
+            setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+        } catch (err) {
+            console.error("Failed to mark all as read", err);
+        }
+    };
+
+    const handleDelete = async (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        try {
+            await apiClient.delete(`/notifications/${id}`);
+            setNotifications(prev => prev.filter(n => n.id !== id));
+        } catch (err) {
+            console.error("Failed to delete notification", err);
+        }
+    };
+
+    const handleClick = (n: Notification) => {
+        if (!n.read) {
+            apiClient.post(`/notifications/${n.id}/read`).catch(console.error);
+        }
+        if (n.link) {
+            navigate(n.link);
+        }
+    };
+
+    const getIcon = (type: string) => {
+        switch (type) {
+            case 'like': return <Heart className="w-4 h-4 text-red-500" fill="currentColor" />;
+            case 'comment': return <MessageSquare className="w-4 h-4 text-blue-500" />;
+            case 'follow': return <UserPlus className="w-4 h-4 text-green-500" />;
+            default: return <Bell className="w-4 h-4 text-gray-500" />;
+        }
+    };
+
+    return (
+        <div className="container max-w-2xl mx-auto py-6 px-4">
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold">Notifications</h1>
+                <Button variant="outline" size="sm" onClick={handleMarkAllAsRead} disabled={loading || notifications.length === 0}>
+                    <Check className="w-4 h-4 mr-2" /> Mark all as read
+                </Button>
+            </div>
+
+            <div className="space-y-2">
+                {loading ? (
+                    <div className="text-center py-8 text-gray-400">Loading updates...</div>
+                ) : notifications.length === 0 ? (
+                    <div className="text-center py-12 bg-white rounded-lg border">
+                        <Bell className="w-12 h-12 mx-auto text-gray-200 mb-2" />
+                        <p className="text-gray-500">No notifications yet</p>
+                    </div>
+                ) : (
+                    notifications.map(n => (
+                        <Card
+                            key={n.id}
+                            className={`cursor-pointer transition-colors hover:bg-gray-50 ${!n.read ? 'bg-blue-50 border-blue-100' : ''}`}
+                            onClick={() => handleClick(n)}
+                        >
+                            <CardContent className="p-4 flex items-start gap-4">
+                                <Avatar className="w-10 h-10 mt-1">
+                                    <AvatarImage src={n.actorAvatar} />
+                                    <AvatarFallback>{n.actorName?.[0] || '?'}</AvatarFallback>
+                                </Avatar>
+
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        {getIcon(n.type)}
+                                        <span className="font-semibold text-sm">{n.title}</span>
+                                        <span className="text-xs text-gray-400">• {formatDistanceToNow(n.createdAt * 1000)} ago</span>
+                                    </div>
+                                    <p className="text-sm text-gray-600">{n.content}</p>
+                                </div>
+
+                                <div className="flex flex-col gap-2">
+                                    {!n.read && (
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8 text-blue-500 hover:text-blue-700 hover:bg-blue-100"
+                                            onClick={(e) => handleMarkAsRead(n.id, e)}
+                                            title="Mark as read"
+                                        >
+                                            <div className="w-2 h-2 rounded-full bg-blue-500" />
+                                        </Button>
+                                    )}
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 text-gray-400 hover:text-red-500 hover:bg-red-50"
+                                        onClick={(e) => handleDelete(n.id, e)}
+                                        title="Delete"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ))
+                )}
+            </div>
+        </div>
+    );
 }

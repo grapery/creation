@@ -1,223 +1,124 @@
 import { create } from 'zustand';
-import { storyApi, userApi } from '../lib/api';
+import type { Story, GenericResponse } from '../types';
+import { apiClient } from '../lib/api';
 
-export interface Story {
-  id: string;
-  title: string;
-  content: string;
-  description?: string;
-  cover?: string;
-  author: {
-    id: string;
-    username: string;
-    displayName: string;
-    avatar?: string;
-  };
-  likes: number;
-  views: number;
-  comments: number;
-  tags?: string[];
-  status: 'draft' | 'published' | 'archived';
-  createdAt: string;
-  updatedAt: string;
-  characters?: any[];
-  scenes?: any[];
+interface StoryStore {
+    stories: Story[];
+    isLoading: boolean;
+    error: string | null;
+    hasMore: boolean;
+    page: number;
+
+    // Actions
+    fetchFeed: (filter?: string, page?: number) => Promise<void>;
+    likeStory: (storyId: string) => Promise<void>;
+    unlikeStory: (storyId: string) => Promise<void>;
+
+    // Helpers
+    getStoryById: (id: string) => Story | undefined;
 }
 
-interface StoryState {
-  stories: Story[];
-  currentStory: Story | null;
-  isLoading: boolean;
-  error: string | null;
-  total: number;
-  
-  // Actions
-  fetchStories: (page?: number, limit?: number, sortBy?: string) => Promise<void>;
-  fetchStory: (id: string) => Promise<void>;
-  createStory: (data: Partial<Story>) => Promise<Story>;
-  updateStory: (id: string, data: Partial<Story>) => Promise<void>;
-  deleteStory: (id: string) => Promise<void>;
-  likeStory: (id: string) => Promise<void>;
-  unlikeStory: (id: string) => Promise<void>;
-  getUserStories: (userId: string, page?: number, limit?: number) => Promise<void>;
-  clearError: () => void;
-}
+export const useStoryStore = create<StoryStore>((set, get) => ({
+    stories: [],
+    isLoading: false,
+    error: null,
+    hasMore: true,
+    page: 1,
 
-export const useStoryStore = create<StoryState>((set, get) => ({
-  stories: [],
-  currentStory: null,
-  isLoading: false,
-  error: null,
-  total: 0,
+    fetchFeed: async (filter = 'best', page = 1) => {
+        set({ isLoading: true, error: null });
+        try {
+            const limit = 20;
+            const offset = (page - 1) * limit;
 
-  fetchStories: async (page = 1, limit = 20, sortBy = 'created_at') => {
-    set({ isLoading: true, error: null });
-    try {
-      const offset = (page - 1) * limit;
-      const response = await storyApi.listStories(page, limit);
-      const data = response.data;
-      
-      // Handle different response formats
-      const stories = data.stories || data.data?.stories || data.data || [];
-      const total = data.total || data.count || stories.length;
-      
-      set({
-        stories: page === 1 ? stories : [...get().stories, ...stories],
-        total,
-        isLoading: false,
-        error: null,
-      });
-    } catch (error: any) {
-      set({
-        isLoading: false,
-        error: error.response?.data?.message || error.message || 'Failed to fetch stories',
-      });
-    }
-  },
+            // Check if user is authenticated
+            const token = localStorage.getItem('token');
 
-  fetchStory: async (id: string) => {
-    set({ isLoading: true, error: null });
-    try {
-      const response = await storyApi.getStory(id);
-      const story = response.data.story || response.data;
-      
-      set({
-        currentStory: story,
-        isLoading: false,
-        error: null,
-      });
-    } catch (error: any) {
-      set({
-        isLoading: false,
-        error: error.response?.data?.message || error.message || 'Failed to fetch story',
-      });
-    }
-  },
+            let response;
+            if (token) {
+                // Authenticated: use standard endpoint
+                response = await apiClient.get<GenericResponse<{ stories: Story[], total: number }>>('/stories', {
+                    params: {
+                        limit,
+                        offset,
+                        ...(filter !== 'best' ? { sort: filter } : {})
+                    }
+                });
+            } else {
+                // Guest: use public trending endpoint
+                response = await apiClient.get<GenericResponse<Story[]>>('/public/stories/trending', {
+                    params: { limit }
+                });
+            }
 
-  createStory: async (data) => {
-    set({ isLoading: true, error: null });
-    try {
-      const response = await storyApi.createStory(data);
-      const story = response.data.story || response.data;
-      
-      set((state) => ({
-        stories: [story, ...state.stories],
-        currentStory: story,
-        isLoading: false,
-        error: null,
-      }));
-      
-      return story;
-    } catch (error: any) {
-      set({
-        isLoading: false,
-        error: error.response?.data?.message || error.message || 'Failed to create story',
-      });
-      throw error;
-    }
-  },
+            const data = response.data.data;
+            // Handle different response structures
+            const newStories = Array.isArray(data) ? data : (data.stories || []);
 
-  updateStory: async (id: string, data) => {
-    set({ isLoading: true, error: null });
-    try {
-      const response = await storyApi.updateStory(id, data);
-      const updatedStory = response.data.story || response.data;
-      
-      set((state) => ({
-        stories: state.stories.map((s) => (s.id === id ? updatedStory : s)),
-        currentStory: state.currentStory?.id === id ? updatedStory : state.currentStory,
-        isLoading: false,
-        error: null,
-      }));
-    } catch (error: any) {
-      set({
-        isLoading: false,
-        error: error.response?.data?.message || error.message || 'Failed to update story',
-      });
-      throw error;
-    }
-  },
+            set(state => ({
+                stories: page === 1 ? newStories : [...state.stories, ...newStories],
+                hasMore: newStories.length === limit,
+                page,
+                isLoading: false
+            }));
+        } catch (error: any) {
+            console.error('Failed to fetch stories:', error);
+            // Don't show error for 401, just set empty state
+            if (error.response?.status === 401) {
+                set({ stories: [], isLoading: false, hasMore: false });
+            } else {
+                set({ error: 'Failed to load stories', isLoading: false });
+            }
+        }
+    },
 
-  deleteStory: async (id: string) => {
-    set({ isLoading: true, error: null });
-    try {
-      await storyApi.deleteStory(id);
-      
-      set((state) => ({
-        stories: state.stories.filter((s) => s.id !== id),
-        currentStory: state.currentStory?.id === id ? null : state.currentStory,
-        isLoading: false,
-        error: null,
-      }));
-    } catch (error: any) {
-      set({
-        isLoading: false,
-        error: error.response?.data?.message || error.message || 'Failed to delete story',
-      });
-      throw error;
-    }
-  },
+    likeStory: async (storyId) => {
+        // Optimistic update
+        set(state => ({
+            stories: state.stories.map(s =>
+                s.id === storyId
+                    ? { ...s, likes: s.likes + 1 } // Backend doesn't return 'isLiked' on list usually, depends on 'isFollowing' etc.
+                    : s
+            )
+        }));
 
-  likeStory: async (id: string) => {
-    try {
-      await storyApi.likeStory(id);
-      set((state) => ({
-        stories: state.stories.map((s) =>
-          s.id === id ? { ...s, likes: s.likes + 1 } : s
-        ),
-        currentStory:
-          state.currentStory?.id === id
-            ? { ...state.currentStory, likes: state.currentStory.likes + 1 }
-            : state.currentStory,
-      }));
-    } catch (error: any) {
-      set({
-        error: error.response?.data?.message || error.message || 'Failed to like story',
-      });
-    }
-  },
+        try {
+            await apiClient.post(`/stories/${storyId}/like`);
+        } catch (error) {
+            // Revert if failed
+            set(state => ({
+                stories: state.stories.map(s =>
+                    s.id === storyId
+                        ? { ...s, likes: s.likes - 1 }
+                        : s
+                )
+            }));
+        }
+    },
 
-  unlikeStory: async (id: string) => {
-    try {
-      await storyApi.unlikeStory(id);
-      set((state) => ({
-        stories: state.stories.map((s) =>
-          s.id === id ? { ...s, likes: Math.max(0, s.likes - 1) } : s
-        ),
-        currentStory:
-          state.currentStory?.id === id
-            ? { ...state.currentStory, likes: Math.max(0, state.currentStory.likes - 1) }
-            : state.currentStory,
-      }));
-    } catch (error: any) {
-      set({
-        error: error.response?.data?.message || error.message || 'Failed to unlike story',
-      });
-    }
-  },
+    unlikeStory: async (storyId) => {
+        // Optimistic update
+        set(state => ({
+            stories: state.stories.map(s =>
+                s.id === storyId
+                    ? { ...s, likes: s.likes - 1 }
+                    : s
+            )
+        }));
 
-  getUserStories: async (userId: string, page = 1, limit = 20) => {
-    set({ isLoading: true, error: null });
-    try {
-      const response = await userApi.getUserStories(userId, page, limit);
-      const data = response.data;
-      const stories = data.stories || data.data?.stories || data.data || [];
-      
-      set({
-        stories: page === 1 ? stories : [...get().stories, ...stories],
-        isLoading: false,
-        error: null,
-      });
-    } catch (error: any) {
-      set({
-        isLoading: false,
-        error: error.response?.data?.message || error.message || 'Failed to fetch user stories',
-      });
-    }
-  },
+        try {
+            await apiClient.delete(`/stories/${storyId}/like`);
+        } catch (error) {
+            // Revert if failed
+            set(state => ({
+                stories: state.stories.map(s =>
+                    s.id === storyId
+                        ? { ...s, likes: s.likes + 1 }
+                        : s
+                )
+            }));
+        }
+    },
 
-  clearError: () => {
-    set({ error: null });
-  },
+    getStoryById: (id) => get().stories.find(s => s.id === id),
 }));
-

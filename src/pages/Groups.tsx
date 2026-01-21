@@ -1,147 +1,108 @@
-import { useState, useEffect } from 'react';
-import { Users, Plus, Search, Settings } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { apiClient } from '../lib/api';
+import type { Group, GenericResponse, PaginatedList } from '../types';
 import { Button } from '../components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Badge } from '../components/ui/badge';
-import { Input } from '../components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { MobileHeader } from '../components/MobileHeader';
-import { groupApi } from '../lib/api';
-import { toast } from 'sonner';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
+import { Users, Plus } from 'lucide-react';
+import { CreateGroupDialog } from '../components/CreateGroupDialog';
 
-interface GroupsProps {
-  onNavigate: (page: string, id?: string) => void;
-}
+export default function Groups() {
+    const [groups, setGroups] = useState<Group[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
-export function Groups({ onNavigate }: GroupsProps) {
-  const [groups, setGroups] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+    useEffect(() => {
+        const fetchGroups = async () => {
+            try {
+                // Assuming /groups returns PaginatedList or list of groups wrapped in GenericResponse
+                const res = await apiClient.get<GenericResponse<PaginatedList<Group>>>('/groups');
+                // Adjust based on actual API response structure. 
+                // If the generic wrap structure is: data: { items: [] } 
+                if (res.data.data && res.data.data.items) {
+                    setGroups(res.data.data.items);
+                } else if (Array.isArray(res.data.data)) {
+                    // Fallback if API returns array directly
+                    setGroups(res.data.data as any);
+                }
+            } catch (error) {
+                console.error("Failed to fetch groups:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
 
-  useEffect(() => {
-    loadGroups();
-  }, []);
+        fetchGroups();
+    }, []);
 
-  const loadGroups = async () => {
-    setIsLoading(true);
-    try {
-      const response = await groupApi.listGroups(1, 50);
-      const groupsData = response.data.groups || response.data.data?.groups || response.data.data || [];
-      setGroups(Array.isArray(groupsData) ? groupsData : []);
-    } catch (error: any) {
-      // If API doesn't exist yet, use empty array
-      if (error.response?.status !== 404) {
-        toast.error(error.response?.data?.message || error.message || 'Failed to load groups');
-      }
-      setGroups([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    return (
+        <div className="container max-w-5xl mx-auto py-8 px-4">
+            <div className="flex justify-between items-center mb-6">
+                <div>
+                    <h1 className="text-3xl font-bold">Spaces</h1>
+                    <p className="text-gray-500">Discover and join spaces matching your interests.</p>
+                </div>
+                <Button onClick={() => setCreateDialogOpen(true)}>
+                    <Plus className="w-4 h-4 mr-2" /> Create Space
+                </Button>
+            </div>
 
-  const filteredGroups = groups.filter(group =>
-    group.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    group.description?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-  return (
-    <div className="min-h-screen">
-      <MobileHeader 
-        title="Groups"
-        actions={
-          <>
-            <Button variant="ghost" size="icon">
-              <Search className="h-5 w-5" />
-            </Button>
-            <Button variant="ghost" size="icon">
-              <Settings className="h-5 w-5" />
-            </Button>
-          </>
-        }
-      />
-      
-      <div className="p-4 space-y-4">
-        <div className="flex gap-2">
-          <Input 
-            placeholder="Search groups..." 
-            className="flex-1"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <Button onClick={() => onNavigate('group-create')}>
-            <Plus className="mr-2 h-4 w-4" />
-            Create
-          </Button>
-        </div>
+            <CreateGroupDialog
+                open={createDialogOpen}
+                onOpenChange={setCreateDialogOpen}
+                onSuccess={() => window.location.reload()} // Simple reload to refresh list
+            />
 
-        <Tabs defaultValue="my-groups">
-          <TabsList className="w-full grid grid-cols-3">
-            <TabsTrigger value="my-groups">My Groups</TabsTrigger>
-            <TabsTrigger value="discover">Discover</TabsTrigger>
-            <TabsTrigger value="invites">Invites</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="my-groups" className="space-y-3 mt-4">
             {isLoading ? (
-              <div className="text-center py-8 text-muted-foreground">Loading groups...</div>
-            ) : filteredGroups.length > 0 ? (
-              filteredGroups.map((group: any) => (
-              <Card key={group.id} className="active:scale-98 transition-transform" onClick={() => onNavigate('group-detail', group.id)}>
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3 mb-3">
-                    <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <Users className="h-6 w-6 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="mb-1 truncate">{group.name}</h3>
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <span>{group.memberCount || group.members || 0} members</span>
-                        <span>•</span>
-                        <span>{group.storyCount || group.stories || 0} stories</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {group.description && (
-                    <p className="text-muted-foreground mb-3 line-clamp-2">
-                      {group.description}
-                    </p>
-                  )}
-                  
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary">{group.isPublic ? 'Public' : 'Private'}</Badge>
-                    {group.userRole && (
-                      <Badge variant={group.userRole === 'admin' ? 'default' : 'outline'}>
-                        {group.userRole}
-                      </Badge>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-              ))
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {[1, 2, 3, 4, 5, 6].map(i => (
+                        <div key={i} className="h-32 bg-gray-100 rounded animate-pulse" />
+                    ))}
+                </div>
+            ) : groups.length === 0 ? (
+                <div className="text-center py-12 bg-white rounded-lg border">
+                    <Users className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900">No spaces found</h3>
+                    <p className="text-gray-500 mb-6">Be the first to create one!</p>
+                    <Button onClick={() => setCreateDialogOpen(true)}>Create Space</Button>
+                </div>
             ) : (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <p className="text-muted-foreground">
-                    {searchQuery ? 'No groups found' : 'No groups yet'}
-                  </p>
-                </CardContent>
-              </Card>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {groups.map(group => (
+                        <Card key={group.id} className="hover:shadow-md transition-shadow">
+                            <CardHeader className="pb-4">
+                                <div className="flex items-center space-x-4">
+                                    <Avatar className="w-12 h-12">
+                                        <AvatarImage src={group.avatar} />
+                                        <AvatarFallback>{group.name[0]}</AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                        <CardTitle className="text-lg">
+                                            <Link to={`/r/${group.id}`} className="hover:underline">
+                                                r/{group.name}
+                                            </Link>
+                                        </CardTitle>
+                                        <CardDescription className="line-clamp-1">
+                                            {group.members} members
+                                        </CardDescription>
+                                    </div>
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-sm text-gray-600 line-clamp-2 min-h-[40px]">
+                                    {group.description || "No description provided."}
+                                </p>
+                                <div className="mt-4">
+                                    <Link to={`/r/${group.id}`}>
+                                        <Button variant="outline" className="w-full">View Space</Button>
+                                    </Link>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
             )}
-          </TabsContent>
-
-          <TabsContent value="discover" className="space-y-3 mt-4">
-            <p className="text-muted-foreground text-center py-8">
-              Discover new groups to join
-            </p>
-          </TabsContent>
-
-          <TabsContent value="invites" className="space-y-3 mt-4">
-            <p className="text-muted-foreground text-center py-8">
-              No pending invites
-            </p>
-          </TabsContent>
-        </Tabs>
-      </div>
-    </div>
-  );
+        </div>
+    );
 }

@@ -1,65 +1,120 @@
-import { Heart, Eye, Users, MoreVertical } from 'lucide-react';
-import { Card, CardContent, CardFooter } from './ui/card';
+import { ArrowBigUp, ArrowBigDown, MessageSquare, Share2, Bookmark } from 'lucide-react';
+import { Card } from './ui/card';
 import { Button } from './ui/button';
-import { Badge } from './ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { Story } from '../lib/mockData';
+import type { Story } from '../types';
+import { formatDistanceToNow } from 'date-fns';
+import { useStoryStore } from '../stores/storyStore';
+import { useNavigate } from 'react-router-dom';
 
 interface StoryCardProps {
-  story: Story;
-  onView?: () => void;
+    story: Story;
+    onView?: () => void;
 }
 
 export function StoryCard({ story, onView }: StoryCardProps) {
-  return (
-    <Card className="overflow-hidden active:scale-98 transition-transform" onClick={onView}>
-      <div className="flex gap-3 p-3">
-        {/* Story Cover */}
-        <div className="relative w-24 h-32 flex-shrink-0 rounded overflow-hidden">
-          <img
-            src={story.coverImage}
-            alt={story.title}
-            className="w-full h-full object-cover"
-          />
-          <Badge className="absolute top-1 right-1 text-xs" variant={story.status === 'published' ? 'default' : 'secondary'}>
-            {story.status}
-          </Badge>
-        </div>
-        
-        {/* Story Info */}
-        <div className="flex-1 min-w-0 flex flex-col">
-          <h3 className="mb-1 line-clamp-2">{story.title}</h3>
-          
-          <p className="text-muted-foreground mb-2 line-clamp-2 flex-1">
-            {story.description}
-          </p>
+    const navigate = useNavigate();
+    const { likeStory } = useStoryStore();
 
-          <div className="flex items-center gap-2 mb-2">
-            <Avatar className="h-5 w-5">
-              <AvatarImage src={story.author.avatar} />
-              <AvatarFallback>{story.author.displayName[0]}</AvatarFallback>
-            </Avatar>
-            <span className="text-muted-foreground truncate">
-              {story.author.displayName}
-            </span>
-          </div>
+    const handleVote = (e: React.MouseEvent, type: 'up' | 'down') => {
+        e.stopPropagation();
+        if (type === 'up') {
+            likeStory(story.id);
+        }
+    };
 
-          <div className="flex items-center gap-3 text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <Heart className="h-3.5 w-3.5" />
-              <span>{story.likes}</span>
+    const handleGroupClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (story.groupId) navigate(`/r/${story.groupId}`);
+    }
+
+    const handleUserClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (story.author?.id) navigate(`/u/${story.author.id}`);
+    }
+
+    return (
+        <Card
+            className="flex border border-gray-200 bg-white hover:border-gray-400 cursor-pointer overflow-hidden rounded mb-2 transition-colors"
+            onClick={onView}
+        >
+            {/* Vote Column */}
+            <div className="w-[40px] bg-[#F8F9FA] flex flex-col items-center py-2 gap-1 border-r border-transparent">
+                <button
+                    className="p-1 hover:bg-gray-200 rounded text-gray-500 hover:text-[#FF4500]"
+                    onClick={(e) => handleVote(e, 'up')}
+                >
+                    <ArrowBigUp className="h-6 w-6" />
+                </button>
+                <span className="text-xs font-bold text-gray-900">{story.likes || 0}</span>
+                <button
+                    className="p-1 hover:bg-gray-200 rounded text-gray-500 hover:text-[#7193FF]"
+                    onClick={(e) => handleVote(e, 'down')}
+                >
+                    <ArrowBigDown className="h-6 w-6" />
+                </button>
             </div>
-            <div className="flex items-center gap-1">
-              <Eye className="h-3.5 w-3.5" />
-              <span>{story.followers}</span>
+
+            {/* Content Column */}
+            <div className="flex-1 p-2 pb-1">
+                {/* Header */}
+                <div className="flex items-center gap-1 text-xs text-gray-500 mb-2">
+                    {story.groupId ? (
+                        <div className="flex items-center gap-1">
+                            {/* Group Icon Placeholder */}
+                            <div className="h-5 w-5 bg-black rounded-full" />
+                            <span className="font-bold text-black hover:underline z-10 relative" onClick={handleGroupClick}>
+                                r/{story.groupName || 'grapery'}
+                            </span>
+                            <span className="mx-0.5">•</span>
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-1">
+                            <div className="h-5 w-5 bg-blue-500 rounded-full" />
+                            <span className="font-bold text-black hover:underline cursor-pointer" onClick={() => navigate('/')}>r/grapery</span>
+                            <span className="mx-0.5">•</span>
+                        </div>
+                    )}
+
+                    <span>Posted by</span>
+                    <span className="hover:underline" onClick={handleUserClick}>
+                        u/{story.author?.username || story.author?.displayName || 'user'}
+                    </span>
+                    <span>
+                        {story.createdAt ? formatDistanceToNow(new Date(story.createdAt * 1000), { addSuffix: true }) : 'recently'}
+                    </span>
+                </div>
+
+                {/* Title & Body */}
+                <div className="mb-2">
+                    <h3 className="text-lg font-medium text-gray-900 mb-2 leading-snug">{story.title}</h3>
+
+                    {story.coverImage ? (
+                        <div className="w-full relative rounded-lg overflow-hidden max-h-[500px] border border-gray-200 flex justify-center bg-black">
+                            <img src={story.coverImage} alt={story.title} className="max-h-[500px] object-contain" />
+                        </div>
+                    ) : (
+                        <div className="relative max-h-[250px] overflow-hidden mask-gradient-b">
+                            <p className="text-sm text-gray-800 leading-relaxed font-normal font-sans">{story.description}</p>
+                        </div>
+                    )}
+                </div>
+
+                {/* Action Bar */}
+                <div className="flex items-center gap-1 text-gray-500 font-bold text-xs">
+                    <Button variant="ghost" size="sm" className="h-8 px-2 gap-2 text-gray-500 hover:bg-gray-100" onClick={(e) => { e.stopPropagation(); navigate(`/stories/${story.id}`); }}>
+                        <MessageSquare className="h-5 w-5" />
+                        {story.comments || story.storyboardCount || 0} Comments
+                    </Button>
+                    <Button variant="ghost" size="sm" className="h-8 px-2 gap-2 text-gray-500 hover:bg-gray-100">
+                        <Share2 className="h-5 w-5" />
+                        Share
+                    </Button>
+                    <Button variant="ghost" size="sm" className="h-8 px-2 gap-2 text-gray-500 hover:bg-gray-100">
+                        <Bookmark className="h-5 w-5" />
+                        Save
+                    </Button>
+                </div>
             </div>
-            <div className="flex items-center gap-1">
-              <Users className="h-3.5 w-3.5" />
-              <span>{story.panels}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </Card>
-  );
+        </Card>
+    );
 }

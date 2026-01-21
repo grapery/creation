@@ -1,191 +1,173 @@
-import { useState } from 'react';
-import {
-  User,
-  Camera,
-  Globe,
-  Palette,
-  Shield,
-  Bell,
-  CreditCard,
-  Info,
-  FileText,
-  Lock,
-  Trash2,
-  LogOut,
-  ChevronRight,
-} from 'lucide-react';
-import { MobileHeader } from '../components/MobileHeader';
-import { Card, CardContent } from '../components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
+import { useEffect, useState } from 'react';
+import { useAuthStore } from '../stores/authStore';
+import { apiClient } from '../lib/api';
 import { Button } from '../components/ui/button';
-import { Separator } from '../components/ui/separator';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { useNavigate } from 'react-router-dom';
+import type { UpdateProfileReq, GenericResponse, User } from '../types';
 
-interface SettingsProps {
-  onNavigate: (page: string) => void;
-}
+export default function Settings() {
+    const { user, checkAuth } = useAuthStore();
+    const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
 
-export function Settings({ onNavigate }: SettingsProps) {
-  const currentUser = {
-    name: 'Alex Morgan',
-    email: 'alex@example.com',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Alex',
-  };
+    // Profile State
+    const [displayName, setDisplayName] = useState('');
+    const [bio, setBio] = useState('');
+    const [location, setLocation] = useState('');
+    const [website, setWebsite] = useState('');
+    const [avatar, setAvatar] = useState('');
+    const [background, setBackground] = useState('');
 
-  const settingsSections = [
-    {
-      title: 'Account',
-      items: [
-        {
-          icon: User,
-          label: 'Profile Settings',
-          description: 'Update your profile information',
-          action: () => onNavigate('profile-settings'),
-        },
-        {
-          icon: Bell,
-          label: 'Notifications',
-          description: 'Manage notification preferences',
-          action: () => onNavigate('notification-settings'),
-        },
-        {
-          icon: CreditCard,
-          label: 'Membership & Billing',
-          description: 'Manage your subscription',
-          action: () => onNavigate('membership'),
-        },
-      ],
-    },
-    {
-      title: 'Preferences',
-      items: [
-        {
-          icon: Globe,
-          label: 'Language',
-          description: 'English',
-          action: () => onNavigate('language-settings'),
-        },
-        {
-          icon: Palette,
-          label: 'Appearance',
-          description: 'Theme and display options',
-          action: () => onNavigate('appearance-settings'),
-        },
-        {
-          icon: Shield,
-          label: 'Privacy & Safety',
-          description: 'Control who can see your content',
-          action: () => onNavigate('privacy-settings'),
-        },
-      ],
-    },
-    {
-      title: 'Legal & About',
-      items: [
-        {
-          icon: FileText,
-          label: 'Terms of Service',
-          action: () => onNavigate('terms'),
-        },
-        {
-          icon: Lock,
-          label: 'Privacy Policy',
-          action: () => onNavigate('privacy'),
-        },
-        {
-          icon: Info,
-          label: 'About StoryForge',
-          action: () => onNavigate('about'),
-        },
-        {
-          icon: FileText,
-          label: 'Regulatory Information',
-          action: () => onNavigate('regulatory'),
-        },
-      ],
-    },
-    {
-      title: 'Account Actions',
-      items: [
-        {
-          icon: LogOut,
-          label: 'Sign Out',
-          className: 'text-primary',
-          action: () => onNavigate('sign-out'),
-        },
-        {
-          icon: Trash2,
-          label: 'Delete Account',
-          className: 'text-destructive',
-          action: () => onNavigate('delete-account'),
-        },
-      ],
-    },
-  ];
+    useEffect(() => {
+        if (!user) {
+            navigate('/login');
+            return;
+        }
+        setDisplayName(user.displayName || '');
+        setBio(user.bio || '');
+        setLocation(user.location || '');
+        setWebsite(user.website || '');
+        setAvatar(user.avatar || '');
+        setBackground(user.background || '');
+    }, [user, navigate]);
 
-  return (
-    <div className="min-h-screen pt-14">
-      <MobileHeader title="Settings" showBack onBack={() => onNavigate('dashboard')} />
+    const handleProfileUpdate = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            const payload: UpdateProfileReq = {
+                displayName,
+                bio,
+                location,
+                website,
+                avatar,
+                background
+            };
 
-      <div className="p-4 space-y-6">
-        {/* Profile Summary */}
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <Avatar className="h-16 w-16">
-                  <AvatarImage src={currentUser.avatar} />
-                  <AvatarFallback>{currentUser.name[0]}</AvatarFallback>
-                </Avatar>
-                <button className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
-                  <Camera className="h-4 w-4" />
-                </button>
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="mb-1">{currentUser.name}</h3>
-                <p className="text-muted-foreground">{currentUser.email}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            await apiClient.put<GenericResponse<User>>(`/users/${user?.id}`, payload);
+            await checkAuth(); // Refresh user data
+            alert('Profile updated successfully!');
+        } catch (err) {
+            console.error(err);
+            alert('Failed to update profile.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
-        {/* Settings Sections */}
-        {settingsSections.map((section, index) => (
-          <div key={section.title}>
-            <h3 className="mb-3 px-1">{section.title}</h3>
-            <Card>
-              <CardContent className="p-0">
-                {section.items.map((item, itemIndex) => {
-                  const Icon = item.icon;
-                  return (
-                    <div key={item.label}>
-                      <button
-                        onClick={item.action}
-                        className="w-full p-4 flex items-center gap-3 hover:bg-accent/50 transition-colors"
-                      >
-                        <Icon className={`h-5 w-5 ${item.className || 'text-muted-foreground'}`} />
-                        <div className="flex-1 text-left">
-                          <div className={item.className}>{item.label}</div>
-                          {item.description && (
-                            <p className="text-muted-foreground">{item.description}</p>
-                          )}
-                        </div>
-                        <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                      </button>
-                      {itemIndex < section.items.length - 1 && <Separator />}
-                    </div>
-                  );
-                })}
-              </CardContent>
-            </Card>
-          </div>
-        ))}
+    return (
+        <div className="container max-w-4xl mx-auto py-8 px-4">
+            <h1 className="text-3xl font-bold mb-6">Settings</h1>
 
-        {/* App Version */}
-        <div className="text-center text-muted-foreground pb-4">
-          <p>StoryForge v1.0.0</p>
-          <p>© 2025 StoryForge. All rights reserved.</p>
+            <Tabs defaultValue="profile">
+                <TabsList className="mb-6">
+                    <TabsTrigger value="profile">Profile</TabsTrigger>
+                    <TabsTrigger value="account">Account</TabsTrigger>
+                    <TabsTrigger value="appearance">Appearance</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="profile">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Profile Information</CardTitle>
+                            <CardDescription>
+                                Update your public profile details.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <form onSubmit={handleProfileUpdate} className="space-y-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="displayName">Display Name</Label>
+                                        <Input
+                                            id="displayName"
+                                            value={displayName}
+                                            onChange={e => setDisplayName(e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="location">Location</Label>
+                                        <Input
+                                            id="location"
+                                            value={location}
+                                            onChange={e => setLocation(e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="website">Website</Label>
+                                        <Input
+                                            id="website"
+                                            value={website}
+                                            onChange={e => setWebsite(e.target.value)}
+                                            placeholder="https://"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="bio">Bio</Label>
+                                    <textarea
+                                        id="bio"
+                                        className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        value={bio}
+                                        onChange={e => setBio(e.target.value)}
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="avatar">Avatar URL</Label>
+                                    <Input
+                                        id="avatar"
+                                        value={avatar}
+                                        onChange={e => setAvatar(e.target.value)}
+                                        placeholder="https://..."
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="background">Background URL</Label>
+                                    <Input
+                                        id="background"
+                                        value={background}
+                                        onChange={e => setBackground(e.target.value)}
+                                        placeholder="https://..."
+                                    />
+                                </div>
+
+                                <Button type="submit" disabled={loading}>
+                                    {loading ? 'Saving...' : 'Save Changes'}
+                                </Button>
+                            </form>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="account">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Account Settings</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-gray-500">Password change and email settings coming soon.</p>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="appearance">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Appearance</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-gray-500">Theme settings coming soon.</p>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+            </Tabs>
         </div>
-      </div>
-    </div>
-  );
+    );
 }
