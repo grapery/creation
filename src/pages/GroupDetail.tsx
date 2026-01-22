@@ -11,6 +11,7 @@ import { useAuthStore } from '../stores/authStore';
 import { InviteMemberDialog } from '../components/InviteMemberDialog';
 import { EditGroupDialog } from '../components/EditGroupDialog';
 import { cn } from '../lib/utils';
+import { toast } from 'sonner';
 
 export default function GroupDetail() {
     const { id } = useParams<{ id: string }>();
@@ -46,21 +47,6 @@ export default function GroupDetail() {
     useEffect(() => {
         fetchData();
     }, [id]);
-
-    const handleJoin = async () => {
-        if (!group) return;
-        setJoining(true);
-        try {
-            await apiClient.post(`/groups/${group.id}/follow`);
-            // Refresh group to get updated membership status
-            const res = await apiClient.get<GenericResponse<Group>>(`/groups/${group.id}`);
-            setGroup(res.data.data);
-        } catch (err) {
-            console.error("Failed to join community", err);
-        } finally {
-            setJoining(false);
-        }
-    };
 
     if (loading) return <div className="p-8 text-center bg-gray-50 min-h-screen">Loading community...</div>;
     if (!group) return <div className="p-8 text-center text-red-500 bg-gray-50 min-h-screen">Community not found</div>;
@@ -101,11 +87,36 @@ export default function GroupDetail() {
 
                     <div className="flex flex-col gap-2 pt-1">
                         <Button
-                            className={cn("w-full transition-all", group.my_role ? "bg-gray-200 text-gray-700 hover:bg-gray-300" : "bg-blue-600 hover:bg-blue-700")}
-                            onClick={handleJoin}
+                            className={cn(
+                                "w-full transition-all",
+                                group.my_role ? "bg-gray-200 text-gray-700 hover:bg-gray-300" : "bg-blue-600 hover:bg-blue-700"
+                            )}
+                            onClick={async () => {
+                                if (!group) return;
+                                setJoining(true);
+                                try {
+                                    if (group.my_role) {
+                                        // Leave/Unfollow group
+                                        await apiClient.delete(`/groups/${group.id}/follow`);
+                                        toast.success('Left the community');
+                                    } else {
+                                        // Join/Follow group
+                                        await apiClient.post(`/groups/${group.id}/follow`);
+                                        toast.success('Joined the community!');
+                                    }
+                                    // Refresh group to get updated membership status
+                                    const res = await apiClient.get<GenericResponse<Group>>(`/groups/${group.id}`);
+                                    setGroup(res.data.data);
+                                } catch (err) {
+                                    console.error("Failed to update membership", err);
+                                    toast.error("Failed to update membership");
+                                } finally {
+                                    setJoining(false);
+                                }
+                            }}
                             disabled={joining}
                         >
-                            {group.my_role ? 'Member' : 'Join Space'}
+                            {joining ? 'Loading...' : (group.my_role ? 'Leave Space' : 'Join Space')}
                         </Button>
                         {isAdmin && (
                             <div className="flex gap-2">

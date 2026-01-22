@@ -6,12 +6,14 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { MessageSquare, ArrowLeft, Share2, Edit } from 'lucide-react';
 import type { Character, GenericResponse } from '../types';
+import { toast } from 'sonner';
 
 export default function CharacterDetail() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const [character, setCharacter] = useState<Character | null>(null);
     const [loading, setLoading] = useState(true);
+    const [following, setFollowing] = useState(false);
 
     useEffect(() => {
         const fetchCharacter = async () => {
@@ -29,6 +31,23 @@ export default function CharacterDetail() {
         };
         fetchCharacter();
     }, [id]);
+
+    const handleShare = async () => {
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: character?.name,
+                    text: `Check out this character: ${character?.name}`,
+                    url: window.location.href,
+                });
+            } catch (err) {
+                console.log('Share failed', err);
+            }
+        } else {
+            navigator.clipboard.writeText(window.location.href);
+            toast.success('Link copied to clipboard!');
+        }
+    };
 
     if (loading) return <div className="p-8 text-center">Loading character...</div>;
     if (!character) return <div className="p-8 text-center text-red-500">Character not found</div>;
@@ -50,10 +69,24 @@ export default function CharacterDetail() {
                     <h1 className="text-2xl font-bold text-center block md:hidden">{character.name}</h1>
 
                     <div className="flex flex-col w-full gap-2">
-                        <Button className="w-full gap-2" variant="default">
-                            <MessageSquare className="w-4 h-4" /> Chat with {character.name.split(' ')[0]}
+                        <Button
+                            className="w-full gap-2"
+                            variant="default"
+                            onClick={() => {
+                                if (character?.id) {
+                                    // Navigate to chat with character or open character chat
+                                    // For now, just navigate to agent chat
+                                    navigate('/chat');
+                                }
+                            }}
+                        >
+                            <MessageSquare className="w-4 h-4" /> Chat with {character?.name.split(' ')[0]}
                         </Button>
-                        <Button className="w-full gap-2" variant="outline">
+                        <Button
+                            className="w-full gap-2"
+                            variant="outline"
+                            onClick={handleShare}
+                        >
                             <Share2 className="w-4 h-4" /> Share
                         </Button>
                     </div>
@@ -110,7 +143,14 @@ export default function CharacterDetail() {
                     </Card>
 
                     <div className="flex justify-end">
-                        <Button variant="ghost" size="sm" className="text-gray-400">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-gray-400"
+                            onClick={() => {
+                                toast.info('Edit suggestion feature coming soon!');
+                            }}
+                        >
                             <Edit className="w-3 h-3 mr-1" /> Suggest Edit
                         </Button>
                     </div>

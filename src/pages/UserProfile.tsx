@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { StoryCard } from '../components/StoryCard';
 import { formatDistanceToNow } from 'date-fns';
 import { MapPin, Link as LinkIcon, Calendar, Activity } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function UserProfile() {
     const { id } = useParams<{ id: string }>();
@@ -69,11 +70,43 @@ export default function UserProfile() {
 
                     <div className="flex gap-2 md:mb-4">
                         {user.isFollowing ? (
-                            <Button variant="outline">Unfollow</Button>
+                            <Button
+                                variant="outline"
+                                onClick={async () => {
+                                    try {
+                                        await apiClient.delete(`/users/${user.id}/follow`);
+                                        setUser({ ...user, isFollowing: false, followers: (user.followers || 0) - 1 });
+                                        toast.success('Unfollowed');
+                                    } catch (err) {
+                                        console.error("Failed to unfollow", err);
+                                    }
+                                }}
+                            >
+                                Unfollow
+                            </Button>
                         ) : (
-                            <Button>Follow</Button>
+                            <Button
+                                onClick={async () => {
+                                    try {
+                                        await apiClient.post(`/users/${user.id}/follow`);
+                                        setUser({ ...user, isFollowing: true, followers: (user.followers || 0) + 1 });
+                                        toast.success('Following!');
+                                    } catch (err) {
+                                        console.error("Failed to follow", err);
+                                    }
+                                }}
+                            >
+                                Follow
+                            </Button>
                         )}
-                        <Button variant="secondary">Message</Button>
+                        <Button
+                            variant="secondary"
+                            onClick={() => {
+                                toast.info('Direct messaging coming soon!');
+                            }}
+                        >
+                            Message
+                        </Button>
                     </div>
                 </div>
 

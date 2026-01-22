@@ -18,6 +18,8 @@ export function CommentsSection({ targetType, targetId }: CommentsSectionProps) 
     const [loading, setLoading] = useState(true);
     const [commentText, setCommentText] = useState('');
     const [submitting, setSubmitting] = useState(false);
+    const [replyingTo, setReplyingTo] = useState<string | null>(null);
+    const [replyText, setReplyText] = useState('');
 
     useEffect(() => {
         fetchComments();
@@ -90,6 +92,40 @@ export function CommentsSection({ targetType, targetId }: CommentsSectionProps) 
         }
     };
 
+    const handleReply = async (commentId: string) => {
+        if (!replyText.trim()) return;
+        try {
+            const payload: CreateCommentReq = {
+                targetType,
+                targetId,
+                content: replyText,
+                parentId: commentId
+            };
+            const res = await apiClient.post<GenericResponse<Comment>>('/comments', payload);
+            if (res.data.data) {
+                const newReply = res.data.data;
+                if (!newReply.author && user) {
+                    newReply.author = user;
+                }
+                // Add reply to the parent comment
+                setComments(comments.map(c => {
+                    if (c.id === commentId) {
+                        return {
+                            ...c,
+                            replies: [...(c.replies || []), newReply],
+                            replyCount: (c.replyCount || 0) + 1
+                        };
+                    }
+                    return c;
+                }));
+                setReplyText('');
+                setReplyingTo(null);
+            }
+        } catch (err) {
+            console.error("Failed to post reply", err);
+        }
+    };
+
     return (
         <div className="space-y-6">
             <h3 className="text-xl font-bold flex items-center gap-2">
@@ -125,31 +161,77 @@ export function CommentsSection({ targetType, targetId }: CommentsSectionProps) 
             ) : (
                 <div className="space-y-4">
                     {comments.map(comment => (
-                        <div key={comment.id} className="flex gap-3">
-                            <Avatar className="w-8 h-8">
-                                <AvatarImage src={comment.author?.avatar} />
-                                <AvatarFallback>{comment.author?.username?.[0] || 'U'}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 space-y-1">
-                                <div className="flex items-center gap-2 text-xs text-gray-500">
-                                    <span className="font-bold text-gray-900">{comment.author?.displayName || comment.author?.username || 'Unknown'}</span>
-                                    <span>{formatDistanceToNow(comment.createdAt * 1000)} ago</span>
-                                </div>
-                                <p className="text-sm text-gray-800">{comment.content}</p>
-                                <div className="flex items-center gap-4 text-xs text-gray-500 font-bold mt-1">
-                                    <button
-                                        className={`flex items-center gap-1 hover:bg-gray-100 p-1 rounded ${comment.isLiked ? 'text-orange-500' : ''}`}
-                                        onClick={() => handleLike(comment.id, true)}
-                                    >
-                                        <ThumbsUp className="w-4 h-4" />
-                                        {comment.likes || 0}
-                                    </button>
-                                    <button className="flex items-center gap-1 hover:bg-gray-100 p-1 rounded">
-                                        <ThumbsDown className="w-4 h-4" />
-                                    </button>
-                                    <button className="hover:bg-gray-100 p-1 rounded">Reply</button>
+                        <div key={comment.id} className="space-y-3">
+                            <div className="flex gap-3">
+                                <Avatar className="w-8 h-8">
+                                    <AvatarImage src={comment.author?.avatar} />
+                                    <AvatarFallback>{comment.author?.username?.[0] || 'U'}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1 space-y-1">
+                                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                                        <span className="font-bold text-gray-900">{comment.author?.displayName || comment.author?.username || 'Unknown'}</span>
+                                        <span>{formatDistanceToNow(comment.createdAt * 1000)} ago</span>
+                                    </div>
+                                    <p className="text-sm text-gray-800">{comment.content}</p>
+                                    <div className="flex items-center gap-4 text-xs text-gray-500 font-bold mt-1">
+                                        <button
+                                            className={`flex items-center gap-1 hover:bg-gray-100 p-1 rounded ${comment.isLiked ? 'text-orange-500' : ''}`}
+                                            onClick={() => handleLike(comment.id, true)}
+                                        >
+                                            <ThumbsUp className="w-4 h-4" />
+                                            {comment.likes || 0}
+                                        </button>
+                                        <button className="flex items-center gap-1 hover:bg-gray-100 p-1 rounded">
+                                            <ThumbsDown className="w-4 h-4" />
+                                        </button>
+                                        <button
+                                            className="hover:bg-gray-100 p-1 rounded"
+                                            onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
+                                        >
+                                            {replyingTo === comment.id ? 'Cancel' : 'Reply'}
+                                        </button>
+                                    </div>
+                                    {replyingTo === comment.id && (
+                                        <div className="mt-2">
+                                            <textarea
+                                                className="w-full min-h-[60px] p-2 border rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                                placeholder="Write a reply..."
+                                                value={replyText}
+                                                onChange={e => setReplyText(e.target.value)}
+                                            />
+                                            <div className="flex gap-2 mt-2">
+                                                <Button
+                                                    size="sm"
+                                                    onClick={() => handleReply(comment.id)}
+                                                    disabled={!replyText.trim()}
+                                                >
+                                                    Post Reply
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
+                            {/* Display replies */}
+                            {comment.replies && comment.replies.length > 0 && (
+                                <div className="ml-11 space-y-3 pl-4 border-l-2 border-gray-200">
+                                    {comment.replies.map(reply => (
+                                        <div key={reply.id} className="flex gap-3">
+                                            <Avatar className="w-6 h-6">
+                                                <AvatarImage src={reply.author?.avatar} />
+                                                <AvatarFallback className="text-xs">{reply.author?.username?.[0] || 'U'}</AvatarFallback>
+                                            </Avatar>
+                                            <div className="flex-1 space-y-1">
+                                                <div className="flex items-center gap-2 text-xs text-gray-500">
+                                                    <span className="font-bold text-gray-900">{reply.author?.displayName || reply.author?.username || 'Unknown'}</span>
+                                                    <span>{formatDistanceToNow(reply.createdAt * 1000)} ago</span>
+                                                </div>
+                                                <p className="text-sm text-gray-800">{reply.content}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     ))}
                     {comments.length === 0 && (

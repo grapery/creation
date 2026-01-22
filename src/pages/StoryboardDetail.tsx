@@ -80,7 +80,19 @@ export default function StoryboardDetail() {
                         <div className="bg-gray-100 rounded-lg p-12 text-center text-gray-500">
                             No scenes generated yet.
                             <div className="mt-4">
-                                <Button variant="outline" className="gap-2">
+                                <Button variant="outline" className="gap-2" onClick={async () => {
+                                    // Generate scenes by updating the storyboard content
+                                    if (board.id) {
+                                        try {
+                                            await apiClient.post(`/storyboards/${board.id}/generate-scenes`);
+                                            // Refresh the board
+                                            const res = await apiClient.get<GenericResponse<Storyboard>>(`/storyboards/${board.id}`);
+                                            setBoard(res.data.data);
+                                        } catch (err) {
+                                            console.error("Failed to generate scenes", err);
+                                        }
+                                    }
+                                }}>
                                     <RefreshCw className="w-4 h-4" /> Generate Scenes
                                 </Button>
                             </div>

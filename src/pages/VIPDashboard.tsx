@@ -5,6 +5,7 @@ import { Button } from '../components/ui/button';
 import { Progress } from '../components/ui/progress';
 import { Crown, Zap, BarChart, Check } from 'lucide-react';
 import type { VIPInfo, GenericResponse } from '../types';
+import { toast } from 'sonner';
 
 
 export default function VIPDashboard() {
@@ -76,7 +77,15 @@ export default function VIPDashboard() {
                             {vipInfo?.is_vip ? (
                                 <Button variant="outline">Manage Subscription</Button>
                             ) : (
-                                <Button className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold">Upgrade to Premium</Button>
+                                <Button
+                                    className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold"
+                                    onClick={() => {
+                                        // Navigate to payment page or open payment dialog
+                                        toast.info('Payment flow coming soon!');
+                                    }}
+                                >
+                                    Upgrade to Premium
+                                </Button>
                             )}
                         </div>
                     </CardContent>
@@ -148,7 +157,15 @@ export default function VIPDashboard() {
                                     <li className="flex items-center gap-2 text-sm"><Check className="w-4 h-4 text-green-500" /> Priority Queue</li>
                                     <li className="flex items-center gap-2 text-sm"><Check className="w-4 h-4 text-green-500" /> Early Access to New Features</li>
                                 </ul>
-                                <Button className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold">Subscribe Now</Button>
+                                <Button
+                                    className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold"
+                                    onClick={() => {
+                                        // Navigate to payment page
+                                        toast.info('Payment flow coming soon!');
+                                    }}
+                                >
+                                    Subscribe Now
+                                </Button>
                             </CardContent>
                         </Card>
 

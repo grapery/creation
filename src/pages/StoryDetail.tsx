@@ -144,8 +144,14 @@ export default function StoryDetail() {
                                 </div>
                                 <button
                                     className="flex items-center space-x-1 hover:text-yellow-600 transition-colors ml-auto"
-                                    onClick={() => {
-                                        toast.info("Saving to collection... (Simulation)");
+                                    onClick={async () => {
+                                        try {
+                                            await apiClient.post(`/stories/${story.id}/save`);
+                                            alert("Story saved to collection!");
+                                        } catch (err) {
+                                            console.error("Failed to save story", err);
+                                            alert("Failed to save story");
+                                        }
                                     }}
                                 >
                                     <Badge variant="outline" className="border-gray-300">Save Story</Badge>

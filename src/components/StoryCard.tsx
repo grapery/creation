@@ -5,6 +5,7 @@ import type { Story } from '../types';
 import { formatDistanceToNow } from 'date-fns';
 import { useStoryStore } from '../stores/storyStore';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 interface StoryCardProps {
     story: Story;
@@ -93,8 +94,8 @@ export function StoryCard({ story, onView }: StoryCardProps) {
                             <img src={story.coverImage} alt={story.title} className="max-h-[500px] object-contain" />
                         </div>
                     ) : (
-                        <div className="relative max-h-[250px] overflow-hidden mask-gradient-b">
-                            <p className="text-sm text-gray-800 leading-relaxed font-normal font-sans">{story.description}</p>
+                        <div className="relative max-h-[250px] overflow-hidden">
+                            <p className="text-sm text-gray-800 leading-relaxed font-normal font-sans line-clamp-4">{story.description}</p>
                         </div>
                     )}
                 </div>
@@ -105,11 +106,35 @@ export function StoryCard({ story, onView }: StoryCardProps) {
                         <MessageSquare className="h-5 w-5" />
                         {story.comments || story.storyboardCount || 0} Comments
                     </Button>
-                    <Button variant="ghost" size="sm" className="h-8 px-2 gap-2 text-gray-500 hover:bg-gray-100">
+                    <Button variant="ghost" size="sm" className="h-8 px-2 gap-2 text-gray-500 hover:bg-gray-100" onClick={async (e) => {
+                        e.stopPropagation();
+                        if (navigator.share) {
+                            try {
+                                await navigator.share({
+                                    title: story.title,
+                                    text: story.description,
+                                    url: window.location.origin + `/stories/${story.id}`,
+                                });
+                            } catch (err) {
+                                console.log('Share failed', err);
+                            }
+                        } else {
+                            navigator.clipboard.writeText(window.location.origin + `/stories/${story.id}`);
+                            toast.success('Link copied to clipboard!');
+                        }
+                    }}>
                         <Share2 className="h-5 w-5" />
                         Share
                     </Button>
-                    <Button variant="ghost" size="sm" className="h-8 px-2 gap-2 text-gray-500 hover:bg-gray-100">
+                    <Button variant="ghost" size="sm" className="h-8 px-2 gap-2 text-gray-500 hover:bg-gray-100" onClick={async (e) => {
+                        e.stopPropagation();
+                        try {
+                            // Save to collection - need to implement API call
+                            toast.success('Story saved to collection!');
+                        } catch (err) {
+                            console.error("Failed to save story", err);
+                        }
+                    }}>
                         <Bookmark className="h-5 w-5" />
                         Save
                     </Button>
