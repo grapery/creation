@@ -1,0 +1,295 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { User, Upload } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from "@/providers/auth-provider";
+import { profile } from "@/lib/api/profile";
+
+export default function ProfileSettingsPage() {
+    const router = useRouter();
+    const { user } = useAuth();
+    const [isSaving, setIsSaving] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
+    const [showError, setShowError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+
+    // Form state
+    const [displayName, setDisplayName] = useState("");
+    const [username, setUsername] = useState("");
+    const [email, setEmail] = useState("");
+    const [bio, setBio] = useState("");
+    const [website, setWebsite] = useState("");
+    const [location, setLocation] = useState("");
+    const [avatar, setAvatar] = useState<File | null>(null);
+    const [aiPromptPreference, setAiPromptPreference] = useState<"detailed" | "balanced" | "concise">("detailed");
+
+    useEffect(() => {
+        if (user) {
+            setDisplayName(user.displayName || "");
+            setUsername(user.username || "");
+            setEmail(user.email || "");
+            setBio(user.bio || "");
+            setWebsite(user.website || "");
+            setLocation(user.location || "");
+        }
+    }, [user]);
+
+    const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setAvatar(e.target.files[0]);
+        }
+    };
+
+    const handleSave = async () => {
+        setIsSaving(true);
+        try {
+            await profile.updateProfile({
+                displayName: displayName.trim(),
+                bio: bio.trim(),
+                website: website.trim(),
+                location: location.trim(),
+            });
+
+            // Handle avatar upload
+            if (avatar) {
+                const formData = new FormData();
+                formData.append("avatar", avatar);
+                // Call avatar upload API
+            }
+
+            setShowSuccess(true);
+            setTimeout(() => setShowSuccess(false), 2000);
+        } catch (e) {
+            console.error("Failed to save profile:", e);
+            setErrorMessage("Failed to update profile. Please try again.");
+            setShowError(true);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    return (
+        <div className="min-h-screen bg-background">
+            {/* Back Header */}
+            <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border">
+                <div className="px-4 py-3 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => router.back()}
+                            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
+                        >
+                            <span className="text-sm">←</span>
+                        </button>
+                        <h1 className="text-base font-semibold text-foreground">Profile Settings</h1>
+                    </div>
+                </div>
+            </div>
+
+            {/* Content */}
+            <div className="px-4 py-6 max-w-2xl mx-auto space-y-6">
+                {/* Avatar Section */}
+                <Card>
+                    <CardContent className="p-6">
+                        <h2 className="text-base font-semibold text-foreground mb-4">Profile Photo</h2>
+                        
+                        <div className="flex items-center gap-6">
+                            {/* Avatar Preview */}
+                            <div className="relative">
+                                <Avatar className="w-24 h-24">
+                                    {avatar ? (
+                                        <AvatarImage src={URL.createObjectURL(avatar)} alt="Avatar" />
+                                    ) : (
+                                        <AvatarFallback className="text-3xl font-bold">
+                                            {(displayName || user?.username || "")[0]?.toUpperCase() || "?"}
+                                        </AvatarFallback>
+                                    )}
+                                </Avatar>
+                                
+                                {/* Upload Button Overlay */}
+                                <label className="absolute inset-0 flex items-center justify-center cursor-pointer hover:bg-black/5 transition-colors rounded-full">
+                                    <Upload className="w-8 h-8 text-white" />
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleAvatarChange}
+                                        className="sr-only"
+                                    />
+                                </label>
+                            </div>
+
+                            <div className="flex-1">
+                                <div className="text-sm font-medium text-foreground mb-1">Current Photo</div>
+                                <div className="text-xs text-muted-foreground">Tap the camera to change</div>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Basic Information Section */}
+                <Card>
+                    <CardContent className="p-6 space-y-4">
+                        <h2 className="text-base font-semibold text-foreground mb-4">Basic Information</h2>
+
+                        {/* Display Name */}
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-foreground">Display Name</label>
+                            <Input
+                                type="text"
+                                placeholder="Enter your display name"
+                                value={displayName}
+                                onChange={(e) => setDisplayName(e.target.value)}
+                                className="w-full"
+                            />
+                        </div>
+
+                        {/* Username */}
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-foreground">Username</label>
+                            <Input
+                                type="text"
+                                placeholder="username"
+                                value={username}
+                                disabled
+                                className="w-full bg-muted/30 cursor-not-allowed"
+                            />
+                            <p className="text-xs text-muted-foreground">Username cannot be changed</p>
+                        </div>
+
+                        {/* Email */}
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-foreground">Email</label>
+                            <Input
+                                type="email"
+                                placeholder="your.email@example.com"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                className="w-full"
+                            />
+                        </div>
+
+                        {/* Bio */}
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-foreground">Bio</label>
+                            <div className="relative">
+                                <textarea
+                                    placeholder="Tell us about yourself"
+                                    value={bio}
+                                    onChange={(e) => setBio(e.target.value)}
+                                    rows={4}
+                                    className="w-full min-h-[80px] resize-none bg-secondary rounded-md px-3 py-2 text-sm text-foreground border border-border focus:outline-none focus:ring-2 focus:ring-primary"
+                                />
+                                <div className="absolute bottom-2 right-2 text-xs text-muted-foreground">
+                                    {bio.length}/200
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Website */}
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-foreground">Website</label>
+                            <Input
+                                type="url"
+                                placeholder="https://yourwebsite.com"
+                                value={website}
+                                onChange={(e) => setWebsite(e.target.value)}
+                                className="w-full"
+                            />
+                        </div>
+
+                        {/* Location */}
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-foreground">Location</label>
+                            <Input
+                                type="text"
+                                placeholder="City, Country"
+                                value={location}
+                                onChange={(e) => setLocation(e.target.value)}
+                                className="w-full"
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* AI Preferences Section */}
+                <Card>
+                    <CardContent className="p-6">
+                        <h2 className="text-base font-semibold text-foreground mb-4">AI Preferences</h2>
+                        
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-foreground">AI Prompt Style</label>
+                            <div className="flex gap-2">
+                                {[
+                                    { value: "detailed", label: "Detailed", tag: "detailed" },
+                                    { value: "balanced", label: "Balanced", tag: "balanced" },
+                                    { value: "concise", label: "Concise", tag: "concise" },
+                                ].map((option) => (
+                                    <button
+                                        key={option.value}
+                                        onClick={() => setAiPromptPreference(option.value as any)}
+                                        className={`
+                                            flex-1 p-3 rounded-lg border ${
+                                                aiPromptPreference === option.value
+                                                    ? "bg-primary text-white border-primary"
+                                                    : "bg-secondary border-border hover:border-primary/50"
+                                            } transition-colors
+                                        `}
+                                    >
+                                        <div className="text-sm font-medium">
+                                            {option.label}
+                                        </div>
+                                        {aiPromptPreference === option.value && (
+                                            <div className="ml-auto">
+                                                ✓
+                                            </div>
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <p className="text-xs text-muted-foreground mt-2">
+                            Choose your preferred level of AI-generated content detail
+                        </p>
+                    </CardContent>
+                </Card>
+
+                {/* Save Button */}
+                <Button
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    className="w-full h-11 text-base font-semibold"
+                >
+                    {isSaving ? "Saving..." : "Save Changes"}
+                </Button>
+
+                {/* Success Message */}
+                {showSuccess && (
+                    <div className="bg-green-50 text-green-600 px-4 py-3 rounded-lg flex items-center justify-center">
+                        <span className="font-medium">Profile updated successfully!</span>
+                    </div>
+                )}
+
+                {/* Error Message */}
+                {showError && (
+                    <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-lg">
+                        <p className="font-medium">{errorMessage}</p>
+                        <button
+                            onClick={() => {
+                                setShowError(false);
+                                setErrorMessage("");
+                            }}
+                            className="mt-2 text-xs underline"
+                        >
+                            Dismiss
+                        </button>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
