@@ -137,5 +137,44 @@ export const auth = {
         }
 
         return response;
+    },
+
+    loginWithWeChat: async (data: {
+        code: string;
+    }): Promise<AuthResponse> => {
+        console.log('[Auth] WeChat OAuth login with code:', data.code ? 'received' : 'missing');
+
+        // Call vippay API for WeChat OAuth
+        const response = await request<any>('/api/vippay/wechat-oauth/signin', 'POST', {
+            code: data.code,
+        });
+
+        console.log('[Auth] WeChat OAuth response:', response);
+
+        // Handle vippay API response format
+        if (response && response.success && response.data) {
+            const { token, refreshToken, user } = response.data;
+
+            // Transform to AuthResponse format
+            const authResponse: AuthResponse = {
+                accessToken: token,
+                refreshToken: refreshToken,
+                user: user,
+                expiresIn: response.data.expiresIn,
+            };
+
+            // Save tokens
+            if (token && typeof token === 'string') {
+                console.log('[Auth] Saving WeChat OAuth tokens');
+                setTokens(token, refreshToken);
+            } else {
+                console.error('[Auth] Invalid WeChat OAuth token in response');
+            }
+
+            return authResponse;
+        } else {
+            console.error('[Auth] WeChat OAuth failed:', response);
+            throw new Error(response?.msg || response?.message || 'WeChat OAuth login failed');
+        }
     }
 };

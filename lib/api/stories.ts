@@ -43,6 +43,12 @@ export const stories = {
         return request(`/api/stories/following?limit=${limit}`); // Guessing endpoint
     },
     // AI Styles
+    uploadCover: async (file: File): Promise<{ url: string }> => {
+        const formData = new FormData();
+        formData.append('file', file);
+        return request('/api/upload/image', 'POST', formData);
+    },
+
     getStyles: async (groupId?: string, limit = 20, offset = 0): Promise<{ styles: any[], total: number }> => {
         let url = `/api/stories/styles?limit=${limit}&offset=${offset}`;
         if (groupId) url += `&group_id=${groupId}`;

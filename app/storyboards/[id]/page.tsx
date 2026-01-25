@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Header } from "@/components/layout/header";
 import { storyboards } from "@/lib/api/storyboards";
 import { Storyboard } from "@/lib/types";
-import { Loader2, ArrowLeft, Sparkles, Users, Heart, MessageSquare, GitFork, Share2, Info, Workflow, Play, X } from "lucide-react";
+import { Loader2, ArrowLeft, Sparkles, Users, Heart, MessageSquare, GitFork, Share2, Info, Workflow, Play, X, ChevronLeft, ChevronRight, LayoutList, Grid3x3, ArrowUp, ArrowDown, AlertCircle, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CommentList } from "@/components/comments/comment-list";
@@ -24,6 +24,12 @@ export default function StoryboardPage() {
     const [showDetailsModal, setShowDetailsModal] = useState(false);
     const [showProcessModal, setShowProcessModal] = useState(false);
     const [expandedVideoSceneId, setExpandedVideoSceneId] = useState<string | null>(null);
+    const [viewMode, setViewMode] = useState<"carousel" | "list">("carousel");
+    const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
+    const [parentStoryboard, setParentStoryboard] = useState<Storyboard | null>(null);
+    const [childStoryboards, setChildStoryboards] = useState<Storyboard[]>([]);
+    const [showChildrenList, setShowChildrenList] = useState(false);
+    const [showNoChildrenDialog, setShowNoChildrenDialog] = useState(false);
     const hasLoadedRef = useRef(false);
     const videoRefs = useRef<Map<string, HTMLVideoElement>>(new Map());
 
@@ -31,6 +37,12 @@ export default function StoryboardPage() {
         if (!id || hasLoadedRef.current) return;
 
         let isMounted = true;
+
+        // Load view mode from localStorage
+        const savedViewMode = localStorage.getItem("storyboardViewMode");
+        if (savedViewMode === "list" || savedViewMode === "carousel") {
+            setViewMode(savedViewMode);
+        }
 
         async function load() {
             try {
@@ -50,9 +62,32 @@ export default function StoryboardPage() {
                         isAIGenerated: data.isAIGenerated || false,
                     });
                 }
+
+                // Load parent and children storyboards
+                if (data.parentId && data.parentId !== "root") {
+                    try {
+                        const parent = await storyboards.getParent(id as string, data.parentId);
+                        if (isMounted) setParentStoryboard(parent);
+                    } catch (e) {
+                        console.error("Failed to load parent:", e);
+                        // Don't show error to user, just silently fail
+                        // Parent navigation will be disabled
+                    }
+                }
+
+                try {
+                    const children = await storyboards.getChildren(id as string);
+                    if (isMounted) setChildStoryboards(children);
+                } catch (e) {
+                    console.error("Failed to load children:", e);
+                    // Set empty array to indicate no children navigation available
+                    if (isMounted) setChildStoryboards([]);
+                    // Don't block the main content - children navigation will show appropriate UI
+                }
+
                 hasLoadedRef.current = true;
             } catch (e) {
-                console.error(e);
+                console.error("Failed to load storyboard:", e);
                 if (isMounted) {
                     setLoading(false);
                 }
@@ -100,6 +135,51 @@ export default function StoryboardPage() {
         setExpandedVideoSceneId(null);
     };
 
+    const handleViewModeChange = (mode: "carousel" | "list") => {
+        setViewMode(mode);
+        localStorage.setItem("storyboardViewMode", mode);
+        // Reset to first scene when switching views
+        setCurrentSceneIndex(0);
+    };
+
+    const handlePreviousScene = () => {
+        if (item?.storyboardScenes) {
+            setCurrentSceneIndex((prev) => (prev > 0 ? prev - 1 : item.storyboardScenes!.length - 1));
+        }
+    };
+
+    const handleNextScene = () => {
+        if (item?.storyboardScenes) {
+            setCurrentSceneIndex((prev) => (prev < item.storyboardScenes!.length - 1 ? prev + 1 : 0));
+        }
+    };
+
+    const handleNavigateToParent = () => {
+        if (parentStoryboard) {
+            router.push(`/storyboards/${parentStoryboard.id}`);
+        }
+    };
+
+    const handleNavigateToChild = () => {
+        if (childStoryboards.length === 0) {
+            // No children - show dialog
+            setShowNoChildrenDialog(true);
+            setShowChildrenList(false);
+        } else if (childStoryboards.length === 1) {
+            // One child - navigate directly
+            router.push(`/storyboards/${childStoryboards[0].id}`);
+            setShowChildrenList(false);
+        } else {
+            // Multiple children - show list
+            setShowChildrenList(!showChildrenList);
+        }
+    };
+
+    const handleChildSelect = (childId: string) => {
+        router.push(`/storyboards/${childId}`);
+        setShowChildrenList(false);
+    };
+
     if (loading) return (
         <div className="min-h-screen bg-background flex items-center justify-center">
             <Loader2 className="animate-spin" />
@@ -130,7 +210,7 @@ export default function StoryboardPage() {
                     <div className="mb-8">
                         <h1 className="text-3xl md:text-4xl font-bold mb-4 leading-tight">{item.title}</h1>
 
-                        <div className="flex items-center gap-4 text-sm">
+                        <div className="flex items-center justify-between gap-4 text-sm">
                             <div className="flex items-center gap-2">
                                 <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center overflow-hidden">
                                     {item.creatorAvatar ? (
@@ -147,12 +227,32 @@ export default function StoryboardPage() {
                                 </div>
                             </div>
 
-                            {item.isAIGenerated && (
-                                <div className="ml-auto flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 text-xs font-medium">
-                                    <Sparkles className="h-3.5 w-3.5" />
-                                    <span>{t("storyboard_detail.ai_generated")}</span>
+                            <div className="flex items-center gap-2">
+                                {item.isAIGenerated && (
+                                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 text-xs font-medium">
+                                        <Sparkles className="h-3.5 w-3.5" />
+                                        <span>{t("storyboard_detail.ai_generated")}</span>
+                                    </div>
+                                )}
+
+                                {/* Action Buttons in Dashed Border */}
+                                <div className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-dashed border-border bg-secondary/20">
+                                    <Button variant="ghost" size="sm" className="gap-1.5 h-7 px-2 text-xs">
+                                        <Heart className="h-3.5 w-3.5" />
+                                        <span className="hidden sm:inline">{item.likes || 0}</span>
+                                    </Button>
+                                    <div className="w-px h-4 bg-border" />
+                                    <Button variant="ghost" size="sm" className="gap-1.5 h-7 px-2 text-xs">
+                                        <MessageSquare className="h-3.5 w-3.5" />
+                                        <span className="hidden sm:inline">{item.comments || 0}</span>
+                                    </Button>
+                                    <div className="w-px h-4 bg-border" />
+                                    <Button variant="ghost" size="sm" className="gap-1.5 h-7 px-2 text-xs">
+                                        <GitFork className="h-3.5 w-3.5" />
+                                        <span className="hidden sm:inline">{t("storyboard_detail.fork")}</span>
+                                    </Button>
                                 </div>
-                            )}
+                            </div>
                         </div>
                     </div>
 
@@ -163,112 +263,346 @@ export default function StoryboardPage() {
                         </div>
                     )}
 
-                    {/* Storyboard Scenes */}
-                    {item.storyboardScenes && item.storyboardScenes.length > 0 && (
-                        <div className="mb-8">
-                            <h3 className="text-xl font-bold tracking-tight mb-4 flex items-center gap-2">
-                                <Workflow className="h-5 w-5 text-muted-foreground" />
-                                {t("storyboard_detail.scenes")} ({item.storyboardScenes.length})
-                            </h3>
-                            {/* Single Column Layout - Show all scenes vertically */}
-                            <div className="space-y-6">
-                                {item.storyboardScenes.map((scene, index) => (
-                                    <div key={scene.id} className="border border-border rounded-lg overflow-hidden bg-card">
-                                        {/* Scene Header */}
-                                        <div className="bg-secondary/50 px-4 py-3 border-b border-border">
-                                            <div className="flex items-start justify-between">
-                                                <div className="flex items-start gap-3">
-                                                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
-                                                        {index + 1}
-                                                    </div>
-                                                    <div>
-                                                        <h4 className="font-bold text-lg">{scene.title}</h4>
-                                                        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1 flex-wrap">
-                                                            <span className="bg-background/50 px-2 py-0.5 rounded">
-                                                                📍 {scene.location}
-                                                            </span>
-                                                            <span className="bg-background/50 px-2 py-0.5 rounded">
-                                                                🕐 {scene.timeOfDay}
-                                                            </span>
-                                                            {scene.mood && (
-                                                                <span className="bg-background/50 px-2 py-0.5 rounded">
-                                                                    😊 {scene.mood}
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    </div>
+                    {/* Storyboard Navigation */}
+                    <div className="mb-6">
+                        {/* Navigation Buttons Row */}
+                        <div className="flex items-center justify-between mb-3">
+                            {/* Previous (Parent) Button */}
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleNavigateToParent}
+                                disabled={!parentStoryboard}
+                                className={`gap-2 ${!parentStoryboard ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            >
+                                <ArrowUp className="h-4 w-4" />
+                                {parentStoryboard ? (
+                                    <span className="hidden sm:inline">{parentStoryboard.title.length > 10 ? parentStoryboard.title.substring(0, 10) + '...' : parentStoryboard.title}</span>
+                                ) : (
+                                    <span className="hidden sm:inline">无上级故事板</span>
+                                )}
+                            </Button>
+
+                            {/* Next (Children) Button */}
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleNavigateToChild}
+                                className="gap-2"
+                            >
+                                <ArrowDown className="h-4 w-4" />
+                                <span className="hidden sm:inline">
+                                    {childStoryboards.length > 0 ? `下一级 (${childStoryboards.length})` : '下一级'}
+                                </span>
+                            </Button>
+                        </div>
+
+                        {/* Children Storyboards List (Horizontal Scroll) */}
+                        {showChildrenList && childStoryboards.length > 1 && (
+                            <div className="border border-border rounded-lg p-4 bg-secondary/20">
+                                <p className="text-sm text-muted-foreground mb-3">选择下一级故事板:</p>
+                                <div className="flex gap-3 overflow-x-auto pb-2">
+                                    {childStoryboards.map((child) => (
+                                        <button
+                                            key={child.id}
+                                            onClick={() => handleChildSelect(child.id)}
+                                            className="flex-shrink-0 w-48 text-left p-3 rounded-lg border border-border hover:bg-secondary/50 transition-colors bg-card"
+                                        >
+                                            <div className="font-semibold text-sm mb-2 truncate">{child.title}</div>
+                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                <div className="flex items-center gap-1">
+                                                    <Heart className="h-3 w-3" />
+                                                    {child.likes || 0}
                                                 </div>
-                                                {scene.isAIGenerated && (
-                                                    <div className="flex items-center gap-1 text-xs text-purple-600 dark:text-purple-400 bg-purple-500/10 px-2 py-1 rounded">
+                                                <div className="flex items-center gap-1">
+                                                    <MessageSquare className="h-3 w-3" />
+                                                    {child.comments || 0}
+                                                </div>
+                                                {child.isAIGenerated && (
+                                                    <div className="flex items-center gap-1 text-purple-600 dark:text-purple-400">
                                                         <Sparkles className="h-3 w-3" />
                                                         AI
                                                     </div>
                                                 )}
                                             </div>
-                                        </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
 
-                                        {/* Scene Image - Always visible, larger */}
-                                        {scene.image && (
-                                            <div className="relative w-full bg-muted group">
-                                                <img
-                                                    src={scene.image}
-                                                    alt={scene.title}
-                                                    className="w-full h-auto object-cover max-h-[600px]"
-                                                />
-                                                {/* Video Play Button - Show if video exists */}
-                                                {scene.videoUrl && (
-                                                    <div
-                                                        className="absolute top-4 right-4 z-10"
-                                                        onClick={() => handlePlayVideo(scene.id)}
-                                                    >
-                                                        <div className="w-12 h-12 rounded-full bg-white/90 dark:bg-black/90 backdrop-blur-sm border-2 border-white dark:border-black flex items-center justify-center shadow-lg hover:bg-white dark:hover:bg-black transition-colors cursor-pointer">
-                                                            <Play className="w-5 h-5 text-foreground ml-0.5" fill="currentColor" />
+                    {/* Storyboard Scenes */}
+                    {item.storyboardScenes && item.storyboardScenes.length > 0 && (
+                        <div className="mb-8">
+                            {/* Header with View Mode Toggle */}
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-xl font-bold tracking-tight flex items-center gap-2">
+                                    <Workflow className="h-5 w-5 text-muted-foreground" />
+                                    {t("storyboard_detail.scenes")} ({item.storyboardScenes.length})
+                                </h3>
+                                <div className="flex items-center gap-1 bg-secondary/20 p-1 rounded-lg">
+                                    <button
+                                        onClick={() => handleViewModeChange("carousel")}
+                                        className={`p-2 rounded-md transition-colors ${
+                                            viewMode === "carousel"
+                                                ? "bg-background shadow-sm text-foreground"
+                                                : "text-muted-foreground hover:text-foreground"
+                                        }`}
+                                        title="轮播视图"
+                                    >
+                                        <Grid3x3 className="h-4 w-4" />
+                                    </button>
+                                    <button
+                                        onClick={() => handleViewModeChange("list")}
+                                        className={`p-2 rounded-md transition-colors ${
+                                            viewMode === "list"
+                                                ? "bg-background shadow-sm text-foreground"
+                                                : "text-muted-foreground hover:text-foreground"
+                                        }`}
+                                        title="列表视图"
+                                    >
+                                        <LayoutList className="h-4 w-4" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Carousel View */}
+                            {viewMode === "carousel" && (
+                                <div className="space-y-4">
+                                    {/* Single Scene Display */}
+                                    <div className="border border-border rounded-lg overflow-hidden bg-card">
+                                        {(() => {
+                                            const scene = item.storyboardScenes[currentSceneIndex];
+                                            const index = currentSceneIndex;
+
+                                            return (
+                                                <>
+                                                    {/* Scene Header */}
+                                                    <div className="bg-secondary/50 px-4 py-3 border-b border-border">
+                                                        <div className="flex items-start justify-between">
+                                                            <div className="flex items-start gap-3">
+                                                                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
+                                                                    {index + 1}
+                                                                </div>
+                                                                <div>
+                                                                    <h4 className="font-bold text-lg">{scene.title}</h4>
+                                                                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1 flex-wrap">
+                                                                        <span className="bg-background/50 px-2 py-0.5 rounded">
+                                                                            📍 {scene.location}
+                                                                        </span>
+                                                                        <span className="bg-background/50 px-2 py-0.5 rounded">
+                                                                            🕐 {scene.timeOfDay}
+                                                                        </span>
+                                                                        {scene.mood && (
+                                                                            <span className="bg-background/50 px-2 py-0.5 rounded">
+                                                                                😊 {scene.mood}
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            {scene.isAIGenerated && (
+                                                                <div className="flex items-center gap-1 text-xs text-purple-600 dark:text-purple-400 bg-purple-500/10 px-2 py-1 rounded">
+                                                                    <Sparkles className="h-3 w-3" />
+                                                                    AI
+                                                                </div>
+                                                            )}
                                                         </div>
+                                                    </div>
+
+                                                    {/* Scene Image */}
+                                                    {scene.image && (
+                                                        <div className="relative w-full bg-muted group">
+                                                            <img
+                                                                src={scene.image}
+                                                                alt={scene.title}
+                                                                className="w-full h-auto object-cover max-h-[600px]"
+                                                            />
+                                                            {/* Video Play Button */}
+                                                            {scene.videoUrl && (
+                                                                <div
+                                                                    className="absolute top-4 right-4 z-10"
+                                                                    onClick={() => handlePlayVideo(scene.id)}
+                                                                >
+                                                                    <div className="w-12 h-12 rounded-full bg-white/90 dark:bg-black/90 backdrop-blur-sm border-2 border-white dark:border-black flex items-center justify-center shadow-lg hover:bg-white dark:hover:bg-black transition-colors cursor-pointer">
+                                                                        <Play className="w-5 h-5 text-foreground ml-0.5" fill="currentColor" />
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+
+                                                    {/* Video Player */}
+                                                    {scene.videoUrl && expandedVideoSceneId === scene.id && (
+                                                        <div className="relative w-full bg-black">
+                                                            <button
+                                                                onClick={() => handleCloseVideo(scene.id)}
+                                                                className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-sm flex items-center justify-center text-white transition-colors"
+                                                            >
+                                                                <X className="w-4 h-4" />
+                                                            </button>
+                                                            <video
+                                                                ref={(el) => {
+                                                                    if (el) videoRefs.current.set(scene.id, el);
+                                                                }}
+                                                                src={scene.videoUrl}
+                                                                controls
+                                                                autoPlay
+                                                                className="w-full h-auto"
+                                                            />
+                                                        </div>
+                                                    )}
+
+                                                    {/* Scene Content */}
+                                                    <div className="px-4 py-3">
+                                                        <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+                                                            {scene.description}
+                                                        </p>
+                                                        {scene.characters && scene.characters.length > 0 && (
+                                                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                                <Users className="h-4 w-4" />
+                                                                <span>{scene.characters.join(", ")}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </>
+                                            );
+                                        })()}
+                                    </div>
+
+                                    {/* Navigation Controls */}
+                                    <div className="flex items-center justify-center gap-4">
+                                        <Button
+                                            variant="outline"
+                                            size="icon"
+                                            onClick={handlePreviousScene}
+                                            className="rounded-full h-10 w-10"
+                                        >
+                                            <ChevronLeft className="h-4 w-4" />
+                                        </Button>
+                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                            {item.storyboardScenes.map((_, idx) => (
+                                                <button
+                                                    key={idx}
+                                                    onClick={() => setCurrentSceneIndex(idx)}
+                                                    className={`w-2 h-2 rounded-full transition-all ${
+                                                        idx === currentSceneIndex
+                                                            ? "bg-primary w-6"
+                                                            : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                                                    }`}
+                                                />
+                                            ))}
+                                        </div>
+                                        <Button
+                                            variant="outline"
+                                            size="icon"
+                                            onClick={handleNextScene}
+                                            className="rounded-full h-10 w-10"
+                                        >
+                                            <ChevronRight className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* List View */}
+                            {viewMode === "list" && (
+                                <div className="space-y-6">
+                                    {item.storyboardScenes.map((scene, index) => (
+                                        <div key={scene.id} className="border border-border rounded-lg overflow-hidden bg-card">
+                                            {/* Scene Header */}
+                                            <div className="bg-secondary/50 px-4 py-3 border-b border-border">
+                                                <div className="flex items-start justify-between">
+                                                    <div className="flex items-start gap-3">
+                                                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
+                                                            {index + 1}
+                                                        </div>
+                                                        <div>
+                                                            <h4 className="font-bold text-lg">{scene.title}</h4>
+                                                            <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1 flex-wrap">
+                                                                <span className="bg-background/50 px-2 py-0.5 rounded">
+                                                                    📍 {scene.location}
+                                                                </span>
+                                                                <span className="bg-background/50 px-2 py-0.5 rounded">
+                                                                    🕐 {scene.timeOfDay}
+                                                                </span>
+                                                                {scene.mood && (
+                                                                    <span className="bg-background/50 px-2 py-0.5 rounded">
+                                                                        😊 {scene.mood}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    {scene.isAIGenerated && (
+                                                        <div className="flex items-center gap-1 text-xs text-purple-600 dark:text-purple-400 bg-purple-500/10 px-2 py-1 rounded">
+                                                            <Sparkles className="h-3 w-3" />
+                                                            AI
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Scene Image */}
+                                            {scene.image && (
+                                                <div className="relative w-full bg-muted group">
+                                                    <img
+                                                        src={scene.image}
+                                                        alt={scene.title}
+                                                        className="w-full h-auto object-cover max-h-[600px]"
+                                                    />
+                                                    {/* Video Play Button */}
+                                                    {scene.videoUrl && (
+                                                        <div
+                                                            className="absolute top-4 right-4 z-10"
+                                                            onClick={() => handlePlayVideo(scene.id)}
+                                                        >
+                                                            <div className="w-12 h-12 rounded-full bg-white/90 dark:bg-black/90 backdrop-blur-sm border-2 border-white dark:border-black flex items-center justify-center shadow-lg hover:bg-white dark:hover:bg-black transition-colors cursor-pointer">
+                                                                <Play className="w-5 h-5 text-foreground ml-0.5" fill="currentColor" />
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {/* Video Player */}
+                                            {scene.videoUrl && expandedVideoSceneId === scene.id && (
+                                                <div className="relative w-full bg-black">
+                                                    <button
+                                                        onClick={() => handleCloseVideo(scene.id)}
+                                                        className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-sm flex items-center justify-center text-white transition-colors"
+                                                    >
+                                                        <X className="w-4 h-4" />
+                                                    </button>
+                                                    <video
+                                                        ref={(el) => {
+                                                            if (el) videoRefs.current.set(scene.id, el);
+                                                        }}
+                                                        src={scene.videoUrl}
+                                                        controls
+                                                        autoPlay
+                                                        className="w-full h-auto"
+                                                    />
+                                                </div>
+                                            )}
+
+                                            {/* Scene Content */}
+                                            <div className="px-4 py-3">
+                                                <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+                                                    {scene.description}
+                                                </p>
+                                                {scene.characters && scene.characters.length > 0 && (
+                                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                        <Users className="h-4 w-4" />
+                                                        <span>{scene.characters.join(", ")}</span>
                                                     </div>
                                                 )}
                                             </div>
-                                        )}
-
-                                        {/* Video Player - Visible when expanded */}
-                                        {scene.videoUrl && expandedVideoSceneId === scene.id && (
-                                            <div className="relative w-full bg-black">
-                                                {/* Close Button */}
-                                                <button
-                                                    onClick={() => handleCloseVideo(scene.id)}
-                                                    className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-sm flex items-center justify-center text-white transition-colors"
-                                                >
-                                                    <X className="w-4 h-4" />
-                                                </button>
-                                                <video
-                                                    ref={(el) => {
-                                                        if (el) videoRefs.current.set(scene.id, el);
-                                                    }}
-                                                    src={scene.videoUrl}
-                                                    controls
-                                                    autoPlay
-                                                    className="w-full h-auto"
-                                                />
-                                            </div>
-                                        )}
-
-                                        {/* Scene Content - Always show description */}
-                                        <div className="px-4 py-3">
-                                            {/* Description */}
-                                            <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                                                {scene.description}
-                                            </p>
-
-                                            {/* Characters in Scene */}
-                                            {scene.characters && scene.characters.length > 0 && (
-                                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                    <Users className="h-4 w-4" />
-                                                    <span>{scene.characters.join(", ")}</span>
-                                                </div>
-                                            )}
                                         </div>
-                                    </div>
-                                ))}
-                            </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     )}
 
@@ -313,82 +647,51 @@ export default function StoryboardPage() {
                         </div>
                     )}
 
-                    {/* Statistics Section */}
-                    <div className="mb-8 pt-6 border-t border-border">
-                        <h3 className="text-xl font-bold tracking-tight mb-4 flex items-center gap-2">
-                            <Info className="h-5 w-5 text-muted-foreground" />
-                            统计信息
-                        </h3>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div className="bg-secondary/30 rounded-lg p-4 text-center">
-                                <div className="text-2xl font-bold text-primary mb-1">{item.likes || 0}</div>
-                                <div className="text-xs text-muted-foreground">点赞</div>
+                    {/* Statistics and Actions Section */}
+                    <div className="pt-6 border-t border-border">
+                        <div className="flex items-center justify-between gap-4">
+                            {/* Statistics - Left Side */}
+                            <div className="flex items-center gap-4 flex-1">
+                                <div className="flex items-center gap-2 text-sm">
+                                    <div className="text-muted-foreground">
+                                        <span className="font-bold text-foreground text-lg mr-1">{item.likes || 0}</span> 点赞
+                                    </div>
+                                    <span className="text-border">•</span>
+                                    <div className="text-muted-foreground">
+                                        <span className="font-bold text-foreground text-lg mr-1">{item.comments || 0}</span> 评论
+                                    </div>
+                                    <span className="text-border">•</span>
+                                    <div className="text-muted-foreground">
+                                        <span className="font-bold text-foreground text-lg mr-1">{item.views || 0}</span> 浏览
+                                    </div>
+                                    <span className="text-border">•</span>
+                                    <div className="text-muted-foreground">
+                                        <span className="font-bold text-foreground text-lg mr-1">{item.forkCount || 0}</span> 分支
+                                    </div>
+                                </div>
                             </div>
-                            <div className="bg-secondary/30 rounded-lg p-4 text-center">
-                                <div className="text-2xl font-bold text-primary mb-1">{item.comments || 0}</div>
-                                <div className="text-xs text-muted-foreground">评论</div>
-                            </div>
-                            <div className="bg-secondary/30 rounded-lg p-4 text-center">
-                                <div className="text-2xl font-bold text-primary mb-1">{item.views || 0}</div>
-                                <div className="text-xs text-muted-foreground">浏览</div>
-                            </div>
-                            <div className="bg-secondary/30 rounded-lg p-4 text-center">
-                                <div className="text-2xl font-bold text-primary mb-1">{item.forkCount || 0}</div>
-                                <div className="text-xs text-muted-foreground">分支</div>
-                            </div>
-                        </div>
-                    </div>
 
-                    {/* Metadata & Workflow - Button Section */}
-                    <div className="mb-8 pt-6 border-t border-border">
-                        <div className="flex flex-wrap gap-3">
-                            {/* Details Button */}
-                            <Button
-                                variant="outline"
-                                onClick={() => setShowDetailsModal(true)}
-                                className="gap-2"
-                            >
-                                <Info className="h-4 w-4" />
-                                {t("storyboard_detail.additional_details")}
-                            </Button>
-
-                            {/* Process Button */}
-                            {workflow && (
+                            {/* Action Buttons - Right Side */}
+                            <div className="flex items-center gap-2">
                                 <Button
                                     variant="outline"
-                                    onClick={() => setShowProcessModal(true)}
+                                    onClick={() => setShowDetailsModal(true)}
                                     className="gap-2"
                                 >
-                                    <Workflow className="h-4 w-4" />
-                                    {t("storyboard_detail.generation_process")}
+                                    <Info className="h-4 w-4" />
+                                    {t("storyboard_detail.additional_details")}
                                 </Button>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Action Bar */}
-                    <div className="flex items-center justify-between pt-6 border-t border-border mt-8">
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                            <span className="text-sm">{item.likes || 0} {t("storyboard_detail.likes")}</span>
-                            <span>•</span>
-                            <span className="text-sm">{item.comments || 0} {t("storyboard_detail.comments")}</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <Button variant="outline" size="sm" className="gap-2">
-                                <Heart className="h-4 w-4" />
-                                {t("storyboard_detail.like")}
-                            </Button>
-                            <Button variant="outline" size="sm" className="gap-2">
-                                <MessageSquare className="h-4 w-4" />
-                                {t("storyboard_detail.comment")}
-                            </Button>
-                            <Button variant="outline" size="sm" className="gap-2">
-                                <GitFork className="h-4 w-4" />
-                                {t("storyboard_detail.fork")}
-                            </Button>
-                            <Button variant="ghost" size="icon">
-                                <Share2 className="h-4 w-4" />
-                            </Button>
+                                {workflow && (
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => setShowProcessModal(true)}
+                                        className="gap-2"
+                                    >
+                                        <Workflow className="h-4 w-4" />
+                                        {t("storyboard_detail.generation_process")}
+                                    </Button>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -530,6 +833,49 @@ export default function StoryboardPage() {
                         </div>
                         <div className="p-6">
                             <StoryboardRoadmap storyboard={item} />
+                        </div>
+                    </Card>
+                </div>
+            )}
+
+            {/* No Children Dialog */}
+            {showNoChildrenDialog && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <Card className="w-full max-w-md">
+                        <div className="p-6">
+                            <div className="flex items-center gap-3 mb-4">
+                                <AlertCircle className="h-6 w-6 text-yellow-500 flex-shrink-0" />
+                                <h3 className="text-xl font-bold">已到故事线终点</h3>
+                            </div>
+                            <p className="text-muted-foreground mb-6">
+                                当前故事板还没有下一级分支，您已经是这个故事的最新节点了。
+                            </p>
+                            <div className="flex flex-col gap-3 mb-6 p-4 bg-secondary/30 rounded-lg">
+                                <p className="text-sm font-medium">您可以：</p>
+                                <ul className="text-sm text-muted-foreground space-y-2 ml-4">
+                                    <li>• 点击"复刻"按钮创建新的故事分支</li>
+                                    <li>• 返回上级故事板查看其他分支</li>
+                                </ul>
+                            </div>
+                            <div className="flex justify-end gap-2">
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setShowNoChildrenDialog(false)}
+                                >
+                                    知道了
+                                </Button>
+                                <Button
+                                    onClick={() => {
+                                        setShowNoChildrenDialog(false);
+                                        // Open fork/creation flow
+                                        // TODO: Implement fork/continue story functionality
+                                    }}
+                                    className="gap-2"
+                                >
+                                    <Plus className="h-4 w-4" />
+                                    创建新的分支
+                                </Button>
+                            </div>
                         </div>
                     </Card>
                 </div>

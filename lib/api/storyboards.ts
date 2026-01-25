@@ -49,6 +49,16 @@ export const storyboards = {
         return request(`/api/storyboards/${id}`);
     },
 
+    // Get child storyboards (forks)
+    getChildren: async (id: string): Promise<Storyboard[]> => {
+        return request(`/api/storyboards/${id}/children`);
+    },
+
+    // Get parent storyboard
+    getParent: async (id: string, parentId: string): Promise<Storyboard> => {
+        return request(`/api/storyboards/${parentId}`);
+    },
+
     // Actions
     like: async (id: string) => request(`/api/storyboards/${id}/like`, 'POST'),
     unlike: async (id: string) => request(`/api/storyboards/${id}/like`, 'DELETE'),

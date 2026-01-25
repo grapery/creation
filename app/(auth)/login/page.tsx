@@ -11,6 +11,7 @@ import { Loader2, BookOpen } from "lucide-react";
 import { AuthTopBar, OAuthProviderButton, Language, LanguageSelector, OAuthProvider } from "@/components/auth";
 import { useRouter } from "next/navigation";
 import { useGoogleOAuth } from "@/lib/hooks/use-google-oauth";
+import { useWeChatOAuth } from "@/lib/hooks/use-wechat-oauth";
 import { auth } from "@/lib/api/auth";
 
 export default function LoginPage() {
@@ -52,6 +53,9 @@ export default function LoginPage() {
             setOAuthLoading(null);
         },
     });
+
+    // WeChat OAuth integration
+    const { signIn: weChatSignIn } = useWeChatOAuth();
 
     async function handleEmailLogin(e: React.FormEvent) {
         e.preventDefault();
@@ -103,8 +107,15 @@ export default function LoginPage() {
             setOAuthLoading(null);
         } else if (provider === "wechat") {
             // WeChat OAuth integration
-            setOAuthError("WeChat Login coming soon");
-            setOAuthLoading(null);
+            try {
+                console.log('[Login] Initiating WeChat sign-in');
+                weChatSignIn();
+                // Note: WeChat OAuth will redirect the browser, so we don't need to set loading to false here
+            } catch (error: any) {
+                console.error('[Login] WeChat sign-in error:', error);
+                setOAuthError(error.message || "Failed to initiate WeChat sign-in. Please try again.");
+                setOAuthLoading(null);
+            }
         }
     }
 

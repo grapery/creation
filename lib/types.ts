@@ -247,6 +247,86 @@ export interface Story {
     contributors?: Contributor[]; // Contributors to the story
 }
 
+// AI Style Configuration
+export interface StyleConfig {
+    id: string;
+    style: string;
+    alias?: string;
+    name: string;
+    description?: string;
+    preview_image?: string;
+    group_id?: string;
+    is_public?: boolean;
+    created_at?: number;
+}
+
+// Creation Requests
+export interface CreateStoryRequest {
+    title: string;
+    description?: string;
+    coverImage?: string; // Backend expects cover_image, client adapter handles mapping or backend accepts camelCase
+    genre?: string;
+    status?: string | number;
+    groupId?: string;
+    defaultSceneCount?: number;
+
+    // AI Enrichment
+    useAIEnrich?: boolean;
+    generateCover?: boolean;
+    generatePoster?: boolean;
+    generateBackground?: boolean;
+    aiStyle?: StyleConfig;
+    style?: string; // Style name string
+
+    isCollaborationOpen?: boolean;
+}
+
+export interface UpdateStoryRequest {
+    title?: string;
+    description?: string;
+    coverImage?: string;
+    genre?: string;
+    status?: string;
+    isCollaborationOpen?: boolean;
+}
+
+export interface RenderStoryRequest {
+    enrichDescription?: boolean;
+    generateBackground?: boolean;
+    generateCover?: boolean;
+    style?: string;
+    aspectRatio?: string;
+}
+
+export enum RenderTaskType {
+    COVER = 'cover',
+    POSTER = 'poster',
+    BACKGROUND = 'background'
+}
+
+export interface MediaRenderRequest {
+    type: RenderTaskType;
+    resolution?: string;
+    quality?: string;
+}
+
+export interface RenderTask {
+    id: string;
+    storyId: string;
+    type: RenderTaskType;
+    status: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled';
+    progress: number;
+    resultUrl?: string;
+    errorMessage?: string;
+    createdAt: number;
+    updatedAt: number;
+}
+
+export interface RenderStoryResponse {
+    story?: Story;
+    taskId?: string;
+}
+
 export interface StoryboardCharacterRef {
     id: string;
     storyboardId: string;

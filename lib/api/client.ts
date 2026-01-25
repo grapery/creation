@@ -188,6 +188,16 @@ const createClient = (serviceType: ServiceType = ServiceType.MAIN): AxiosInstanc
                     return Promise.reject(new APIError(message, status, error));
                 }
 
+                // For navigation endpoints (children, parent), 404 is expected when no data exists
+                // Return empty array instead of throwing error
+                const isNavigationEndpoint = error.config?.url?.includes('/children');
+                if (status === 404 && isNavigationEndpoint) {
+                    if (process.env.NODE_ENV === 'development') {
+                        console.log('[API] No navigation data found (404) - returning empty array');
+                    }
+                    return Promise.resolve([]);
+                }
+
                 // For 500, 503, and connection errors on non-auth endpoints, return a safe empty response
                 // This prevents console errors when backend is down
                 if (status >= 500 || status === 0) {

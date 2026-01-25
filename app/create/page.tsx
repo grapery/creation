@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { X, Share2, Users } from "lucide-react";
+import { X, Share2, Users, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { stories } from "@/lib/api/stories";
+import { StyleConfig, CreateStoryRequest } from "@/lib/types";
 
 interface CreateStoryProps {
     storyId?: string;
@@ -16,19 +18,67 @@ export default function CreateStory({ storyId, groupId }: CreateStoryProps) {
     const [description, setDescription] = useState("");
     const [selectedGenre, setSelectedGenre] = useState("Fantasy");
     const [defaultSceneCount, setDefaultSceneCount] = useState(3);
+    const [coverImage, setCoverImage] = useState<string | null>(null);
+    const [isUploadingCover, setIsUploadingCover] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // AI Enrichment states
     const [useAIEnrich, setUseAIEnrich] = useState(false);
     const [generateCover, setGenerateCover] = useState(false);
     const [generatePoster, setGeneratePoster] = useState(false);
     const [generateBackground, setGenerateBackground] = useState(false);
-    const [selectedAIStyle, setSelectedAIStyle] = useState<any>(null);
+    const [selectedAIStyle, setSelectedAIStyle] = useState<StyleConfig | null>(null);
     const [isAIProcessing, setIsAIProcessing] = useState(false);
     const [aiEnrichedDescription, setAiEnrichedDescription] = useState("");
     const [aiGeneratedCoverURL, setAiGeneratedCoverURL] = useState("");
     const [aiGeneratedPosterURL, setAiGeneratedPosterURL] = useState("");
     const [aiGeneratedBackgroundURL, setAiGeneratedBackgroundURL] = useState("");
     const [tokensUsed, setTokensUsed] = useState(0);
+
+    // Style Selection States
+    const [styles, setStyles] = useState<StyleConfig[]>([]);
+    const [isLoadingStyles, setIsLoadingStyles] = useState(false);
+    const [styleSearchQuery, setStyleSearchQuery] = useState("");
+    const [stylesPage, setStylesPage] = useState(0);
+    const [stylesTotal, setStylesTotal] = useState(0);
+
+    useEffect(() => {
+        loadStyles();
+    }, [groupId]);
+
+    const loadStyles = async (page = 0, query = "") => {
+        setIsLoadingStyles(true);
+        try {
+            const result = query
+                ? await stories.searchStyles(query, groupId, 20, page * 20)
+                : await stories.getStyles(groupId, 20, page * 20);
+
+            setStyles(result.styles);
+            setStylesTotal(result.total);
+            setStylesPage(page);
+
+            // Select first style by default if none selected and styles available
+            if (!selectedAIStyle && result.styles.length > 0 && page === 0) {
+                setSelectedAIStyle(result.styles[0]);
+            }
+        } catch (error) {
+            console.error("Failed to load styles:", error);
+        } finally {
+            setIsLoadingStyles(false);
+        }
+    };
+
+    const handleStyleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const query = e.target.value;
+        setStyleSearchQuery(query);
+        // Debounce would be better here, but for now direct call with small delay or just wait for enter? 
+        // Let's just debounce manually or relying on user stopping typing if we had a hook.
+        // For simplicity, we'll search on enter or immediate (api might handle it).
+        // Let's implement a simple timeout based debounce effectively inside the component if needed, 
+        // or just call loadStyles(0, query) after a timeout.
+        const timeoutId = setTimeout(() => loadStyles(0, query), 500);
+        return () => clearTimeout(timeoutId);
+    };
 
     const genres = [
         "Fantasy",
@@ -42,11 +92,36 @@ export default function CreateStory({ storyId, groupId }: CreateStoryProps) {
         "Contemporary"
     ];
 
+
+
     const tabs = [
         { id: 0, label: "Details" },
         { id: 1, label: "Panels" },
         { id: 2, label: "Cast" }
     ];
+
+    const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsUploadingCover(true);
+        try {
+            // Upload to server
+            const result = await stories.uploadCover(file);
+            setCoverImage(result.url);
+            // Clear AI generated cover if manual upload
+            setAiGeneratedCoverURL("");
+        } catch (error) {
+            console.error("Failed to upload cover:", error);
+            alert("Failed to upload cover image");
+        } finally {
+            setIsUploadingCover(false);
+        }
+    };
+
+    const triggerFileInput = () => {
+        fileInputRef.current?.click();
+    };
 
     const handleCreate = async () => {
         if (!title.trim()) {
@@ -54,19 +129,38 @@ export default function CreateStory({ storyId, groupId }: CreateStoryProps) {
             return;
         }
 
-        if (useAIEnrich || generateCover || generatePoster || generateBackground) {
-            setIsAIProcessing(true);
-            // Simulate AI creation
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            setAiEnrichedDescription(aiEnrichedDescription || description || "This is an AI-enriched description of your story...");
-            if (generateCover) setAiGeneratedCoverURL("https://images.unsplash.com/photo-154471-9520?w=400");
-            if (generatePoster) setAiGeneratedPosterURL("https://images.unsplash.com/photo-154471-9520?w=400");
-            if (generateBackground) setAiGeneratedBackgroundURL("https://images.unsplash.com/photo-154471-9520?w=400");
-            setTokensUsed(tokensUsed + 1250);
+        setIsAIProcessing(true);
+        try {
+            const request: CreateStoryRequest = {
+                title,
+                description,
+                coverImage: coverImage || aiGeneratedCoverURL || undefined,
+                genre: selectedGenre,
+                defaultSceneCount,
+                groupId,
+                useAIEnrich,
+                generateCover,
+                generatePoster,
+                generateBackground,
+                aiStyle: selectedAIStyle || undefined,
+                style: selectedAIStyle?.style // Passing style name as string as well if needed
+            };
+
+            const createdStory = await stories.create(request);
+
+            // If AI processing happened, we might get enriched content back immediately 
+            // or we might need to poll. The backend implementation detail isn't fully visible,
+            // but the Swift code sets `createdStory` and then maybe refreshes?
+            // For now, assume success and redirect.
+
+            alert("Story created successfully!");
+            router.push(`/stories/${createdStory.id}`); // Redirect to new story
+
+        } catch (error) {
+            console.error("Failed to create story:", error);
+            alert("Failed to create story. Please try again.");
+        } finally {
             setIsAIProcessing(false);
-            alert("Story created successfully!");
-        } else {
-            alert("Story created successfully!");
         }
     };
 
@@ -157,8 +251,8 @@ export default function CreateStory({ storyId, groupId }: CreateStoryProps) {
                                         key={count}
                                         onClick={() => setDefaultSceneCount(count)}
                                         className={`w-9 h-9 rounded-full border flex items-center justify-center transition-colors ${defaultSceneCount === count
-                                                ? "bg-primary text-white"
-                                                : "bg-background hover:bg-muted"
+                                            ? "bg-primary text-white"
+                                            : "bg-background hover:bg-muted"
                                             }`}
                                     >
                                         <span className="text-sm font-semibold">{count}</span>
@@ -171,14 +265,52 @@ export default function CreateStory({ storyId, groupId }: CreateStoryProps) {
                         {/* Cover Image Upload */}
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-foreground">Cover Image</label>
-                            <div className="w-full h-[200px] border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center bg-muted/30">
-                                <svg className="w-12 h-12 text-muted-foreground mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-8a3 3 0 006 1.061l-.431.431.061-3.061L6 6a2 2 0 002.828 2.828-2.828A3 3 0 006 1.061l-.431.431.061-3.061L16 16z" />
-                                </svg>
-                                <p className="text-sm text-muted-foreground mb-2">Click to upload cover image</p>
-                                <button className="px-4 py-2 bg-card text-foreground rounded-lg border border-border hover:bg-muted">
-                                    Upload Cover
-                                </button>
+                            <div className="w-full h-[200px] border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center bg-muted/30 overflow-hidden relative">
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    className="hidden"
+                                    accept="image/*"
+                                    onChange={handleCoverUpload}
+                                />
+
+                                {coverImage || aiGeneratedCoverURL ? (
+                                    <>
+                                        <img
+                                            src={coverImage || aiGeneratedCoverURL}
+                                            alt="Cover"
+                                            className="w-full h-full object-cover"
+                                        />
+                                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                                            <button
+                                                onClick={triggerFileInput}
+                                                className="px-4 py-2 bg-white text-black rounded-lg text-sm font-medium"
+                                            >
+                                                Change Cover
+                                            </button>
+                                        </div>
+                                        {(aiGeneratedCoverURL && !coverImage) && (
+                                            <div className="absolute top-2 right-2 px-2 py-1 bg-purple-500 text-white text-xs rounded shadow-sm flex items-center gap-1">
+                                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                                                AI Generated
+                                            </div>
+                                        )}
+                                    </>
+                                ) : (
+                                    <>
+                                        <svg className="w-12 h-12 text-muted-foreground mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-8a3 3 0 006 1.061l-.431.431.061-3.061L6 6a2 2 0 002.828 2.828-2.828A3 3 0 006 1.061l-.431.431.061-3.061L16 16z" />
+                                        </svg>
+                                        <p className="text-sm text-muted-foreground mb-2">Click to upload cover image</p>
+                                        <button
+                                            onClick={triggerFileInput}
+                                            disabled={isUploadingCover}
+                                            className="px-4 py-2 bg-card text-foreground rounded-lg border border-border hover:bg-muted disabled:opacity-50"
+                                        >
+                                            {isUploadingCover ? "Uploading..." : "Upload Cover"}
+                                        </button>
+                                    </>
+                                )}
                             </div>
                         </div>
 
@@ -207,8 +339,8 @@ export default function CreateStory({ storyId, groupId }: CreateStoryProps) {
                                         onClick={() => setUseAIEnrich(!useAIEnrich)}
                                         disabled={description.length === 0}
                                         className={`w-11 h-6 rounded-full transition-colors ${useAIEnrich
-                                                ? "bg-purple-500 text-white"
-                                                : "bg-muted"
+                                            ? "bg-purple-500 text-white"
+                                            : "bg-muted"
                                             }`}
                                     >
                                     </button>
@@ -226,8 +358,8 @@ export default function CreateStory({ storyId, groupId }: CreateStoryProps) {
                                     <button
                                         onClick={() => setGenerateCover(!generateCover)}
                                         className={`w-11 h-6 rounded-full transition-colors ${generateCover
-                                                ? "bg-purple-500 text-white"
-                                                : "bg-muted"
+                                            ? "bg-purple-500 text-white"
+                                            : "bg-muted"
                                             }`}
                                     >
                                     </button>
@@ -245,8 +377,8 @@ export default function CreateStory({ storyId, groupId }: CreateStoryProps) {
                                     <button
                                         onClick={() => setGenerateBackground(!generateBackground)}
                                         className={`w-11 h-6 rounded-full transition-colors ${generateBackground
-                                                ? "bg-purple-500 text-white"
-                                                : "bg-muted"
+                                            ? "bg-purple-500 text-white"
+                                            : "bg-muted"
                                             }`}
                                     >
                                     </button>
@@ -264,13 +396,101 @@ export default function CreateStory({ storyId, groupId }: CreateStoryProps) {
                                     <button
                                         onClick={() => setGeneratePoster(!generatePoster)}
                                         className={`w-11 h-6 rounded-full transition-colors ${generatePoster
-                                                ? "bg-purple-500 text-white"
-                                                : "bg-muted"
+                                            ? "bg-purple-500 text-white"
+                                            : "bg-muted"
                                             }`}
                                     >
                                     </button>
                                 </div>
                             </div>
+
+                            {/* Style Selection */}
+                            {(generateCover || generatePoster || generateBackground) && (
+                                <div className="space-y-3 pt-3 border-t border-purple-200/50">
+                                    <h4 className="text-sm font-medium text-purple-900">Art Style</h4>
+
+                                    {/* Search */}
+                                    <div className="relative">
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                        <input
+                                            type="text"
+                                            placeholder="Search styles..."
+                                            value={styleSearchQuery}
+                                            onChange={handleStyleSearch}
+                                            className="w-full pl-9 pr-4 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                        />
+                                    </div>
+
+                                    {/* Styles Grid */}
+                                    {isLoadingStyles ? (
+                                        <div className="flex justify-center py-4">
+                                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-500" />
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-2 gap-3 max-h-60 overflow-y-auto p-1">
+                                            {styles.map((style) => (
+                                                <div
+                                                    key={style.id}
+                                                    onClick={() => setSelectedAIStyle(style)}
+                                                    className={`
+                                                        cursor-pointer rounded-lg border overflow-hidden transition-all
+                                                        ${selectedAIStyle?.id === style.id
+                                                            ? 'border-purple-500 ring-2 ring-purple-500/20'
+                                                            : 'border-border hover:border-purple-300'}
+                                                    `}
+                                                >
+                                                    <div className="aspect-video bg-muted relative">
+                                                        {style.preview_image ? (
+                                                            <img
+                                                                src={style.preview_image}
+                                                                alt={style.name}
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        ) : (
+                                                            <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
+                                                                No Preview
+                                                            </div>
+                                                        )}
+                                                        {selectedAIStyle?.id === style.id && (
+                                                            <div className="absolute inset-0 bg-purple-500/20 flex items-center justify-center">
+                                                                <div className="bg-white rounded-full p-1">
+                                                                    <svg className="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                                    </svg>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="p-2 bg-card">
+                                                        <div className="text-xs font-medium truncate">{style.name}</div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {/* Pagination */}
+                                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                        <span>Showing {styles.length} of {stylesTotal}</span>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => loadStyles(stylesPage - 1, styleSearchQuery)}
+                                                disabled={stylesPage === 0}
+                                                className="p-1 hover:bg-muted rounded disabled:opacity-30"
+                                            >
+                                                <ChevronLeft className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => loadStyles(stylesPage + 1, styleSearchQuery)}
+                                                disabled={(stylesPage + 1) * 20 >= stylesTotal}
+                                                className="p-1 hover:bg-muted rounded disabled:opacity-30"
+                                            >
+                                                <ChevronRight className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Token Usage Info */}
                             {(useAIEnrich || generateCover || generatePoster || generateBackground) && (
