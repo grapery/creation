@@ -41,5 +41,17 @@ export const stories = {
         // Use general list for now or check if I missed it.
         // In Swift `FollowingContentView` iterates `viewModel.followingStories`.
         return request(`/api/stories/following?limit=${limit}`); // Guessing endpoint
+    },
+    // AI Styles
+    getStyles: async (groupId?: string, limit = 20, offset = 0): Promise<{ styles: any[], total: number }> => {
+        let url = `/api/stories/styles?limit=${limit}&offset=${offset}`;
+        if (groupId) url += `&group_id=${groupId}`;
+        return request(url);
+    },
+
+    searchStyles: async (query: string, groupId?: string, limit = 20, offset = 0): Promise<{ styles: any[], total: number }> => {
+        let url = `/api/stories/styles/search?q=${encodeURIComponent(query)}&limit=${limit}&offset=${offset}`;
+        if (groupId) url += `&group_id=${groupId}`;
+        return request(url);
     }
 };
