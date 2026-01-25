@@ -134,6 +134,7 @@ jobs:
 
       - name: Extract host and port from DEV_DEPLOY_HOST
         id: parse-dev-host
+        shell: bash
         run: |
           # Extract host (remove port if present)
           DEV_HOST="${{ vars.DEV_DEPLOY_HOST }}"
@@ -141,6 +142,7 @@ jobs:
           # Get hostname before any colon
           HOSTNAME="${DEV_HOST%%:*}"
           echo "HOSTNAME=$HOSTNAME" >> $GITHUB_ENV
+          echo "hostname=$HOSTNAME" >> $GITHUB_OUTPUT
 
       - name: Deploy notification
         run: |
@@ -153,11 +155,12 @@ jobs:
           echo "| Image | \`${{ env.REGISTRY }}/grapery-dev/${{ env.IMAGE_NAME }}:dev\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Environment | development |" >> $GITHUB_STEP_SUMMARY
           echo "| Commit | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Hostname | ${{ steps.parse-dev-host.outputs.hostname }} |" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload .env to ECS
         uses: appleboy/scp-action@v0.1.4
         with:
-          host: ${{ env.HOSTNAME }}
+          host: ${{ steps.parse-dev-host.outputs.hostname }}
           username: ${{ vars.SSH_USER }}
           key: ${{ vars.SSH_KEY }}
           port: 22
@@ -167,7 +170,7 @@ jobs:
       - name: Remote Deploy to Development Server
         uses: appleboy/ssh-action@v0.1.10
         with:
-          host: ${{ env.HOSTNAME }}
+          host: ${{ steps.parse-dev-host.outputs.hostname }}
           username: ${{ vars.SSH_USER }}
           key: ${{ vars.SSH_KEY }}
           port: 22
@@ -278,6 +281,7 @@ jobs:
 
       - name: Extract host and port from PROD_DEPLOY_HOST
         id: parse-prod-host
+        shell: bash
         run: |
           # Extract host (remove port if present)
           PROD_HOST="${{ vars.PROD_DEPLOY_HOST }}"
@@ -285,6 +289,7 @@ jobs:
           # Get hostname before any colon
           HOSTNAME="${PROD_HOST%%:*}"
           echo "HOSTNAME=$HOSTNAME" >> $GITHUB_ENV
+          echo "hostname=$HOSTNAME" >> $GITHUB_OUTPUT
 
       - name: Deploy notification
         run: |
@@ -297,11 +302,12 @@ jobs:
           echo "| Image | \`${{ env.REGISTRY }}/grapery-prod/${{ env.IMAGE_NAME }}:prod\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Environment | production |" >> $GITHUB_STEP_SUMMARY
           echo "| Commit | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Hostname | ${{ steps.parse-prod-host.outputs.hostname }} |" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload .env to ECS
         uses: appleboy/scp-action@v0.1.4
         with:
-          host: ${{ env.HOSTNAME }}
+          host: ${{ steps.parse-prod-host.outputs.hostname }}
           username: ${{ vars.SSH_USER }}
           key: ${{ vars.SSH_KEY }}
           port: 22
@@ -311,7 +317,7 @@ jobs:
       - name: Remote Deploy to Production Server
         uses: appleboy/ssh-action@v0.1.10
         with:
-          host: ${{ env.HOSTNAME }}
+          host: ${{ steps.parse-prod-host.outputs.hostname }}
           username: ${{ vars.SSH_USER }}
           key: ${{ vars.SSH_KEY }}
           port: 22
