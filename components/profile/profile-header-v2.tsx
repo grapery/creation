@@ -19,7 +19,7 @@ interface ProfileHeaderProps {
     onMessage?: () => void;
 }
 
-export function ProfileHeader({
+export default function ProfileHeader({
     user,
     isOwnProfile = false,
     isFollowing = false,
@@ -159,9 +159,9 @@ export function ProfileHeader({
                     )}
 
                     {/* Stats - Improved layout and visual hierarchy */}
-                    <div className="flex items-center gap-6 sm:gap-8 pt-2 text-sm">
+                    <div className="flex items-center gap-6 sm:gap-8 pt-2 text-xs">
                         <div className="flex items-center gap-1.5 group cursor-pointer hover:text-foreground transition-colors">
-                            <span className="text-base sm:text-lg font-semibold tabular-nums">
+                            <span className="text-sm font-semibold tabular-nums">
                                 {user.followingCount || user.following || 0}
                             </span>
                             <span className="text-muted-foreground group-hover:text-muted-foreground/80">
@@ -169,7 +169,7 @@ export function ProfileHeader({
                             </span>
                         </div>
                         <div className="flex items-center gap-1.5 group cursor-pointer hover:text-foreground transition-colors">
-                            <span className="text-base sm:text-lg font-semibold tabular-nums">
+                            <span className="text-sm font-semibold tabular-nums">
                                 {user.followerCount || user.followers || 0}
                             </span>
                             <span className="text-muted-foreground group-hover:text-muted-foreground/80">
@@ -177,7 +177,7 @@ export function ProfileHeader({
                             </span>
                         </div>
                         <div className="flex items-center gap-1.5 group cursor-pointer hover:text-foreground transition-colors">
-                            <span className="text-base sm:text-lg font-semibold tabular-nums">
+                            <span className="text-sm font-semibold tabular-nums">
                                 {likesCount}
                             </span>
                             <span className="text-muted-foreground group-hover:text-muted-foreground/80">

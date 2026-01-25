@@ -9,7 +9,7 @@ interface CharacterCardProps {
     character: Character;
 }
 
-export function CharacterCard({ character }: CharacterCardProps) {
+export default function CharacterCard({ character }: CharacterCardProps) {
     return (
         <Link href={`/characters/${character.id}`}>
             <Card className="group cursor-pointer border-border/50 hover:border-primary/30 transition-all hover:shadow-lg hover:-translate-y-1">
@@ -31,7 +31,7 @@ export function CharacterCard({ character }: CharacterCardProps) {
                         {/* Overlay with character type badge */}
                         <div className="absolute top-3 right-3">
                             <span className="px-2 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium backdrop-blur-sm">
-                                {character.type || 'Character'}
+                                Character
                             </span>
                         </div>
                     </div>
@@ -77,21 +77,39 @@ export function CharacterCard({ character }: CharacterCardProps) {
                             </div>
                         </div>
 
-                        {/* Personality Tags */}
-                        {character.personality && character.personality.length > 0 && (
+                        {/* Personality Tags - Handle both string and array */}
+                        {character.personality && (
                             <div className="flex items-center gap-1.5 flex-wrap pt-1">
-                                {character.personality.slice(0, 3).map((trait, index) => (
-                                    <span
-                                        key={`${trait}-${index}`}
-                                        className="px-2.5 py-1 rounded-full bg-secondary/10 text-secondary-foreground text-xs font-medium hover:bg-secondary/20 transition-colors"
-                                    >
-                                        {trait}
-                                    </span>
-                                ))}
-                                {character.personality.length > 3 && (
-                                    <span className="text-xs text-muted-foreground">
-                                        +{character.personality.length - 3}
-                                    </span>
+                                {/* If personality is a string, split by comma */}
+                                {typeof character.personality === 'string' ? (
+                                    <>
+                                        {character.personality.split(',').map((trait, index) => (
+                                            <span
+                                                key={`${trait}-${index}`}
+                                                className="px-2.5 py-1 rounded-full bg-secondary/10 text-secondary-foreground text-xs font-medium hover:bg-secondary/20 transition-colors"
+                                            >
+                                                {trait.trim()}
+                                            </span>
+                                        ))}
+                                    </>
+                                ) : (
+                                    <>
+                                        {/* If personality is an array, display first 3 */}
+                                        {(character.personality as string[]).slice(0, 3).map((trait, index) => (
+                                            <span
+                                                key={`${trait}-${index}`}
+                                                className="px-2.5 py-1 rounded-full bg-secondary/10 text-secondary-foreground text-xs font-medium hover:bg-secondary/20 transition-colors"
+                                            >
+                                                {trait}
+                                            </span>
+                                        ))}
+                                        {/* Show +N if more than 3 traits */}
+                                        {(character.personality as string[]).length > 3 && (
+                                            <span className="text-xs text-muted-foreground">
+                                                +{(character.personality as string[]).length - 3}
+                                            </span>
+                                        )}
+                                    </>
                                 )}
                             </div>
                         )}

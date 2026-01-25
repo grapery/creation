@@ -7,19 +7,22 @@ import Link from "next/link";
 
 interface StoryboardCardProps {
     storyboard: Storyboard;
+    href?: string;
 }
 
-export function StoryboardCard({ storyboard }: StoryboardCardProps) {
+export default function StoryboardCard({ storyboard, href }: StoryboardCardProps) {
+    const linkHref = href || `/storyboards/${storyboard.id}`;
+
     return (
-        <Link href={`/storyboards/${storyboard.id}`}>
+        <Link href={linkHref}>
             <Card className="group cursor-pointer border-border/50 hover:border-primary/30 transition-all hover:shadow-lg hover:-translate-y-1">
                 <CardContent className="p-4 sm:p-5">
                     {/* Cover Image */}
                     <div className="relative aspect-video rounded-lg bg-muted/30 mb-4 overflow-hidden">
-                        {story.coverImage ? (
+                        {storyboard.coverImage ? (
                             <img
-                                src={story.coverImage}
-                                alt={story.title}
+                                src={storyboard.coverImage}
+                                alt={storyboard.title}
                                 className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300"
                             />
                         ) : (
@@ -34,7 +37,7 @@ export function StoryboardCard({ storyboard }: StoryboardCardProps) {
                                 <div className="flex items-center gap-2 bg-black/50 backdrop-blur-sm px-3 py-1.5 rounded-full">
                                     <FileText className="h-3.5 w-3.5 text-white/90" />
                                     <span className="text-xs font-medium text-white tabular-nums">
-                                        {story.sceneCount || 0} scenes
+                                        {storyboard.sceneCount || 0} scenes
                                     </span>
                                 </div>
                             </div>
@@ -44,20 +47,20 @@ export function StoryboardCard({ storyboard }: StoryboardCardProps) {
                     {/* Storyboard Info */}
                     <div className="space-y-2.5">
                         <h3 className="text-lg font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors leading-tight">
-                            {story.title}
+                            {storyboard.title}
                         </h3>
 
                         {/* Description */}
-                        {story.description && (
+                        {storyboard.description && (
                             <p className="text-sm text-muted-foreground/80 line-clamp-2 leading-relaxed">
-                                {story.description}
+                                {storyboard.description}
                             </p>
                         )}
 
                         {/* Metadata Row */}
                         <div className="flex items-center justify-between text-sm pt-1">
                             <div className="flex items-center gap-1.5 text-muted-foreground">
-                                {story.createdAt && (
+                                {storyboard.createdAt && (
                                     <div className="flex items-center gap-1">
                                         <Calendar className="h-3.5 w-3.5" />
                                         <span>
@@ -73,19 +76,19 @@ export function StoryboardCard({ storyboard }: StoryboardCardProps) {
                             <div className="flex items-center gap-3">
                                 <div className="flex items-center gap-1 text-muted-foreground">
                                     <Heart className="h-3.5 w-3.5" />
-                                    <span className="font-medium tabular-nums">{story.likeCount || 0}</span>
+                                    <span className="font-medium tabular-nums">{storyboard.likeCount || 0}</span>
                                 </div>
                                 <div className="flex items-center gap-1 text-muted-foreground">
                                     <MessageSquare className="h-3.5 w-3.5" />
-                                    <span className="font-medium tabular-nums">{story.commentCount || 0}</span>
+                                    <span className="font-medium tabular-nums">{storyboard.commentCount || 0}</span>
                                 </div>
                             </div>
                         </div>
 
                         {/* Tags */}
-                        {story.tags && story.tags.length > 0 && (
+                        {storyboard.tags && storyboard.tags.length > 0 && (
                             <div className="flex items-center gap-1.5 flex-wrap">
-                                {story.tags.slice(0, 3).map((tag, index) => (
+                                {storyboard.tags.slice(0, 3).map((tag, index) => (
                                     <span
                                         key={`${tag}-${index}`}
                                         className="px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium hover:bg-primary/20 transition-colors"
@@ -93,9 +96,9 @@ export function StoryboardCard({ storyboard }: StoryboardCardProps) {
                                         {tag}
                                     </span>
                                 ))}
-                                {story.tags.length > 3 && (
+                                {storyboard.tags.length > 3 && (
                                     <span className="text-xs text-muted-foreground">
-                                        +{story.tags.length - 3}
+                                        +{storyboard.tags.length - 3}
                                     </span>
                                 )}
                             </div>

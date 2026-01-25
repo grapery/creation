@@ -8,7 +8,7 @@ export interface Character {
     avatar?: string;
     portrait?: string;
     background?: string;
-    personality?: string;
+    personality?: string | string[];
     shortTermGoal?: string;
     longTermGoal?: string;
     handlingStyle?: string;

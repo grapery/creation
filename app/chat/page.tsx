@@ -19,9 +19,17 @@ export default function ChatListPage() {
             setLoading(true);
             try {
                 const res = await chat.listSessions();
-                setSessions(res || []);
+                // Handle both array and object response formats
+                if (Array.isArray(res)) {
+                    setSessions(res);
+                } else if (res && typeof res === 'object' && 'sessions' in res) {
+                    setSessions(res.sessions || []);
+                } else {
+                    setSessions([]);
+                }
             } catch (e) {
                 console.error(e);
+                setSessions([]);
             } finally {
                 setLoading(false);
             }

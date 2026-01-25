@@ -11,9 +11,11 @@ interface ContentGridProps {
     empty?: boolean;
     emptyMessage?: string;
     emptyIcon?: ReactNode;
+    showTitle?: boolean;
+    layout?: 'grid' | 'list';
 }
 
-export function ContentGrid({
+export default function ContentGrid({
     title,
     icon,
     children,
@@ -21,6 +23,8 @@ export function ContentGrid({
     empty = false,
     emptyMessage = "No content yet",
     emptyIcon,
+    showTitle = true,
+    layout = 'grid',
 }: ContentGridProps) {
     if (loading) {
         return (
@@ -55,18 +59,26 @@ export function ContentGrid({
 
     return (
         <div className="space-y-6">
-            {/* Section Header */}
-            <div className="flex items-center gap-3 pb-3 border-b border-border/50">
-                <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                    {icon}
+            {/* Section Header - Only show if showTitle is true */}
+            {showTitle && (
+                <div className="flex items-center gap-3 pb-3 border-b border-border/50">
+                    <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                        {icon}
+                    </div>
+                    <h2 className="text-xl font-semibold text-foreground">{title}</h2>
                 </div>
-                <h2 className="text-xl font-semibold text-foreground">{title}</h2>
-            </div>
+            )}
 
-            {/* Grid Content */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
-                {children}
-            </div>
+            {/* Grid or List Content */}
+            {layout === 'list' ? (
+                <div className="space-y-4">
+                    {children}
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
+                    {children}
+                </div>
+            )}
         </div>
     );
 }

@@ -9,7 +9,7 @@ interface StoryCardProps {
     story: Story;
 }
 
-export function StoryCard({ story }: StoryCardProps) {
+export default function StoryCard({ story }: StoryCardProps) {
     return (
         <Link href={`/stories/${story.id}`}>
             <Card className="group cursor-pointer border-border/50 hover:border-primary/30 transition-all hover:shadow-lg hover:-translate-y-1">

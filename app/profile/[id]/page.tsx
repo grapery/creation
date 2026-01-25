@@ -5,15 +5,15 @@ import { useParams, useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/providers/auth-provider";
 import { ActivityFeed } from "@/components/profile/activity-feed";
 import { ActivityHeatmap } from "@/components/profile/activity-heatmap";
-import { Button } from "@/components/ui/button";
-import { Loader2, Sparkles, Drama, BookOpen, FileText, LayoutDashboard } from "lucide-react";
+import { Loader2, Sparkles, Drama, BookOpen, FileText, Layers } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { User, ActivityHeatmapData, ActivityTimeRange, Storyboard, Story } from "@/lib/types";
+import { User, ActivityHeatmapData, ActivityTimeRange } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { profile } from "@/lib/api/profile";
 import { useTranslation } from "@/providers/language-provider";
 import { getAuthToken } from "@/lib/api/client";
 import Link from "next/link";
+import ProfileHeader from "@/components/profile/profile-header-v2";
 
 enum ProfileTab {
     ACTIVITY = "activity",
@@ -40,7 +40,7 @@ function ProfileTabs({
         {
             label: t("profile.activity", "Activity"),
             href: basePath,
-            icon: LayoutDashboard,
+            icon: Layers,
             exact: true
         },
         {
@@ -56,18 +56,18 @@ function ProfileTabs({
         {
             label: t("profile.characters", "Characters"),
             href: `${basePath}/characters`,
-            icon: Drama
+            icon: Sparkles
         },
         ...(isOwnProfile ? [{
             label: t("profile.drafts", "Drafts"),
             href: `${basePath}/drafts`,
-            icon: Sparkles,
+            icon: FileText,
             exact: false
         }] : []),
     ];
 
     return (
-        <div className="border-b bg-background sticky top-14 z-40">
+        <div className="border-b border-border/50 bg-background sticky top-14 z-40">
             <div className="container max-w-6xl mx-auto px-4 flex overflow-x-auto scrollbar-hide">
                 {tabs.map((tab) => {
                     const isActive = tab.exact
@@ -88,7 +88,7 @@ function ProfileTabs({
                             <tab.icon className="h-4 w-4" />
                             {tab.label}
                         </Link>
-                    )
+                    );
                 })}
             </div>
         </div>
@@ -224,124 +224,18 @@ export default function ProfilePage() {
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
-            {/* Immersive Header */}
-            <div className="h-[200px] w-full relative">
-                {profileUser.background ? (
-                    <>
-                        <img
-                            src={profileUser.background}
-                            alt="Cover"
-                            className="w-full h-full object-cover blur-md"
-                        />
-                        <div className="absolute inset-0 bg-black/40" />
-                    </>
-                ) : profileUser.avatar ? (
-                    <>
-                        <img
-                            src={profileUser.avatar}
-                            alt="Cover"
-                            className="w-full h-full object-cover blur-md"
-                        />
-                        <div className="absolute inset-0 bg-black/30" />
-                    </>
-                ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-primary/80 via-primary/60 to-background" />
-                )}
-            </div>
-
-            <div className="container max-w-6xl mx-auto px-4 pb-4">
-                {/* Profile Info Section */}
-                <div className="relative -mt-16 mb-6">
-                    <div className="flex flex-col md:flex-row items-end md:items-start gap-6">
-                        {/* Avatar */}
-                        <div className="w-32 h-32 rounded-xl bg-background p-1 shadow-xl">
-                            <div className="w-full h-full rounded-lg bg-secondary overflow-hidden">
-                                {profileUser.avatar ? (
-                                    <img
-                                        src={profileUser.avatar}
-                                        alt={profileUser.displayName || profileUser.username}
-                                        className="w-full h-full object-cover"
-                                    />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center">
-                                        <span className="text-4xl font-bold text-muted-foreground">
-                                            {(profileUser.displayName || profileUser.username)?.[0]?.toUpperCase() || "?"}
-                                        </span>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Info */}
-                        <div className="flex-1 pt-4">
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                <div>
-                                    <div className="flex items-center gap-2">
-                                        <h1 className="text-3xl font-bold text-foreground">
-                                            {profileUser.displayName || profileUser.username}
-                                        </h1>
-                                        {profileUser.isVip && (
-                                            <span className="text-orange-500 text-2xl">👑</span>
-                                        )}
-                                    </div>
-                                    <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
-                                        <span>@{profileUser.username}</span>
-                                        {profileUser.createdAt && (
-                                            <>
-                                                <span>·</span>
-                                                <span>{t("profile.joined", "Joined")} {new Date(profileUser.createdAt * 1000).toLocaleDateString("en-US", { year: "numeric", month: "2-digit" })}</span>
-                                            </>
-                                        )}
-                                    </div>
-                                    {profileUser.bio && (
-                                        <p className="mt-3 text-muted-foreground max-w-2xl">
-                                            {profileUser.bio}
-                                        </p>
-                                    )}
-                                </div>
-
-                                <div className="flex items-center justify-center md:justify-start gap-2">
-                                    {isOwnProfile ? (
-                                        <>
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                onClick={() => router.push("/settings/profile")}
-                                            >
-                                                {t("profile.edit_profile", "Edit Profile")}
-                                            </Button>
-                                        </>
-                                    ) : (
-                                        <Button
-                                            size="sm"
-                                            variant={isFollowing ? "outline" : "default"}
-                                            onClick={handleFollow}
-                                        >
-                                            {isFollowing ? t("profile.following", "Following") : t("profile.follow", "Follow")}
-                                        </Button>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Stats */}
-                            <div className="flex items-center gap-6 mt-4 text-sm">
-                                <div className="flex items-center gap-1">
-                                    <span className="font-semibold text-foreground">{profileUser.followingCount || 0}</span>
-                                    <span className="text-muted-foreground">{t("profile.following", "following")}</span>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                    <span className="font-semibold text-foreground">{profileUser.followerCount || 0}</span>
-                                    <span className="text-muted-foreground">{t("profile.followers", "followers")}</span>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                    <span className="font-semibold text-foreground">{totalLikes}</span>
-                                    <span className="text-muted-foreground">{t("profile.likes", "likes")}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {/* Profile Header - Improved version */}
+            <ProfileHeader
+                user={profileUser}
+                isOwnProfile={isOwnProfile}
+                isFollowing={isFollowing}
+                likesCount={totalLikes}
+                onAvatarTap={() => {}}
+                onEditProfile={() => router.push("/settings/profile")}
+                onFollow={handleFollow}
+                onShare={() => {}}
+                onMessage={() => router.push(`/chat/${profileUser.id}`)}
+            />
 
             {/* Tabs Navigation */}
             <ProfileTabs currentPath={pathname} userId={userId as string} isOwnProfile={!!isOwnProfile} />
