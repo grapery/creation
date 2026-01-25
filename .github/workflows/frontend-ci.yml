@@ -44,7 +44,6 @@ jobs:
         run: echo ${{ vars.ACR_PASSWORD }} | docker login ${{ env.REGISTRY }} -u ${{ vars.ACR_USERNAME }} --password-stdin
 
       - name: Build Docker image
-        working-directory: ./creation
         run: |
           docker build \
             -f Dockerfile \
@@ -84,7 +83,6 @@ jobs:
         run: echo ${{ vars.ACR_PASSWORD }} | docker login ${{ env.REGISTRY }} -u ${{ vars.ACR_USERNAME }} --password-stdin
 
       - name: Build Docker image
-        working-directory: ./creation
         run: |
           docker build \
             -f Dockerfile \
@@ -122,7 +120,7 @@ jobs:
       - name: Generate .env file
         run: |
           echo "📦 Generating development .env file..."
-          cat > creation/.env << EOF
+          cat > .env << EOF
           # ========== Environment ==========
           ENVIRONMENT=development
           SERVICE_NAME=${{ env.SERVICE_NAME }}
@@ -132,7 +130,7 @@ jobs:
           PORT=${{ env.PORT }}
           EOF
           echo "✅ Development .env file generated"
-          cat creation/.env
+          cat .env
 
       - name: Deploy notification
         run: |
@@ -153,7 +151,7 @@ jobs:
           username: ${{ vars.SSH_USER }}
           key: ${{ vars.SSH_KEY }}
           port: 22
-          source: "creation/.env"
+          source: ".env"
           target: "/home/ubuntu/grapery/creation/"
 
       - name: Remote Deploy to Development Server
@@ -256,7 +254,7 @@ jobs:
       - name: Generate .env file
         run: |
           echo "📦 Generating production .env file..."
-          cat > creation/.env << EOF
+          cat > .env << EOF
           # ========== Environment ==========
           ENVIRONMENT=production
           SERVICE_NAME=${{ env.SERVICE_NAME }}
@@ -266,7 +264,7 @@ jobs:
           PORT=${{ env.PORT }}
           EOF
           echo "✅ Production .env file generated"
-          cat creation/.env
+          cat .env
 
       - name: Deploy notification
         run: |
@@ -287,7 +285,7 @@ jobs:
           username: ${{ vars.SSH_USER }}
           key: ${{ vars.SSH_KEY }}
           port: 22
-          source: "creation/.env"
+          source: ".env"
           target: "/home/ubuntu/grapery/creation/"
 
       - name: Remote Deploy to Production Server
