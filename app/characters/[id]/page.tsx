@@ -185,10 +185,12 @@ export default function CharacterDetailPage() {
                             <Card>
                                 <CardContent className="p-6 space-y-4">
                                     <h3 className="text-lg font-semibold">About {character.name}</h3>
-                                    {character.personality && character.personality.trim() !== '' && (
+                                    {character.personality && (
                                         <div>
                                             <h4 className="text-sm font-medium text-muted-foreground mb-2">Personality</h4>
-                                            <p className="text-sm leading-relaxed">{character.personality}</p>
+                                            <p className="text-sm leading-relaxed">
+                                                {Array.isArray(character.personality) ? character.personality.join(', ') : character.personality}
+                                            </p>
                                         </div>
                                     )}
                                     {character.background && character.background.trim() !== '' && (
