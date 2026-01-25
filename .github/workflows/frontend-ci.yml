@@ -132,6 +132,16 @@ jobs:
           echo "✅ Development .env file generated"
           cat .env
 
+      - name: Extract host and port from DEV_DEPLOY_HOST
+        id: parse-dev-host
+        run: |
+          # Extract host (remove port if present)
+          DEV_HOST="${{ vars.DEV_DEPLOY_HOST }}"
+          echo "DEV_HOST=$DEV_HOST" >> $GITHUB_ENV
+          # Get hostname before any colon
+          HOSTNAME="${DEV_HOST%%:*}"
+          echo "HOSTNAME=$HOSTNAME" >> $GITHUB_ENV
+
       - name: Deploy notification
         run: |
           echo "## 🚀 Development Deployment - Frontend Service" >> $GITHUB_STEP_SUMMARY
@@ -147,7 +157,7 @@ jobs:
       - name: Upload .env to ECS
         uses: appleboy/scp-action@v0.1.4
         with:
-          host: ${{ vars.DEV_DEPLOY_HOST }}
+          host: ${{ env.HOSTNAME }}
           username: ${{ vars.SSH_USER }}
           key: ${{ vars.SSH_KEY }}
           port: 22
@@ -157,7 +167,7 @@ jobs:
       - name: Remote Deploy to Development Server
         uses: appleboy/ssh-action@v0.1.10
         with:
-          host: ${{ vars.DEV_DEPLOY_HOST }}
+          host: ${{ env.HOSTNAME }}
           username: ${{ vars.SSH_USER }}
           key: ${{ vars.SSH_KEY }}
           port: 22
@@ -266,6 +276,16 @@ jobs:
           echo "✅ Production .env file generated"
           cat .env
 
+      - name: Extract host and port from PROD_DEPLOY_HOST
+        id: parse-prod-host
+        run: |
+          # Extract host (remove port if present)
+          PROD_HOST="${{ vars.PROD_DEPLOY_HOST }}"
+          echo "PROD_HOST=$PROD_HOST" >> $GITHUB_ENV
+          # Get hostname before any colon
+          HOSTNAME="${PROD_HOST%%:*}"
+          echo "HOSTNAME=$HOSTNAME" >> $GITHUB_ENV
+
       - name: Deploy notification
         run: |
           echo "## 🚀 Production Deployment - Frontend Service" >> $GITHUB_STEP_SUMMARY
@@ -281,7 +301,7 @@ jobs:
       - name: Upload .env to ECS
         uses: appleboy/scp-action@v0.1.4
         with:
-          host: ${{ vars.PROD_DEPLOY_HOST }}
+          host: ${{ env.HOSTNAME }}
           username: ${{ vars.SSH_USER }}
           key: ${{ vars.SSH_KEY }}
           port: 22
@@ -291,7 +311,7 @@ jobs:
       - name: Remote Deploy to Production Server
         uses: appleboy/ssh-action@v0.1.10
         with:
-          host: ${{ vars.PROD_DEPLOY_HOST }}
+          host: ${{ env.HOSTNAME }}
           username: ${{ vars.SSH_USER }}
           key: ${{ vars.SSH_KEY }}
           port: 22
