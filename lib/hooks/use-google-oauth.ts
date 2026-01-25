@@ -27,8 +27,41 @@ export function useGoogleOAuth({
   const scriptLoaded = useRef(false);
 
   useEffect(() => {
-    // Load Google Identity Services script
-    if (scriptLoaded.current || !clientId) return;
+    // Check if clientId is provided
+    if (!clientId) {
+      console.error('[Google OAuth] Client ID is not configured. Please set NEXT_PUBLIC_GOOGLE_CLIENT_ID environment variable.');
+      return;
+    }
+
+    // Check if script is already loaded
+    if (scriptLoaded.current) {
+      // Check if window.google is available
+      if (window.google && window.google.accounts) {
+        setIsLoaded(true);
+      }
+      return;
+    }
+
+    // Check if script already exists in DOM
+    const existingScript = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
+    if (existingScript) {
+      scriptLoaded.current = true;
+      // Wait a bit for the script to initialize
+      const checkGoogle = setInterval(() => {
+        if (window.google && window.google.accounts) {
+          setIsLoaded(true);
+          clearInterval(checkGoogle);
+        }
+      }, 100);
+      // Timeout after 5 seconds
+      setTimeout(() => {
+        clearInterval(checkGoogle);
+        if (!window.google || !window.google.accounts) {
+          console.error('[Google OAuth] Script exists but Google API not available');
+        }
+      }, 5000);
+      return;
+    }
 
     scriptLoaded.current = true;
     const script = document.createElement('script');
@@ -36,27 +69,45 @@ export function useGoogleOAuth({
     script.async = true;
     script.defer = true;
     script.onload = () => {
-      setIsLoaded(true);
-      console.log('[Google OAuth] Script loaded successfully');
+      // Wait for Google API to be available
+      const checkGoogle = setInterval(() => {
+        if (window.google && window.google.accounts) {
+          setIsLoaded(true);
+          console.log('[Google OAuth] Script loaded successfully');
+          clearInterval(checkGoogle);
+        }
+      }, 100);
+      // Timeout after 5 seconds
+      setTimeout(() => {
+        clearInterval(checkGoogle);
+        if (!window.google || !window.google.accounts) {
+          console.error('[Google OAuth] Script loaded but Google API not available');
+          onError?.();
+        }
+      }, 5000);
     };
     script.onerror = () => {
       console.error('[Google OAuth] Failed to load script');
+      scriptLoaded.current = false;
       onError?.();
     };
     document.body.appendChild(script);
 
     return () => {
-      // Cleanup
-      const existingScript = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
-      if (existingScript) {
-        document.body.removeChild(existingScript);
-      }
+      // Don't remove script on cleanup as it might be used by other components
     };
   }, [clientId, onError]);
 
   const signIn = async () => {
-    if (!isLoaded || !window.google) {
-      console.error('[Google OAuth] Google script not loaded');
+    if (!clientId) {
+      console.error('[Google OAuth] Client ID is not configured');
+      onError?.();
+      return;
+    }
+
+    if (!isLoaded || !window.google || !window.google.accounts) {
+      console.error('[Google OAuth] Google script not loaded. isLoaded:', isLoaded, 'window.google:', !!window.google);
+      onError?.();
       return;
     }
 

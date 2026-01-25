@@ -72,12 +72,31 @@ export default function LoginPage() {
         setOAuthError("");
 
         if (provider === "google") {
-            if (!googleLoaded) {
-                setOAuthError("Google OAuth not ready. Please try again.");
+            // Check if client ID is configured
+            if (!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
+                setOAuthError("Google OAuth is not configured. Please contact support.");
                 setOAuthLoading(null);
                 return;
             }
-            googleSignIn();
+
+            // Check if Google OAuth is loaded
+            if (!googleLoaded) {
+                // Wait a bit and check again (script might still be loading)
+                await new Promise(resolve => setTimeout(resolve, 500));
+                if (!googleLoaded) {
+                    setOAuthError("Google OAuth is still loading. Please wait a moment and try again.");
+                    setOAuthLoading(null);
+                    return;
+                }
+            }
+
+            try {
+                googleSignIn();
+            } catch (error: any) {
+                console.error('[Login] Google sign-in error:', error);
+                setOAuthError(error.message || "Failed to initiate Google sign-in. Please try again.");
+                setOAuthLoading(null);
+            }
         } else if (provider === "apple") {
             // Apple OAuth integration
             setOAuthError("Apple Sign In coming soon");

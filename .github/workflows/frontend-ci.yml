@@ -51,6 +51,7 @@ jobs:
             --build-arg VERSION=develop-${{ github.sha }} \
             --build-arg COMMIT_SHA=${{ github.sha }} \
             --build-arg BUILD_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
+            --build-arg NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{ vars.NEXT_PUBLIC_GOOGLE_CLIENT_ID }} \
             .
 
       - name: Push Docker image
@@ -90,6 +91,7 @@ jobs:
             --build-arg VERSION=${{ github.sha }} \
             --build-arg COMMIT_SHA=${{ github.sha }} \
             --build-arg BUILD_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
+            --build-arg NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{ vars.NEXT_PUBLIC_GOOGLE_CLIENT_ID }} \
             .
 
       - name: Push Docker image
