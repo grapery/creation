@@ -169,26 +169,26 @@ export default function StoryPage() {
             // Count character contributions by author
             if (story.characters) {
                 story.characters.forEach((character: Character) => {
-                    if (character.authorId) {
-                        characterCountByUser[character.authorId] = (characterCountByUser[character.authorId] || 0) + 1;
+                    if (character.creatorId) {
+                        characterCountByUser[character.creatorId] = (characterCountByUser[character.creatorId] || 0) + 1;
                     }
                 });
 
                 // Add character creators
                 story.characters.forEach((character: Character) => {
-                    if (character.authorId && !seenUserIds.has(character.authorId)) {
+                    if (character.creatorId && !seenUserIds.has(character.creatorId)) {
                         const authorName = character.author?.displayName || character.author?.username || "Unknown Creator";
                         const authorAvatar = character.author?.avatar;
 
                         creators.push({
-                            id: `character-creator-${character.authorId}`,
-                            userId: character.authorId,
+                            id: `character-creator-${character.creatorId}`,
+                            userId: character.creatorId,
                             name: authorName,
                             avatar: authorAvatar,
                             role: CreatorRole.CharacterCreator,
-                            contributionCount: characterCountByUser[character.authorId] || 1
+                            contributionCount: characterCountByUser[character.creatorId] || 1
                         });
-                        seenUserIds.add(character.authorId);
+                        seenUserIds.add(character.creatorId);
                     }
                 });
             }

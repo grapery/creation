@@ -244,10 +244,10 @@ export default function ProfileStoriesPage() {
                                 views: story.viewCount,
                                 createdAt: story.createdAt,
                             }}
-                            author={story.creator ? {
-                                name: story.creator.displayName || story.creator.username || "Unknown",
-                                avatar: story.creator.avatar,
-                                username: story.creator.username,
+                            author={story.author ? {
+                                name: story.author.displayName || story.author.username || "Unknown",
+                                avatar: story.author.avatar,
+                                username: story.author.username,
                             } : undefined}
                             actions={
                                 <Link href={`/stories/${story.id}`}>

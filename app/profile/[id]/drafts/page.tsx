@@ -229,18 +229,19 @@ export default function ProfileDraftsPage() {
                     {drafts.map((draft) => (
                         <div key={draft.id} className="relative group">
                             <ListItem
+                                id={draft.id}
                                 title={draft.title}
-                                description={draft.description}
-                                coverImage={draft.coverImage}
+                                description={draft.content}
+                                coverImage={draft.image}
                                 coverIcon={<Layers className="h-8 w-8" />}
                                 stats={{
                                     scenes: draft.sceneCount,
                                     createdAt: draft.createdAt,
                                 }}
-                                author={draft.creator ? {
-                                    name: draft.creator.displayName || draft.creator.username || "Unknown",
-                                    avatar: draft.creator.avatar,
-                                    username: draft.creator.username,
+                                author={draft.creatorName ? {
+                                    name: draft.creatorName,
+                                    avatar: draft.creatorAvatar,
+                                    username: undefined,
                                 } : undefined}
                                 actions={
                                     <>

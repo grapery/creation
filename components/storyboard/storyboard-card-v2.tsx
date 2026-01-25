@@ -19,9 +19,9 @@ export default function StoryboardCard({ storyboard, href }: StoryboardCardProps
                 <CardContent className="p-4 sm:p-5">
                     {/* Cover Image */}
                     <div className="relative aspect-video rounded-lg bg-muted/30 mb-4 overflow-hidden">
-                        {storyboard.coverImage ? (
+                        {storyboard.image ? (
                             <img
-                                src={storyboard.coverImage}
+                                src={storyboard.image}
                                 alt={storyboard.title}
                                 className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300"
                             />
@@ -51,9 +51,9 @@ export default function StoryboardCard({ storyboard, href }: StoryboardCardProps
                         </h3>
 
                         {/* Description */}
-                        {storyboard.description && (
+                        {storyboard.content && (
                             <p className="text-sm text-muted-foreground/80 line-clamp-2 leading-relaxed">
-                                {storyboard.description}
+                                {storyboard.content}
                             </p>
                         )}
 
@@ -76,33 +76,14 @@ export default function StoryboardCard({ storyboard, href }: StoryboardCardProps
                             <div className="flex items-center gap-3">
                                 <div className="flex items-center gap-1 text-muted-foreground">
                                     <Heart className="h-3.5 w-3.5" />
-                                    <span className="font-medium tabular-nums">{storyboard.likeCount || 0}</span>
+                                    <span className="font-medium tabular-nums">{storyboard.likes || 0}</span>
                                 </div>
                                 <div className="flex items-center gap-1 text-muted-foreground">
                                     <MessageSquare className="h-3.5 w-3.5" />
-                                    <span className="font-medium tabular-nums">{storyboard.commentCount || 0}</span>
+                                    <span className="font-medium tabular-nums">{storyboard.comments || 0}</span>
                                 </div>
                             </div>
                         </div>
-
-                        {/* Tags */}
-                        {storyboard.tags && storyboard.tags.length > 0 && (
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                                {storyboard.tags.slice(0, 3).map((tag, index) => (
-                                    <span
-                                        key={`${tag}-${index}`}
-                                        className="px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium hover:bg-primary/20 transition-colors"
-                                    >
-                                        {tag}
-                                    </span>
-                                ))}
-                                {storyboard.tags.length > 3 && (
-                                    <span className="text-xs text-muted-foreground">
-                                        +{storyboard.tags.length - 3}
-                                    </span>
-                                )}
-                            </div>
-                        )}
                     </div>
                 </CardContent>
             </Card>

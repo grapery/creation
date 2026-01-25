@@ -53,7 +53,7 @@ export default function StoryCard({ story }: StoryCardProps) {
 
                         <div className="flex items-center justify-between text-sm text-muted-foreground">
                             <div className="flex items-center gap-1.5">
-                                {story.author && (
+                                {story.author && story.createdAt && (
                                     <>
                                         <Calendar className="h-3.5 w-3.5" />
                                         <span>

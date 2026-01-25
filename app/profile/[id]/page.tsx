@@ -6,6 +6,7 @@ import { useAuth } from "@/providers/auth-provider";
 import { ActivityFeed } from "@/components/profile/activity-feed";
 import { ActivityHeatmap } from "@/components/profile/activity-heatmap";
 import { Loader2, Sparkles, Drama, BookOpen, FileText, Layers } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { User, ActivityHeatmapData, ActivityTimeRange } from "@/lib/types";
 import { cn } from "@/lib/utils";

@@ -234,19 +234,19 @@ export default function ProfileStoryboardsPage() {
                             key={storyboard.id}
                             id={storyboard.id}
                             title={storyboard.title}
-                            description={storyboard.description}
-                            coverImage={storyboard.coverImage}
+                            description={storyboard.content}
+                            coverImage={storyboard.image}
                             coverIcon={<Layers className="h-8 w-8" />}
                             stats={{
-                                likes: storyboard.likeCount,
-                                comments: storyboard.commentCount,
+                                likes: storyboard.likes,
+                                comments: storyboard.comments,
                                 scenes: storyboard.sceneCount,
                                 createdAt: storyboard.createdAt,
                             }}
-                            author={storyboard.creator ? {
-                                name: storyboard.creator.displayName || storyboard.creator.username || "Unknown",
-                                avatar: storyboard.creator.avatar,
-                                username: storyboard.creator.username,
+                            author={storyboard.creatorName ? {
+                                name: storyboard.creatorName,
+                                avatar: storyboard.creatorAvatar,
+                                username: undefined,
                             } : undefined}
                             actions={
                                 <Link href={`/storyboards/${storyboard.id}`}>

@@ -68,11 +68,11 @@ export default function CharacterCard({ character }: CharacterCardProps) {
                             <div className="flex items-center gap-3">
                                 <div className="flex items-center gap-1 text-muted-foreground">
                                     <Heart className="h-3.5 w-3.5" />
-                                    <span className="font-medium tabular-nums">{character.likeCount || 0}</span>
+                                    <span className="font-medium tabular-nums">{character.likes || 0}</span>
                                 </div>
                                 <div className="flex items-center gap-1 text-muted-foreground">
                                     <MessageSquare className="h-3.5 w-3.5" />
-                                    <span className="font-medium tabular-nums">{character.commentCount || 0}</span>
+                                    <span className="font-medium tabular-nums">{character.chatCount || 0}</span>
                                 </div>
                             </div>
                         </div>
