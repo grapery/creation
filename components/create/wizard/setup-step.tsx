@@ -23,10 +23,10 @@ export function SetupStep({ data, onChange, onNext, onBack }: SetupStepProps) {
     const [showFullContent, setShowFullContent] = useState(false);
     const [generatedContent, setGeneratedContent] = useState("");
 
-    const canRenderStory = !data.title.isEmpty && !data.content.isEmpty;
-    const canCreateStoryboard = data.useAI 
-        ? !generatedContent.isEmpty || !data.title.isEmpty && !data.content.isEmpty
-        : !data.title.isEmpty && !data.content.isEmpty;
+    const canRenderStory = data.title.length > 0 && data.content.length > 0;
+    const canCreateStoryboard = data.useAI
+        ? data.generatedContent.length > 0 || (data.title.length > 0 && data.content.length > 0)
+        : data.title.length > 0 && data.content.length > 0;
 
     const toggleAI = () => {
         onChange({ ...data, useAI: !data.useAI });
@@ -87,14 +87,12 @@ export function SetupStep({ data, onChange, onNext, onBack }: SetupStepProps) {
                 </div>
                 <button
                     onClick={toggleAI}
-                    className={`relative w-11 h-6 rounded-full transition-colors ${
-                        data.useAI ? "bg-purple-500" : "bg-gray-300"
-                    }`}
+                    className={`relative w-11 h-6 rounded-full transition-colors ${data.useAI ? "bg-purple-500" : "bg-gray-300"
+                        }`}
                 >
                     <span
-                        className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${
-                            data.useAI ? "translate-x-5" : "translate-x-1"
-                        }`}
+                        className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${data.useAI ? "translate-x-5" : "translate-x-1"
+                            }`}
                     />
                 </button>
             </div>
@@ -130,7 +128,7 @@ export function SetupStep({ data, onChange, onNext, onBack }: SetupStepProps) {
             )}
 
             {/* AI Generated Content Preview */}
-            {data.useAI && !generatedContent.isEmpty && (
+            {data.useAI && generatedContent.length > 0 && (
                 <div className="p-4 bg-green-50/10 border border-green-500/30 rounded-lg">
                     <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
@@ -169,7 +167,7 @@ export function SetupStep({ data, onChange, onNext, onBack }: SetupStepProps) {
             )}
 
             {/* Render Story Button - AI Mode */}
-            {data.useAI && generatedContent.isEmpty && (
+            {data.useAI && generatedContent.length === 0 && (
                 <button
                     onClick={renderContent}
                     disabled={!canRenderStory}
@@ -193,7 +191,7 @@ export function SetupStep({ data, onChange, onNext, onBack }: SetupStepProps) {
                     disabled={!canCreateStoryboard}
                     className="flex-1 py-3 bg-black hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors"
                 >
-                    {data.useAI && !generatedContent.isEmpty ? "Create Storyboard" : "Continue"}
+                    {data.useAI && generatedContent.length > 0 ? "Create Storyboard" : "Continue"}
                 </button>
             </div>
         </div>

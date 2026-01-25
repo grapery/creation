@@ -101,11 +101,10 @@ export function ProfileHeader({
                             <>
                                 <button
                                     onClick={onFollow}
-                                    className={`px-4 h-8 rounded-full text-sm font-medium ${
-                                        isFollowing
+                                    className={`px-4 h-8 rounded-full text-sm font-medium ${isFollowing
                                             ? "bg-transparent text-foreground border border-border"
                                             : "bg-primary text-white border-transparent"
-                                    }`}
+                                        }`}
                                 >
                                     {isFollowing ? "Following" : "Follow"}
                                 </button>
@@ -129,7 +128,7 @@ export function ProfileHeader({
                         </h1>
                         {user.isVip && (
                             <div className="flex items-center gap-0.5 text-orange-500">
-                                <Crown className="w-3.5 h-3.5 fill="currentColor" />
+                                <Crown className="w-3.5 h-3.5 fill-current" />
                             </div>
                         )}
                     </div>

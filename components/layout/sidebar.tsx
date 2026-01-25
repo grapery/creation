@@ -74,7 +74,7 @@ export function Sidebar({ className }: { className?: string }) {
                     <Link href="/api/v1" className="hover:text-foreground">API 文档</Link>
                 </div>
                 <div className="text-xs text-muted-foreground">
-                    <div>© 2025 Grapery Platform. All rights reserved.</div>
+                    <div>© 2025 未择 Voyager Platform. All rights reserved.</div>
                     <div className="mt-1">
                         <a 
                             href="https://beian.miit.gov.cn/" 

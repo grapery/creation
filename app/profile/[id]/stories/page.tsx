@@ -5,12 +5,17 @@ import { useParams, useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/providers/auth-provider";
 import { profile } from "@/lib/api/profile";
 import { Story, User } from "@/lib/types";
-import { Loader2, Sparkles, FileText, Layers, BookOpen } from "lucide-react";
+import { Loader2, BookOpen, Layers, FileText, Sparkles, Heart, MessageSquare, Calendar, Crown, Settings, Share2, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useTranslation } from "@/providers/language-provider";
+import { getAuthToken } from "@/lib/api/client";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import ProfileHeader from "@/components/profile/profile-header-v2";
+import ContentGrid from "@/components/profile/content-grid";
+import StoryCard from "@/components/story/story-card-v2";
+import ListItem from "@/components/profile/list-item";
 
 // Inline Tabs component
 function ProfileTabs({
@@ -50,13 +55,13 @@ function ProfileTabs({
         ...(isOwnProfile ? [{
             label: t("profile.drafts", "Drafts"),
             href: `${basePath}/drafts`,
-            icon: Sparkles,
+            icon: FileText,
             exact: false
         }] : []),
     ];
 
     return (
-        <div className="border-b bg-background sticky top-14 z-40">
+        <div className="border-b border-border/50 bg-background sticky top-14 z-40">
             <div className="container max-w-6xl mx-auto px-4 flex overflow-x-auto scrollbar-hide">
                 {tabs.map((tab) => {
                     const isActive = tab.exact
@@ -77,7 +82,7 @@ function ProfileTabs({
                             <tab.icon className="h-4 w-4" />
                             {tab.label}
                         </Link>
-                    )
+                    );
                 })}
             </div>
         </div>
@@ -95,7 +100,7 @@ export default function ProfileStoriesPage() {
     const [loading, setLoading] = useState(true);
     const [isFollowing, setIsFollowing] = useState(false);
 
-    const isOwnProfile = currentUser?.id === id || (!id && currentUser?.id);
+    const isOwnProfile = !!currentUser?.id && currentUser.id === id;
     const userId = id || currentUser?.id;
 
     useEffect(() => {
@@ -107,10 +112,14 @@ export default function ProfileStoriesPage() {
             setLoading(true);
             try {
                 // Fetch user profile
+                const token = getAuthToken();
+                const headers: Record<string, string> = {};
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+
                 const userResponse = await fetch(`/api/users/${userId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('voyager_auth_token')}`,
-                    },
+                    headers,
                 });
                 const userData = await userResponse.json();
 
@@ -120,7 +129,7 @@ export default function ProfileStoriesPage() {
                 setIsFollowing(userData.isFollowing || false);
 
                 // Fetch user's stories
-                const storiesData = await profile.getStories(userId, 1, 50);
+                const storiesData = await profile.getStories(userId as string, 1, 50);
 
                 if (!isMounted) return;
 
@@ -147,19 +156,21 @@ export default function ProfileStoriesPage() {
     const handleFollow = async () => {
         if (!profileUser) return;
         try {
+            const token = getAuthToken();
+            const headers: Record<string, string> = {};
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
             if (isFollowing) {
                 await fetch(`/api/users/${profileUser.id}/unfollow`, {
                     method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('voyager_auth_token')}`,
-                    },
+                    headers,
                 });
             } else {
                 await fetch(`/api/users/${profileUser.id}/follow`, {
                     method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('voyager_auth_token')}`,
-                    },
+                    headers,
                 });
             }
             setIsFollowing(!isFollowing);
@@ -179,8 +190,8 @@ export default function ProfileStoriesPage() {
     if (!profileUser) {
         return (
             <div className="min-h-screen bg-background flex items-center justify-center">
-                <div className="text-center">
-                    <h1 className="text-2xl font-bold mb-4">{t("profile.user_not_found", "User Not Found")}</h1>
+                <div className="text-center space-y-4">
+                    <h1 className="text-2xl font-bold text-foreground">{t("profile.user_not_found", "User Not Found")}</h1>
                     <Button onClick={() => router.back()}>{t("common.go_back", "Go Back")}</Button>
                 </div>
             </div>
@@ -191,205 +202,62 @@ export default function ProfileStoriesPage() {
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
-            {/* Immersive Header */}
-            <div className="h-[200px] w-full relative">
-                {profileUser.background ? (
-                    <>
-                        <img
-                            src={profileUser.background}
-                            alt="Cover"
-                            className="w-full h-full object-cover blur-md"
-                        />
-                        <div className="absolute inset-0 bg-black/40" />
-                    </>
-                ) : profileUser.avatar ? (
-                    <>
-                        <img
-                            src={profileUser.avatar}
-                            alt="Cover"
-                            className="w-full h-full object-cover blur-md"
-                        />
-                        <div className="absolute inset-0 bg-black/30" />
-                    </>
-                ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-primary/80 via-primary/60 to-background" />
-                )}
-            </div>
-
-            <div className="container max-w-6xl mx-auto px-4 pb-4">
-                {/* Profile Info Section */}
-                <div className="relative -mt-16 mb-6">
-                    <div className="flex flex-col md:flex-row items-end md:items-start gap-6">
-                        {/* Avatar */}
-                        <div className="w-32 h-32 rounded-xl bg-background p-1 shadow-xl">
-                            <div className="w-full h-full rounded-lg bg-secondary overflow-hidden">
-                                {profileUser.avatar ? (
-                                    <img
-                                        src={profileUser.avatar}
-                                        alt={profileUser.displayName || profileUser.username}
-                                        className="w-full h-full object-cover"
-                                    />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center">
-                                        <span className="text-4xl font-bold text-muted-foreground">
-                                            {(profileUser.displayName || profileUser.username)?.[0]?.toUpperCase() || "?"}
-                                        </span>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Info */}
-                        <div className="flex-1 pt-4">
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                <div>
-                                    <div className="flex items-center gap-2">
-                                        <h1 className="text-3xl font-bold text-foreground">
-                                            {profileUser.displayName || profileUser.username}
-                                        </h1>
-                                        {profileUser.isVip && (
-                                            <span className="text-orange-500 text-2xl">👑</span>
-                                        )}
-                                    </div>
-                                    <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
-                                        <span>@{profileUser.username}</span>
-                                        {profileUser.createdAt && (
-                                            <>
-                                                <span>·</span>
-                                                <span>{t("profile.joined", "Joined")} {new Date(profileUser.createdAt * 1000).toLocaleDateString("en-US", { year: "numeric", month: "2-digit" })}</span>
-                                            </>
-                                        )}
-                                    </div>
-                                    {profileUser.bio && (
-                                        <p className="mt-3 text-muted-foreground max-w-2xl">
-                                            {profileUser.bio}
-                                        </p>
-                                    )}
-                                </div>
-
-                                <div className="flex items-center justify-center md:justify-start gap-2">
-                                    {isOwnProfile ? (
-                                        <>
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                onClick={() => router.push("/settings/profile")}
-                                            >
-                                                {t("profile.edit_profile", "Edit Profile")}
-                                            </Button>
-                                        </>
-                                    ) : (
-                                        <Button
-                                            size="sm"
-                                            variant={isFollowing ? "outline" : "default"}
-                                            onClick={handleFollow}
-                                        >
-                                            {isFollowing ? t("profile.following", "Following") : t("profile.follow", "Follow")}
-                                        </Button>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Stats */}
-                            <div className="flex items-center gap-6 mt-4 text-sm">
-                                <div className="flex items-center gap-1">
-                                    <span className="font-semibold text-foreground">{profileUser.followingCount || 0}</span>
-                                    <span className="text-muted-foreground">{t("profile.following", "following")}</span>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                    <span className="font-semibold text-foreground">{profileUser.followerCount || 0}</span>
-                                    <span className="text-muted-foreground">{t("profile.followers", "followers")}</span>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                    <span className="font-semibold text-foreground">{totalLikes}</span>
-                                    <span className="text-muted-foreground">{t("profile.likes", "likes")}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {/* Profile Header - Improved version */}
+            <ProfileHeader
+                user={profileUser}
+                isOwnProfile={isOwnProfile}
+                isFollowing={isFollowing}
+                likesCount={totalLikes}
+                onAvatarTap={() => {}}
+                onEditProfile={() => router.push("/settings/profile")}
+                onFollow={handleFollow}
+                onShare={() => {}}
+                onMessage={() => router.push(`/chat/${profileUser.id}`)}
+            />
 
             {/* Tabs Navigation */}
-            <ProfileTabs currentPath={pathname} userId={userId!} isOwnProfile={isOwnProfile} />
+            <ProfileTabs currentPath={pathname} userId={userId as string} isOwnProfile={!!isOwnProfile} />
 
             {/* Stories Content */}
             <main className="flex-1 container max-w-6xl mx-auto px-4 py-8">
-                <div className="space-y-4">
-                    {stories.length === 0 ? (
-                        <Card>
-                            <CardContent className="p-12">
-                                <div className="text-center py-12 text-muted-foreground">
-                                    <BookOpen className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
-                                    <p className="text-lg font-semibold mb-2">{t("profile.no_stories", "No stories yet")}</p>
-                                    <p className="text-sm">
-                                        {isOwnProfile
-                                            ? t("profile.create_first_story", "Create your first story to get started")
-                                            : t("profile.user_no_stories", "This user hasn't created any stories yet")
-                                        }
-                                    </p>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ) : (
-                        <div className="space-y-4">
-                            {stories.map((story) => (
-                                <Link key={story.id} href={`/stories/${story.id}`}>
-                                    <Card className="hover:shadow-md transition-shadow cursor-pointer">
-                                        <CardContent className="p-4">
-                                            <div className="flex gap-4">
-                                                {/* Cover Image */}
-                                                {story.coverImage && (
-                                                    <div className="w-32 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-secondary">
-                                                        <img
-                                                            src={story.coverImage}
-                                                            alt={story.title}
-                                                            className="w-full h-full object-cover"
-                                                        />
-                                                    </div>
-                                                )}
-
-                                                {/* Content */}
-                                                <div className="flex-1 min-w-0">
-                                                    {/* Title */}
-                                                    <h3 className="text-base font-bold text-foreground mb-1 line-clamp-2">
-                                                        {story.title}
-                                                    </h3>
-
-                                                    {/* Description */}
-                                                    {story.description && (
-                                                        <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                                                            {story.description}
-                                                        </p>
-                                                    )}
-
-                                                    {/* Stats */}
-                                                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                                                        {story.panels && (
-                                                            <span>{story.panels} panels</span>
-                                                        )}
-                                                        {story.likes && (
-                                                            <>
-                                                                <span>·</span>
-                                                                <span>{story.likes} likes</span>
-                                                            </>
-                                                        )}
-                                                        {story.status === 1 && (
-                                                            <>
-                                                                <span>·</span>
-                                                                <span className="text-xs font-medium text-primary">{t("story.published", "Published")}</span>
-                                                            </>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </CardContent>
-                                    </Card>
+                <ContentGrid
+                    title="Stories"
+                    icon={<BookOpen />}
+                    loading={loading}
+                    empty={stories.length === 0}
+                    emptyMessage="No stories yet"
+                    emptyIcon={<BookOpen />}
+                    showTitle={false}
+                    layout="list"
+                >
+                    {stories.map((story) => (
+                        <ListItem
+                            key={story.id}
+                            id={story.id}
+                            title={story.title}
+                            description={story.description}
+                            coverImage={story.coverImage}
+                            coverIcon={<BookOpen className="h-8 w-8" />}
+                            stats={{
+                                likes: story.likeCount,
+                                comments: story.commentCount,
+                                views: story.viewCount,
+                                createdAt: story.createdAt,
+                            }}
+                            author={story.author ? {
+                                name: story.author.displayName || story.author.username || "Unknown",
+                                avatar: story.author.avatar,
+                                username: story.author.username,
+                            } : undefined}
+                            actions={
+                                <Link href={`/stories/${story.id}`}>
+                                    <Button size="sm" variant="outline">View</Button>
                                 </Link>
-                            ))}
-                        </div>
-                    )}
-                </div>
+                            }
+                            onClick={() => router.push(`/stories/${story.id}`)}
+                        />
+                    ))}
+                </ContentGrid>
             </main>
         </div>
     );

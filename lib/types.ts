@@ -1,7 +1,7 @@
 export interface User {
     id: string;
     username: string;
-    email: string;
+    email?: string;
     displayName?: string;
     bio?: string;
     avatar?: string;
@@ -161,14 +161,34 @@ export interface ActivityHeatmapResponse {
 // Character Models
 export interface Character {
     id: string;
-    storyId: string;
+    storyId?: string;
     name: string;
-    description?: string;
+    description: string;
     avatar?: string;
-    authorId?: string;
+    portrait?: string;
+    background?: string;
+    personality?: string | string[];
+    shortTermGoal?: string;
+    longTermGoal?: string;
+    handlingStyle?: string;
+    cognitionRange?: string;
+    abilityFeatures?: string;
+    appearance?: string;
+    dressPreference?: string;
+    creatorId: string;
     author?: User;
+    isPublic: boolean;
+    likes?: number;
+    followers?: number;
+    stories?: number;
+    isFollowing?: boolean;
+    chatCount?: number;
+    tags?: string[];
+    creator?: User;
     createdAt?: number;
     updatedAt?: number;
+    systemPrompt?: string;
+    gallery?: string[];
 }
 
 // Scene Models (Story-level scenes, not storyboard scenes)

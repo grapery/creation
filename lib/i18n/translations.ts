@@ -4,7 +4,7 @@ import ja from './translations/ja.json';
 
 export type Language = 'en' | 'zh-Hans' | 'ja';
 
-export const translations: Record<Language, typeof en> = {
+export const translations: Record<Language, any> = {
   en,
   'zh-Hans': zhHans,
   ja,
@@ -21,11 +21,11 @@ export const LANGUAGE_NAMES: Record<Language, { name: string; nativeName: string
 export function getTranslation(key: string, language: Language = DEFAULT_LANGUAGE): string {
   const keys = key.split('.');
   let value: any = translations[language];
-  
+
   for (const k of keys) {
     value = value?.[k];
   }
-  
+
   return value || key;
 }
 

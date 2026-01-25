@@ -2,14 +2,10 @@ name: creation-frontend-ci
 
 on:
   push:
-    paths:
-      - 'creation/**'
     branches:
       - main
       - develop
   pull_request:
-    paths:
-      - 'creation/**'
   # 手动触发部署
   workflow_dispatch:
     inputs:
@@ -26,7 +22,7 @@ env:
   REGISTRY: ${{ vars.ACR_REGISTRY || 'crpi-kz6w8hb0pa94yvgy.cn-hangzhou.personal.cr.aliyuncs.com' }}
   IMAGE_NAME: grapery-creation
   SERVICE_NAME: creation
-  PORT: 3000
+  APP_PORT: 3000
 
 jobs:
   # ========================================
@@ -48,7 +44,6 @@ jobs:
         run: echo ${{ vars.ACR_PASSWORD }} | docker login ${{ env.REGISTRY }} -u ${{ vars.ACR_USERNAME }} --password-stdin
 
       - name: Build Docker image
-        working-directory: ./creation
         run: |
           docker build \
             -f Dockerfile \
@@ -88,7 +83,6 @@ jobs:
         run: echo ${{ vars.ACR_PASSWORD }} | docker login ${{ env.REGISTRY }} -u ${{ vars.ACR_USERNAME }} --password-stdin
 
       - name: Build Docker image
-        working-directory: ./creation
         run: |
           docker build \
             -f Dockerfile \
@@ -126,17 +120,17 @@ jobs:
       - name: Generate .env file
         run: |
           echo "📦 Generating development .env file..."
-          cat > creation/.env << EOF
+          cat > .env << EOF
           # ========== Environment ==========
           ENVIRONMENT=development
           SERVICE_NAME=${{ env.SERVICE_NAME }}
           IMAGE=${{ env.REGISTRY }}/grapery-dev/${{ env.IMAGE_NAME }}:dev
           
           # ========== Service Configuration ==========
-          PORT=${{ env.PORT }}
+          PORT=${{ env.APP_PORT }}
           EOF
           echo "✅ Development .env file generated"
-          cat creation/.env
+          cat .env
 
       - name: Deploy notification
         run: |
@@ -145,10 +139,11 @@ jobs:
           echo "| Setting | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|---------|-------|" >> $GITHUB_STEP_SUMMARY
           echo "| Service | ${{ env.SERVICE_NAME }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Port | ${{ env.PORT }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Port | ${{ env.APP_PORT }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Image | \`${{ env.REGISTRY }}/grapery-dev/${{ env.IMAGE_NAME }}:dev\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Environment | development |" >> $GITHUB_STEP_SUMMARY
           echo "| Commit | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Host | ${{ vars.DEV_DEPLOY_HOST }} |" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload .env to ECS
         uses: appleboy/scp-action@v0.1.4
@@ -157,7 +152,7 @@ jobs:
           username: ${{ vars.SSH_USER }}
           key: ${{ vars.SSH_KEY }}
           port: 22
-          source: "creation/.env"
+          source: ".env"
           target: "/home/ubuntu/grapery/creation/"
 
       - name: Remote Deploy to Development Server
@@ -205,7 +200,7 @@ jobs:
               --name ${{ env.SERVICE_NAME }} \
               --restart unless-stopped \
               --network grapery-network \
-              -p ${{ env.PORT }}:3000 \
+              -p ${{ env.APP_PORT }}:3000 \
               --env-file .env \
               ${{ env.REGISTRY }}/grapery-dev/${{ env.IMAGE_NAME }}:dev)
             
@@ -227,7 +222,7 @@ jobs:
             # 检查健康状态
             echo ""
             echo "🏥 Health check:"
-            if curl -f http://localhost:${{ env.PORT }}/api/health > /dev/null 2>&1; then
+            if curl -f http://localhost:${{ env.APP_PORT }}/api/health > /dev/null 2>&1; then
               echo "✅ Health check passed"
             else
               echo "⚠️  Health check failed, but container is running"
@@ -260,17 +255,17 @@ jobs:
       - name: Generate .env file
         run: |
           echo "📦 Generating production .env file..."
-          cat > creation/.env << EOF
+          cat > .env << EOF
           # ========== Environment ==========
           ENVIRONMENT=production
           SERVICE_NAME=${{ env.SERVICE_NAME }}
           IMAGE=${{ env.REGISTRY }}/grapery-prod/${{ env.IMAGE_NAME }}:prod
           
           # ========== Service Configuration ==========
-          PORT=${{ env.PORT }}
+          PORT=${{ env.APP_PORT }}
           EOF
           echo "✅ Production .env file generated"
-          cat creation/.env
+          cat .env
 
       - name: Deploy notification
         run: |
@@ -279,10 +274,11 @@ jobs:
           echo "| Setting | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|---------|-------|" >> $GITHUB_STEP_SUMMARY
           echo "| Service | ${{ env.SERVICE_NAME }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Port | ${{ env.PORT }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Port | ${{ env.APP_PORT }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Image | \`${{ env.REGISTRY }}/grapery-prod/${{ env.IMAGE_NAME }}:prod\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Environment | production |" >> $GITHUB_STEP_SUMMARY
           echo "| Commit | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Host | ${{ vars.PROD_DEPLOY_HOST }} |" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload .env to ECS
         uses: appleboy/scp-action@v0.1.4
@@ -291,7 +287,7 @@ jobs:
           username: ${{ vars.SSH_USER }}
           key: ${{ vars.SSH_KEY }}
           port: 22
-          source: "creation/.env"
+          source: ".env"
           target: "/home/ubuntu/grapery/creation/"
 
       - name: Remote Deploy to Production Server
@@ -339,7 +335,7 @@ jobs:
               --name ${{ env.SERVICE_NAME }} \
               --restart unless-stopped \
               --network grapery-network \
-              -p ${{ env.PORT }}:3000 \
+              -p ${{ env.APP_PORT }}:3000 \
               --env-file .env \
               ${{ env.REGISTRY }}/grapery-prod/${{ env.IMAGE_NAME }}:prod)
             
@@ -361,7 +357,7 @@ jobs:
             # 检查健康状态
             echo ""
             echo "🏥 Health check:"
-            if curl -f http://localhost:${{ env.PORT }}/api/health > /dev/null 2>&1; then
+            if curl -f http://localhost:${{ env.APP_PORT }}/api/health > /dev/null 2>&1; then
               echo "✅ Health check passed"
             else
               echo "⚠️  Health check failed, but container is running"

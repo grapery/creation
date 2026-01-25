@@ -126,7 +126,7 @@ export default function GroupDashboardPage() {
                                 {t("group_detail.activity")}
                             </h3>
                             {heatmap ? (
-                                <HeatmapComponent data={heatmap} />
+                                <HeatmapComponent data={heatmap.data} totalCount={heatmap.totalCount} />
                             ) : (
                                 <div className="text-sm text-muted-foreground">{t("groups.no_activity_yet")}</div>
                             )}

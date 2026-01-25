@@ -2,7 +2,7 @@
 
 ## 概述
 
-Creation 是 Grapery 平台的前端应用，基于 Next.js 16 构建。本文档说明如何部署和配置前端服务。
+Creation 是 未择 Voyager 平台的前端应用，基于 Next.js 16 构建。本文档说明如何部署和配置前端服务。
 
 ## 架构
 
@@ -16,7 +16,7 @@ Creation 是 Grapery 平台的前端应用，基于 Next.js 16 构建。本文�
 
 ```bash
 cd creation
-docker build -t grapery-creation:latest .
+docker build -t voyager-creation:latest .
 ```
 
 ### 运行容器
@@ -24,9 +24,9 @@ docker build -t grapery-creation:latest .
 ```bash
 docker run -d \
   --name creation \
-  --network grapery-network \
+  --network voyager-network \
   -p 3000:3000 \
-  grapery-creation:latest
+  voyager-creation:latest
 ```
 
 ## GitHub Actions 自动部署
@@ -73,7 +73,7 @@ Nginx 配置位于 `ngx/conf/default.conf`，主要配置：
 ## 注意事项
 
 1. **Standalone 模式**: Next.js 配置为 `standalone` 输出模式，适合 Docker 部署
-2. **网络配置**: 确保容器加入 `grapery-network` 网络，以便与其他服务通信
+2. **网络配置**: 确保容器加入 `voyager-network` 网络，以便与其他服务通信
 3. **环境变量**: 生产环境需要配置必要的环境变量
 4. **静态资源**: Next.js 会自动处理静态资源，无需额外配置
 
@@ -83,7 +83,7 @@ Nginx 配置位于 `ngx/conf/default.conf`，主要配置：
 
 1. 检查日志: `docker logs creation`
 2. 检查端口占用: `netstat -tulpn | grep 3000`
-3. 检查网络: `docker network inspect grapery-network`
+3. 检查网络: `docker network inspect voyager-network`
 
 ### 代理失败
 

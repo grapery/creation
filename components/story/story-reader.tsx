@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Story, Storyboard, StoryboardScene, Character as CharacterType } from "@/lib/types";
 import { X, ChevronLeft, ChevronRight, BookOpen, Users, Image as ImageIcon } from "lucide-react";
 
@@ -21,6 +22,7 @@ interface StoryReaderContent {
     isStandalone: boolean;
     isAIGenerated: boolean;
     isLiked: boolean;
+    isRoot?: boolean;
     characters: Array<{
         id: string;
         name: string;
@@ -152,8 +154,7 @@ export function StoryReader({ content, onClose, onFork, onLike, onBranchTap }: S
                                         </div>
                                     ))}
                                 </div>
-                            )}
-                        </div>
+                            </div>
                         )}
 
                         {/* Scenes */}
@@ -183,8 +184,8 @@ export function StoryReader({ content, onClose, onFork, onLike, onBranchTap }: S
                                         </div>
                                     ))}
                                 </div>
-                            )}
-                        </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

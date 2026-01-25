@@ -6,10 +6,11 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
 
 export async function POST(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const userId = params.id;
+        const { id } = await params;
+        const userId = id;
 
         // Get the authorization header from the incoming request
         const authHeader = request.headers.get('authorization');
@@ -51,10 +52,11 @@ export async function POST(
 
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const userId = params.id;
+        const { id } = await params;
+        const userId = id;
 
         // Get the authorization header from the incoming request
         const authHeader = request.headers.get('authorization');

@@ -18,10 +18,18 @@ export default function ChatListPage() {
         async function fetchData() {
             setLoading(true);
             try {
-                const res = await chat.listSessions();
-                setSessions(res || []);
+                const res = await chat.listSessions() as unknown;
+                // Handle both array and object response formats
+                if (Array.isArray(res)) {
+                    setSessions(res);
+                } else if (res && typeof res === 'object' && 'sessions' in res) {
+                    setSessions((res as { sessions: ChatSession[] }).sessions || []);
+                } else {
+                    setSessions([]);
+                }
             } catch (e) {
                 console.error(e);
+                setSessions([]);
             } finally {
                 setLoading(false);
             }

@@ -3,7 +3,8 @@
 import React from "react";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { LanguageSelector, Language } from "./language-selector";
+import { LanguageSelector } from "./language-selector";
+import { Language } from "@/providers/language-provider";
 
 interface AuthTopBarProps {
     showBack?: boolean;

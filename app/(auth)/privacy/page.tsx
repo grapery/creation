@@ -53,7 +53,7 @@ export default function PrivacyPolicyPage() {
 
 ## 引言
 
-Grapery（"我们"、"平台"）非常重视用户的隐私保护和个人信息安全。本隐私政策旨在向您说明我们如何收集、使用、存储和保护您的个人信息。
+未择 Voyager（"我们"、"平台"）非常重视用户的隐私保护和个人信息安全。本隐私政策旨在向您说明我们如何收集、使用、存储和保护您的个人信息。
 
 使用我们的服务即表示您同意本隐私政策的条款。如果您不同意本政策，请停止使用我们的服务。
 
@@ -404,11 +404,10 @@ Grapery（"我们"、"平台"）非常重视用户的隐私保护和个人信息
                                 {content.map((block, index) => (
                                     <div key={index}>
                                         {block.type === "heading" && (
-                                            <h2 className={`font-bold ${
-                                                block.level === 1 ? "text-3xl" :
-                                                block.level === 2 ? "text-2xl" :
-                                                "text-xl"
-                                            }`}>
+                                            <h2 className={`font-bold ${block.level === 1 ? "text-3xl" :
+                                                    block.level === 2 ? "text-2xl" :
+                                                        "text-xl"
+                                                }`}>
                                                 {block.text}
                                             </h2>
                                         )}
@@ -455,7 +454,7 @@ Grapery（"我们"、"平台"）非常重视用户的隐私保护和个人信息
     );
 }
 
-function parseInlineMarkdown(text: string): JSX.Element {
+function parseInlineMarkdown(text: string) {
     // Simple inline markdown parsing for bold and links
     let result = text;
 

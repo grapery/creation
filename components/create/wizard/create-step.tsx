@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { ArrowLeftRight, RotateCcw, ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
 
 interface CreateStepProps {
@@ -8,7 +9,7 @@ interface CreateStepProps {
         style: string;
         useAI: boolean;
         sceneCount: number;
-        characters: [];
+        characters: any[];
         content: string;
         generatedContent: string;
         scenes: any[];
@@ -34,7 +35,7 @@ export function CreateStep({ data, onChange, onNext, onBack }: CreateStepProps) 
                     description: "The story begins with an engaging introduction to the world and characters."
                 },
                 {
-                    id: "2", 
+                    id: "2",
                     sequence: 2,
                     title: "Rising Action",
                     description: "Tensions build as the protagonist faces their first challenge."

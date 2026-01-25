@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useAuth } from "@/providers/auth-provider";
 import { Button } from "@/components/ui/button";
-import { UserCircle, LogOut, Loader2, Crown, Search } from "lucide-react";
+import { UserCircle, LogOut, Loader2, Crown, Search, Bell, MessageSquare, Info } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { LanguageSelector } from "@/components/auth/language-selector";
 import { useTranslation } from "@/providers/language-provider";
@@ -27,8 +28,22 @@ export function Header() {
                 </div>
 
                 {/* Search Bar */}
-                <div className="flex-1 max-w-md mx-4 hidden md:block">
-                    <div className="relative">
+                <div className="flex-1 max-w-md mx-4 hidden md:flex items-center gap-4">
+                    <nav className="flex items-center space-x-4 text-sm font-medium">
+                        <Link href="/about" className="transition-colors hover:text-foreground/80 text-foreground/60 flex items-center gap-1">
+                            <Info className="h-4 w-4" />
+                            {t("navigation.about")}
+                        </Link>
+                        <Link href="/notifications" className="transition-colors hover:text-foreground/80 text-foreground/60 flex items-center gap-1">
+                            <Bell className="h-4 w-4" />
+                            {t("navigation.notify")}
+                        </Link>
+                        <Link href="/chat" className="transition-colors hover:text-foreground/80 text-foreground/60 flex items-center gap-1">
+                            <MessageSquare className="h-4 w-4" />
+                            {t("navigation.messages")}
+                        </Link>
+                    </nav>
+                    <div className="relative flex-1">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
                             type="search"
@@ -48,13 +63,16 @@ export function Header() {
                             {!user.isVip && (
                                 <Button variant="outline" size="sm" className="hidden md:flex border-yellow-500/50 hover:bg-yellow-500/10 hover:text-yellow-500 text-yellow-600 dark:text-yellow-500" asChild>
                                     <Link href="/vip">
-                                        <Crown className="mr-2 h-4 w-4" /> Get Pro
+                                        <Crown className="w-3.5 h-3.5 fill-current" /> Get Pro
                                     </Link>
                                 </Button>
                             )}
                             <Button variant="ghost" size="sm" asChild>
                                 <Link href="/profile">
-                                    <UserCircle className="mr-2 h-4 w-4" />
+                                    <Avatar className="h-5 w-5 mr-2">
+                                        <AvatarImage src={user.avatar} alt={user.displayName || user.username} />
+                                        <AvatarFallback><UserCircle className="h-5 w-5" /></AvatarFallback>
+                                    </Avatar>
                                     {user.displayName || user.username}
                                 </Link>
                             </Button>

@@ -1,6 +1,6 @@
 "use client";
 
-import { ActivityHeatmapResponse } from "@/lib/api/groups";
+import { ActivityHeatmapResponse, ActivityHeatmapData, ActivityTimeRange } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 // Mock Tooltip for now if not installed, or I should install.
@@ -8,16 +8,36 @@ import { cn } from "@/lib/utils";
 // Actually I'll use a simple title attribute for now to save installing more packages unless strictly needed.
 // Heatmap usually needs a good tooltip.
 
-export function ActivityHeatmap({ data }: { data: ActivityHeatmapResponse }) {
-    // Simple grid of squares.
-    // Data.heatmapData contains { date, count }
-    // We need to render a grid (like GitHub contributions).
-    // For 'month', it's about 30 days.
-    // We can just render a flex row of squares.
+interface ActivityHeatmapProps {
+    data: ActivityHeatmapData[];
+    totalCount?: number;
+    selectedTimeRange?: ActivityTimeRange;
+    selectedDate?: string | null;
+    isLoading?: boolean;
+    onTimeRangeChange?: (range: ActivityTimeRange) => void;
+    onDateSelect?: (date: string | null) => void;
+}
 
-    if (!data?.heatmapData) return null;
+export function ActivityHeatmap({
+    data,
+    totalCount,
+    selectedTimeRange,
+    selectedDate,
+    isLoading,
+    onTimeRangeChange,
+    onDateSelect
+}: ActivityHeatmapProps) {
+    if (isLoading) {
+        return <div className="h-20 w-full animate-pulse bg-secondary/30 rounded-lg"></div>;
+    }
 
-    const maxCount = Math.max(...data.heatmapData.map(d => d.count), 1);
+    if (!data || data.length === 0) {
+        return <div className="text-center py-4 text-muted-foreground text-xs">No activity data available</div>;
+    }
+
+    const maxCount = Math.max(...data.map(d => d.count), 1);
+    const startDate = data[0]?.date || "";
+    const endDate = data[data.length - 1]?.date || "";
 
     const getColor = (count: number) => {
         if (count === 0) return "bg-secondary";
@@ -29,21 +49,52 @@ export function ActivityHeatmap({ data }: { data: ActivityHeatmapResponse }) {
     };
 
     return (
-        <div className="w-full overflow-x-auto pb-2">
-            <div className="flex gap-1 min-w-[300px]">
-                {data.heatmapData.map((d) => (
-                    <div key={d.date} className="flex flex-col gap-1 items-center group relative">
-                        <div
-                            className={cn("h-8 w-2 md:h-12 md:w-3 rounded-sm transition-colors", getColor(d.count))}
-                            title={`${d.date}: ${d.count} activities`}
-                        />
-                        {/* Tooltip logic moved to title for simplicity/performance */}
-                    </div>
-                ))}
+        <div className="w-full space-y-4">
+            <div className="flex items-center justify-between">
+                <div className="flex gap-2">
+                    {Object.values(ActivityTimeRange).map((range) => (
+                        <button
+                            key={range}
+                            onClick={() => onTimeRangeChange?.(range)}
+                            className={cn(
+                                "px-2 py-1 text-xs rounded-md transition-colors",
+                                selectedTimeRange === range
+                                    ? "bg-primary text-primary-foreground"
+                                    : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                            )}
+                        >
+                            {range.charAt(0).toUpperCase() + range.slice(1)}
+                        </button>
+                    ))}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                    Total: <span className="font-semibold text-foreground">{totalCount}</span>
+                </div>
             </div>
-            <div className="flex justify-between text-xs text-muted-foreground mt-2">
-                <span>{data.startDate}</span>
-                <span>{data.endDate}</span>
+
+            <div className="w-full overflow-x-auto pb-2">
+                <div className="flex gap-1 min-w-[300px]">
+                    {data.map((d) => (
+                        <div
+                            key={d.date}
+                            className="flex flex-col gap-1 items-center group relative cursor-pointer"
+                            onClick={() => onDateSelect?.(d.date === selectedDate ? null : d.date)}
+                        >
+                            <div
+                                className={cn(
+                                    "h-8 w-2 md:h-12 md:w-3 rounded-sm transition-all",
+                                    getColor(d.count),
+                                    selectedDate === d.date ? "ring-2 ring-ring ring-offset-2" : ""
+                                )}
+                                title={`${d.date}: ${d.count} activities`}
+                            />
+                        </div>
+                    ))}
+                </div>
+                <div className="flex justify-between text-xs text-muted-foreground mt-2">
+                    <span>{startDate}</span>
+                    <span>{endDate}</span>
+                </div>
             </div>
         </div>
     );

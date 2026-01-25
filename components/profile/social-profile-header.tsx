@@ -3,7 +3,7 @@
 import { User } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Settings, Share2, Bell, MoreHorizontal, MessageSquare, Crown, Calendar, Users, User as UserIcon, FileText, Masks, Heart } from "lucide-react";
+import { Settings, Share2, Bell, MoreHorizontal, MessageSquare, Crown, Calendar, Users, User as UserIcon, FileText, Drama, Heart } from "lucide-react";
 import Link from "next/link";
 
 interface SocialProfileHeaderProps {
@@ -139,11 +139,10 @@ export function SocialProfileHeader({
                                 {onFollow && (
                                     <button
                                         onClick={onFollow}
-                                        className={`px-4 py-2.5 rounded-full text-sm font-semibold flex items-center gap-1 ${
-                                            isFollowing
-                                                ? "bg-card text-foreground border border-border"
-                                                : "bg-primary text-white border-transparent"
-                                        }`}
+                                        className={`px-4 py-2.5 rounded-full text-sm font-semibold flex items-center gap-1 ${isFollowing
+                                            ? "bg-card text-foreground border border-border"
+                                            : "bg-primary text-white border-transparent"
+                                            }`}
                                     >
                                         {isFollowing ? (
                                             <>
@@ -241,7 +240,7 @@ export function SocialProfileHeader({
                     <div className="flex-1">
                         <div className="px-4 py-3 bg-card rounded-lg border border-border">
                             <div className="flex flex-col items-center gap-1">
-                                <Masks className="w-3 h-3 text-muted-foreground" strokeWidth={2} />
+                                <Drama className="w-5 h-5 mr-3 text-muted-foreground" strokeWidth={2} />
                                 <span className="text-[16px] font-bold text-foreground">
                                     {user.characterCount || 0}
                                 </span>
