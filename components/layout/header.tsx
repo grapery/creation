@@ -8,10 +8,21 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { LanguageSelector } from "@/components/auth/language-selector";
 import { useTranslation } from "@/providers/language-provider";
+import { useLoginPrompt } from "@/components/auth/login-prompt";
 
 export function Header() {
     const { user, loading, logout } = useAuth();
     const { t } = useTranslation();
+    const { LoginPromptModal, show: showLoginPrompt } = useLoginPrompt();
+
+    // Handle protected links - show login prompt if not authenticated
+    const handleProtectedLink = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+        if (!user) {
+            e.preventDefault();
+            showLoginPrompt();
+        }
+        // If user is authenticated, let the link work normally
+    };
 
     return (
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -23,7 +34,13 @@ export function Header() {
                 <div className="mr-4 hidden md:flex">
                     <nav className="flex items-center space-x-6 text-sm font-medium">
                         <Link href="/" className="transition-colors hover:text-foreground/80 text-foreground">{t("navigation.home")}</Link>
-                        <Link href={user ? "/groups" : "/login"} className="transition-colors hover:text-foreground/80 text-foreground/60">{t("navigation.groups")}</Link>
+                        <Link 
+                            href="/groups" 
+                            onClick={(e) => handleProtectedLink(e, "/groups")}
+                            className="transition-colors hover:text-foreground/80 text-foreground/60"
+                        >
+                            {t("navigation.groups")}
+                        </Link>
                     </nav>
                 </div>
 
@@ -42,11 +59,19 @@ export function Header() {
                         />
                     </div>
                     <nav className="flex items-center space-x-4 text-sm font-medium">
-                        <Link href={user ? "/notifications" : "/login"} className="transition-colors hover:text-foreground/80 text-foreground/60 flex items-center gap-1">
+                        <Link 
+                            href="/notifications" 
+                            onClick={(e) => handleProtectedLink(e, "/notifications")}
+                            className="transition-colors hover:text-foreground/80 text-foreground/60 flex items-center gap-1"
+                        >
                             <Bell className="h-4 w-4" />
                             {t("navigation.notify")}
                         </Link>
-                        <Link href={user ? "/chat" : "/login"} className="transition-colors hover:text-foreground/80 text-foreground/60 flex items-center gap-1">
+                        <Link 
+                            href="/chat" 
+                            onClick={(e) => handleProtectedLink(e, "/chat")}
+                            className="transition-colors hover:text-foreground/80 text-foreground/60 flex items-center gap-1"
+                        >
                             <MessageSquare className="h-4 w-4" />
                             {t("navigation.messages")}
                         </Link>
@@ -93,6 +118,8 @@ export function Header() {
                     )}
                 </div>
             </div>
+            {/* Login Prompt Modal */}
+            <LoginPromptModal />
         </header>
     );
 }

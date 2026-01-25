@@ -86,7 +86,11 @@
     "passwords_do_not_match_error": "Passwords do not match",
     "age_requirement_error": "You must be at least 13 years old to register",
     "browse_as_guest": "Browse as Guest",
-    "browse_as_guest_description": "Explore trending stories without signing in"
+    "browse_as_guest_description": "Explore trending stories without signing in",
+    "join_community": "Join the Community",
+    "login_prompt_description": "Sign in to access exclusive content, create your own stories, and connect with other creators.",
+    "login": "Login",
+    "maybe_later": "Maybe Later"
   },
   "navigation": {
     "home": "Home",

@@ -76,7 +76,11 @@
     "passwords_do_not_match_error": "パスワードが一致しません",
     "age_requirement_error": "登録するには13歳以上である必要があります",
     "browse_as_guest": "ゲストとして閲覧",
-    "browse_as_guest_description": "ログインせずにトレンドストーリーを探索"
+    "browse_as_guest_description": "ログインせずにトレンドストーリーを探索",
+    "join_community": "コミュニティに参加",
+    "login_prompt_description": "サインインして、限定コンテンツにアクセスし、独自のストーリーを作成し、他のクリエイターとつながりましょう。",
+    "login": "ログイン",
+    "maybe_later": "後で"
   },
   "navigation": {
     "home": "ホーム",

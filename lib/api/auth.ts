@@ -86,16 +86,39 @@ export const auth = {
         accessToken?: string;
         refreshToken?: string;
     }): Promise<AuthResponse> => {
-        const response = await request<AuthResponse>('/api/auth/oauth/google', 'POST', data);
+        // Call vippay API for Google OAuth
+        const response = await request<any>('/api/vippay/google-oauth/signin', 'POST', {
+            idToken: data.idToken,
+            accessToken: data.accessToken,
+            refreshToken: data.refreshToken,
+        });
 
-        // Check if response has expected structure
-        if (response && 'accessToken' in response && typeof response.accessToken === 'string') {
-            setTokens(response.accessToken, response.refreshToken);
+        console.log('[Auth] Google OAuth response:', response);
+
+        // Handle vippay API response format
+        if (response && response.success && response.data) {
+            const { token, refreshToken, user } = response.data;
+
+            // Transform to AuthResponse format
+            const authResponse: AuthResponse = {
+                accessToken: token,
+                refreshToken: refreshToken,
+                user: user,
+                expiresIn: response.data.expiresIn,
+            };
+
+            // Save tokens
+            if (token && typeof token === 'string') {
+                setTokens(token, refreshToken);
+            } else {
+                console.error('[Auth] Invalid Google OAuth token in response');
+            }
+
+            return authResponse;
         } else {
-            console.error('[Auth] Invalid Google OAuth response structure:', response);
+            console.error('[Auth] Google OAuth failed:', response);
+            throw new Error(response?.msg || response?.message || 'Google OAuth login failed');
         }
-
-        return response;
     },
 
     loginWithApple: async (data: {

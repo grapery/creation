@@ -10,6 +10,8 @@ import { Card } from "@/components/ui/card";
 import { Loader2, BookOpen } from "lucide-react";
 import { AuthTopBar, OAuthProviderButton, Language, LanguageSelector, OAuthProvider } from "@/components/auth";
 import { useRouter } from "next/navigation";
+import { useGoogleOAuth } from "@/lib/hooks/use-google-oauth";
+import { auth } from "@/lib/api/auth";
 
 export default function LoginPage() {
     const { login } = useAuth();
@@ -22,6 +24,34 @@ export default function LoginPage() {
     const [oauthLoading, setOAuthLoading] = useState<OAuthProvider | null>(null);
     const [oauthError, setOAuthError] = useState("");
     const [showEmailLogin, setShowEmailLogin] = useState(false);
+
+    // Google OAuth integration
+    const { isLoaded: googleLoaded, isLoading: googleLoading, signIn: googleSignIn } = useGoogleOAuth({
+        clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+        onSuccess: async (credentialResponse) => {
+            try {
+                console.log('[Login] Google credential received:', {
+                    hasCredential: !!credentialResponse.credential,
+                });
+
+                // Call backend API with Google credential
+                await auth.loginWithGoogle({
+                    idToken: credentialResponse.credential,
+                });
+
+                console.log('[Login] Google login successful');
+                router.push('/');
+            } catch (err: any) {
+                console.error('[Login] Google login error:', err);
+                setOAuthError(err.message || t('auth.login_failed'));
+                setOAuthLoading(null);
+            }
+        },
+        onError: () => {
+            setOAuthError(t('auth.oauth_failed') || 'OAuth login failed');
+            setOAuthLoading(null);
+        },
+    });
 
     async function handleEmailLogin(e: React.FormEvent) {
         e.preventDefault();
@@ -37,15 +67,26 @@ export default function LoginPage() {
         }
     }
 
-    function handleOAuthLogin(provider: OAuthProvider) {
-        // Placeholder for OAuth integration
-        // Actual implementation would use Google/Apple Sign In SDK
+    async function handleOAuthLogin(provider: OAuthProvider) {
         setOAuthLoading(provider);
-        setOAuthError("OAuth integration coming soon");
-        setTimeout(() => {
+        setOAuthError("");
+
+        if (provider === "google") {
+            if (!googleLoaded) {
+                setOAuthError("Google OAuth not ready. Please try again.");
+                setOAuthLoading(null);
+                return;
+            }
+            googleSignIn();
+        } else if (provider === "apple") {
+            // Apple OAuth integration
+            setOAuthError("Apple Sign In coming soon");
             setOAuthLoading(null);
-            setTimeout(() => setOAuthError(""), 5000);
-        }, 1000);
+        } else if (provider === "wechat") {
+            // WeChat OAuth integration
+            setOAuthError("WeChat Login coming soon");
+            setOAuthLoading(null);
+        }
     }
 
     return (

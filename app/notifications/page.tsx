@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { useTranslation } from "@/providers/language-provider";
+import { useAuthRequired } from "@/lib/hooks/use-auth-required";
 import { Header } from "@/components/layout/header";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Bell, Heart, UserPlus, MessageCircle } from "lucide-react";
+import { Bell, Heart, UserPlus, MessageCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 
@@ -19,7 +20,39 @@ const mockNotifications = [
 
 export default function NotificationsPage() {
     const { t } = useTranslation();
+    const { isAuthenticated, isCheckingAuth, LoginPromptModal } = useAuthRequired();
     const [activeTab, setActiveTab] = useState("all");
+
+    // Show login prompt if not authenticated
+    if (!isAuthenticated) {
+        return (
+            <div className="min-h-screen bg-background flex flex-col">
+                <Header />
+                <main className="flex-1 container max-w-6xl px-4 py-8 mx-auto flex items-center justify-center">
+                    {isCheckingAuth ? (
+                        <div className="text-center space-y-4">
+                            <Loader2 className="h-12 w-12 mx-auto animate-spin text-primary" />
+                            <p className="text-muted-foreground">Checking authentication...</p>
+                        </div>
+                    ) : (
+                        <div className="text-center space-y-4">
+                            <Bell className="h-16 w-16 mx-auto text-muted-foreground" />
+                            <div>
+                                <h2 className="text-xl font-bold mb-2">Sign In Required</h2>
+                                <p className="text-muted-foreground max-w-md">
+                                    Please sign in to view your notifications and stay updated with your account activity.
+                                </p>
+                            </div>
+                        </div>
+                    )}
+                </main>
+                <LoginPromptModal
+                    title="View Your Notifications"
+                    description="Sign in to see your likes, follows, comments, and system updates."
+                />
+            </div>
+        );
+    }
 
     const getIcon = (type: string) => {
         switch (type) {

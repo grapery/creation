@@ -86,7 +86,11 @@
     "passwords_do_not_match_error": "密码不匹配",
     "age_requirement_error": "您必须年满13岁才能注册",
     "browse_as_guest": "游客浏览",
-    "browse_as_guest_description": "无需登录，探索热门故事"
+    "browse_as_guest_description": "无需登录，探索热门故事",
+    "join_community": "加入社区",
+    "login_prompt_description": "登录以访问独家内容，创建您自己的故事，并与其他创作者联系。",
+    "login": "登录",
+    "maybe_later": "稍后再说"
   },
   "navigation": {
     "home": "首页",

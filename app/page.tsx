@@ -8,13 +8,14 @@ import { StoryboardCard } from "@/components/storyboard/storyboard-card";
 import { storyboards } from "@/lib/api/storyboards";
 import { stories } from "@/lib/api/stories";
 import { Storyboard, Story } from "@/lib/types";
-import { Loader2, Lock, LogIn, UserPlus } from "lucide-react";
+import { Loader2, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import Link from "next/link";
+import { Link } from "next/link";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
+import { useLoginPrompt } from "@/components/auth/login-prompt";
+import { withAuth } from "@/lib/utils/api-auth";
 
 enum Tab {
   TRENDING = "trending",
@@ -31,7 +32,7 @@ export default function DashboardPage() {
   const [items, setItems] = useState<Storyboard[]>([]);
   const [trendingStories, setTrendingStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const { LoginPromptModal, show: showLoginPrompt } = useLoginPrompt();
 
   // Set default tab on auth load
   useEffect(() => {
@@ -142,7 +143,7 @@ export default function DashboardPage() {
   const handleTabClick = (tab: typeof tabs[0]) => {
     if (tab.requiredAuth && !user) {
       // Show login prompt for unauthenticated users
-      setShowLoginPrompt(true);
+      showLoginPrompt();
     } else {
       setActiveTab(tab.value);
     }
@@ -264,60 +265,7 @@ export default function DashboardPage() {
       </main>
 
       {/* Login Prompt Modal */}
-      {showLoginPrompt && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <Card className="w-full max-w-md p-8">
-            <div className="flex flex-col items-center text-center space-y-6">
-              {/* Icon */}
-              <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-                <Lock className="h-8 w-8 text-primary" />
-              </div>
-
-              {/* Title and Description */}
-              <div className="space-y-2">
-                <h3 className="text-2xl font-bold">Join the Community</h3>
-                <p className="text-muted-foreground">
-                  Sign in to access exclusive content, create your own stories, and connect with other creators.
-                </p>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-3 w-full">
-                <Button
-                  asChild
-                  className="flex-1"
-                  onClick={() => setShowLoginPrompt(false)}
-                >
-                  <Link href="/login" className="flex items-center gap-2">
-                    <LogIn className="h-4 w-4" />
-                    Login
-                  </Link>
-                </Button>
-                <Button
-                  variant="outline"
-                  asChild
-                  className="flex-1"
-                  onClick={() => setShowLoginPrompt(false)}
-                >
-                  <Link href="/register" className="flex items-center gap-2">
-                    <UserPlus className="h-4 w-4" />
-                    Sign Up
-                  </Link>
-                </Button>
-              </div>
-
-              {/* Cancel Button */}
-              <Button
-                variant="ghost"
-                className="w-full"
-                onClick={() => setShowLoginPrompt(false)}
-              >
-                Maybe Later
-              </Button>
-            </div>
-          </Card>
-        </div>
-      )}
+      <LoginPromptModal />
     </div>
   );
 }
