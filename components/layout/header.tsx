@@ -16,33 +16,23 @@ export function Header() {
     return (
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="container max-w-6xl flex h-14 items-center px-4 md:px-6 mx-auto">
-                <Link href="/" className="mr-6 flex items-center space-x-2">
+                <Link href="/about" className="mr-6 flex items-center space-x-2">
                     <div className="h-6 w-6 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold">V</div>
                     <span className="hidden font-bold sm:inline-block">Voyager</span>
                 </Link>
                 <div className="mr-4 hidden md:flex">
                     <nav className="flex items-center space-x-6 text-sm font-medium">
                         <Link href="/" className="transition-colors hover:text-foreground/80 text-foreground">{t("navigation.home")}</Link>
-                        <Link href="/groups" className="transition-colors hover:text-foreground/80 text-foreground/60">{t("navigation.groups")}</Link>
+                        <Link href={user ? "/groups" : "/login"} className="transition-colors hover:text-foreground/80 text-foreground/60">{t("navigation.groups")}</Link>
                     </nav>
                 </div>
 
                 {/* Search Bar */}
                 <div className="flex-1 max-w-md mx-4 hidden md:flex items-center gap-4">
-                    <nav className="flex items-center space-x-4 text-sm font-medium">
-                        <Link href="/about" className="transition-colors hover:text-foreground/80 text-foreground/60 flex items-center gap-1">
-                            <Info className="h-4 w-4" />
-                            {t("navigation.about")}
-                        </Link>
-                        <Link href="/notifications" className="transition-colors hover:text-foreground/80 text-foreground/60 flex items-center gap-1">
-                            <Bell className="h-4 w-4" />
-                            {t("navigation.notify")}
-                        </Link>
-                        <Link href="/chat" className="transition-colors hover:text-foreground/80 text-foreground/60 flex items-center gap-1">
-                            <MessageSquare className="h-4 w-4" />
-                            {t("navigation.messages")}
-                        </Link>
-                    </nav>
+                    <Link href="/about" className="transition-colors hover:text-foreground/80 text-foreground/60 flex items-center gap-1 text-sm font-medium">
+                        <Info className="h-4 w-4" />
+                        {t("navigation.about")}
+                    </Link>
                     <div className="relative flex-1">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
@@ -51,6 +41,16 @@ export function Header() {
                             className="w-full bg-secondary/50 border-0 focus-visible:ring-1 focus-visible:ring-primary pl-9 h-9"
                         />
                     </div>
+                    <nav className="flex items-center space-x-4 text-sm font-medium">
+                        <Link href={user ? "/notifications" : "/login"} className="transition-colors hover:text-foreground/80 text-foreground/60 flex items-center gap-1">
+                            <Bell className="h-4 w-4" />
+                            {t("navigation.notify")}
+                        </Link>
+                        <Link href={user ? "/chat" : "/login"} className="transition-colors hover:text-foreground/80 text-foreground/60 flex items-center gap-1">
+                            <MessageSquare className="h-4 w-4" />
+                            {t("navigation.messages")}
+                        </Link>
+                    </nav>
                 </div>
 
                 <div className="flex flex-1 items-center justify-end space-x-4">
