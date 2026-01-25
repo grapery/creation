@@ -30,7 +30,7 @@ export default function GroupDashboardPage() {
                 const [actsData, storiesData, heatmapData] = await Promise.all([
                     groups.getActivities(id as string, 1, 5),
                     groups.getStories(id as string, 1, 6),
-                    groups.getHeatmap(id as string),
+                    groups.getHeatmap(id as string, "year" as any), // Cast or use enum if imported
                 ]);
                 setActivities(actsData.activities || []);
                 setStories(storiesData.stories || []);

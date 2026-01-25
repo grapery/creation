@@ -1,7 +1,7 @@
-"use client";
-
 import { useState } from "react";
 import { useTranslation } from "@/providers/language-provider";
+import { BookOpen, Users, Clapperboard, PenTool } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface StoryTabsProps {
     onTabChange: (tab: string) => void;
@@ -12,10 +12,10 @@ export function StoryTabs({ onTabChange }: StoryTabsProps) {
     const [activeTab, setActiveTab] = useState("story");
 
     const tabs = [
-        { id: "story", label: t("story_detail.tabs.story", "Story") },
-        { id: "characters", label: t("story_detail.tabs.characters", "Characters") },
-        { id: "scenes", label: t("story_detail.tabs.scenes", "Scenes") },
-        { id: "team", label: t("story_detail.tabs.team", "Team") }
+        { id: "story", label: t("story_detail.tabs.story", "Story"), icon: BookOpen },
+        { id: "characters", label: t("story_detail.tabs.characters", "Characters"), icon: Users },
+        { id: "scenes", label: t("story_detail.tabs.scenes", "Scenes"), icon: Clapperboard },
+        { id: "team", label: t("story_detail.tabs.team", "Team"), icon: PenTool }
     ];
 
     const handleTabClick = (tabId: string) => {
@@ -24,20 +24,26 @@ export function StoryTabs({ onTabChange }: StoryTabsProps) {
     };
 
     return (
-        <div className="flex items-center overflow-x-auto pb-2 scrollbar-hide">
-            <div className="flex items-center space-x-2">
-                {tabs.map((tab) => (
-                    <button
-                        key={tab.id}
-                        onClick={() => handleTabClick(tab.id)}
-                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${activeTab === tab.id
-                            ? "text-primary font-bold bg-secondary"
-                            : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-                            }`}
-                    >
-                        {tab.label}
-                    </button>
-                ))}
+        <div className="flex items-center overflow-x-auto pb-0 scrollbar-hide border-b bg-background w-full">
+            <div className="flex items-center w-full">
+                {tabs.map((tab) => {
+                    const isActive = activeTab === tab.id;
+                    return (
+                        <button
+                            key={tab.id}
+                            onClick={() => handleTabClick(tab.id)}
+                            className={cn(
+                                "flex items-center gap-2 px-6 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap",
+                                isActive
+                                    ? "border-primary text-primary"
+                                    : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
+                            )}
+                        >
+                            <tab.icon className="h-4 w-4" />
+                            {tab.label}
+                        </button>
+                    );
+                })}
             </div>
         </div>
     );

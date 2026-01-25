@@ -4,11 +4,8 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { groups } from "@/lib/api/groups";
 import { User } from "@/lib/types";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import { MemberCard } from "@/components/group/member-card";
 
 interface GroupMember {
     id: string;
@@ -38,37 +35,37 @@ export default function GroupMembersPage() {
         load();
     }, [id]);
 
-    if (loading) return <div className="py-20 flex justify-center"><Loader2 className="animate-spin h-6 w-6 text-muted-foreground" /></div>;
+    if (loading) return (
+        <div className="py-20 flex justify-center">
+            <Loader2 className="animate-spin h-8 w-8 text-primary" />
+        </div>
+    );
 
     return (
-        <div className="space-y-6">
-            <h2 className="text-xl font-bold">Members ({members.length})</h2>
-            <div className="grid md:grid-cols-2 gap-4">
+        <div className="space-y-8 container max-w-6xl px-4 md:px-6 mx-auto py-8">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h2 className="text-2xl font-bold tracking-tight">Members</h2>
+                    <p className="text-muted-foreground">
+                        {members.length} {members.length === 1 ? 'member' : 'members'} in this group
+                    </p>
+                </div>
+
+                {/* Potential Filter/Sort Actions could go here */}
+            </div>
+
+            {/* Responsive Grid for Golden Ratio Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                 {members.map(member => (
-                    <Card key={member.id} className="overflow-hidden">
-                        <CardContent className="p-4 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center overflow-hidden">
-                                    {member.user?.avatar ? (
-                                        <img src={member.user.avatar} className="w-full h-full object-cover" />
-                                    ) : (
-                                        <span className="font-bold">{member.user?.username?.[0]?.toUpperCase() || "U"}</span>
-                                    )}
-                                </div>
-                                <div>
-                                    <div className="font-semibold flex items-center gap-2">
-                                        {member.user?.displayName || member.user?.username || "Unknown"}
-                                        {member.role === "owner" && <span className="text-[10px] bg-primary text-primary-foreground px-1.5 py-0.5 rounded">Owner</span>}
-                                        {member.role === "admin" && <span className="text-[10px] bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded">Admin</span>}
-                                    </div>
-                                    <div className="text-xs text-muted-foreground">Joined {member.joinedAt ? formatDistanceToNow(new Date(member.joinedAt), { addSuffix: true }) : 'recently'}</div>
-                                </div>
-                            </div>
-                            {/* Actions if needed */}
-                        </CardContent>
-                    </Card>
+                    <MemberCard key={member.id} member={member} />
                 ))}
             </div>
+
+            {members.length === 0 && (
+                <div className="text-center py-20 text-muted-foreground">
+                    No members found.
+                </div>
+            )}
         </div>
     );
 }

@@ -1,100 +1,156 @@
 "use client";
 
-import { ActivityHeatmapResponse, ActivityHeatmapData, ActivityTimeRange } from "@/lib/types";
+import { useMemo } from "react";
+import { ActivityHeatmapData, ActivityTimeRange } from "@/lib/types";
 import { cn } from "@/lib/utils";
-
-// Mock Tooltip for now if not installed, or I should install.
-// I'll install radix-ui tooltip.
-// Actually I'll use a simple title attribute for now to save installing more packages unless strictly needed.
-// Heatmap usually needs a good tooltip.
+import {
+    addDays,
+    eachDayOfInterval,
+    endOfWeek,
+    format,
+    getDay,
+    startOfWeek,
+    subWeeks,
+    startOfDay,
+    isSameDay,
+    parseISO,
+    isValid
+} from "date-fns";
 
 interface ActivityHeatmapProps {
     data: ActivityHeatmapData[];
     totalCount?: number;
     selectedTimeRange?: ActivityTimeRange;
-    selectedDate?: string | null;
     isLoading?: boolean;
-    onTimeRangeChange?: (range: ActivityTimeRange) => void;
-    onDateSelect?: (date: string | null) => void;
 }
 
 export function ActivityHeatmap({
     data,
     totalCount,
-    selectedTimeRange,
-    selectedDate,
     isLoading,
-    onTimeRangeChange,
-    onDateSelect
 }: ActivityHeatmapProps) {
+    // Generate the last 52 weeks of dates for the calendar grid
+    const calendarData = useMemo(() => {
+        const today = new Date();
+        const endDate = today;
+        const startDate = subWeeks(today, 51); // 52 weeks total including current
+
+        // Align start to the start of that week (Sunday)
+        const alignedStartDate = startOfWeek(startDate);
+
+        // Generate all days
+        const days = eachDayOfInterval({
+            start: alignedStartDate,
+            end: endDate
+        });
+
+        // Create a map for quick lookup of activity counts
+        const activityMap = new Map<string, number>();
+        if (data) {
+            data.forEach(d => {
+                // Ensure date format matches key
+                // API usually returns YYYY-MM-DD
+                activityMap.set(d.date, d.count);
+            });
+        }
+
+        // Group by weeks for rendering
+        const weeks: { days: { date: Date; count: number; level: number }[] }[] = [];
+        let currentWeek: { date: Date; count: number; level: number }[] = [];
+
+        days.forEach((day) => {
+            const dateKey = format(day, 'yyyy-MM-dd');
+            const count = activityMap.get(dateKey) || 0;
+
+            // Calculate intensity level (0-4)
+            let level = 0;
+            if (count > 0) level = 1;
+            if (count > 2) level = 2;
+            if (count > 5) level = 3;
+            if (count > 10) level = 4;
+
+            currentWeek.push({ date: day, count, level });
+
+            if (currentWeek.length === 7) {
+                weeks.push({ days: currentWeek });
+                currentWeek = [];
+            }
+        });
+
+        // Push partial last week if exists
+        if (currentWeek.length > 0) {
+            weeks.push({ days: currentWeek });
+        }
+
+        return weeks;
+    }, [data]);
+
     if (isLoading) {
-        return <div className="h-20 w-full animate-pulse bg-secondary/30 rounded-lg"></div>;
+        return <div className="h-[120px] w-full animate-pulse bg-secondary/30 rounded-lg"></div>;
     }
 
-    if (!data || data.length === 0) {
-        return <div className="text-center py-4 text-muted-foreground text-xs">No activity data available</div>;
-    }
-
-    const maxCount = Math.max(...data.map(d => d.count), 1);
-    const startDate = data[0]?.date || "";
-    const endDate = data[data.length - 1]?.date || "";
-
-    const getColor = (count: number) => {
-        if (count === 0) return "bg-secondary";
-        const intensity = count / maxCount;
-        if (intensity < 0.25) return "bg-primary/20";
-        if (intensity < 0.5) return "bg-primary/40";
-        if (intensity < 0.75) return "bg-primary/60";
-        return "bg-primary";
+    // Color scales for levels 0-4
+    // Using green shades similar to GitHub but adaptable to theme
+    const getLevelColor = (level: number) => {
+        switch (level) {
+            case 0: return "bg-secondary/40"; // Empty
+            case 1: return "bg-emerald-200 dark:bg-emerald-900/60";
+            case 2: return "bg-emerald-300 dark:bg-emerald-700";
+            case 3: return "bg-emerald-400 dark:bg-emerald-600";
+            case 4: return "bg-emerald-500 dark:bg-emerald-500";
+            default: return "bg-secondary";
+        }
     };
+
+    const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
     return (
         <div className="w-full space-y-4">
             <div className="flex items-center justify-between">
-                <div className="flex gap-2">
-                    {Object.values(ActivityTimeRange).map((range) => (
-                        <button
-                            key={range}
-                            onClick={() => onTimeRangeChange?.(range)}
-                            className={cn(
-                                "px-2 py-1 text-xs rounded-md transition-colors",
-                                selectedTimeRange === range
-                                    ? "bg-primary text-primary-foreground"
-                                    : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                            )}
-                        >
-                            {range.charAt(0).toUpperCase() + range.slice(1)}
-                        </button>
-                    ))}
-                </div>
-                <div className="text-xs text-muted-foreground">
-                    Total: <span className="font-semibold text-foreground">{totalCount}</span>
-                </div>
+                <h4 className="text-xs font-medium text-muted-foreground">{totalCount ?? 0} contributions in the last year</h4>
             </div>
 
-            <div className="w-full overflow-x-auto pb-2">
-                <div className="flex gap-1 min-w-[300px]">
-                    {data.map((d) => (
-                        <div
-                            key={d.date}
-                            className="flex flex-col gap-1 items-center group relative cursor-pointer"
-                            onClick={() => onDateSelect?.(d.date === selectedDate ? null : d.date)}
-                        >
-                            <div
-                                className={cn(
-                                    "h-8 w-2 md:h-12 md:w-3 rounded-sm transition-all",
-                                    getColor(d.count),
-                                    selectedDate === d.date ? "ring-2 ring-ring ring-offset-2" : ""
-                                )}
-                                title={`${d.date}: ${d.count} activities`}
-                            />
+            <div className="w-full overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-secondary">
+                <div className="flex gap-1 min-w-max">
+                    {/* Day labels column */}
+                    <div className="grid grid-rows-7 gap-1 pr-2 text-[10px] text-muted-foreground h-[95px]">
+                        <span className="sr-only">Sun</span>
+                        <span>Mon</span>
+                        <span className="sr-only">Tue</span>
+                        <span>Wed</span>
+                        <span className="sr-only">Thu</span>
+                        <span>Fri</span>
+                        <span className="sr-only">Sat</span>
+                    </div>
+
+                    {/* Weeks columns */}
+                    {calendarData.map((week, weekIndex) => (
+                        <div key={weekIndex} className="grid grid-rows-7 gap-1 h-[95px]">
+                            {week.days.map((day, dayIndex) => (
+                                <div
+                                    key={dayIndex}
+                                    className={cn(
+                                        "w-3 h-3 rounded-[2px] transition-colors hover:ring-1 hover:ring-foreground/50",
+                                        getLevelColor(day.level)
+                                    )}
+                                    title={`${format(day.date, 'MMMM d, yyyy')}: ${day.count} activities`}
+                                />
+                            ))}
                         </div>
                     ))}
                 </div>
-                <div className="flex justify-between text-xs text-muted-foreground mt-2">
-                    <span>{startDate}</span>
-                    <span>{endDate}</span>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 text-[10px] text-muted-foreground">
+                <span>Less</span>
+                <div className="flex gap-1">
+                    <div className={cn("w-3 h-3 rounded-[2px]", getLevelColor(0))} />
+                    <div className={cn("w-3 h-3 rounded-[2px]", getLevelColor(1))} />
+                    <div className={cn("w-3 h-3 rounded-[2px]", getLevelColor(2))} />
+                    <div className={cn("w-3 h-3 rounded-[2px]", getLevelColor(3))} />
+                    <div className={cn("w-3 h-3 rounded-[2px]", getLevelColor(4))} />
                 </div>
+                <span>More</span>
             </div>
         </div>
     );

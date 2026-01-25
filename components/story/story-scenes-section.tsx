@@ -10,6 +10,7 @@ interface StoryScenesSectionProps {
     scenes: StoryScene[];
     storyId: string;
     isLoading?: boolean;
+    error?: string;
     onAddScene?: () => void;
 }
 
@@ -18,6 +19,7 @@ export function StoryScenesSection({
     scenes,
     storyId,
     isLoading = false,
+    error,
     onAddScene
 }: StoryScenesSectionProps) {
     const { t } = useTranslation();
@@ -45,6 +47,12 @@ export function StoryScenesSection({
                 <div className="bg-card border border-border/8 rounded-2xl p-10 flex flex-col items-center justify-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-3" />
                     <p className="text-sm text-muted-foreground">{t("common.loading", "Loading...")}</p>
+                </div>
+            ) : error ? (
+                <div className="bg-card border border-border/8 rounded-2xl p-6 text-center">
+                    <ImageIcon className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
+                    <p className="text-sm font-semibold text-foreground mb-1">{t("story_detail.error.title", "Unable to load scenes")}</p>
+                    <p className="text-sm text-muted-foreground">{error}</p>
                 </div>
             ) : scenes.length === 0 ? (
                 <div className="bg-card border border-border/8 rounded-2xl p-6 text-center">

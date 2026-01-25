@@ -2,73 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
 
-export async function GET(
-    request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
-) {
-    try {
-        const { id: characterId } = await params;
-        const authHeader = request.headers.get('authorization');
-
-        const backendUrl = `${BACKEND_URL}/api/characters/${characterId}`;
-
-        const response = await fetch(backendUrl, {
-            method: 'GET',
-            headers: {
-                'Authorization': authHeader || '',
-                'Content-Type': 'application/json',
-            },
-        });
-
-        if (!response.ok) {
-            let errorMessage = 'Failed to fetch character';
-            try {
-                const errorData = await response.json();
-                errorMessage = errorData.message || errorData.msg || errorMessage;
-            } catch (e) {}
-            return NextResponse.json(
-                { code: response.status, message: errorMessage },
-                { status: response.status }
-            );
-        }
-
-        const data = await response.json();
-        return NextResponse.json(data);
-    } catch (error) {
-        console.error('[API /characters/[id]] Exception caught:', error);
-
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        const isConnectionError = errorMessage.includes('ECONNREFUSED') ||
-                                  errorMessage.includes('ENOTFOUND') ||
-                                  errorMessage.includes('Network Error');
-
-        if (isConnectionError) {
-            return NextResponse.json(
-                {
-                    code: 503,
-                    message: `Backend service not available. Please ensure the backend service is running at ${BACKEND_URL}`
-                },
-                { status: 503 }
-            );
-        }
-
-        return NextResponse.json(
-            { code: 500, message: 'Internal server error', error: errorMessage },
-            { status: 500 }
-        );
-    }
-}
-
 export async function PUT(
     request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+    { params }: { params: Promise<{ id: string; sceneId: string }> }
 ) {
     try {
-        const { id: characterId } = await params;
+        const { id: storyId, sceneId } = await params;
         const authHeader = request.headers.get('authorization');
         const body = await request.json();
 
-        const backendUrl = `${BACKEND_URL}/api/characters/${characterId}`;
+        const backendUrl = `${BACKEND_URL}/api/stories/${storyId}/scenes/${sceneId}`;
 
         const response = await fetch(backendUrl, {
             method: 'PUT',
@@ -80,7 +23,7 @@ export async function PUT(
         });
 
         if (!response.ok) {
-            let errorMessage = 'Failed to update character';
+            let errorMessage = 'Failed to update scene';
             try {
                 const errorData = await response.json();
                 errorMessage = errorData.message || errorData.msg || errorMessage;
@@ -94,7 +37,7 @@ export async function PUT(
         const data = await response.json();
         return NextResponse.json(data);
     } catch (error) {
-        console.error('[API /characters/[id]] PUT Exception caught:', error);
+        console.error('[API /stories/[id]/scenes/[sceneId]] PUT Exception caught:', error);
 
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         const isConnectionError = errorMessage.includes('ECONNREFUSED') ||
@@ -120,13 +63,13 @@ export async function PUT(
 
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+    { params }: { params: Promise<{ id: string; sceneId: string }> }
 ) {
     try {
-        const { id: characterId } = await params;
+        const { id: storyId, sceneId } = await params;
         const authHeader = request.headers.get('authorization');
 
-        const backendUrl = `${BACKEND_URL}/api/characters/${characterId}`;
+        const backendUrl = `${BACKEND_URL}/api/stories/${storyId}/scenes/${sceneId}`;
 
         const response = await fetch(backendUrl, {
             method: 'DELETE',
@@ -137,7 +80,7 @@ export async function DELETE(
         });
 
         if (!response.ok) {
-            let errorMessage = 'Failed to delete character';
+            let errorMessage = 'Failed to delete scene';
             try {
                 const errorData = await response.json();
                 errorMessage = errorData.message || errorData.msg || errorMessage;
@@ -151,7 +94,7 @@ export async function DELETE(
         const data = await response.json();
         return NextResponse.json(data);
     } catch (error) {
-        console.error('[API /characters/[id]] DELETE Exception caught:', error);
+        console.error('[API /stories/[id]/scenes/[sceneId]] DELETE Exception caught:', error);
 
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         const isConnectionError = errorMessage.includes('ECONNREFUSED') ||

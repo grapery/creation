@@ -59,5 +59,76 @@ export const stories = {
         let url = `/api/stories/styles/search?q=${encodeURIComponent(query)}&limit=${limit}&offset=${offset}`;
         if (groupId) url += `&group_id=${groupId}`;
         return request(url);
+    },
+
+    // ==================== Scenes Management ====================
+
+    // Get story scenes
+    getScenes: async (storyId: string, limit = 20, offset = 0): Promise<{ scenes: any[], count: number }> => {
+        return request(`/api/stories/${storyId}/scenes?limit=${limit}&offset=${offset}`);
+    },
+
+    // Create scene
+    createScene: async (storyId: string, data: {
+        title: string;
+        description?: string;
+        image?: string;
+        location?: string;
+        timeOfDay?: string;
+        sourceType: 'manual' | 'upload' | 'ai';
+        sourcePrompt?: string;
+        sourceImage?: string;
+        isPublic?: boolean;
+        tags?: string[];
+    }): Promise<any> => {
+        return request(`/api/stories/${storyId}/scenes`, 'POST', data);
+    },
+
+    // Update scene
+    updateScene: async (storyId: string, sceneId: string, data: {
+        title?: string;
+        description?: string;
+        image?: string;
+        location?: string;
+        timeOfDay?: string;
+        sourceType?: 'manual' | 'upload' | 'ai';
+        sourcePrompt?: string;
+        sourceImage?: string;
+        isPublic?: boolean;
+        tags?: string[];
+    }): Promise<any> => {
+        return request(`/api/stories/${storyId}/scenes/${sceneId}`, 'PUT', data);
+    },
+
+    // Delete scene
+    deleteScene: async (storyId: string, sceneId: string): Promise<{ message: string }> => {
+        return request(`/api/stories/${storyId}/scenes/${sceneId}`, 'DELETE');
+    },
+
+    // Upload scene image
+    uploadSceneImage: async (storyId: string, imageUrl: string): Promise<{ success: boolean; url: string }> => {
+        return request(`/api/stories/${storyId}/scenes/register-image`, 'POST', { imageUrl });
+    },
+
+    // AI generate scene image
+    generateSceneImage: async (storyId: string, sceneId?: string, prompt?: string): Promise<{ success: boolean; url: string; filename: string }> => {
+        return request(`/api/stories/${storyId}/scenes/ai-generate-image${sceneId ? `?sceneId=${sceneId}` : ''}`, 'POST', { prompt });
+    },
+
+    // ==================== Contributors Management ====================
+
+    // Get story contributors
+    getContributors: async (storyId: string, limit = 20, offset = 0): Promise<{ contributors: any[], count: number }> => {
+        return request(`/api/stories/${storyId}/contributors?limit=${limit}&offset=${offset}`);
+    },
+
+    // Invite contributor
+    inviteContributor: async (storyId: string, userId: string, role: 'collaborator' | 'contributor'): Promise<any> => {
+        return request(`/api/stories/${storyId}/contributors`, 'POST', { userId, role });
+    },
+
+    // Remove contributor
+    removeContributor: async (storyId: string, userId: string): Promise<{ message: string }> => {
+        return request(`/api/stories/${storyId}/contributors/${userId}`, 'DELETE');
     }
 };

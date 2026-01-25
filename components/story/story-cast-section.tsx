@@ -9,9 +9,11 @@ interface StoryCastSectionProps {
     title: string;
     characters: Character[];
     onAddCharacter?: () => void;
+    isLoading?: boolean;
+    error?: string;
 }
 
-export function StoryCastSection({ title, characters, onAddCharacter }: StoryCastSectionProps) {
+export function StoryCastSection({ title, characters, onAddCharacter, isLoading = false, error }: StoryCastSectionProps) {
     const { t } = useTranslation();
 
     return (
@@ -33,7 +35,18 @@ export function StoryCastSection({ title, characters, onAddCharacter }: StoryCas
             </div>
 
             {/* Content */}
-            {characters.length === 0 ? (
+            {isLoading ? (
+                <div className="bg-card border border-border/8 rounded-2xl p-10 flex flex-col items-center justify-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-3" />
+                    <p className="text-sm text-muted-foreground">{t("common.loading", "Loading...")}</p>
+                </div>
+            ) : error ? (
+                <div className="bg-card border border-border/8 rounded-2xl p-6 text-center">
+                    <Users className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
+                    <p className="text-sm font-semibold text-foreground mb-1">{t("story_detail.error.title", "Unable to load characters")}</p>
+                    <p className="text-sm text-muted-foreground">{error}</p>
+                </div>
+            ) : characters.length === 0 ? (
                 <div className="bg-card border border-border/8 rounded-2xl p-6 text-center">
                     <Users className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
                     <p className="text-sm font-semibold text-foreground mb-1">{t("story_detail.empty.no_characters_title", "No characters yet")}</p>

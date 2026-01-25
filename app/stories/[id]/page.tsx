@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Header } from "@/components/layout/header";
 import { stories } from "@/lib/api/stories";
 import { storyboards } from "@/lib/api/storyboards";
+import { characters as charactersApi } from "@/lib/api/characters";
 import { Story, Storyboard, Character, StoryScene, Contributor } from "@/lib/types";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -33,15 +34,18 @@ export default function StoryPage() {
     // Characters tab data
     const [characters, setCharacters] = useState<Character[]>([]);
     const [loadingCharacters, setLoadingCharacters] = useState(true);
+    const [charactersError, setCharactersError] = useState<string>("");
 
     // Scenes tab data
     const [scenes, setScenes] = useState<StoryScene[]>([]);
     const [loadingScenes, setLoadingScenes] = useState(true);
+    const [scenesError, setScenesError] = useState<string>("");
 
     // Team tab data
     const [creators, setCreators] = useState<ContentCreator[]>([]);
     const [contributors, setContributors] = useState<Contributor[]>([]);
     const [loadingTeam, setLoadingTeam] = useState(true);
+    const [teamError, setTeamError] = useState<string>("");
 
     useEffect(() => {
         if (!id) return;
@@ -85,16 +89,20 @@ export default function StoryPage() {
 
     const loadCharacters = async (storyId: string) => {
         setLoadingCharacters(true);
+        setCharactersError("");
         try {
-            // Characters are part of the story object
-            if (story && story.characters) {
-                setCharacters(story.characters);
-            } else {
-                setCharacters([]);
-            }
-        } catch (e) {
-            console.error(e);
+            // Fetch characters from API using storyId
+            const response = await charactersApi.list({ storyId });
+            setCharacters(response.characters || []);
+        } catch (e: any) {
+            console.error('Failed to load characters:', e);
             setCharacters([]);
+            // Set error message
+            if (e.code === 401 || e.message?.includes('authorization')) {
+                setCharactersError('Please login to view characters');
+            } else {
+                setCharactersError('Failed to load characters');
+            }
         } finally {
             setLoadingCharacters(false);
         }
@@ -102,16 +110,20 @@ export default function StoryPage() {
 
     const loadScenes = async (storyId: string) => {
         setLoadingScenes(true);
+        setScenesError("");
         try {
-            // Scenes are part of the story object
-            if (story && story.scenes) {
-                setScenes(story.scenes);
-            } else {
-                setScenes([]);
-            }
-        } catch (e) {
-            console.error(e);
+            // Fetch scenes from API
+            const response = await stories.getScenes(storyId);
+            setScenes(response.scenes || []);
+        } catch (e: any) {
+            console.error('Failed to load scenes:', e);
             setScenes([]);
+            // Set error message
+            if (e.code === 401 || e.message?.includes('authorization')) {
+                setScenesError('Please login to view scenes');
+            } else {
+                setScenesError('Failed to load scenes');
+            }
         } finally {
             setLoadingScenes(false);
         }
@@ -119,13 +131,13 @@ export default function StoryPage() {
 
     const loadTeam = async (storyId: string) => {
         setLoadingTeam(true);
+        setTeamError("");
         try {
             if (!story) return;
 
             const creators: ContentCreator[] = [];
             const seenUserIds = new Set<string>();
             const storyboardCountByUser: Record<string, number> = {};
-            const characterCountByUser: Record<string, number> = {};
 
             // Add story author as primary creator
             if (story.author) {
@@ -167,16 +179,9 @@ export default function StoryPage() {
             });
 
             // Count character contributions by author
-            if (story.characters) {
-                story.characters.forEach((character: Character) => {
-                    if (character.creatorId) {
-                        characterCountByUser[character.creatorId] = (characterCountByUser[character.creatorId] || 0) + 1;
-                    }
-                });
-
-                // Add character creators
-                story.characters.forEach((character: Character) => {
-                    if (character.creatorId && !seenUserIds.has(character.creatorId)) {
+            characters.forEach((character: Character) => {
+                if (character.creatorId) {
+                    if (!seenUserIds.has(character.creatorId)) {
                         const authorName = character.author?.displayName || character.author?.username || "Unknown Creator";
                         const authorAvatar = character.author?.avatar;
 
@@ -186,19 +191,28 @@ export default function StoryPage() {
                             name: authorName,
                             avatar: authorAvatar,
                             role: CreatorRole.CharacterCreator,
-                            contributionCount: characterCountByUser[character.creatorId] || 1
+                            contributionCount: 1
                         });
                         seenUserIds.add(character.creatorId);
                     }
-                });
-            }
+                }
+            });
 
             setCreators(creators);
-            setContributors(story.contributors || []);
-        } catch (e) {
-            console.error(e);
+
+            // Fetch contributors from API
+            const contributorsResponse = await stories.getContributors(storyId);
+            setContributors(contributorsResponse.contributors || []);
+        } catch (e: any) {
+            console.error('Failed to load team:', e);
             setCreators([]);
             setContributors([]);
+            // Set error message
+            if (e.code === 401 || e.message?.includes('authorization')) {
+                setTeamError('Please login to view team members');
+            } else {
+                setTeamError('Failed to load team members');
+            }
         } finally {
             setLoadingTeam(false);
         }
@@ -270,6 +284,8 @@ export default function StoryPage() {
                         <StoryCastSection
                             title={t("story_detail.header.characters", "Characters")}
                             characters={characters}
+                            isLoading={loadingCharacters}
+                            error={charactersError}
                             onAddCharacter={() => {
                                 // TODO: Navigate to create character
                                 console.log("Add character clicked");
@@ -283,6 +299,7 @@ export default function StoryPage() {
                             scenes={scenes}
                             storyId={story.id}
                             isLoading={loadingScenes}
+                            error={scenesError}
                             onAddScene={() => {
                                 // TODO: Navigate to create scene
                                 console.log("Add scene clicked");
@@ -296,6 +313,7 @@ export default function StoryPage() {
                             creators={creators}
                             contributors={contributors}
                             isLoading={loadingTeam}
+                            error={teamError}
                             onInvite={() => {
                                 // TODO: Show invite modal
                                 console.log("Invite clicked");
@@ -308,25 +326,7 @@ export default function StoryPage() {
                     )}
                 </div>
 
-                {/* Action Bar */}
-                <div className="border-t border-border/50 py-4 bg-background">
-                    <div className="container max-w-6xl px-4 md:px-6 mx-auto">
-                        <Button
-                            className="w-full md:w-auto"
-                            onClick={() => {
-                                if (storyboardsList.length === 0) {
-                                    // Navigate to create first storyboard
-                                    router.push(`/create/wizard?storyId=${story.id}`);
-                                } else {
-                                    // Start reading first storyboard
-                                    handleStoryboardTap(storyboardsList[0]);
-                                }
-                            }}
-                        >
-                            {storyboardsList.length === 0 ? t("story_detail.actions.create_first_storyboard", "Create First Storyboard") : t("story_detail.actions.start_reading", "Start Reading")}
-                        </Button>
-                    </div>
-                </div>
+
             </main>
         </div>
     );

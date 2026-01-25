@@ -2,9 +2,22 @@ import { apiClient, request } from './client';
 import { Character, CharacterMessage } from '../types/character';
 
 export const characters = {
-    list: async (page = 1, limit = 20): Promise<{ characters: Character[], total: number }> => {
-        // Assuming API structure.
-        return request(`/api/characters?limit=${limit}&offset=${(page - 1) * limit}`);
+    list: async (params: {
+        page?: number;
+        limit?: number;
+        storyId?: string;
+        authorId?: string;
+        search?: string;
+    } = {}): Promise<{ characters: Character[], total: number }> => {
+        const { page = 1, limit = 20, storyId, authorId, search } = params;
+        const queryParams = new URLSearchParams();
+        queryParams.append('limit', limit.toString());
+        queryParams.append('offset', ((page - 1) * limit).toString());
+        if (storyId) queryParams.append('storyId', storyId);
+        if (authorId) queryParams.append('authorId', authorId);
+        if (search) queryParams.append('search', search);
+
+        return request(`/api/characters?${queryParams.toString()}`);
     },
 
     get: async (id: string): Promise<Character> => {
