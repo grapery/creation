@@ -22,7 +22,7 @@ env:
   REGISTRY: ${{ vars.ACR_REGISTRY || 'crpi-kz6w8hb0pa94yvgy.cn-hangzhou.personal.cr.aliyuncs.com' }}
   IMAGE_NAME: grapery-creation
   SERVICE_NAME: creation
-  PORT: 3000
+  APP_PORT: 3000
 
 jobs:
   # ========================================
@@ -127,33 +127,10 @@ jobs:
           IMAGE=${{ env.REGISTRY }}/grapery-dev/${{ env.IMAGE_NAME }}:dev
           
           # ========== Service Configuration ==========
-          PORT=${{ env.PORT }}
+          PORT=${{ env.APP_PORT }}
           EOF
           echo "✅ Development .env file generated"
           cat .env
-
-      - name: Parse deploy host (remove port if present)
-        id: parse-dev-host
-        shell: bash
-        run: |
-          DEV_HOST="${{ vars.DEV_DEPLOY_HOST }}"
-          echo "=== DEV_DEPLOY_HOST Parsing ===" >> $GITHUB_STEP_SUMMARY
-          echo "Original: $DEV_HOST" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          # Remove port using parameter expansion (removes :port)
-          FINAL_HOSTNAME="${DEV_HOST%:*}"
-
-          # If the result still contains a colon or is the same, there was no port
-          if [[ "$FINAL_HOSTNAME" == *:* ]] || [[ "$FINAL_HOSTNAME" == "$DEV_HOST" ]]; then
-            FINAL_HOSTNAME="$DEV_HOST"
-            echo "No port detected, using original" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "Port detected and removed" >> $GITHUB_STEP_SUMMARY
-          fi
-
-          echo "Final hostname: $FINAL_HOSTNAME" >> $GITHUB_STEP_SUMMARY
-          echo "hostname=$FINAL_HOSTNAME" >> $GITHUB_OUTPUT
 
       - name: Deploy notification
         run: |
@@ -162,52 +139,26 @@ jobs:
           echo "| Setting | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|---------|-------|" >> $GITHUB_STEP_SUMMARY
           echo "| Service | ${{ env.SERVICE_NAME }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Port | ${{ env.PORT }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Port | ${{ env.APP_PORT }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Image | \`${{ env.REGISTRY }}/grapery-dev/${{ env.IMAGE_NAME }}:dev\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Environment | development |" >> $GITHUB_STEP_SUMMARY
           echo "| Commit | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Host | ${{ steps.parse-dev-host.outputs.hostname }} |" >> $GITHUB_STEP_SUMMARY
-
-      - name: Upload .env to ECS - Log
-        run: |
-          echo "## 📤 Uploading .env File" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Setting | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|---------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Source File | .env |" >> $GITHUB_STEP_SUMMARY
-          echo "| Target Host | ${{ steps.parse-dev-host.outputs.hostname }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Target Path | /home/ubuntu/grapery/creation/ |" >> $GITHUB_STEP_SUMMARY
-          echo "| Port | 22 |" >> $GITHUB_STEP_SUMMARY
-          echo "| Username | ${{ vars.SSH_USER }} |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "📋 .env file contents:" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          cat .env >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "| Host | ${{ vars.DEV_DEPLOY_HOST }} |" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload .env to ECS
         uses: appleboy/scp-action@v0.1.4
-        env:
-          INPUT_PORT: 22
         with:
-          host: ${{ steps.parse-dev-host.outputs.hostname }}
+          host: ${{ vars.DEV_DEPLOY_HOST }}
           username: ${{ vars.SSH_USER }}
           key: ${{ vars.SSH_KEY }}
           port: 22
           source: ".env"
           target: "/home/ubuntu/grapery/creation/"
-          strip_components: 0
-          overwrite: true
-          debug: false
-
-      - name: Upload .env to ECS - Success
-        run: |
-          echo "✅ .env file uploaded successfully to ${{ steps.parse-dev-host.outputs.hostname }}:/home/ubuntu/grapery/creation/" >> $GITHUB_STEP_SUMMARY
 
       - name: Remote Deploy to Development Server
         uses: appleboy/ssh-action@v0.1.10
         with:
-          host: ${{ steps.parse-dev-host.outputs.hostname }}
+          host: ${{ vars.DEV_DEPLOY_HOST }}
           username: ${{ vars.SSH_USER }}
           key: ${{ vars.SSH_KEY }}
           port: 22
@@ -249,7 +200,7 @@ jobs:
               --name ${{ env.SERVICE_NAME }} \
               --restart unless-stopped \
               --network grapery-network \
-              -p ${{ env.PORT }}:3000 \
+              -p ${{ env.APP_PORT }}:3000 \
               --env-file .env \
               ${{ env.REGISTRY }}/grapery-dev/${{ env.IMAGE_NAME }}:dev)
             
@@ -271,7 +222,7 @@ jobs:
             # 检查健康状态
             echo ""
             echo "🏥 Health check:"
-            if curl -f http://localhost:${{ env.PORT }}/api/health > /dev/null 2>&1; then
+            if curl -f http://localhost:${{ env.APP_PORT }}/api/health > /dev/null 2>&1; then
               echo "✅ Health check passed"
             else
               echo "⚠️  Health check failed, but container is running"
@@ -311,33 +262,10 @@ jobs:
           IMAGE=${{ env.REGISTRY }}/grapery-prod/${{ env.IMAGE_NAME }}:prod
           
           # ========== Service Configuration ==========
-          PORT=${{ env.PORT }}
+          PORT=${{ env.APP_PORT }}
           EOF
           echo "✅ Production .env file generated"
           cat .env
-
-      - name: Parse deploy host (remove port if present)
-        id: parse-prod-host
-        shell: bash
-        run: |
-          PROD_HOST="${{ vars.PROD_DEPLOY_HOST }}"
-          echo "=== PROD_DEPLOY_HOST Parsing ===" >> $GITHUB_STEP_SUMMARY
-          echo "Original: $PROD_HOST" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          # Remove port using parameter expansion (removes :port)
-          FINAL_HOSTNAME="${PROD_HOST%:*}"
-
-          # If the result still contains a colon or is the same, there was no port
-          if [[ "$FINAL_HOSTNAME" == *:* ]] || [[ "$FINAL_HOSTNAME" == "$PROD_HOST" ]]; then
-            FINAL_HOSTNAME="$PROD_HOST"
-            echo "No port detected, using original" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "Port detected and removed" >> $GITHUB_STEP_SUMMARY
-          fi
-
-          echo "Final hostname: $FINAL_HOSTNAME" >> $GITHUB_STEP_SUMMARY
-          echo "hostname=$FINAL_HOSTNAME" >> $GITHUB_OUTPUT
 
       - name: Deploy notification
         run: |
@@ -346,52 +274,26 @@ jobs:
           echo "| Setting | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|---------|-------|" >> $GITHUB_STEP_SUMMARY
           echo "| Service | ${{ env.SERVICE_NAME }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Port | ${{ env.PORT }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Port | ${{ env.APP_PORT }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Image | \`${{ env.REGISTRY }}/grapery-prod/${{ env.IMAGE_NAME }}:prod\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Environment | production |" >> $GITHUB_STEP_SUMMARY
           echo "| Commit | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Host | ${{ steps.parse-prod-host.outputs.hostname }} |" >> $GITHUB_STEP_SUMMARY
-
-      - name: Upload .env to ECS - Log
-        run: |
-          echo "## 📤 Uploading .env File" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Setting | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|---------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Source File | .env |" >> $GITHUB_STEP_SUMMARY
-          echo "| Target Host | ${{ steps.parse-prod-host.outputs.hostname }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Target Path | /home/ubuntu/grapery/creation/ |" >> $GITHUB_STEP_SUMMARY
-          echo "| Port | 22 |" >> $GITHUB_STEP_SUMMARY
-          echo "| Username | ${{ vars.SSH_USER }} |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "📋 .env file contents:" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          cat .env >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "| Host | ${{ vars.PROD_DEPLOY_HOST }} |" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload .env to ECS
         uses: appleboy/scp-action@v0.1.4
-        env:
-          INPUT_PORT: 22
         with:
-          host: ${{ steps.parse-prod-host.outputs.hostname }}
+          host: ${{ vars.PROD_DEPLOY_HOST }}
           username: ${{ vars.SSH_USER }}
           key: ${{ vars.SSH_KEY }}
           port: 22
           source: ".env"
           target: "/home/ubuntu/grapery/creation/"
-          strip_components: 0
-          overwrite: true
-          debug: false
-
-      - name: Upload .env to ECS - Success
-        run: |
-          echo "✅ .env file uploaded successfully to ${{ steps.parse-prod-host.outputs.hostname }}:/home/ubuntu/grapery/creation/" >> $GITHUB_STEP_SUMMARY
 
       - name: Remote Deploy to Production Server
         uses: appleboy/ssh-action@v0.1.10
         with:
-          host: ${{ steps.parse-prod-host.outputs.hostname }}
+          host: ${{ vars.PROD_DEPLOY_HOST }}
           username: ${{ vars.SSH_USER }}
           key: ${{ vars.SSH_KEY }}
           port: 22
@@ -433,7 +335,7 @@ jobs:
               --name ${{ env.SERVICE_NAME }} \
               --restart unless-stopped \
               --network grapery-network \
-              -p ${{ env.PORT }}:3000 \
+              -p ${{ env.APP_PORT }}:3000 \
               --env-file .env \
               ${{ env.REGISTRY }}/grapery-prod/${{ env.IMAGE_NAME }}:prod)
             
@@ -455,7 +357,7 @@ jobs:
             # 检查健康状态
             echo ""
             echo "🏥 Health check:"
-            if curl -f http://localhost:${{ env.PORT }}/api/health > /dev/null 2>&1; then
+            if curl -f http://localhost:${{ env.APP_PORT }}/api/health > /dev/null 2>&1; then
               echo "✅ Health check passed"
             else
               echo "⚠️  Health check failed, but container is running"
