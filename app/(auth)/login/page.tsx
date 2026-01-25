@@ -31,7 +31,7 @@ export default function LoginPage() {
         try {
             await login(email, password);
         } catch (err: any) {
-            setError(err.message || "Something went wrong. Please try again.");
+            setError(err.message || t('auth.login_failed'));
         } finally {
             setIsLoading(false);
         }
@@ -62,7 +62,7 @@ export default function LoginPage() {
                 </div>
                 <h1 className="text-3xl font-bold tracking-tight">Voyager</h1>
                 <p className="text-muted-foreground text-center">
-                    Create, explore, and share interactive stories with world
+                    {t('auth.app_tagline')}
                 </p>
             </div>
 
@@ -70,7 +70,7 @@ export default function LoginPage() {
             <Card className="border-0 shadow-none bg-transparent space-y-3">
                 <OAuthProviderButton
                     provider="google"
-                    title="Sign in with Google"
+                    title={t('auth.sign_in_with_google')}
                     isLoading={oauthLoading === "google"}
                     disabled={oauthLoading !== null}
                     onClick={() => handleOAuthLogin("google")}
@@ -78,7 +78,7 @@ export default function LoginPage() {
 
                 <OAuthProviderButton
                     provider="apple"
-                    title="Sign in with Apple"
+                    title={t('auth.sign_in_with_apple')}
                     isLoading={oauthLoading === "apple"}
                     disabled={oauthLoading !== null}
                     onClick={() => handleOAuthLogin("apple")}
@@ -86,7 +86,7 @@ export default function LoginPage() {
 
                 <OAuthProviderButton
                     provider="wechat"
-                    title="Sign in with WeChat"
+                    title={t('auth.sign_in_with_wechat')}
                     isLoading={oauthLoading === "wechat"}
                     disabled={oauthLoading !== null}
                     onClick={() => handleOAuthLogin("wechat")}
@@ -105,7 +105,7 @@ export default function LoginPage() {
                     </div>
                     <span className="relative flex justify-center text-xs uppercase">
                         <span className="bg-muted px-2 text-muted-foreground">
-                            or
+                            {t('auth.or')}
                         </span>
                     </span>
                 </div>
@@ -117,7 +117,7 @@ export default function LoginPage() {
                     className="w-full"
                     onClick={() => setShowEmailLogin(true)}
                 >
-                    Use email to sign in
+                    {t('auth.use_email_to_sign_in')}
                 </Button>
             </Card>
 
@@ -142,7 +142,7 @@ export default function LoginPage() {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
                     <Card className="w-full max-w-sm">
                         <div className="flex items-center justify-between border-b p-4">
-                            <h2 className="text-lg font-semibold">Sign In</h2>
+                            <h2 className="text-lg font-semibold">{t('auth.sign_in')}</h2>
                             <Button
                                 type="button"
                                 variant="ghost"
@@ -160,12 +160,12 @@ export default function LoginPage() {
                         <div className="p-6 space-y-4">
                             <div className="space-y-2">
                                 <label htmlFor="email" className="text-sm font-medium">
-                                    Email
+                                    {t('auth.email')}
                                 </label>
                                 <Input
                                     id="email"
                                     type="email"
-                                    placeholder="name@example.com"
+                                    placeholder={t('auth.email_placeholder')}
                                     autoCapitalize="none"
                                     autoComplete="email"
                                     autoCorrect="off"
@@ -178,19 +178,19 @@ export default function LoginPage() {
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between">
                                     <label htmlFor="password" className="text-sm font-medium">
-                                        Password
+                                        {t('auth.password')}
                                     </label>
                                     <Link
                                         href="/forgot-password"
                                         className="text-sm text-primary hover:underline"
                                     >
-                                        Forgot password?
+                                        {t('auth.forgot_password')}
                                     </Link>
                                 </div>
                                 <Input
                                     id="password"
                                     type="password"
-                                    placeholder="••••••••••"
+                                    placeholder={t('auth.password_placeholder')}
                                     autoComplete="current-password"
                                     disabled={isLoading}
                                     value={password}
@@ -214,7 +214,7 @@ export default function LoginPage() {
                                 {isLoading ? (
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                 ) : (
-                                    "Sign In"
+                                    t('auth.sign_in')
                                 )}
                             </Button>
                         </div>
@@ -224,23 +224,23 @@ export default function LoginPage() {
 
             {/* Sign Up Link */}
             <div className="mt-6 text-center text-sm text-muted-foreground">
-                Don&apos;t have an account?{" "}
+                {t('auth.dont_have_account')}{" "}
                 <Link href="/register" className="font-medium text-primary hover:underline">
-                    Sign up
+                    {t('auth.sign_up')}
                 </Link>
             </div>
 
             {/* Terms and Privacy */}
             <div className="mt-6 text-center text-xs text-muted-foreground space-y-1">
                 <p>
-                    By continuing, you agree to our{" "}
+                    {t('auth.by_continuing')}{" "}
                     <Link href="/terms" className="text-primary hover:underline">
-                        Terms of Service
+                        {t('auth.terms_of_service')}
                     </Link>
                     {" "}
-                    and{" "}
+                    {t('common.and')}{" "}
                     <Link href="/privacy" className="text-primary hover:underline">
-                        Privacy Policy
+                        {t('auth.privacy_policy')}
                     </Link>
                 </p>
             </div>

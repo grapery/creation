@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/providers/auth-provider";
+import { useTranslation } from "@/providers/language-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription } from "@/components/ui/card";
@@ -11,6 +12,7 @@ import { AuthBackground, LanguageSelector, Language, OAuthProviderButton, OAuthP
 
 export default function RegisterPage() {
     const { register } = useAuth();
+    const { t } = useTranslation();
     const [formData, setFormData] = useState({
         username: "",
         displayName: "",
@@ -72,19 +74,19 @@ export default function RegisterPage() {
         setIsLoading(true);
         setError("");
 
-        try {
-            if (formData.password !== formData.confirmPassword) {
-                setError("Passwords do not match");
-                return;
-            }
+            try {
+                if (formData.password !== formData.confirmPassword) {
+                    setError(t('auth.passwords_do_not_match_error'));
+                    return;
+                }
 
-            // Calculate age
-            const birthDate = new Date(formData.dateOfBirth);
-            const age = maxDateOfBirth.getFullYear() - birthDate.getFullYear();
-            if (age < 13) {
-                setError("You must be at least 13 years old to register");
-                return;
-            }
+                // Calculate age
+                const birthDate = new Date(formData.dateOfBirth);
+                const age = maxDateOfBirth.getFullYear() - birthDate.getFullYear();
+                if (age < 13) {
+                    setError(t('auth.age_requirement_error'));
+                    return;
+                }
 
             await register({
                 username: formData.username,
@@ -95,7 +97,7 @@ export default function RegisterPage() {
                 dateOfBirth: formatDateOfBirth(formData.dateOfBirth),
             });
         } catch (err: any) {
-            setError(err.message || "Registration failed. Please try again.");
+            setError(err.message || t('auth.register_failed'));
         } finally {
             setIsLoading(false);
         }
@@ -110,7 +112,7 @@ export default function RegisterPage() {
                         <Link href="/login">
                             <Button variant="ghost" size="sm" className="gap-2">
                                 <ArrowLeft className="h-4 w-4" />
-                                Back to Sign In
+                                {t('auth.back_to_sign_in')}
                             </Button>
                         </Link>
                     </div>
@@ -122,7 +124,7 @@ export default function RegisterPage() {
                         </div>
                         <h1 className="text-3xl font-bold tracking-tight">Voyager</h1>
                         <p className="text-muted-foreground text-center">
-                            Create your account and start creating
+                            {t('auth.register_tagline')}
                         </p>
                     </div>
 
@@ -131,7 +133,7 @@ export default function RegisterPage() {
                         <CardContent className="p-4 space-y-3">
                             <OAuthProviderButton
                                 provider="google"
-                                title="Sign in with Google"
+                                title={t('auth.sign_in_with_google')}
                                 isLoading={oauthLoading === "google"}
                                 disabled={oauthLoading !== null}
                                 onClick={() => handleOAuthLogin("google")}
@@ -139,7 +141,7 @@ export default function RegisterPage() {
 
                             <OAuthProviderButton
                                 provider="apple"
-                                title="Sign in with Apple"
+                                title={t('auth.sign_in_with_apple')}
                                 isLoading={oauthLoading === "apple"}
                                 disabled={oauthLoading !== null}
                                 onClick={() => handleOAuthLogin("apple")}
@@ -154,7 +156,7 @@ export default function RegisterPage() {
                         </div>
                         <span className="relative flex justify-center">
                             <span className="bg-muted px-3 text-xs uppercase text-muted-foreground">
-                                or sign up with email
+                                {t('auth.or_sign_up_with_email')}
                             </span>
                         </span>
                     </div>
@@ -165,13 +167,13 @@ export default function RegisterPage() {
                             {/* Full Name / Display Name */}
                             <div className="space-y-2">
                                 <label htmlFor="displayName" className="text-sm font-medium">
-                                    Full Name
+                                    {t('auth.full_name')}
                                 </label>
                                 <div className="relative">
                                     <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                     <Input
                                         id="displayName"
-                                        placeholder="Enter your full name"
+                                        placeholder={t('auth.full_name_placeholder')}
                                         type="text"
                                         autoCapitalize="words"
                                         autoCorrect="off"
@@ -187,13 +189,13 @@ export default function RegisterPage() {
                             {/* Username */}
                             <div className="space-y-2">
                                 <label htmlFor="username" className="text-sm font-medium">
-                                    Username
+                                    {t('profile.username')}
                                 </label>
                                 <div className="relative">
                                     <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                     <Input
                                         id="username"
-                                        placeholder="Choose a username"
+                                        placeholder={t('auth.username_placeholder')}
                                         type="text"
                                         autoCapitalize="none"
                                         autoCorrect="off"
@@ -209,13 +211,13 @@ export default function RegisterPage() {
                             {/* Email */}
                             <div className="space-y-2">
                                 <label htmlFor="email" className="text-sm font-medium">
-                                    Email Address
+                                    {t('auth.email')}
                                 </label>
                                 <div className="relative">
                                     <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                     <Input
                                         id="email"
-                                        placeholder="name@example.com"
+                                        placeholder={t('auth.email_placeholder')}
                                         type="email"
                                         autoCapitalize="none"
                                         autoComplete="email"
@@ -232,7 +234,7 @@ export default function RegisterPage() {
                             {/* Date of Birth */}
                             <div className="space-y-2">
                                 <label htmlFor="dateOfBirth" className="text-sm font-medium">
-                                    Date of Birth
+                                    {t('auth.date_of_birth')}
                                 </label>
                                 <div className="relative">
                                     <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground z-10" />
@@ -248,20 +250,20 @@ export default function RegisterPage() {
                                     />
                                 </div>
                                 <p className="text-xs text-muted-foreground">
-                                    You must be at least 13 years old to create an account.
+                                    {t('auth.age_requirement_notice')}
                                 </p>
                             </div>
 
                             {/* Password */}
                             <div className="space-y-2">
                                 <label htmlFor="password" className="text-sm font-medium">
-                                    Password
+                                    {t('auth.password')}
                                 </label>
                                 <div className="relative">
                                     <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                     <Input
                                         id="password"
-                                        placeholder="Create a password"
+                                        placeholder={t('auth.create_password_placeholder')}
                                         type="password"
                                         autoComplete="new-password"
                                         disabled={isLoading}
@@ -276,13 +278,13 @@ export default function RegisterPage() {
                             {/* Confirm Password */}
                             <div className="space-y-2">
                                 <label htmlFor="confirmPassword" className="text-sm font-medium">
-                                    Confirm Password
+                                    {t('auth.confirm_password')}
                                 </label>
                                 <div className="relative">
                                     <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                     <Input
                                         id="confirmPassword"
-                                        placeholder="Confirm your password"
+                                        placeholder={t('auth.confirm_password_placeholder')}
                                         type="password"
                                         autoComplete="new-password"
                                         disabled={isLoading}
@@ -310,9 +312,9 @@ export default function RegisterPage() {
                                         htmlFor="agreeTerms"
                                         className="text-sm text-foreground leading-relaxed cursor-pointer"
                                     >
-                                        I agree to the{" "}
+                                        {t('auth.i_agree_to_the')}{" "}
                                         <Link href="/terms" className="text-primary hover:underline font-medium">
-                                            Terms of Service
+                                            {t('auth.terms_of_service')}
                                         </Link>
                                     </label>
                                 </div>
@@ -331,9 +333,9 @@ export default function RegisterPage() {
                                         htmlFor="agreePrivacy"
                                         className="text-sm text-foreground leading-relaxed cursor-pointer"
                                     >
-                                        I agree to the{" "}
+                                        {t('auth.i_agree_to_the')}{" "}
                                         <Link href="/privacy" className="text-primary hover:underline font-medium">
-                                            Privacy Policy
+                                            {t('auth.privacy_policy')}
                                         </Link>
                                     </label>
                                 </div>
@@ -353,7 +355,7 @@ export default function RegisterPage() {
                                 disabled={!canSubmit() || isLoading}
                             >
                                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                Create Account
+                                {t('auth.create_account_button')}
                             </Button>
                         </CardContent>
                     </Card>
@@ -361,9 +363,9 @@ export default function RegisterPage() {
                     {/* Sign In Link */}
                     <div className="mt-6 text-center">
                         <p className="text-sm text-muted-foreground">
-                            Already have an account?{" "}
+                            {t('auth.already_have_account')}{" "}
                             <Link href="/login" className="font-medium text-primary hover:underline">
-                                Sign in
+                                {t('auth.sign_in')}
                             </Link>
                         </p>
                     </div>
