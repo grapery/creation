@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronRight, User, Shield, Bell, Globe, Lock, Mail, Trash2, LogOut, Monitor, Info } from "lucide-react";
@@ -121,33 +120,25 @@ export default function SettingsPage() {
     const { t } = useTranslation();
 
     return (
-        <div className="min-h-screen bg-background flex flex-col">
-            <Header />
-            
-            <main className="flex-1 container px-4 py-8 md:px-6">
-                <div className="max-w-2xl mx-auto space-y-6">
-                    <h1 className="text-2xl font-bold mb-6">{t("settings.title")}</h1>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-6">
-                            <SettingsGroupCard group={accountSettings} />
-                            <SettingsGroupCard group={preferencesSettings} />
-                        </div>
-                    </div>
-
+        <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-6">
+                    <SettingsGroupCard group={accountSettings} />
+                    <SettingsGroupCard group={preferencesSettings} />
+                </div>
+                <div className="space-y-6">
                     <SettingsGroupCard group={legalSettings} />
-
                     <div className="md:hidden">
                         <SettingsGroupCard group={accountActionsSettings} isActionGroup />
                     </div>
                 </div>
+            </div>
 
-                <div className="text-center py-8">
-                    <p className="text-sm text-muted-foreground">
-                        Voyager v1.0.0 (Web)
-                    </p>
-                </div>
-            </main>
+            <div className="text-center py-8">
+                <p className="text-sm text-muted-foreground">
+                    Voyager v1.0.0 (Web)
+                </p>
+            </div>
         </div>
     );
 }

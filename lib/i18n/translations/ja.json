@@ -54,7 +54,9 @@
     "continue_with_google": "Googleで続行",
     "or_continue_with": "または続行",
     "apple": "Apple",
-    "google": "Google"
+    "google": "Google",
+    "browse_as_guest": "ゲストとして閲覧",
+    "browse_as_guest_description": "ログインせずにトレンドストーリーを探索"
   },
   "navigation": {
     "home": "ホーム",

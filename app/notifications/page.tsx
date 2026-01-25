@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "@/providers/language-provider";
 import { Header } from "@/components/layout/header";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -17,6 +18,7 @@ const mockNotifications = [
 ];
 
 export default function NotificationsPage() {
+    const { t } = useTranslation();
     const [activeTab, setActiveTab] = useState("all");
 
     const getIcon = (type: string) => {
@@ -31,16 +33,16 @@ export default function NotificationsPage() {
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <Header />
-            <main className="flex-1 container max-w-2xl px-0 md:px-4 py-0 md:py-8 mx-auto">
+            <main className="flex-1 container max-w-6xl px-4 py-8 mx-auto">
                 <div className="p-4 md:px-0">
-                    <h1 className="text-2xl font-bold mb-4">Notifications</h1>
+                    <h1 className="text-2xl font-bold mb-4">{t("notifications.title")}</h1>
 
                     <Tabs defaultValue="all" onValueChange={setActiveTab} className="w-full">
                         <TabsList className="w-full justify-start overflow-x-auto scrollbar-hide">
-                            <TabsTrigger value="all">All</TabsTrigger>
-                            <TabsTrigger value="likes">Likes</TabsTrigger>
-                            <TabsTrigger value="mentions">Mentions</TabsTrigger>
-                            <TabsTrigger value="system">System</TabsTrigger>
+                            <TabsTrigger value="all">{t("notifications.tab_all")}</TabsTrigger>
+                            <TabsTrigger value="likes">{t("notifications.tab_likes")}</TabsTrigger>
+                            <TabsTrigger value="mentions">{t("notifications.tab_mentions")}</TabsTrigger>
+                            <TabsTrigger value="system">{t("notifications.tab_system")}</TabsTrigger>
                         </TabsList>
 
                         <div className="mt-4 space-y-2">

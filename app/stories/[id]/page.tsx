@@ -16,9 +16,11 @@ import { StoryScenesSection } from "@/components/story/story-scenes-section";
 import { StoryTeamSection, ContentCreator } from "@/components/story/story-team-section";
 import { CreatorRole } from "@/components/story/story-team-section";
 import { formatDistanceToNow } from "date-fns";
+import { useTranslation } from "@/providers/language-provider";
 
 export default function StoryPage() {
     const { id } = useParams();
+    const { t } = useTranslation();
     const router = useRouter();
     const [story, setStory] = useState<Story | null>(null);
     const [loading, setLoading] = useState(true);
@@ -231,9 +233,9 @@ export default function StoryPage() {
     if (!story) return (
         <div className="min-h-screen bg-background flex items-center justify-center">
             <div className="text-center">
-                <h1 className="text-2xl font-bold mb-4">Story Not Found</h1>
-                <p className="text-muted-foreground mb-4">The story you're looking for doesn't exist.</p>
-                <Button onClick={() => router.push("/")}>Go Home</Button>
+                <h1 className="text-2xl font-bold mb-4">{t("story_detail.story_not_found", "Story Not Found")}</h1>
+                <p className="text-muted-foreground mb-4">{t("story_detail.story_not_found_message", "The story you're looking for doesn't exist.")}</p>
+                <Button onClick={() => router.push("/")}>{t("story_detail.go_home", "Go Home")}</Button>
             </div>
         </div>
     );
@@ -246,12 +248,14 @@ export default function StoryPage() {
                 <StoryDetailHeader story={story} />
 
                 {/* Tab Navigation */}
-                <div className="border-b border-border/50">
-                    <StoryTabs onTabChange={setActiveTab} />
+                <div className="border-b border-border/50 bg-background sticky top-14 z-20">
+                    <div className="container max-w-6xl px-4 md:px-6 mx-auto py-3">
+                        <StoryTabs onTabChange={setActiveTab} />
+                    </div>
                 </div>
 
                 {/* Tab Content */}
-                <div className="container max-w-5xl px-4 py-6">
+                <div className="container max-w-6xl px-4 py-6 md:px-6 mx-auto">
                     {activeTab === "story" && (
                         <StoryBranchesSection
                             storyId={story.id}
@@ -264,7 +268,7 @@ export default function StoryPage() {
 
                     {activeTab === "characters" && (
                         <StoryCastSection
-                            title="Characters"
+                            title={t("story_detail.header.characters", "Characters")}
                             characters={characters}
                             onAddCharacter={() => {
                                 // TODO: Navigate to create character
@@ -275,7 +279,7 @@ export default function StoryPage() {
 
                     {activeTab === "scenes" && (
                         <StoryScenesSection
-                            title="Scenes"
+                            title={t("story_detail.tabs.scenes", "Scenes")}
                             scenes={scenes}
                             storyId={story.id}
                             isLoading={loadingScenes}
@@ -288,7 +292,7 @@ export default function StoryPage() {
 
                     {activeTab === "team" && (
                         <StoryTeamSection
-                            title="Contributors"
+                            title={t("story_detail.contributors", "Contributors")}
                             creators={creators}
                             contributors={contributors}
                             isLoading={loadingTeam}
@@ -305,8 +309,8 @@ export default function StoryPage() {
                 </div>
 
                 {/* Action Bar */}
-                <div className="border-t border-border/50 px-4 py-4 bg-background">
-                    <div className="container max-w-5xl">
+                <div className="border-t border-border/50 py-4 bg-background">
+                    <div className="container max-w-6xl px-4 md:px-6 mx-auto">
                         <Button
                             className="w-full md:w-auto"
                             onClick={() => {
@@ -319,7 +323,7 @@ export default function StoryPage() {
                                 }
                             }}
                         >
-                            {storyboardsList.length === 0 ? "Create First Storyboard" : "Start Reading"}
+                            {storyboardsList.length === 0 ? t("story_detail.actions.create_first_storyboard", "Create First Storyboard") : t("story_detail.actions.start_reading", "Start Reading")}
                         </Button>
                     </div>
                 </div>

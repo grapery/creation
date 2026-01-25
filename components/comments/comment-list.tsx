@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { comments, Comment } from "@/lib/api/comments";
 import { CommentItem } from "./comment-item";
 import { Button } from "@/components/ui/button";
@@ -29,20 +29,50 @@ export function CommentList({ targetId, targetType }: CommentListProps) {
     const [submitting, setSubmitting] = useState(false);
     const [content, setContent] = useState("");
     const [replyTo, setReplyTo] = useState<Comment | null>(null);
+    const [refreshKey, setRefreshKey] = useState(0);
+    const hasLoadedRef = useRef(false);
 
     useEffect(() => {
+        // Reset the loaded flag when targetId, targetType, or refreshKey changes
+        hasLoadedRef.current = false;
+    }, [targetId, targetType, refreshKey]);
+
+    useEffect(() => {
+        if (hasLoadedRef.current) return;
+
+        let isMounted = true;
+
+        const loadComments = async () => {
+            try {
+                const res = await comments.list(targetId, targetType);
+
+                if (!isMounted) return;
+
+                setItems(res.comments || []);
+                hasLoadedRef.current = true;
+            } catch (e) {
+                console.error(e);
+                if (isMounted) {
+                    setLoading(false);
+                }
+            } finally {
+                if (isMounted) {
+                    setLoading(false);
+                }
+            }
+        };
+
         loadComments();
-    }, [targetId]);
+
+        return () => {
+            isMounted = false;
+        };
+    }, [targetId, targetType, refreshKey]);
 
     const loadComments = async () => {
-        try {
-            const res = await comments.list(targetId);
-            setItems(res.comments || []);
-        } catch (e) {
-            console.error(e);
-        } finally {
-            setLoading(false);
-        }
+        // This function is now called inside useEffect, no longer needed as standalone
+        // But keeping it for manual refresh if needed
+        setRefreshKey(prev => prev + 1);
     };
 
     const onSubmit = async () => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useParams } from "next/navigation";
 import { Header } from "@/components/layout/header";
@@ -8,24 +8,26 @@ import { groups } from "@/lib/api/groups";
 import { BranchGroup } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Loader2, Users, BookOpen, Settings, LayoutDashboard } from "lucide-react";
+import { Loader2, Users, BookOpen, Settings, LayoutDashboard, Share2, MoreHorizontal, Book } from "lucide-react";
+import { useTranslation } from "@/providers/language-provider";
 
-// Inline Tabs for now if not installed
+// Inline Tabs
 function SimpleTabs({ group, currentPath }: { group: BranchGroup, currentPath: string }) {
+    const { t } = useTranslation();
     const tabs = [
-        { label: "Dashboard", href: `/groups/${group.id}`, icon: LayoutDashboard, exact: true },
-        { label: "Stories", href: `/groups/${group.id}/stories`, icon: BookOpen },
-        { label: "Members", href: `/groups/${group.id}/members`, icon: Users },
-        { label: "Settings", href: `/groups/${group.id}/settings`, icon: Settings }, // Only if admin?
+        { label: t("group_detail.dashboard", "Dashboard"), href: `/groups/${group.id}`, icon: LayoutDashboard, exact: true },
+        { label: t("group_detail.stories", "Stories"), href: `/groups/${group.id}/stories`, icon: BookOpen },
+        { label: t("group_detail.members", "Members"), href: `/groups/${group.id}/members`, icon: Users },
+        { label: t("group_detail.settings", "Settings"), href: `/groups/${group.id}/settings`, icon: Settings },
     ];
 
     return (
         <div className="border-b bg-background sticky top-14 z-40">
-            <div className="container px-4 md:px-6 flex overflow-x-auto scrollbar-hide">
+            <div className="container max-w-6xl mx-auto px-4 flex overflow-x-auto scrollbar-hide">
                 {tabs.map((tab) => {
                     const isActive = tab.exact
                         ? currentPath === tab.href
-                        : currentPath.startsWith(tab.href);
+                        : currentPath.startsWith(tab.href) && tab.href !== `/groups/${group.id}`;
 
                     return (
                         <Link
@@ -35,7 +37,7 @@ function SimpleTabs({ group, currentPath }: { group: BranchGroup, currentPath: s
                                 "flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap",
                                 isActive
                                     ? "border-primary text-primary"
-                                    : "border-transparent text-muted-foreground hover:text-foreground hover:border-muted"
+                                    : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
                             )}
                         >
                             <tab.icon className="h-4 w-4" />
@@ -53,25 +55,60 @@ export default function GroupLayout({
 }: {
     children: React.ReactNode
 }) {
+    const { t } = useTranslation();
     const { id } = useParams();
     const pathname = usePathname();
     const [group, setGroup] = useState<BranchGroup | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isFollowing, setIsFollowing] = useState(false);
+    const hasLoadedRef = useRef(false);
 
     useEffect(() => {
-        if (!id) return;
+        if (!id || hasLoadedRef.current) return;
+
+        let isMounted = true;
+
         async function load() {
             try {
                 const data = await groups.get(id as string);
+
+                if (!isMounted) return;
+
                 setGroup(data);
+                setIsFollowing(data.isFollowing || false);
+                hasLoadedRef.current = true;
             } catch (e) {
                 console.error(e);
+                if (isMounted) {
+                    setLoading(false);
+                }
             } finally {
-                setLoading(false);
+                if (isMounted) {
+                    setLoading(false);
+                }
             }
         }
+
         load();
+
+        return () => {
+            isMounted = false;
+        };
     }, [id]);
+
+    const handleFollow = async () => {
+        if (!group) return;
+        try {
+            if (isFollowing) {
+                await groups.unfollow(group.id);
+            } else {
+                await groups.follow(group.id);
+            }
+            setIsFollowing(!isFollowing);
+        } catch (e) {
+            console.error("Failed to follow/unfollow:", e);
+        }
+    };
 
     if (loading) return (
         <div className="min-h-screen bg-background flex flex-col">
@@ -86,49 +123,111 @@ export default function GroupLayout({
         <div className="min-h-screen bg-background flex flex-col">
             <Header />
             <div className="flex-1 flex items-center justify-center">
-                Group not found
+                <div className="text-center">
+                    <h1 className="text-2xl font-bold mb-4">{t("group_detail.group_not_found")}</h1>
+                </div>
             </div>
         </div>
     );
+
+    const memberCount = group.members ?? group.memberCount ?? 0;
+    const storyCount = group.stories ?? group.storyCount ?? 0;
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <Header />
 
-            {/* Group Header */}
-            <div className="bg-card border-b pt-8 pb-4">
-                <div className="container px-4 md:px-6">
-                    <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
-                        <div className="h-20 w-20 md:h-24 md:w-24 rounded-full bg-secondary flex-shrink-0 flex items-center justify-center text-3xl font-bold text-primary overflow-hidden border-4 border-background shadow-sm">
-                            {group.avatar ? (
-                                <img src={group.avatar} className="w-full h-full object-cover" />
+            {/* Immersive Header Banner */}
+            <div className="relative h-[200px] md:h-[240px]">
+                {group.avatar || group.displayImage ? (
+                    <>
+                        <img
+                            src={group.avatar || group.displayImage}
+                            alt={group.name}
+                            className="w-full h-full object-cover blur-md scale-105"
+                        />
+                        <div className="absolute inset-0 bg-black/40" />
+                    </>
+                ) : (
+                    <div className="w-full h-full bg-gradient-to-r from-primary/20 to-primary/5" />
+                )}
+            </div>
+
+            <div className="container max-w-6xl mx-auto px-4 pb-4">
+                {/* Header Content */}
+                <div className="relative -mt-16 mb-6 flex flex-col md:flex-row items-end md:items-start gap-6">
+                    {/* Avatar */}
+                    <div className="w-32 h-32 rounded-xl bg-background p-1 shadow-xl">
+                        <div className="w-full h-full rounded-lg bg-secondary overflow-hidden">
+                            {group.avatar || group.displayImage ? (
+                                <img
+                                    src={group.avatar || group.displayImage}
+                                    alt={group.name}
+                                    className="w-full h-full object-cover"
+                                />
                             ) : (
-                                group.name[0]?.toUpperCase()
+                                <div className="w-full h-full flex items-center justify-center">
+                                    <Users className="w-12 h-12 text-muted-foreground" />
+                                </div>
                             )}
                         </div>
-                        <div className="flex-1 space-y-2">
-                            <h1 className="text-2xl md:text-3xl font-bold">{group.name}</h1>
-                            <p className="text-muted-foreground max-w-2xl">{group.description}</p>
-                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                                <span>{group.memberCount || 0} Members</span>
-                                <span>•</span>
-                                <span>{group.storyCount || 0} Stories</span>
-                                <span>•</span>
-                                <span>{group.isPublic ? "Public" : "Private"}</span>
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex-1 pt-4 text-center md:text-left">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div>
+                                <h1 className="text-3xl font-bold text-foreground mb-2 drop-shadow-md md:drop-shadow-none text-white md:text-foreground">
+                                    {group.name}
+                                </h1>
+                                <div className="flex items-center justify-center md:justify-start gap-4 text-sm text-muted-foreground">
+                                    {group.isPublic !== undefined && (
+                                        <span className="bg-secondary px-2.5 py-0.5 rounded-full text-xs font-medium text-foreground">
+                                            {group.isPublic ? t("group_detail.public") : t("group_detail.private")}
+                                        </span>
+                                    )}
+                                    <div className="flex items-center gap-1">
+                                        <Users className="w-4 h-4" />
+                                        <span>{memberCount} {t("group_detail.members")}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <Book className="w-4 h-4" />
+                                        <span>{storyCount} {t("group_detail.stories")}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-center gap-2">
+                                <Button
+                                    size="sm"
+                                    variant={isFollowing ? "default" : "outline"}
+                                    onClick={handleFollow}
+                                    className="min-w-[100px]"
+                                >
+                                    {isFollowing ? t("group_detail.following") : t("group_detail.follow")}
+                                </Button>
+                                <Button size="sm" variant="outline">
+                                    <Share2 className="w-4 h-4 mr-2" />
+                                    {t("group_detail.share")}
+                                </Button>
+                                <Button size="sm" variant="ghost" className="h-9 w-9 p-0">
+                                    <MoreHorizontal className="w-4 h-4" />
+                                </Button>
                             </div>
                         </div>
-                        <div className="flex gap-2">
-                            <Button>Join Group</Button>
-                            {/* Only show if member/admin */}
-                            {/* <Button variant="outline">Invite</Button> */}
-                        </div>
+
+                        {group.description && (
+                            <p className="mt-4 text-muted-foreground max-w-2xl leading-relaxed line-clamp-2 text-left">
+                                {group.description}
+                            </p>
+                        )}
                     </div>
                 </div>
             </div>
 
             <SimpleTabs group={group} currentPath={pathname} />
 
-            <main className="flex-1 container px-4 py-8 md:px-6">
+            <main className="flex-1 container max-w-6xl mx-auto px-4 py-8">
                 {children}
             </main>
         </div>

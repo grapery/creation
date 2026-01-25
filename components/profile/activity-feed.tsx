@@ -77,7 +77,7 @@ export function ActivityFeed({ userId }: ActivityFeedProps) {
                             {getDescription(activity)}
                         </div>
                         <div className="text-xs text-muted-foreground mt-1">
-                            {formatDistanceToNow(new Date(activity.createdAt), { addSuffix: true })}
+                            {formatDistanceToNow(new Date(activity.createdAt * 1000), { addSuffix: true })}
                         </div>
                     </div>
                 </div>

@@ -32,7 +32,7 @@ export function ProfileHeader({
 }: ProfileHeaderProps) {
     const formatJoinedDate = (timestamp?: number) => {
         if (!timestamp) return "";
-        const date = new Date(timestamp);
+        const date = new Date(timestamp * 1000);
         return date.toLocaleDateString("en-US", { year: "numeric", month: "2-digit" });
     };
 

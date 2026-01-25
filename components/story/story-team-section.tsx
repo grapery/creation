@@ -3,6 +3,7 @@
 import { Contributor } from "@/lib/types";
 import { UserPlus, MessageSquare, Crown, BookOpen, User, Image as ImageIcon, Users2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/providers/language-provider";
 
 interface StoryTeamSectionProps {
     title: string;
@@ -38,13 +39,14 @@ export function StoryTeamSection({
     onInvite,
     onOpenWritersRoom
 }: StoryTeamSectionProps) {
+    const { t } = useTranslation();
     const totalCount = creators.length + contributors.length;
 
     return (
         <div className="space-y-4">
             {/* Header */}
             <div className="flex items-center justify-between">
-                <h2 className="text-base font-semibold text-foreground">
+                <h2 className="text-xl font-bold tracking-tight">
                     {title} ({totalCount})
                 </h2>
                 <Button
@@ -54,7 +56,7 @@ export function StoryTeamSection({
                     className="flex items-center gap-2"
                 >
                     <UserPlus className="w-4 h-4" />
-                    <span className="text-sm font-semibold">Invite</span>
+                    <span className="text-sm font-semibold">{t("story_detail.empty.invite", "Invite")}</span>
                 </Button>
             </div>
 
@@ -64,17 +66,17 @@ export function StoryTeamSection({
                     <div className="flex-1">
                         <div className="flex items-center gap-2.5 mb-2">
                             <MessageSquare className="w-5 h-5 text-foreground" />
-                            <h3 className="text-[15px] font-semibold text-foreground">Writers Room</h3>
+                            <h3 className="text-[15px] font-semibold text-foreground">{t("story_detail.empty.writers_room", "Writers Room")}</h3>
                         </div>
                         <p className="text-sm text-muted-foreground line-clamp-2">
-                            Collaborate in real-time with AI assistance
+                            {t("story_detail.empty.writers_room_desc", "Collaborate in real-time with AI assistance")}
                         </p>
                     </div>
                     <Button
                         onClick={onOpenWritersRoom}
                         className="bg-foreground text-foreground px-4 py-2.5 text-sm font-semibold rounded-xl"
                     >
-                        Open Chat
+                        {t("story_detail.empty.open_chat", "Open Chat")}
                     </Button>
                 </div>
             </div>
@@ -83,13 +85,13 @@ export function StoryTeamSection({
             {isLoading ? (
                 <div className="bg-card border border-border/8 rounded-2xl p-10 flex flex-col items-center justify-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-3" />
-                    <p className="text-sm text-muted-foreground">Loading team...</p>
+                    <p className="text-sm text-muted-foreground">{t("common.loading", "Loading team...")}</p>
                 </div>
             ) : creators.length === 0 && contributors.length === 0 ? (
                 <div className="bg-card border border-border/8 rounded-2xl p-6 text-center">
                     <Users2 className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
-                    <p className="text-sm font-semibold text-foreground mb-1">No team members yet</p>
-                    <p className="text-sm text-muted-foreground">Invite contributors to collaborate</p>
+                    <p className="text-sm font-semibold text-foreground mb-1">{t("story_detail.empty.no_team_title", "No team members yet")}</p>
+                    <p className="text-sm text-muted-foreground">{t("story_detail.empty.no_team_message", "Invite contributors to collaborate")}</p>
                 </div>
             ) : (
                 <div className="space-y-3">

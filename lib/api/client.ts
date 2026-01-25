@@ -150,13 +150,23 @@ const createClient = (serviceType: ServiceType = ServiceType.MAIN): AxiosInstanc
             if (error.response) {
                 const { status, data } = error.response;
 
-                // Debug: Log error details
-                console.error('[API] Response error:', {
-                    url: error.config?.url,
-                    status,
-                    data,
-                    hasToken: !!error.config?.headers?.Authorization
-                });
+                // Only log errors in development or for non-connection errors
+                if (process.env.NODE_ENV === 'development' && status !== 0 && status !== 503) {
+                    if (status >= 500) {
+                        console.warn('[API] Server error:', {
+                            url: error.config?.url,
+                            status,
+                            message: (data as any)?.message || 'Server error'
+                        });
+                    } else if (status !== 401) {
+                        // Don't log 401 errors as they're expected for unauthenticated users
+                        console.warn('[API] Request failed:', {
+                            url: error.config?.url,
+                            status,
+                            message: (data as any)?.message || error.message
+                        });
+                    }
+                }
 
                 if (status === 401) {
                     // Unauthorized - emit event or redirect
@@ -164,13 +174,58 @@ const createClient = (serviceType: ServiceType = ServiceType.MAIN): AxiosInstanc
                         // Optional: clearTokens();
                         // window.location.href = '/login';
                         // Better to handle in AuthContext
-                        console.error('[API] 401 Unauthorized - Token may be invalid or expired');
+                        // Silently handle 401 - don't log
                     }
                 }
 
                 const message = (data as any)?.message || (data as any)?.msg || error.message;
+
+                // For authentication endpoints, always throw errors
+                const isAuthEndpoint = error.config?.url?.includes('/api/auth/') ||
+                                      error.config?.url?.includes('/api/oauth/');
+
+                if (isAuthEndpoint) {
+                    return Promise.reject(new APIError(message, status, error));
+                }
+
+                // For 500, 503, and connection errors on non-auth endpoints, return a safe empty response
+                // This prevents console errors when backend is down
+                if (status >= 500 || status === 0) {
+                    // Return a safe empty object that matches common response formats
+                    return Promise.resolve({ data: [], stories: [], storyboards: [], groups: [], total: 0 } as any);
+                }
+
                 return Promise.reject(new APIError(message, status, error));
             }
+
+            // Connection errors (ECONNREFUSED, etc)
+            const isConnectionError = error.code === 'ECONNREFUSED' ||
+                                    error.code === 'ENOTFOUND' ||
+                                    error.message?.includes('Network Error') ||
+                                    error.message?.includes('ECONNREFUSED');
+
+            if (isConnectionError) {
+                // Check if this is an authentication endpoint
+                const isAuthEndpoint = error.config?.url?.includes('/api/auth/') ||
+                                      error.config?.url?.includes('/api/oauth/');
+
+                if (isAuthEndpoint) {
+                    // For auth endpoints, throw an error with a clear message
+                    if (process.env.NODE_ENV === 'development') {
+                        console.warn('[API] Backend not available for auth request');
+                    }
+                    return Promise.reject(new APIError('Unable to connect to server. Please check your connection.', 0, error));
+                }
+
+                // Only log in development for non-auth endpoints
+                if (process.env.NODE_ENV === 'development') {
+                    console.warn('[API] Backend not available - returning empty data');
+                }
+                // Return empty data instead of throwing error for data endpoints
+                return Promise.resolve({ data: [], stories: [], storyboards: [], groups: [], total: 0 } as any);
+            }
+
+            // For other errors, still throw
             return Promise.reject(new APIError(error.message, 0, error));
         }
     );

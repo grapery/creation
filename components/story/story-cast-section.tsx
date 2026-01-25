@@ -3,6 +3,7 @@
 import { Character } from "@/lib/types";
 import { Plus, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/providers/language-provider";
 
 interface StoryCastSectionProps {
     title: string;
@@ -11,11 +12,13 @@ interface StoryCastSectionProps {
 }
 
 export function StoryCastSection({ title, characters, onAddCharacter }: StoryCastSectionProps) {
+    const { t } = useTranslation();
+
     return (
-        <div className="space-y-3">
+        <div className="space-y-4">
             {/* Header */}
             <div className="flex items-center justify-between">
-                <h2 className="text-base font-semibold text-foreground">
+                <h2 className="text-xl font-bold tracking-tight">
                     {title} ({characters.length})
                 </h2>
                 <Button
@@ -25,7 +28,7 @@ export function StoryCastSection({ title, characters, onAddCharacter }: StoryCas
                     className="flex items-center gap-2"
                 >
                     <Plus className="w-4 h-4" />
-                    <span className="text-sm font-semibold">Add Character</span>
+                    <span className="text-sm font-semibold">{t("story_detail.empty.add_character", "Add Character")}</span>
                 </Button>
             </div>
 
@@ -33,8 +36,8 @@ export function StoryCastSection({ title, characters, onAddCharacter }: StoryCas
             {characters.length === 0 ? (
                 <div className="bg-card border border-border/8 rounded-2xl p-6 text-center">
                     <Users className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
-                    <p className="text-sm font-semibold text-foreground mb-1">No characters yet</p>
-                    <p className="text-sm text-muted-foreground">Add characters to bring your story to life</p>
+                    <p className="text-sm font-semibold text-foreground mb-1">{t("story_detail.empty.no_characters_title", "No characters yet")}</p>
+                    <p className="text-sm text-muted-foreground">{t("story_detail.empty.no_characters_message", "Add characters to bring your story to life")}</p>
                 </div>
             ) : (
                 <div className="space-y-3">

@@ -8,15 +8,17 @@ import { Users, Book, Globe, Lock, ChevronRight } from "lucide-react";
 export function GroupCard({
     group,
     showJoinButton = false,
+    className,
 }: {
     group: BranchGroup;
     showJoinButton?: boolean;
+    className?: string;
 }) {
     const memberCount = group.members ?? group.memberCount ?? 0;
     const storyCount = group.stories ?? group.storyCount ?? 0;
 
     return (
-        <div className="bg-card border border-border rounded-xl p-4 min-h-[120px]">
+        <div className={`bg-card border border-border rounded-xl p-4 min-h-[120px] ${className || ""}`}>
             <div className="flex items-start gap-3">
                 {/* Avatar */}
                 <div className="relative">

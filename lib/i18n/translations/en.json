@@ -10,6 +10,14 @@
     "remove": "Remove",
     "search": "Search",
     "loading": "Loading...",
+    "vip": {
+      "upgrade_title": "Upgrade to Pro",
+      "upgrade_subtitle": "Unlock the full power of Voyager. Create without limits.",
+      "plan_free": "Free",
+      "plan_pro": "Pro",
+      "subscribe": "Subscribe",
+      "current_plan": "Current Plan"
+    },
     "error": "Error",
     "success": "Success",
     "retry": "Retry",
@@ -17,7 +25,9 @@
     "back": "Back",
     "next": "Next",
     "skip": "Skip",
-    "close": "Close"
+    "close": "Close",
+    "views": "Views",
+    "forks": "Forks"
   },
   "auth": {
     "sign_in": "Sign In",
@@ -54,7 +64,9 @@
     "continue_with_google": "Continue with Google",
     "or_continue_with": "Or continue with",
     "apple": "Apple",
-    "google": "Google"
+    "google": "Google",
+    "browse_as_guest": "Browse as Guest",
+    "browse_as_guest_description": "Explore trending stories without signing in"
   },
   "navigation": {
     "home": "Home",
@@ -63,7 +75,18 @@
     "chat": "Chat",
     "groups": "Groups",
     "profile": "Profile",
-    "settings": "Settings"
+    "settings": "Settings",
+    "sidebar": {
+      "creator_center": "Creator Center",
+      "write_story": "Write Story",
+      "storyboard": "Storyboard",
+      "my_drafts": "My Drafts",
+      "analytics": "Analytics",
+      "about": "About Voyager",
+      "guidelines": "Guidelines",
+      "privacy": "Privacy",
+      "terms": "Terms"
+    }
   },
   "settings": {
     "title": "Settings",
@@ -90,7 +113,9 @@
     "start_creating_first_story": "Start creating your first story!",
     "discover": "Discover",
     "invites": "Invites",
-    "my_groups": "My Groups"
+    "my_groups": "My Groups",
+    "start_here": "Start Here",
+    "trending_topics": "Trending Topics"
   },
   "stories": {
     "create_story": "Create Story",
@@ -118,6 +143,32 @@
     "create_first_storyboard_button": "Create First Storyboard",
     "create_storyboards_empty_message": "Use the button above to create your first storyboard and begin crafting your narrative journey."
   },
+  "storyboard_detail": {
+    "back": "Back",
+    "ai_generated": "AI Generated",
+    "generation_process": "Generation Process",
+    "additional_details": "Additional Details",
+    "creator": "Creator",
+    "created": "Created",
+    "scenes": "Scenes",
+    "status": "Status",
+    "status_completed": "Completed",
+    "status_in_progress": "In Progress",
+    "status_pending": "Pending",
+    "tokens": "tokens",
+    "step_raw_input": "Raw Input",
+    "step_content_generation": "Content Generation",
+    "step_scene_details": "Scene Details",
+    "step_images": "Images",
+    "step_videos": "Videos",
+    "scene": "Scene",
+    "multi_segment_video": "Multi-segment HLS video",
+    "likes": "Likes",
+    "comments": "Comments",
+    "like": "Like",
+    "comment": "Comment",
+    "fork": "Fork"
+  },
   "characters": {
     "create_character": "Create Character",
     "character_name": "Character Name",
@@ -144,7 +195,11 @@
     "character_editor_avatar": "Avatar",
     "character_editor_upload_avatar": "Upload Avatar",
     "no_characters_available": "No Characters Available",
-    "create_characters_first": "Create characters in the story first to add them here."
+    "create_characters_first": "Create characters in the story first to add them here.",
+    "title": "Characters",
+    "subtitle": "Chat with AI personalities or create your own.",
+    "search_placeholder": "Search characters...",
+    "create_button": "Create Character"
   },
   "chat": {
     "new_chat": "New Chat",
@@ -166,14 +221,13 @@
     "select_ai_agent": "Select AI Agent",
     "messages": "messages",
     "messages_per_day": "msgs/day",
-    "chat_message_placeholder": "Message..."
+    "chat_message_placeholder": "Message...",
+    "title": "Messages",
+    "no_messages": "No messages yet",
+    "start_chatting": "Start chatting with characters instantly.",
+    "explore_characters": "Explore Characters"
   },
   "groups": {
-    "create_group": "Create Group",
-    "group_name": "Group Name",
-    "group_description": "Group Description",
-    "invite_members": "Invite Members",
-    "my_groups": "My Groups",
     "members": "members",
     "published": "published",
     "panels": "panels",
@@ -204,7 +258,38 @@
     "leave_group": "Leave Group",
     "leave_group_confirmation": "Are you sure you want to leave this group?",
     "delete_group": "Delete Group",
-    "delete_group_confirmation": "Are you sure you want to delete this group? This action cannot be undone."
+    "delete_group_confirmation": "Are you sure you want to delete this group? This action cannot be undone.",
+    "title": "Groups",
+    "search_placeholder": "Search groups",
+    "create_group": "Create Group",
+    "my_groups_tab": "My Groups",
+    "discover_tab": "Discover",
+    "invites_tab": "Invites",
+    "search_results": "Search Results",
+    "found": "found",
+    "no_groups_found": "No groups found",
+    "try_different_search": "Try a different search term",
+    "no_groups_yet": "No groups yet",
+    "join_or_create_message": "Join or create a group to collaborate with others",
+    "no_groups_discover": "No groups to discover",
+    "check_back_later": "Check back later for new public groups",
+    "no_invites": "No invites",
+    "invites_message": "You'll see group invitations here"
+  },
+  "group_detail": {
+    "stories": "Stories",
+    "activity": "Activity",
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "members": "Members",
+    "follow": "Follow",
+    "following": "Following",
+    "share": "Share",
+    "created_by": "Created by",
+    "group_not_found": "Group Not Found",
+    "go_back": "Go Back",
+    "public": "Public",
+    "private": "Private"
   },
   "profile": {
     "edit_profile": "Edit Profile",
@@ -259,7 +344,12 @@
     "all_caught_up": "All caught up",
     "no_unread_notifications": "No unread notifications",
     "no_notifications_yet": "No notifications yet",
-    "notifications_will_appear": "Notifications will appear here"
+    "notifications_will_appear": "Notifications will appear here",
+    "title": "Notifications",
+    "tab_all": "All",
+    "tab_likes": "Likes",
+    "tab_mentions": "Mentions",
+    "tab_system": "System"
   },
   "errors": {
     "network_error": "Network error. Please check your connection.",
@@ -271,5 +361,53 @@
     "error_occurred": "An error occurred"
   },
   "loading": "Loading...",
-  "empty": "No data available"
+  "empty": "No Data",
+  "story_detail": {
+    "tabs": {
+      "story": "Story",
+      "characters": "Characters",
+      "scenes": "Scenes",
+      "team": "Team"
+    },
+    "header": {
+      "published": "Published",
+      "draft": "Draft",
+      "open_to_all": "Open to All",
+      "private": "Private",
+      "views": "views",
+      "storyboards": "storyboards",
+      "characters": "characters",
+      "created_by": "Created by"
+    },
+    "actions": {
+      "share": "Share",
+      "start_reading": "Start Reading",
+      "create_first_storyboard": "Create First Storyboard"
+    },
+    "empty": {
+      "no_storyboards_title": "No Storyboards Yet",
+      "no_storyboards_message": "{title} is waiting for its first storyboard. Start creating to bring the story to life.",
+      "tips_title": "Tips for first storyboard",
+      "tip_opening": "Create an engaging opening scene",
+      "tip_characters": "Introduce key characters early",
+      "tip_ai": "Use AI to generate content",
+      "no_characters_title": "No characters yet",
+      "no_characters_message": "Add characters to bring your story to life",
+      "add_character": "Add Character",
+      "no_scenes_title": "No scenes yet",
+      "no_scenes_message": "Add scenes to structure your story",
+      "add_scene": "Add Scene",
+      "no_team_title": "No team members yet",
+      "no_team_message": "Invite contributors to collaborate",
+      "invite": "Invite",
+      "writers_room": "Writers Room",
+      "writers_room_desc": "Collaborate in real-time with AI assistance",
+      "open_chat": "Open Chat"
+    },
+    "story_not_found": "Story Not Found",
+    "story_not_found_message": "The story you're looking for doesn't exist.",
+    "go_home": "Go Home",
+    "story_branches": "Story Branches",
+    "contributors": "Contributors"
+  }
 }

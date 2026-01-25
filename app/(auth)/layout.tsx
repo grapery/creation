@@ -1,3 +1,8 @@
+"use client";
+
+import React from "react";
+import { GitFork } from "lucide-react";
+
 export default function AuthLayout({
     children,
 }: {
@@ -23,6 +28,20 @@ export default function AuthLayout({
                     </svg>
                     Voyager
                 </div>
+
+                {/* GitHub Fork Icon and Community Info - Centered */}
+                <div className="relative z-20 flex flex-1 flex-col items-center justify-center">
+                    <div className="flex flex-col items-center space-y-6">
+                        <GitFork className="h-56 w-56 text-white" strokeWidth={1.5} />
+                        <div className="text-center space-y-2">
+                            <h2 className="text-3xl font-bold tracking-tight">Join the Community</h2>
+                            <p className="text-xl text-zinc-300 max-w-md">
+                                Fork, collaborate, and build amazing stories together
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
                 <div className="relative z-20 mt-auto">
                     <blockquote className="space-y-2">
                         <p className="text-lg">

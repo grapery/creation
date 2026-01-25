@@ -29,7 +29,13 @@ export const profile = {
             throw new Error('User not authenticated');
         }
         const offset = (page - 1) * limit;
-        return request(`/api/users/${userId}/draft-storyboards?limit=${limit}&offset=${offset}`);
+        return request(`/api/users/${userId}/drafts?limit=${limit}&offset=${offset}`);
+    },
+
+    // Get user's published drafts (for viewing another user's profile)
+    getUserDrafts: async (userId: string, page = 1, limit = 20): Promise<{ drafts: Storyboard[], count: number }> => {
+        const offset = (page - 1) * limit;
+        return request(`/api/users/${userId}/drafts?limit=${limit}&offset=${offset}`);
     },
 
     deleteDraft: async (id: string): Promise<void> => {
@@ -93,6 +99,12 @@ export const profile = {
     getCharacters: async (userId: string, page = 1, limit = 20): Promise<{ characters: any[], count: number }> => {
         const offset = (page - 1) * limit;
         return request(`/api/users/${userId}/characters?limit=${limit}&offset=${offset}`);
+    },
+
+    // Storyboards
+    getStoryboards: async (userId: string, page = 1, limit = 20): Promise<{ storyboards: Storyboard[], count: number }> => {
+        const offset = (page - 1) * limit;
+        return request(`/api/users/${userId}/storyboards?limit=${limit}&offset=${offset}`);
     },
 
     // User Profile

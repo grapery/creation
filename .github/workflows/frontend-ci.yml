@@ -1,0 +1,378 @@
+name: creation-frontend-ci
+
+on:
+  push:
+    paths:
+      - 'creation/**'
+    branches:
+      - main
+      - develop
+  pull_request:
+    paths:
+      - 'creation/**'
+  # 手动触发部署
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: '部署环境'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - prod
+
+env:
+  REGISTRY: ${{ vars.ACR_REGISTRY || 'crpi-kz6w8hb0pa94yvgy.cn-hangzhou.personal.cr.aliyuncs.com' }}
+  IMAGE_NAME: grapery-creation
+  SERVICE_NAME: creation
+  PORT: 3000
+
+jobs:
+  # ========================================
+  # Docker 构建 - Develop 分支
+  # ========================================
+  docker-develop:
+    name: Docker Build (Develop)
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/develop') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev')
+    env:
+      TAG: dev
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Aliyun ACR
+        run: echo ${{ vars.ACR_PASSWORD }} | docker login ${{ env.REGISTRY }} -u ${{ vars.ACR_USERNAME }} --password-stdin
+
+      - name: Build Docker image
+        working-directory: ./creation
+        run: |
+          docker build \
+            -f Dockerfile \
+            -t ${{ env.REGISTRY }}/grapery-dev/${{ env.IMAGE_NAME }}:${{ env.TAG }} \
+            --build-arg VERSION=develop-${{ github.sha }} \
+            --build-arg COMMIT_SHA=${{ github.sha }} \
+            --build-arg BUILD_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
+            .
+
+      - name: Push Docker image
+        run: |
+          docker push ${{ env.REGISTRY }}/grapery-dev/${{ env.IMAGE_NAME }}:${{ env.TAG }}
+
+      - name: Build summary
+        run: |
+          echo "## Docker Image Built (Develop)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Image: \`${{ env.REGISTRY }}/grapery-dev/${{ env.IMAGE_NAME }}:${{ env.TAG }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "Commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+
+  # ========================================
+  # Docker 构建 - Main 分支
+  # ========================================
+  docker-production:
+    name: Docker Build (Production)
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod')
+    env:
+      TAG: prod
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Aliyun ACR
+        run: echo ${{ vars.ACR_PASSWORD }} | docker login ${{ env.REGISTRY }} -u ${{ vars.ACR_USERNAME }} --password-stdin
+
+      - name: Build Docker image
+        working-directory: ./creation
+        run: |
+          docker build \
+            -f Dockerfile \
+            -t ${{ env.REGISTRY }}/grapery-prod/${{ env.IMAGE_NAME }}:${{ env.TAG }} \
+            --build-arg VERSION=${{ github.sha }} \
+            --build-arg COMMIT_SHA=${{ github.sha }} \
+            --build-arg BUILD_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
+            .
+
+      - name: Push Docker image
+        run: |
+          docker push ${{ env.REGISTRY }}/grapery-prod/${{ env.IMAGE_NAME }}:${{ env.TAG }}
+
+      - name: Build summary
+        run: |
+          echo "## Docker Image Built (Production)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Image: \`${{ env.REGISTRY }}/grapery-prod/${{ env.IMAGE_NAME }}:${{ env.TAG }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "Commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+
+  # ========================================
+  # 部署到开发环境 - Develop 分支
+  # ========================================
+  deploy-develop:
+    name: Deploy to Development
+    runs-on: ubuntu-latest
+    needs: docker-develop
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/develop') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate .env file
+        run: |
+          echo "📦 Generating development .env file..."
+          cat > creation/.env << EOF
+          # ========== Environment ==========
+          ENVIRONMENT=development
+          SERVICE_NAME=${{ env.SERVICE_NAME }}
+          IMAGE=${{ env.REGISTRY }}/grapery-dev/${{ env.IMAGE_NAME }}:dev
+          
+          # ========== Service Configuration ==========
+          PORT=${{ env.PORT }}
+          EOF
+          echo "✅ Development .env file generated"
+          cat creation/.env
+
+      - name: Deploy notification
+        run: |
+          echo "## 🚀 Development Deployment - Frontend Service" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Setting | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | ${{ env.SERVICE_NAME }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Port | ${{ env.PORT }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Image | \`${{ env.REGISTRY }}/grapery-dev/${{ env.IMAGE_NAME }}:dev\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | development |" >> $GITHUB_STEP_SUMMARY
+          echo "| Commit | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload .env to ECS
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ vars.DEV_DEPLOY_HOST }}
+          username: ${{ vars.SSH_USER }}
+          key: ${{ vars.SSH_KEY }}
+          port: 22
+          source: "creation/.env"
+          target: "/home/ubuntu/grapery/creation/"
+
+      - name: Remote Deploy to Development Server
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ vars.DEV_DEPLOY_HOST }}
+          username: ${{ vars.SSH_USER }}
+          key: ${{ vars.SSH_KEY }}
+          port: 22
+          script: |
+            set -e
+            
+            echo "=========================================="
+            echo "🚀 Starting Frontend Deployment"
+            echo "=========================================="
+            
+            cd /home/ubuntu/grapery/creation
+            echo "✅ Working directory: $(pwd)"
+            
+            # 设置环境变量
+            export REGISTRY=${{ env.REGISTRY }}
+            export ACR_USERNAME=${{ vars.ACR_USERNAME }}
+            export ACR_PASSWORD=${{ vars.ACR_PASSWORD }}
+            
+            # 登录阿里云 ACR
+            echo "🔐 Logging in to ACR..."
+            echo "$ACR_PASSWORD" | docker login $REGISTRY -u "$ACR_USERNAME" --password-stdin
+            
+            # 拉取最新镜像
+            echo "📦 Pulling latest image..."
+            docker pull ${{ env.REGISTRY }}/grapery-dev/${{ env.IMAGE_NAME }}:dev
+            
+            # 停止并移除旧容器
+            echo "🛑 Stopping old container..."
+            docker stop ${{ env.SERVICE_NAME }} 2>/dev/null || echo "   (no existing container)"
+            docker rm ${{ env.SERVICE_NAME }} 2>/dev/null || echo "   (container already removed)"
+            
+            # 确保 grapery-network 网络存在（用于与其他服务通信）
+            echo "🔗 Checking grapery-network..."
+            docker network create grapery-network 2>/dev/null || echo "   (network already exists)"
+            
+            # 启动新容器
+            echo "🚀 Starting new container..."
+            CONTAINER_ID=$(docker run -d \
+              --name ${{ env.SERVICE_NAME }} \
+              --restart unless-stopped \
+              --network grapery-network \
+              -p ${{ env.PORT }}:3000 \
+              --env-file .env \
+              ${{ env.REGISTRY }}/grapery-dev/${{ env.IMAGE_NAME }}:dev)
+            
+            echo "✅ Container started: $CONTAINER_ID"
+            
+            # 等待容器启动
+            echo "⏳ Waiting for container to be ready..."
+            sleep 5
+            
+            # 检查容器状态
+            echo "🔍 Container status:"
+            docker ps -a --filter "name=${{ env.SERVICE_NAME }}" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+            
+            # 检查容器日志
+            echo ""
+            echo "📋 Container logs (last 20 lines):"
+            docker logs --tail 20 ${{ env.SERVICE_NAME }}
+            
+            # 检查健康状态
+            echo ""
+            echo "🏥 Health check:"
+            if curl -f http://localhost:${{ env.PORT }}/api/health > /dev/null 2>&1; then
+              echo "✅ Health check passed"
+            else
+              echo "⚠️  Health check failed, but container is running"
+            fi
+            
+            # 清理未使用的镜像
+            echo ""
+            echo "🧹 Cleaning up unused images..."
+            docker system prune -f
+            
+            echo ""
+            echo "=========================================="
+            echo "✅ Deployment completed successfully!"
+            echo "=========================================="
+
+  # ========================================
+  # 部署到生产环境 - Main 分支
+  # ========================================
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: docker-production
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate .env file
+        run: |
+          echo "📦 Generating production .env file..."
+          cat > creation/.env << EOF
+          # ========== Environment ==========
+          ENVIRONMENT=production
+          SERVICE_NAME=${{ env.SERVICE_NAME }}
+          IMAGE=${{ env.REGISTRY }}/grapery-prod/${{ env.IMAGE_NAME }}:prod
+          
+          # ========== Service Configuration ==========
+          PORT=${{ env.PORT }}
+          EOF
+          echo "✅ Production .env file generated"
+          cat creation/.env
+
+      - name: Deploy notification
+        run: |
+          echo "## 🚀 Production Deployment - Frontend Service" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Setting | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | ${{ env.SERVICE_NAME }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Port | ${{ env.PORT }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Image | \`${{ env.REGISTRY }}/grapery-prod/${{ env.IMAGE_NAME }}:prod\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | production |" >> $GITHUB_STEP_SUMMARY
+          echo "| Commit | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload .env to ECS
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ vars.PROD_DEPLOY_HOST }}
+          username: ${{ vars.SSH_USER }}
+          key: ${{ vars.SSH_KEY }}
+          port: 22
+          source: "creation/.env"
+          target: "/home/ubuntu/grapery/creation/"
+
+      - name: Remote Deploy to Production Server
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ vars.PROD_DEPLOY_HOST }}
+          username: ${{ vars.SSH_USER }}
+          key: ${{ vars.SSH_KEY }}
+          port: 22
+          script: |
+            set -e
+            
+            echo "=========================================="
+            echo "🚀 Starting Frontend Deployment (Production)"
+            echo "=========================================="
+            
+            cd /home/ubuntu/grapery/creation
+            echo "✅ Working directory: $(pwd)"
+            
+            # 设置环境变量
+            export REGISTRY=${{ env.REGISTRY }}
+            export ACR_USERNAME=${{ vars.ACR_USERNAME }}
+            export ACR_PASSWORD=${{ vars.ACR_PASSWORD }}
+            
+            # 登录阿里云 ACR
+            echo "🔐 Logging in to ACR..."
+            echo "$ACR_PASSWORD" | docker login $REGISTRY -u "$ACR_USERNAME" --password-stdin
+            
+            # 拉取最新镜像
+            echo "📦 Pulling latest image..."
+            docker pull ${{ env.REGISTRY }}/grapery-prod/${{ env.IMAGE_NAME }}:prod
+            
+            # 停止并移除旧容器
+            echo "🛑 Stopping old container..."
+            docker stop ${{ env.SERVICE_NAME }} 2>/dev/null || echo "   (no existing container)"
+            docker rm ${{ env.SERVICE_NAME }} 2>/dev/null || echo "   (container already removed)"
+            
+            # 确保 grapery-network 网络存在（用于与其他服务通信）
+            echo "🔗 Checking grapery-network..."
+            docker network create grapery-network 2>/dev/null || echo "   (network already exists)"
+            
+            # 启动新容器
+            echo "🚀 Starting new container..."
+            CONTAINER_ID=$(docker run -d \
+              --name ${{ env.SERVICE_NAME }} \
+              --restart unless-stopped \
+              --network grapery-network \
+              -p ${{ env.PORT }}:3000 \
+              --env-file .env \
+              ${{ env.REGISTRY }}/grapery-prod/${{ env.IMAGE_NAME }}:prod)
+            
+            echo "✅ Container started: $CONTAINER_ID"
+            
+            # 等待容器启动
+            echo "⏳ Waiting for container to be ready..."
+            sleep 5
+            
+            # 检查容器状态
+            echo "🔍 Container status:"
+            docker ps -a --filter "name=${{ env.SERVICE_NAME }}" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+            
+            # 检查容器日志
+            echo ""
+            echo "📋 Container logs (last 20 lines):"
+            docker logs --tail 20 ${{ env.SERVICE_NAME }}
+            
+            # 检查健康状态
+            echo ""
+            echo "🏥 Health check:"
+            if curl -f http://localhost:${{ env.PORT }}/api/health > /dev/null 2>&1; then
+              echo "✅ Health check passed"
+            else
+              echo "⚠️  Health check failed, but container is running"
+            fi
+            
+            # 清理未使用的镜像
+            echo ""
+            echo "🧹 Cleaning up unused images..."
+            docker system prune -f
+            
+            echo ""
+            echo "=========================================="
+            echo "✅ Deployment completed successfully!"
+            echo "=========================================="

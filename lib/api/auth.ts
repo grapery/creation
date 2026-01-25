@@ -3,24 +3,34 @@ import { User, AuthResponse } from '../types';
 
 export const auth = {
     login: async (email: string, password: string): Promise<AuthResponse> => {
-        const response = await request<AuthResponse>('/api/auth/login', 'POST', { email, password });
+        try {
+            const response = await request<AuthResponse>('/api/auth/login', 'POST', { email, password });
 
-        // Debug: Log the response structure
-        console.log('[Auth] Login response:', response);
+            // Debug: Log the response structure
+            console.log('[Auth] Login response:', response);
 
-        // Check if response has the expected structure
-        if (response && 'accessToken' in response && typeof response.accessToken === 'string') {
-            console.log('[Auth] Saving tokens:', {
-                hasAccessToken: !!response.accessToken,
-                accessTokenLength: response.accessToken.length,
-                hasRefreshToken: !!response.refreshToken
-            });
-            setTokens(response.accessToken, response.refreshToken);
-        } else {
-            console.error('[Auth] Invalid login response structure:', response);
+            // Check if response has the expected structure
+            if (response && 'accessToken' in response && typeof response.accessToken === 'string') {
+                console.log('[Auth] Saving tokens:', {
+                    hasAccessToken: !!response.accessToken,
+                    accessTokenLength: response.accessToken.length,
+                    hasRefreshToken: !!response.refreshToken
+                });
+                setTokens(response.accessToken, response.refreshToken);
+            } else {
+                console.error('[Auth] Invalid login response structure:', response);
+                // Throw an error with a user-friendly message
+                throw new Error('Invalid response from server. Please try again.');
+            }
+
+            return response;
+        } catch (error: any) {
+            // Provide better error messages for common issues
+            if (error.message?.includes('ECONNREFUSED') || error.message?.includes('Network Error')) {
+                throw new Error('Unable to connect to server. Please check your connection and try again.');
+            }
+            throw error;
         }
-
-        return response;
     },
 
     register: async (data: {

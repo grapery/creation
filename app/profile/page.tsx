@@ -1,79 +1,182 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/providers/auth-provider";
-import { ProfileHeader, SocialProfileHeader } from "@/components/profile/profile-header";
 import { ActivityFeed } from "@/components/profile/activity-feed";
 import { ActivityHeatmap } from "@/components/profile/activity-heatmap";
 import { Button } from "@/components/ui/button";
-import { Loader2, Sparkles, Mask } from "lucide-react";
+import { Loader2, Sparkles, Drama, BookOpen, FileText, LayoutDashboard } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { User } from "@/lib/types";
+import { User, ActivityHeatmapData, ActivityTimeRange, Storyboard, Story } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { profile } from "@/lib/api/profile";
+import { useTranslation } from "@/providers/language-provider";
+import Link from "next/link";
 
 enum ProfileTab {
     ACTIVITY = "activity",
     STORIES = "stories",
+    STORYBOARDS = "storyboards",
     CHARACTERS = "characters",
     DRAFTS = "drafts",
+}
+
+// Inline Tabs component
+function ProfileTabs({
+    currentPath,
+    userId,
+    isOwnProfile
+}: {
+    currentPath: string;
+    userId: string;
+    isOwnProfile: boolean;
+}) {
+    const { t } = useTranslation();
+    const basePath = `/profile/${userId}`;
+
+    const tabs = [
+        {
+            label: t("profile.activity", "Activity"),
+            href: basePath,
+            icon: LayoutDashboard,
+            exact: true
+        },
+        {
+            label: t("profile.stories", "Stories"),
+            href: `${basePath}/stories`,
+            icon: BookOpen
+        },
+        {
+            label: t("profile.storyboards", "Storyboards"),
+            href: `${basePath}/storyboards`,
+            icon: FileText
+        },
+        {
+            label: t("profile.characters", "Characters"),
+            href: `${basePath}/characters`,
+            icon: Drama
+        },
+        ...(isOwnProfile ? [{
+            label: t("profile.drafts", "Drafts"),
+            href: `${basePath}/drafts`,
+            icon: Sparkles,
+            exact: false
+        }] : []),
+    ];
+
+    return (
+        <div className="bg-background sticky top-14 z-40 border-b border-border/50">
+            <div className="container max-w-6xl mx-auto px-4 py-2 flex overflow-x-auto scrollbar-hide">
+                <div className="flex items-center space-x-2">
+                    {tabs.map((tab) => {
+                        const isActive = tab.exact
+                            ? currentPath === tab.href
+                            : currentPath.startsWith(tab.href) && tab.href !== basePath;
+
+                        return (
+                            <Link
+                                key={tab.href}
+                                href={tab.href}
+                                className={cn(
+                                    "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap",
+                                    isActive
+                                        ? "text-primary font-bold bg-secondary"
+                                        : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                                )}
+                            >
+                                <tab.icon className="h-4 w-4" />
+                                {tab.label}
+                            </Link>
+                        )
+                    })}
+                </div>
+            </div>
+        </div>
+    );
 }
 
 export default function ProfilePage() {
     const { user: currentUser } = useAuth();
     const { id } = useParams();
     const router = useRouter();
+    const pathname = usePathname();
+    const { t } = useTranslation();
     const [profileUser, setProfileUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
-    const [selectedTab, setSelectedTab] = useState<ProfileTab>(ProfileTab.ACTIVITY);
     const [isFollowing, setIsFollowing] = useState(false);
-    const [scrollOffset, setScrollOffset] = useState(0);
 
     const isOwnProfile = currentUser?.id === id || (!id && currentUser?.id);
-    const containerRef = useRef<HTMLDivElement>(null);
+    const userId = id || currentUser?.id;
+
+    const hasLoadedRef = useRef(false);
 
     useEffect(() => {
+        if (!userId || hasLoadedRef.current) return;
+
+        let isMounted = true;
+
         async function fetchProfile() {
             setLoading(true);
             try {
-                if (id) {
-                    // Fetch other user's profile
-                    const response = await fetch(`/api/users/${id}`, {
-                        headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                        },
-                    });
-                    const data = await response.json();
-                    setProfileUser(data.user);
-                    setIsFollowing(data.isFollowing || false);
-                } else if (currentUser) {
-                    // Current user's profile
-                    setProfileUser(currentUser);
+                console.log('[Profile] Fetching user profile for userId:', userId);
+                const token = localStorage.getItem('voyager_auth_token');
+                console.log('[Profile] Token exists:', !!token, 'Token length:', token?.length);
+
+                const response = await fetch(`/api/users/${userId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+
+                console.log('[Profile] Response status:', response.status, 'ok:', response.ok);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
+
+                const data = await response.json();
+                console.log('[Profile] Response data:', data);
+
+                if (!isMounted) return;
+
+                setProfileUser(data.user);
+                setIsFollowing(data.isFollowing || false);
+                hasLoadedRef.current = true;
             } catch (e) {
                 console.error("Failed to fetch profile:", e);
+                if (isMounted) {
+                    setProfileUser(null);
+                }
             } finally {
-                setLoading(false);
+                if (isMounted) {
+                    setLoading(false);
+                }
             }
         }
+
         fetchProfile();
-    }, [id, currentUser]);
+
+        return () => {
+            isMounted = false;
+        };
+    }, [userId]);
 
     const handleFollow = async () => {
         if (!profileUser) return;
         try {
             if (isFollowing) {
-                await fetch(`/api/users/${profileUser.id}/unfollow`, {
+                await fetch(`/api/users/${profileUser.id}/follow`, {
                     method: 'DELETE',
                     headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Authorization': `Bearer ${localStorage.getItem('voyager_auth_token')}`,
                     },
                 });
             } else {
                 await fetch(`/api/users/${profileUser.id}/follow`, {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Authorization': `Bearer ${localStorage.getItem('voyager_auth_token')}`,
                     },
                 });
             }
@@ -95,8 +198,8 @@ export default function ProfilePage() {
         return (
             <div className="min-h-screen bg-background flex items-center justify-center">
                 <div className="text-center">
-                    <h1 className="text-2xl font-bold mb-4">User Not Found</h1>
-                    <Button onClick={() => router.back()}>Go Back</Button>
+                    <h1 className="text-2xl font-bold mb-4">{t("profile.user_not_found", "User Not Found")}</h1>
+                    <Button onClick={() => router.back()}>{t("common.go_back", "Go Back")}</Button>
                 </div>
             </div>
         );
@@ -105,24 +208,24 @@ export default function ProfilePage() {
     const totalLikes = profileUser.totalLikes || 0;
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-background flex flex-col">
             {/* Immersive Header */}
-            <div className="h-[160px] w-full relative">
+            <div className="h-[200px] w-full relative">
                 {profileUser.background ? (
                     <>
                         <img
                             src={profileUser.background}
                             alt="Cover"
-                            className="w-full h-full object-cover blur-xl"
+                            className="w-full h-full object-cover blur-md"
                         />
-                        <div className="absolute inset-0 bg-black/20" />
+                        <div className="absolute inset-0 bg-black/40" />
                     </>
                 ) : profileUser.avatar ? (
                     <>
                         <img
                             src={profileUser.avatar}
                             alt="Cover"
-                            className="w-full h-full object-cover blur-xl"
+                            className="w-full h-full object-cover blur-md"
                         />
                         <div className="absolute inset-0 bg-black/30" />
                     </>
@@ -131,251 +234,173 @@ export default function ProfilePage() {
                 )}
             </div>
 
-            {/* Profile Info Section */}
-            <div className="relative -top-11 px-4 z-10">
-                <div className="bg-card rounded-xl border border-border p-4">
-                    {/* Avatar + Actions Row */}
-                    <div className="flex items-end justify-between gap-4 mb-3 -mt-11">
+            <div className="container max-w-6xl mx-auto px-4 pb-4">
+                {/* Profile Info Section */}
+                <div className="relative -mt-16 mb-6">
+                    <div className="flex flex-col md:flex-row items-end md:items-start gap-6">
                         {/* Avatar */}
-                        <button
-                            onClick={() => {
-                                // Show avatar preview
-                            }}
-                            className="relative w-[88px] h-[88px] rounded-full border-[4px] border-background shadow-[0_5px_4px_rgba(0,0,0,0.1)] overflow-hidden flex-shrink-0"
-                        >
-                            {profileUser.avatar ? (
-                                <img
-                                    src={profileUser.avatar}
-                                    alt={profileUser.displayName || profileUser.username}
-                                    className="w-full h-full object-cover"
-                                />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center bg-background">
-                                    <span className="text-4xl font-bold text-muted-foreground">
-                                        {(profileUser.displayName || profileUser.username)?.[0]?.toUpperCase() || "?"}
-                                    </span>
+                        <div className="w-32 h-32 rounded-xl bg-background p-1 shadow-xl">
+                            <div className="w-full h-full rounded-lg bg-secondary overflow-hidden">
+                                {profileUser.avatar ? (
+                                    <img
+                                        src={profileUser.avatar}
+                                        alt={profileUser.displayName || profileUser.username}
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center">
+                                        <span className="text-4xl font-bold text-muted-foreground">
+                                            {(profileUser.displayName || profileUser.username)?.[0]?.toUpperCase() || "?"}
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Info */}
+                        <div className="flex-1 pt-4">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <h1 className="text-3xl font-bold text-foreground">
+                                            {profileUser.displayName || profileUser.username}
+                                        </h1>
+                                        {profileUser.isVip && (
+                                            <span className="text-orange-500 text-2xl">👑</span>
+                                        )}
+                                    </div>
+                                    <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
+                                        <span>@{profileUser.username}</span>
+                                        {profileUser.createdAt && (
+                                            <>
+                                                <span>·</span>
+                                                <span>{t("profile.joined", "Joined")} {new Date(profileUser.createdAt * 1000).toLocaleDateString("en-US", { year: "numeric", month: "2-digit" })}</span>
+                                            </>
+                                        )}
+                                    </div>
+                                    {profileUser.bio && (
+                                        <p className="mt-3 text-muted-foreground max-w-2xl">
+                                            {profileUser.bio}
+                                        </p>
+                                    )}
                                 </div>
-                            )}
-                        </button>
 
-                        <div className="flex-1" />
-
-                        {/* Action Buttons */}
-                        <div className="flex gap-2 pb-2 items-end">
-                            {isOwnProfile ? (
-                                <>
-                                    <button
-                                        className="px-4 h-8 bg-transparent text-foreground border border-border rounded-full text-sm font-medium"
-                                        onClick={() => router.push("/profile/settings")}
-                                    >
-                                        Edit Profile
-                                    </button>
-                                    <button
-                                        className="flex items-center gap-1 px-3 h-8 bg-transparent text-foreground border border-border rounded-full text-sm font-medium"
-                                    >
-                                        <span>Share</span>
-                                    </button>
-                                </>
-                            ) : (
-                                <>
-                                    <button
-                                        onClick={handleFollow}
-                                        className={`px-4 h-8 rounded-full text-sm font-medium ${
-                                            isFollowing
-                                                ? "bg-transparent text-foreground border border-border"
-                                                : "bg-primary text-white border-transparent"
-                                        }`}
-                                    >
-                                        {isFollowing ? "Following" : "Follow"}
-                                    </button>
-                                    <button
-                                        className="w-8 h-8 rounded-full bg-transparent text-foreground border border-border flex items-center justify-center"
-                                    >
-                                        <span className="text-sm">💬</span>
-                                    </button>
-                                </>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* User Info */}
-                    <div className="space-y-2">
-                        {/* Name and VIP */}
-                        <div className="flex items-center gap-1.5">
-                            <h1 className="text-[24px] font-bold text-foreground">
-                                {profileUser.displayName || profileUser.username}
-                            </h1>
-                            {profileUser.isVip && (
-                                <span className="text-orange-500">👑</span>
-                            )}
-                        </div>
-
-                        {/* Username and Joined Date */}
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <span>@{profileUser.username}</span>
-                            {profileUser.createdAt && (
-                                <>
-                                    <span>·</span>
-                                    <span>Joined {new Date(profileUser.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "2-digit" })}</span>
-                                </>
-                            )}
-                        </div>
-
-                        {/* Bio */}
-                        {profileUser.bio && (
-                            <p className="text-[15px] text-foreground line-clamp-3">
-                                {profileUser.bio}
-                            </p>
-                        )}
-
-                        {/* Stats */}
-                        <div className="flex items-center gap-4 pt-1 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                                <span className="text-[16px] font-semibold text-foreground">
-                                    {profileUser.followingCount || 0}
-                                </span>
-                                <span>following</span>
+                                <div className="flex items-center justify-center md:justify-start gap-2">
+                                    {isOwnProfile ? (
+                                        <>
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => router.push("/settings/profile")}
+                                            >
+                                                {t("profile.edit_profile", "Edit Profile")}
+                                            </Button>
+                                        </>
+                                    ) : (
+                                        <Button
+                                            size="sm"
+                                            variant={isFollowing ? "outline" : "default"}
+                                            onClick={handleFollow}
+                                        >
+                                            {isFollowing ? t("profile.following", "Following") : t("profile.follow", "Follow")}
+                                        </Button>
+                                    )}
+                                </div>
                             </div>
-                            <div className="flex items-center gap-1">
-                                <span className="text-[16px] font-semibold text-foreground">
-                                    {profileUser.followerCount || 0}
-                                </span>
-                                <span>followers</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                                <span className="text-[16px] font-semibold text-foreground">
-                                    {totalLikes}
-                                </span>
-                                <span>likes</span>
+
+                            {/* Stats */}
+                            <div className="flex items-center gap-6 mt-4 text-sm">
+                                <div className="flex items-center gap-1">
+                                    <span className="font-semibold text-foreground">{profileUser.followingCount || 0}</span>
+                                    <span className="text-muted-foreground">{t("profile.following", "following")}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                    <span className="font-semibold text-foreground">{profileUser.followerCount || 0}</span>
+                                    <span className="text-muted-foreground">{t("profile.followers", "followers")}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                    <span className="font-semibold text-foreground">{totalLikes}</span>
+                                    <span className="text-muted-foreground">{t("profile.likes", "likes")}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Tab Navigation */}
-            <div className="px-4 py-3 sticky top-0 bg-background z-20 border-b border-border">
-                <div className="bg-secondary rounded-full p-1 border border-border inline-flex">
-                    {[
-                        { value: ProfileTab.ACTIVITY, label: "Activity" },
-                        { value: ProfileTab.STORIES, label: "Stories" },
-                        { value: ProfileTab.CHARACTERS, label: "Characters" },
-                        ...(isOwnProfile ? [{ value: ProfileTab.DRAFTS, label: "Drafts" }] : []),
-                    ].map((tab) => (
-                        <button
-                            key={tab.value}
-                            onClick={() => setSelectedTab(tab.value as ProfileTab)}
-                            className={cn(
-                                "px-4 py-1.5 rounded-full text-[12px] font-medium transition-all",
-                                selectedTab === tab.value
-                                    ? "bg-card text-foreground shadow-sm"
-                                    : "text-muted-foreground hover:text-foreground/80"
-                            )}
-                        >
-                            {tab.label}
-                        </button>
-                    ))}
-                </div>
-            </div>
+            {/* Tabs Navigation */}
+            <ProfileTabs currentPath={pathname} userId={userId!} isOwnProfile={isOwnProfile} />
 
-            {/* Tab Content */}
-            <div className="px-4 py-4 pb-8">
-                {selectedTab === ProfileTab.ACTIVITY && (
-                    <ActivityTabContent userId={profileUser.id} />
-                )}
-                {selectedTab === ProfileTab.STORIES && (
-                    <StoriesTabContent userId={profileUser.id} userName={profileUser.displayName || profileUser.username} />
-                )}
-                {selectedTab === ProfileTab.CHARACTERS && (
-                    <CharactersTabContent userId={profileUser.id} userName={profileUser.displayName || profileUser.username} />
-                )}
-                {selectedTab === ProfileTab.DRAFTS && isOwnProfile && (
-                    <DraftsTabContent />
-                )}
-            </div>
+            {/* Activity Tab Content (default) */}
+            <ActivityTabContent userId={userId!} />
         </div>
     );
 }
 
 // Activity Tab Content
 function ActivityTabContent({ userId }: { userId: string }) {
-    return (
-        <div className="space-y-4">
-            {/* Heatmap Card */}
-            <Card>
-                <CardContent className="p-4">
-                    <ActivityHeatmap />
-                </CardContent>
-            </Card>
+    const [heatmapData, setHeatmapData] = useState<ActivityHeatmapData[]>([]);
+    const [totalCount, setTotalCount] = useState(0);
+    const [selectedTimeRange, setSelectedTimeRange] = useState<ActivityTimeRange>(ActivityTimeRange.MONTH);
+    const [selectedDate, setSelectedDate] = useState<string | null>(null);
+    const [loadingHeatmap, setLoadingHeatmap] = useState(true);
 
-            {/* Activity List */}
-            <Card>
-                <CardContent className="p-4">
-                    <ActivityFeed userId={userId} />
-                </CardContent>
-            </Card>
-        </div>
-    );
-}
+    useEffect(() => {
+        let isMounted = true;
 
-// Stories Tab Content
-function StoriesTabContent({ userId, userName }: { userId: string; userName: string }) {
+        async function fetchHeatmap() {
+            setLoadingHeatmap(true);
+            try {
+                const response = await profile.getHeatmap(userId, selectedTimeRange);
+                if (!isMounted) return;
+
+                setHeatmapData(response.data || []);
+                setTotalCount(response.totalCount || 0);
+            } catch (e) {
+                console.error('Failed to fetch heatmap:', e);
+                if (isMounted) {
+                    setHeatmapData([]);
+                    setTotalCount(0);
+                }
+            } finally {
+                if (isMounted) {
+                    setLoadingHeatmap(false);
+                }
+            }
+        }
+
+        fetchHeatmap();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [userId, selectedTimeRange]);
+
     return (
-        <div className="space-y-4">
-            <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold text-foreground">Stories</h2>
-                <Button variant="link" size="sm" asChild>
-                    <span className="text-primary">See All</span>
-                </Button>
+        <main className="flex-1 container max-w-6xl mx-auto px-4 py-8">
+            <div className="space-y-4">
+                {/* Heatmap Card */}
+                <Card>
+                    <CardContent className="p-4">
+                        <ActivityHeatmap
+                            data={heatmapData}
+                            totalCount={totalCount}
+                            selectedTimeRange={selectedTimeRange}
+                            selectedDate={selectedDate}
+                            isLoading={loadingHeatmap}
+                            onTimeRangeChange={setSelectedTimeRange}
+                            onDateSelect={setSelectedDate}
+                        />
+                    </CardContent>
+                </Card>
+
+                {/* Activity List */}
+                <Card>
+                    <CardContent className="p-4">
+                        <ActivityFeed userId={userId} />
+                    </CardContent>
+                </Card>
             </div>
-
-            <Card>
-                <CardContent className="p-4">
-                    <div className="text-center py-12 text-muted-foreground">
-                        <Sparkles className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
-                        <p>No stories yet</p>
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
-    );
-}
-
-// Characters Tab Content
-function CharactersTabContent({ userId, userName }: { userId: string; userName: string }) {
-    return (
-        <div className="space-y-4">
-            <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold text-foreground">Characters</h2>
-                <Button variant="link" size="sm" asChild>
-                    <span className="text-primary">See All</span>
-                </Button>
-            </div>
-
-            <Card>
-                <CardContent className="p-4">
-                    <div className="text-center py-12 text-muted-foreground">
-                        <TheatertMasks className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
-                        <p>No characters yet</p>
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
-    );
-}
-
-// Drafts Tab Content (Own profile only)
-function DraftsTabContent() {
-    return (
-        <div className="space-y-4">
-            <Card>
-                <CardContent className="p-4">
-                    <div className="text-center py-12 text-muted-foreground">
-                        <BookOpen className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
-                        <p>No drafts yet</p>
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
+        </main>
     );
 }

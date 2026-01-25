@@ -2,14 +2,16 @@
 
 import { Globe, Lock, ShieldCheck } from "lucide-react";
 import { Story } from "@/lib/types";
+import { useTranslation } from "@/providers/language-provider";
 
 interface StoryDetailHeaderProps {
     story: Story;
 }
 
 export function StoryDetailHeader({ story }: StoryDetailHeaderProps) {
+    const { t } = useTranslation();
     const isPublished = story.status === 1;
-    
+
     return (
         <div className="relative">
             {/* Immersive Header with Blurred Background */}
@@ -17,7 +19,7 @@ export function StoryDetailHeader({ story }: StoryDetailHeaderProps) {
                 {story.coverImage ? (
                     <>
                         {/* Blurred Background */}
-                        <div 
+                        <div
                             className="absolute inset-0 bg-cover bg-center blur-[20px]"
                             style={{ backgroundImage: `url(${story.coverImage})` }}
                         />
@@ -29,7 +31,7 @@ export function StoryDetailHeader({ story }: StoryDetailHeaderProps) {
             </div>
 
             {/* Overlapping Cover Avatar and Actions */}
-            <div className="relative px-4 md:px-6">
+            <div className="relative container max-w-6xl px-4 md:px-6 mx-auto">
                 <div className="flex items-end gap-4 -mt-12 md:-mt-16">
                     {/* Circular Cover Avatar */}
                     <div className="relative">
@@ -57,11 +59,11 @@ export function StoryDetailHeader({ story }: StoryDetailHeaderProps) {
                             <Globe className="w-3 h-3" />
                             <span className="text-sm font-medium">{story.likes || 0}</span>
                         </button>
-                        
+
                         {/* Share Button */}
                         <button className="flex items-center gap-2 px-4 py-2 rounded-full border hover:bg-muted transition-colors">
                             <Globe className="w-3 h-3" />
-                            <span className="text-sm font-medium">Share</span>
+                            <span className="text-sm font-medium">{t("story_detail.actions.share", "Share")}</span>
                         </button>
                     </div>
                 </div>
@@ -69,35 +71,33 @@ export function StoryDetailHeader({ story }: StoryDetailHeaderProps) {
                 {/* Status Badges */}
                 <div className="flex items-center gap-2 mt-3 flex-wrap">
                     {/* Status Badge */}
-                    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${
-                        isPublished ? 'bg-muted text-foreground' : 'bg-muted text-foreground'
-                    }`}>
+                    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${isPublished ? 'bg-muted text-foreground' : 'bg-muted text-foreground'
+                        }`}>
                         {isPublished ? (
                             <>
                                 <Globe className="w-2.5 h-2.5" />
-                                <span>Published</span>
+                                <span>{t("story_detail.header.published", "Published")}</span>
                             </>
                         ) : (
                             <>
                                 <Lock className="w-2.5 h-2.5" />
-                                <span>Draft</span>
+                                <span>{t("story_detail.header.draft", "Draft")}</span>
                             </>
                         )}
                     </div>
 
                     {/* Collaboration Status Badge */}
-                    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${
-                        story.groupId ? 'bg-accent/10 text-accent' : 'bg-muted text-muted-foreground'
-                    }`}>
+                    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${story.groupId ? 'bg-accent/10 text-accent' : 'bg-muted text-muted-foreground'
+                        }`}>
                         {story.groupId ? (
                             <>
                                 <Globe className="w-2.5 h-2.5" />
-                                <span>Open to All</span>
+                                <span>{t("story_detail.header.open_to_all", "Open to All")}</span>
                             </>
                         ) : (
                             <>
                                 <ShieldCheck className="w-2.5 h-2.5" />
-                                <span>Private</span>
+                                <span>{t("story_detail.header.private", "Private")}</span>
                             </>
                         )}
                     </div>
@@ -111,18 +111,18 @@ export function StoryDetailHeader({ story }: StoryDetailHeaderProps) {
                     <div className="flex items-center gap-2">
                         <Globe className="w-4 h-4" />
                         <span className="font-semibold">{story.storyboardCount || 0}</span>
-                        <span>storyboards</span>
+                        <span>{t("story_detail.header.storyboards", "storyboards")}</span>
                     </div>
                     <div className="flex items-center gap-2">
                         <Globe className="w-4 h-4" />
                         <span className="font-semibold">{story.characterCount || 0}</span>
-                        <span>characters</span>
+                        <span>{t("story_detail.header.characters", "characters")}</span>
                     </div>
-                    {story.viewCount && (
+                    {story.viewCount !== undefined && (
                         <div className="flex items-center gap-2">
                             <Globe className="w-4 h-4" />
                             <span className="font-semibold">{story.viewCount}</span>
-                            <span>views</span>
+                            <span>{t("story_detail.header.views", "views")}</span>
                         </div>
                     )}
                 </div>
@@ -147,7 +147,7 @@ export function StoryDetailHeader({ story }: StoryDetailHeaderProps) {
                             )}
                         </div>
                         <span className="text-sm text-muted-foreground">
-                            Created by {story.author.displayName || story.author.username}
+                            {t("story_detail.header.created_by", "Created by")} {story.author.displayName || story.author.username}
                         </span>
                     </div>
                 )}

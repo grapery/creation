@@ -16,8 +16,8 @@ export interface Comment {
 
 export const comments = {
     // Get comments for a target
-    list: async (targetId: string, page = 1, limit = 20): Promise<{ comments: Comment[], total: number }> => {
-        return request(`/api/comments?targetId=${targetId}&limit=${limit}&offset=${(page - 1) * limit}`);
+    list: async (targetId: string, targetType: string, page = 1, limit = 20): Promise<{ comments: Comment[], total: number }> => {
+        return request(`/api/comments?targetId=${targetId}&targetType=${targetType}&limit=${limit}&offset=${(page - 1) * limit}`);
     },
 
     // Create a comment

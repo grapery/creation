@@ -11,6 +11,7 @@ import {
 } from "@/components/group/group-card";
 import { Loader2, Search, Plus, Users, Globe, Mail, Lock } from "lucide-react";
 import { useAuth } from "@/providers/auth-provider";
+import { useTranslation } from "@/providers/language-provider";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
@@ -21,6 +22,7 @@ enum Tab {
 }
 
 export default function GroupsPage() {
+    const { t } = useTranslation();
     const { user, loading: authLoading } = useAuth();
     const [activeTab, setActiveTab] = useState<Tab>(Tab.MY_GROUPS);
     const [myGroups, setMyGroups] = useState<BranchGroup[]>([]);
@@ -53,8 +55,18 @@ export default function GroupsPage() {
                 setHasMoreDiscoverGroups(res.groups?.length >= 20);
                 setDiscoverGroupsPage(1);
             } else if (activeTab === Tab.INVITES && user) {
-                const res = await groups.getInvites(1, 20);
-                setInvites(res.invites || []);
+                try {
+                    const res = await groups.getInvites(1, 20);
+                    setInvites(res.invites || []);
+                } catch (e: any) {
+                    // Backend might return "group not found" if /api/groups/invites is not handled and falls through to /api/groups/:id
+                    if (e?.message?.includes('group not found') || e?.code === 404) {
+                        console.warn('Invites endpoint not found or misrouted on backend. Defaulting to empty list.');
+                        setInvites([]);
+                    } else {
+                        throw e; // Re-throw other errors
+                    }
+                }
             }
         } catch (e) {
             console.error("Failed to fetch groups:", e);
@@ -123,34 +135,34 @@ export default function GroupsPage() {
 
     const isShowingSearchResults = searchQuery.trim().length > 0;
     const tabs = [
-        { value: Tab.MY_GROUPS, label: "My Groups" },
-        { value: Tab.DISCOVER, label: "Discover" },
-        { value: Tab.INVITES, label: "Invites" },
+        { value: Tab.MY_GROUPS, label: t("groups.my_groups_tab") },
+        { value: Tab.DISCOVER, label: t("groups.discover_tab") },
+        { value: Tab.INVITES, label: t("groups.invites_tab") },
     ];
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <Header />
 
-            <main className="flex-1">
+            <main className="flex-1 container max-w-6xl px-4 py-6 md:px-6 mx-auto">
                 {/* Top App Bar */}
-                <div className="px-4 h-[52px] flex items-center justify-between border-b border-border bg-card">
-                    <h1 className="text-[18px] font-bold text-foreground">Groups</h1>
+                <div className="flex items-center justify-between mb-4">
+                    <h1 className="text-[24px] font-bold text-foreground">{t("groups.title")}</h1>
                 </div>
 
                 {/* Search and Tabs */}
-                <div className="bg-card p-3 pb-3">
+                <div className="mb-6">
                     {/* Search + Create */}
-                    <div className="flex items-center gap-2 mb-3">
+                    <div className="flex items-center gap-2 mb-4">
                         {/* Search Bar */}
-                        <div className="flex-1 flex items-center gap-1.5 px-3 h-9 bg-secondary rounded-full border border-border">
-                            <Search className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+                        <div className="flex-1 flex items-center gap-1.5 px-3 h-10 bg-secondary/50 rounded-xl border border-border">
+                            <Search className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                             <input
                                 type="text"
-                                placeholder="Search groups"
+                                placeholder={t("groups.search_placeholder")}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="flex-1 bg-transparent outline-none text-[13px] text-foreground placeholder:text-muted-foreground"
+                                className="flex-1 bg-transparent outline-none text-sm text-foreground placeholder:text-muted-foreground"
                             />
                             {searchQuery && (
                                 <button
@@ -168,33 +180,35 @@ export default function GroupsPage() {
                         {/* Create Group Button */}
                         <button
                             onClick={() => setShowCreateDialog(true)}
-                            className="flex items-center gap-1 px-4 h-9 bg-foreground text-background rounded-full hover:opacity-90 transition-opacity"
+                            className="flex items-center gap-2 px-5 h-10 bg-foreground text-background rounded-full hover:opacity-90 transition-opacity"
                         >
-                            <Plus className="w-3.5 h-3.5" />
-                            <span className="text-[13px] font-medium">Create Group</span>
+                            <Plus className="w-4 h-4" />
+                            <span className="text-sm font-medium">{t("groups.create_group")}</span>
                         </button>
                     </div>
 
                     {/* Tabs */}
-                    <div className="bg-secondary rounded-full p-1 border border-border inline-flex">
+                    <div className="border-b border-border flex gap-6">
                         {tabs.map((tab) => (
                             <button
                                 key={tab.value}
                                 onClick={() => setActiveTab(tab.value)}
-                                className={`px-4 py-1.5 rounded-full text-[13px] font-medium transition-all ${
-                                    activeTab === tab.value
-                                        ? "bg-card text-foreground shadow-sm"
-                                        : "text-muted-foreground hover:text-foreground/80"
-                                }`}
+                                className={`pb-3 text-sm font-medium transition-all relative ${activeTab === tab.value
+                                    ? "text-foreground"
+                                    : "text-muted-foreground hover:text-foreground/80"
+                                    }`}
                             >
                                 {tab.label}
+                                {activeTab === tab.value && (
+                                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-foreground rounded-full" />
+                                )}
                             </button>
                         ))}
                     </div>
                 </div>
 
                 {/* Content */}
-                <div className="px-4 py-4">
+                <div className="py-2">
                     {loading ? (
                         <div className="flex justify-center py-20">
                             <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -243,7 +257,7 @@ export default function GroupsPage() {
                         />
                     ) : activeTab === Tab.INVITES ? (
                         /* Invites */
-                        <InvitesContent invites={invites} loading={loading} />
+                        <InvitesContent invites={invites} setInvites={setInvites} loading={loading} />
                     ) : null}
                 </div>
             </main>
@@ -278,12 +292,14 @@ function MyGroupsContent({
     }
 
     return (
-        <div className="max-w-2xl mx-auto space-y-2">
-            {groups.map((group) => (
-                <Link key={group.id} href={`/groups/${group.id}`}>
-                    <GroupCard group={group} />
-                </Link>
-            ))}
+        <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {groups.map((group) => (
+                    <Link key={group.id} href={`/groups/${group.id}`} className="block h-full">
+                        <GroupCard group={group} className="h-full hover:shadow-md transition-all duration-300" />
+                    </Link>
+                ))}
+            </div>
 
             {loadingMore && (
                 <div className="flex justify-center py-4">
@@ -319,10 +335,12 @@ function DiscoverGroupsContent({
     }
 
     return (
-        <div className="max-w-2xl mx-auto space-y-2">
-            {groups.map((group) => (
-                <GroupCard key={group.id} group={group} showJoinButton />
-            ))}
+        <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {groups.map((group) => (
+                    <GroupCard key={group.id} group={group} showJoinButton className="h-full hover:shadow-md transition-all duration-300" />
+                ))}
+            </div>
 
             {loadingMore && (
                 <div className="flex justify-center py-4">
@@ -336,9 +354,11 @@ function DiscoverGroupsContent({
 // Invites Content
 function InvitesContent({
     invites,
+    setInvites,
     loading,
 }: {
     invites: GroupInvite[];
+    setInvites: (invites: GroupInvite[]) => void;
     loading: boolean;
 }) {
     if (!loading && invites.length === 0) {
@@ -352,7 +372,7 @@ function InvitesContent({
     }
 
     return (
-        <div className="max-w-2xl mx-auto space-y-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {invites.map((invite) => (
                 <GroupInviteCard
                     key={invite.id}
@@ -362,7 +382,7 @@ function InvitesContent({
                             await groups.acceptInvite(invite.id);
                             // Refresh invites
                             const res = await groups.getInvites(1, 20);
-                            setInvites(res.invites || []);
+                            setInvites(res.invites || []); // Fix setInvites (param name mismatch in parent - need to fix call site if passed wrong)
                         } catch (e) {
                             console.error("Failed to accept invite:", e);
                         }

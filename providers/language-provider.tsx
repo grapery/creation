@@ -6,62 +6,76 @@ import { Language, DEFAULT_LANGUAGE, LANGUAGE_NAMES, translations } from '@/lib/
 interface LanguageContextType {
   language: Language;
   setLanguage: (language: Language) => void;
-  t: (key: string, params?: Record<string, string | number>) => string;
+  // t function: key, optional default value, optional params
+  t: (key: string, defaultValueOrParams?: string | Record<string, string | number>, params?: Record<string, string | number>) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguageState] = useState<Language>(() => {
-    // Get language from localStorage or browser preference
-    if (typeof window !== 'undefined') {
-      const savedLanguage = localStorage.getItem('language') as Language;
-      if (savedLanguage && translations[savedLanguage]) {
-        return savedLanguage;
-      }
-      
-      // Try to detect browser language
+  const [language, setLanguageState] = useState<Language>(DEFAULT_LANGUAGE);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+    const savedLanguage = localStorage.getItem('language') as Language;
+    if (savedLanguage && translations[savedLanguage]) {
+      setLanguageState(savedLanguage);
+    } else {
+      // Try to detect browser language if no preference saved
       const browserLang = navigator.language;
       if (browserLang.startsWith('zh')) {
-        return 'zh-Hans';
+        setLanguageState('zh-Hans');
       } else if (browserLang.startsWith('ja')) {
-        return 'ja';
+        setLanguageState('ja');
       }
     }
-    return DEFAULT_LANGUAGE;
-  });
+  }, []);
 
   const setLanguage = (newLanguage: Language) => {
     setLanguageState(newLanguage);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('language', newLanguage);
-      document.documentElement.lang = newLanguage;
-    }
+    localStorage.setItem('language', newLanguage);
+    document.documentElement.lang = newLanguage;
   };
 
-  // Set document language on mount and language change
+  // Set document language on mount/change
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (isMounted) {
       document.documentElement.lang = language;
     }
-  }, [language]);
+  }, [language, isMounted]);
 
   // Translation function
-  const t = (key: string, params?: Record<string, string | number>): string => {
+  const t = (key: string, defaultValueOrParams?: string | Record<string, string | number>, params?: Record<string, string | number>): string => {
     const keys = key.split('.');
     let value: any = translations[language];
-    
+
     for (const k of keys) {
       value = value?.[k];
     }
-    
-    if (typeof value === 'string' && params) {
-      return value.replace(/{(\w+)}/g, (match, paramKey) => {
-        return params[paramKey]?.toString() || match;
+
+    let result = (typeof value === 'string' ? value : undefined);
+
+    // If result is undefined, try to use defaultValue if provided as string
+    if (result === undefined && typeof defaultValueOrParams === 'string') {
+      result = defaultValueOrParams;
+    }
+
+    // If we still have no result, fallback to key
+    if (result === undefined) {
+      return key;
+    }
+
+    // Determine actual params
+    const actualParams = typeof defaultValueOrParams === 'object' ? defaultValueOrParams : params;
+
+    if (actualParams) {
+      return result.replace(/{(\w+)}/g, (match, paramKey) => {
+        return actualParams[paramKey]?.toString() || match;
       });
     }
-    
-    return typeof value === 'string' ? value : key;
+
+    return result;
   };
 
   return (

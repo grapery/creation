@@ -3,6 +3,7 @@
 import { StoryScene } from "@/lib/types";
 import { Plus, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/providers/language-provider";
 
 interface StoryScenesSectionProps {
     title: string;
@@ -19,11 +20,13 @@ export function StoryScenesSection({
     isLoading = false,
     onAddScene
 }: StoryScenesSectionProps) {
+    const { t } = useTranslation();
+
     return (
-        <div className="space-y-3">
+        <div className="space-y-4">
             {/* Header */}
             <div className="flex items-center justify-between">
-                <h2 className="text-base font-semibold text-foreground">
+                <h2 className="text-xl font-bold tracking-tight">
                     {title} ({scenes.length})
                 </h2>
                 <Button
@@ -33,7 +36,7 @@ export function StoryScenesSection({
                     className="flex items-center gap-2"
                 >
                     <Plus className="w-4 h-4" />
-                    <span className="text-sm font-semibold">Add Scene</span>
+                    <span className="text-sm font-semibold">{t("story_detail.empty.add_scene", "Add Scene")}</span>
                 </Button>
             </div>
 
@@ -41,13 +44,13 @@ export function StoryScenesSection({
             {isLoading ? (
                 <div className="bg-card border border-border/8 rounded-2xl p-10 flex flex-col items-center justify-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-3" />
-                    <p className="text-sm text-muted-foreground">Loading scenes...</p>
+                    <p className="text-sm text-muted-foreground">{t("common.loading", "Loading...")}</p>
                 </div>
             ) : scenes.length === 0 ? (
                 <div className="bg-card border border-border/8 rounded-2xl p-6 text-center">
                     <ImageIcon className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
-                    <p className="text-sm font-semibold text-foreground mb-1">No scenes yet</p>
-                    <p className="text-sm text-muted-foreground">Add scenes to structure your story</p>
+                    <p className="text-sm font-semibold text-foreground mb-1">{t("story_detail.empty.no_scenes_title", "No scenes yet")}</p>
+                    <p className="text-sm text-muted-foreground">{t("story_detail.empty.no_scenes_message", "Add scenes to structure your story")}</p>
                 </div>
             ) : (
                 <div className="space-y-3">

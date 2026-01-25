@@ -10,6 +10,14 @@
     "remove": "移除",
     "search": "搜索",
     "loading": "加载中...",
+    "vip": {
+      "upgrade_title": "升级到 Pro",
+      "upgrade_subtitle": "解锁 Voyager 的全部潜力。创作无极限。",
+      "plan_free": "免费版",
+      "plan_pro": "Pro 版",
+      "subscribe": "订阅",
+      "current_plan": "当前计划"
+    },
     "error": "错误",
     "success": "成功",
     "retry": "重试",
@@ -17,7 +25,9 @@
     "back": "返回",
     "next": "下一步",
     "skip": "跳过",
-    "close": "关闭"
+    "close": "关闭",
+    "views": "浏览",
+    "forks": "复刻"
   },
   "auth": {
     "sign_in": "登录",
@@ -54,7 +64,9 @@
     "continue_with_google": "使用 Google 继续",
     "or_continue_with": "或继续使用",
     "apple": "Apple",
-    "google": "Google"
+    "google": "Google",
+    "browse_as_guest": "游客浏览",
+    "browse_as_guest_description": "无需登录，探索热门故事"
   },
   "navigation": {
     "home": "首页",
@@ -63,7 +75,18 @@
     "chat": "聊天",
     "groups": "群组",
     "profile": "个人资料",
-    "settings": "设置"
+    "settings": "设置",
+    "sidebar": {
+      "creator_center": "创作者中心",
+      "write_story": "写故事",
+      "storyboard": "故事板",
+      "my_drafts": "我的草稿",
+      "analytics": "分析",
+      "about": "关于 Voyager",
+      "guidelines": "社区指南",
+      "privacy": "隐私政策",
+      "terms": "服务条款"
+    }
   },
   "settings": {
     "title": "设置",
@@ -90,7 +113,9 @@
     "start_creating_first_story": "开始创作你的第一个故事！",
     "discover": "发现",
     "invites": "邀请",
-    "my_groups": "我的群组"
+    "my_groups": "我的群组",
+    "start_here": "开始",
+    "trending_topics": "热门话题"
   },
   "stories": {
     "create_story": "创建故事",
@@ -118,6 +143,32 @@
     "create_first_storyboard_button": "创建第一个故事板",
     "create_storyboards_empty_message": "使用上方按钮创建你的第一个故事板，开启你的叙事旅程。"
   },
+  "storyboard_detail": {
+    "back": "返回",
+    "ai_generated": "AI 生成",
+    "generation_process": "生成过程",
+    "additional_details": "详细信息",
+    "creator": "创作者",
+    "created": "创建于",
+    "scenes": "场景",
+    "status": "状态",
+    "status_completed": "已完成",
+    "status_in_progress": "进行中",
+    "status_pending": "等待中",
+    "tokens": "Token",
+    "step_raw_input": "原始输入",
+    "step_content_generation": "内容生成",
+    "step_scene_details": "场景详情",
+    "step_images": "图像",
+    "step_videos": "视频",
+    "scene": "场景",
+    "multi_segment_video": "多片段 HLS 视频",
+    "likes": "获赞",
+    "comments": "评论",
+    "like": "点赞",
+    "comment": "评论",
+    "fork": "复刻"
+  },
   "characters": {
     "create_character": "创建角色",
     "character_name": "角色名称",
@@ -144,7 +195,11 @@
     "character_editor_avatar": "头像",
     "character_editor_upload_avatar": "上传头像",
     "no_characters_available": "没有可用角色",
-    "create_characters_first": "请先在故事中创建角色，然后才能在此添加。"
+    "create_characters_first": "请先在故事中创建角色，然后才能在此添加。",
+    "title": "角色",
+    "subtitle": "与 AI 角色聊天或创建属于你自己的角色。",
+    "search_placeholder": "搜索角色...",
+    "create_button": "创建角色"
   },
   "chat": {
     "new_chat": "新聊天",
@@ -166,14 +221,13 @@
     "select_ai_agent": "选择 AI 智能体",
     "messages": "消息",
     "messages_per_day": "条/天",
-    "chat_message_placeholder": "输入消息..."
+    "chat_message_placeholder": "输入消息...",
+    "title": "消息",
+    "no_messages": "暂无消息",
+    "start_chatting": "立即开始与角色聊天。",
+    "explore_characters": "探索角色"
   },
   "groups": {
-    "create_group": "创建群组",
-    "group_name": "群组名称",
-    "group_description": "群组描述",
-    "invite_members": "邀请成员",
-    "my_groups": "我的群组",
     "members": "成员",
     "published": "已发布",
     "panels": "面板",
@@ -204,7 +258,38 @@
     "leave_group": "离开群组",
     "leave_group_confirmation": "您确定要离开此群组吗？",
     "delete_group": "删除群组",
-    "delete_group_confirmation": "您确定要删除此群组吗？此操作无法撤销。"
+    "delete_group_confirmation": "您确定要删除此群组吗？此操作无法撤销。",
+    "title": "群组",
+    "search_placeholder": "搜索群组",
+    "create_group": "创建群组",
+    "my_groups_tab": "我的群组",
+    "discover_tab": "发现",
+    "invites_tab": "邀请",
+    "search_results": "搜索结果",
+    "found": "个结果",
+    "no_groups_found": "未找到群组",
+    "try_different_search": "尝试不同的搜索词",
+    "no_groups_yet": "暂无群组",
+    "join_or_create_message": "加入或创建一个群组，与他人协作",
+    "no_groups_discover": "没有可发现的群组",
+    "check_back_later": "稍后回来查看新的公开群组",
+    "no_invites": "暂无邀请",
+    "invites_message": "您将在这里看到群组邀请"
+  },
+  "group_detail": {
+    "stories": "故事",
+    "activity": "动态",
+    "dashboard": "总览",
+    "settings": "设置",
+    "members": "成员",
+    "follow": "关注",
+    "following": "已关注",
+    "share": "分享",
+    "created_by": "创建者",
+    "group_not_found": "未找到群组",
+    "go_back": "返回",
+    "public": "公开",
+    "private": "私密"
   },
   "profile": {
     "edit_profile": "编辑个人资料",
@@ -259,7 +344,12 @@
     "all_caught_up": "全部已读",
     "no_unread_notifications": "没有未读通知",
     "no_notifications_yet": "暂无通知",
-    "notifications_will_appear": "通知将在此显示"
+    "notifications_will_appear": "通知将在此显示",
+    "title": "通知",
+    "tab_all": "全部",
+    "tab_likes": "点赞",
+    "tab_mentions": "提及",
+    "tab_system": "系统"
   },
   "errors": {
     "network_error": "网络错误，请检查您的连接。",
@@ -271,5 +361,53 @@
     "error_occurred": "发生错误"
   },
   "loading": "加载中...",
-  "empty": "暂无数据"
+  "empty": "暂无数据",
+  "story_detail": {
+    "tabs": {
+      "story": "故事",
+      "characters": "角色",
+      "scenes": "场景",
+      "team": "团队"
+    },
+    "header": {
+      "published": "已发布",
+      "draft": "草稿",
+      "open_to_all": "开放协作",
+      "private": "私有",
+      "views": "浏览",
+      "storyboards": "故事板",
+      "characters": "角色",
+      "created_by": "创建者"
+    },
+    "actions": {
+      "share": "分享",
+      "start_reading": "开始阅读",
+      "create_first_storyboard": "创建第一个故事板"
+    },
+    "empty": {
+      "no_storyboards_title": "暂无故事板",
+      "no_storyboards_message": "{title} 正在等待它的第一个故事板。开始创作，让故事生动起来。",
+      "tips_title": "创作第一个故事板的提示",
+      "tip_opening": "创作一个引人入胜的开场场景",
+      "tip_characters": "尽早引入关键角色",
+      "tip_ai": "使用 AI 生成内容",
+      "no_characters_title": "暂无角色",
+      "no_characters_message": "添加角色，让故事更生动",
+      "add_character": "添加角色",
+      "no_scenes_title": "暂无场景",
+      "no_scenes_message": "添加场景来构建你的故事结构",
+      "add_scene": "添加场景",
+      "no_team_title": "暂无团队成员",
+      "no_team_message": "邀请贡献者一起协作",
+      "invite": "邀请",
+      "writers_room": "编剧室",
+      "writers_room_desc": "在 AI 协助下实时协作",
+      "open_chat": "打开聊天"
+    },
+    "story_not_found": "未找到故事",
+    "story_not_found_message": "您要查找的故事不存在。",
+    "go_home": "返回首页",
+    "story_branches": "故事分支",
+    "contributors": "贡献者"
+  }
 }

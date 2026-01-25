@@ -1,16 +1,17 @@
 "use client";
 
 import { Storyboard, StoryboardScene } from "@/lib/types";
-import { 
-    TextCursor, 
-    FileText, 
-    List, 
-    Image as ImageIcon, 
-    Video, 
+import {
+    TextCursor,
+    FileText,
+    List,
+    Image as ImageIcon,
+    Video,
     CheckCircle2,
     Circle,
     Clock
 } from "lucide-react";
+import { useTranslation } from "@/providers/language-provider";
 
 interface RoadmapStep {
     id: number;
@@ -27,10 +28,12 @@ interface StoryboardRoadmapProps {
 }
 
 export function StoryboardRoadmap({ storyboard }: StoryboardRoadmapProps) {
+    const { t } = useTranslation();
+
     const steps: RoadmapStep[] = [
         {
             id: 1,
-            title: "Raw Input",
+            title: t("storyboard_detail.step_raw_input"),
             icon: <TextCursor className="w-5 h-5" />,
             iconColor: "text-blue-500",
             status: "completed",
@@ -44,7 +47,7 @@ export function StoryboardRoadmap({ storyboard }: StoryboardRoadmapProps) {
         },
         {
             id: 2,
-            title: "Content Generation",
+            title: t("storyboard_detail.step_content_generation"),
             icon: <FileText className="w-5 h-5" />,
             iconColor: "text-purple-500",
             status: "completed",
@@ -58,23 +61,23 @@ export function StoryboardRoadmap({ storyboard }: StoryboardRoadmapProps) {
         },
         {
             id: 3,
-            title: "Scene Details",
+            title: t("storyboard_detail.step_scene_details"),
             icon: <List className="w-5 h-5" />,
             iconColor: "text-orange-500",
             status: "completed",
             content: storyboard.storyboardScenes ? (
                 <div className="space-y-2">
                     {storyboard.storyboardScenes.map((scene, index) => (
-                        <div 
+                        <div
                             key={scene.id}
                             className="p-3 bg-muted rounded-[12px]"
                         >
                             <div className="flex items-start justify-between mb-2">
                                 <h4 className="text-sm font-semibold text-foreground">
-                                    {scene.title || `Scene ${index + 1}`}
+                                    {scene.title || `${t("storyboard_detail.scene")} ${scene.sequence || index + 1}`}
                                 </h4>
                                 <span className="text-[11px] text-muted-foreground px-2 py-1 bg-secondary rounded-full">
-                                    Scene {scene.sequence || index + 1}
+                                    {t("storyboard_detail.scene")} {scene.sequence || index + 1}
                                 </span>
                             </div>
                             {scene.description && (
@@ -108,7 +111,7 @@ export function StoryboardRoadmap({ storyboard }: StoryboardRoadmapProps) {
         },
         {
             id: 4,
-            title: "Images",
+            title: t("storyboard_detail.step_images"),
             icon: <ImageIcon className="w-5 h-5" />,
             iconColor: "text-green-500",
             status: "completed",
@@ -117,12 +120,12 @@ export function StoryboardRoadmap({ storyboard }: StoryboardRoadmapProps) {
                     {storyboard.storyboardScenes
                         .filter(scene => scene.image)
                         .map((scene, index) => (
-                            <div 
+                            <div
                                 key={scene.id}
                                 className="relative rounded-[12px] overflow-hidden"
                             >
-                                <img 
-                                    src={scene.image} 
+                                <img
+                                    src={scene.image}
                                     alt={scene.title || `Scene ${index + 1}`}
                                     className="w-full h-[150px] object-cover"
                                 />
@@ -139,7 +142,7 @@ export function StoryboardRoadmap({ storyboard }: StoryboardRoadmapProps) {
     if (storyboard.storyboardScenes?.some(s => s.videoUrl)) {
         steps.push({
             id: 5,
-            title: "Videos",
+            title: t("storyboard_detail.step_videos"),
             icon: <Video className="w-5 h-5" />,
             iconColor: "text-red-500",
             status: "completed",
@@ -148,13 +151,13 @@ export function StoryboardRoadmap({ storyboard }: StoryboardRoadmapProps) {
                     {storyboard.storyboardScenes
                         .filter(scene => scene.videoUrl)
                         .map((scene, index) => (
-                            <div 
+                            <div
                                 key={scene.id}
                                 className="p-3 bg-red-50/10 border border-red-500/20 rounded-[12px]"
                             >
                                 <div className="flex items-start justify-between mb-2">
                                     <h4 className="text-sm font-semibold text-foreground">
-                                        {scene.title || `Scene ${index + 1}`}
+                                        {scene.title || `${t("storyboard_detail.scene")} ${index + 1}`}
                                     </h4>
                                     <div className="flex items-center gap-1 text-red-500">
                                         <Video className="w-3.5 h-3.5" />
@@ -170,7 +173,7 @@ export function StoryboardRoadmap({ storyboard }: StoryboardRoadmapProps) {
                                     <div className="flex items-center gap-1.5 mt-1">
                                         <List className="w-3 h-3 text-blue-500" />
                                         <span className="text-[11px] text-blue-500">
-                                            Multi-segment HLS video
+                                            {t("storyboard_detail.multi_segment_video")}
                                         </span>
                                     </div>
                                 )}
@@ -195,9 +198,9 @@ export function StoryboardRoadmap({ storyboard }: StoryboardRoadmapProps) {
     return (
         <div className="space-y-4">
             <h2 className="text-xl font-semibold text-foreground">
-                Generation Process
+                {t("storyboard_detail.generation_process")}
             </h2>
-            
+
             <div className="p-4 bg-background border border-border rounded-[16px]">
                 <div className="space-y-0">
                     {steps.map((step, index) => (
@@ -209,7 +212,7 @@ export function StoryboardRoadmap({ storyboard }: StoryboardRoadmapProps) {
                                         {step.icon}
                                     </div>
                                     {/* Step Number Badge */}
-                                    <div 
+                                    <div
                                         className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full ${step.iconColor} flex items-center justify-center`}
                                     >
                                         <span className="text-[10px] font-bold text-white">

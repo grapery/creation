@@ -9,8 +9,10 @@ import { Loader2, Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
+import { useTranslation } from "@/providers/language-provider";
 
 export default function CharactersPage() {
+    const { t } = useTranslation();
     const [items, setItems] = useState<Character[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
@@ -35,16 +37,16 @@ export default function CharactersPage() {
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <Header />
-            <main className="flex-1 container px-4 py-8 md:px-6">
+            <main className="flex-1 container max-w-6xl px-4 py-8 md:px-6 mx-auto">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold">Characters</h1>
-                        <p className="text-muted-foreground mt-1">Chat with AI personalities or create your own.</p>
+                        <h1 className="text-3xl font-bold">{t("characters.title")}</h1>
+                        <p className="text-muted-foreground mt-1">{t("characters.subtitle")}</p>
                     </div>
                     <Button asChild>
                         <Link href="/characters/create">
                             <Plus className="mr-2 h-4 w-4" />
-                            Create Character
+                            {t("characters.create_button")}
                         </Link>
                     </Button>
                 </div>
@@ -53,7 +55,7 @@ export default function CharactersPage() {
                     <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                         className="pl-9 bg-secondary/50 border-0"
-                        placeholder="Search characters..."
+                        placeholder={t("characters.search_placeholder")}
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />

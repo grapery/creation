@@ -45,7 +45,7 @@ export function CommentItem({ comment, onReply, onDelete }: CommentItemProps) {
                 <div className="bg-muted/30 p-3 rounded-xl rounded-tl-sm">
                     <div className="flex justify-between items-start mb-1">
                         <span className="font-semibold text-sm">{comment.user?.displayName || comment.user?.username || "Unknown"}</span>
-                        <span className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}</span>
+                        <span className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(comment.createdAt * 1000), { addSuffix: true })}</span>
                     </div>
                     <p className="text-sm">{comment.content}</p>
                 </div>

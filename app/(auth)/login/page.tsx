@@ -3,14 +3,18 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/providers/auth-provider";
+import { useTranslation } from "@/providers/language-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Loader2, BookOpen } from "lucide-react";
-import { AuthBackground, AuthTopBar, OAuthProviderButton, Language, LanguageSelector } from "@/components/auth";
+import { AuthTopBar, OAuthProviderButton, Language, LanguageSelector } from "@/components/auth";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
     const { login } = useAuth();
+    const { t } = useTranslation();
+    const router = useRouter();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -45,27 +49,25 @@ export default function LoginPage() {
     }
 
     return (
-        <AuthBackground>
-            <div className="flex min-h-screen items-center justify-center p-4">
-                <div className="w-full max-w-sm">
-                    {/* Auth Top Bar with Language Selector */}
-                    <div className="flex justify-end mb-4">
-                        <LanguageSelector />
-                    </div>
+        <div className="w-full max-w-sm">
+            {/* Auth Top Bar with Language Selector */}
+            <div className="flex justify-end mb-4">
+                <LanguageSelector />
+            </div>
 
-                    {/* App Icon and Title */}
-                    <div className="mb-8 flex flex-col items-center space-y-4">
-                        <div className="h-20 w-20 rounded-2xl bg-primary flex items-center justify-center shadow-lg">
-                            <BookOpen className="h-10 w-10 text-white" />
-                        </div>
-                        <h1 className="text-3xl font-bold tracking-tight">Voyager</h1>
-                        <p className="text-muted-foreground text-center">
-                            Create, explore, and share interactive stories with world
-                        </p>
-                    </div>
+            {/* App Icon and Title */}
+            <div className="mb-8 flex flex-col items-center space-y-4">
+                <div className="h-20 w-20 rounded-2xl bg-primary flex items-center justify-center shadow-lg">
+                    <BookOpen className="h-10 w-10 text-white" />
+                </div>
+                <h1 className="text-3xl font-bold tracking-tight">Voyager</h1>
+                <p className="text-muted-foreground text-center">
+                    Create, explore, and share interactive stories with world
+                </p>
+            </div>
 
-                    {/* OAuth Provider Buttons */}
-                    <Card className="border-0 shadow-none bg-transparent space-y-3">
+            {/* OAuth Provider Buttons */}
+            <Card className="border-0 shadow-none bg-transparent space-y-3">
                         <OAuthProviderButton
                             provider="google"
                             title="Sign in with Google"
@@ -118,6 +120,22 @@ export default function LoginPage() {
                             Use email to sign in
                         </Button>
                     </Card>
+
+                    {/* Browse as Guest Button */}
+                    <div className="mt-4">
+                        <Button
+                            variant="outline"
+                            className="w-full"
+                            asChild
+                        >
+                            <Link href="/">
+                                {t('auth.browse_as_guest')}
+                            </Link>
+                        </Button>
+                        <p className="text-xs text-center text-muted-foreground mt-2">
+                            {t('auth.browse_as_guest_description')}
+                        </p>
+                    </div>
 
                     {/* Email Login Form (Modal-like overlay) */}
                     {showEmailLogin && (
@@ -204,30 +222,28 @@ export default function LoginPage() {
                         </div>
                     )}
 
-                    {/* Sign Up Link */}
-                    <div className="mt-6 text-center text-sm text-muted-foreground">
-                        Don&apos;t have an account?{" "}
-                        <Link href="/register" className="font-medium text-primary hover:underline">
-                            Sign up
-                        </Link>
-                    </div>
-
-                    {/* Terms and Privacy */}
-                    <div className="mt-6 text-center text-xs text-muted-foreground space-y-1">
-                        <p>
-                            By continuing, you agree to our{" "}
-                            <Link href="/terms" className="text-primary hover:underline">
-                                Terms of Service
-                            </Link>
-                            {" "}
-                            and{" "}
-                            <Link href="/privacy" className="text-primary hover:underline">
-                                Privacy Policy
-                            </Link>
-                        </p>
-                    </div>
-                </div>
+            {/* Sign Up Link */}
+            <div className="mt-6 text-center text-sm text-muted-foreground">
+                Don&apos;t have an account?{" "}
+                <Link href="/register" className="font-medium text-primary hover:underline">
+                    Sign up
+                </Link>
             </div>
-        </AuthBackground>
+
+            {/* Terms and Privacy */}
+            <div className="mt-6 text-center text-xs text-muted-foreground space-y-1">
+                <p>
+                    By continuing, you agree to our{" "}
+                    <Link href="/terms" className="text-primary hover:underline">
+                        Terms of Service
+                    </Link>
+                    {" "}
+                    and{" "}
+                    <Link href="/privacy" className="text-primary hover:underline">
+                        Privacy Policy
+                    </Link>
+                </p>
+            </div>
+        </div>
     );
 }

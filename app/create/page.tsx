@@ -169,7 +169,6 @@ export default function CreateStory({ storyId, groupId }: CreateStoryProps) {
                             </div>
                             <span className="text-sm text-muted-foreground ml-2">scenes (2-8)</span>
                         </div>
-                        </div>
 
                         {/* Cover Image Upload */}
                         <div className="space-y-2">

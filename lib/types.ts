@@ -228,13 +228,20 @@ export interface Story {
 }
 
 export interface StoryboardCharacterRef {
+    id: string;
+    storyboardId: string;
     characterId: string;
+    order: number;
     displayName?: string; // Made optional for safety
     avatarUrl?: string;
+    character?: Character; // Backend returns nested character object
+    createdAt?: number;
+    updatedAt?: number;
 }
 
 export interface StoryboardScene {
     id: string;
+    storyboardId: string;
     sequence: number;
     title: string;
     description?: string;
@@ -246,6 +253,10 @@ export interface StoryboardScene {
     videoSegments?: VideoSegment[];
     totalVideoDuration?: number;
     isSubdivided?: boolean;
+    isAIGenerated?: boolean;
+    characters?: string[];
+    createdAt?: number;
+    updatedAt?: number;
 }
 
 export interface VideoSegment {
@@ -265,15 +276,17 @@ export interface StoryboardWorkflow {
 
 export interface Storyboard {
     id: string;
-    storyId: string;
+    storyId?: string;
     parentId?: string;
     title: string;
     content?: string;
+    rawInput?: string;
     image?: string;
     images?: string[]; // Multiple scene images
     video?: string;
-    type: string; // 'scene', 'choice', 'ending'
+    type?: string; // 'scene', 'choice', 'ending'
     createdAt?: number;
+    updatedAt?: number;
     creatorId?: string;
     creatorName?: string;
     creatorAvatar?: string;
@@ -282,9 +295,14 @@ export interface Storyboard {
     comments?: number;
     shares?: number;
     forkCount?: number;
+    views?: number;
+    tokenConsumption?: number;
     isStandalone?: boolean;
     isAIGenerated?: boolean;
     isLiked?: boolean;
+    sceneCount?: number;
+    workflowStatus?: string;
+    currentStep?: number;
     storyboardScenes?: StoryboardScene[];
     characterRefs?: StoryboardCharacterRef[];
 }

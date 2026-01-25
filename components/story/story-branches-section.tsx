@@ -12,18 +12,22 @@ interface StoryBranchesSectionProps {
     onStoryboardTap: (storyboard: Storyboard) => void;
 }
 
-export function StoryBranchesSection({ 
-    storyId, 
+import { useTranslation } from "@/providers/language-provider";
+
+export function StoryBranchesSection({
+    storyId,
     storyTitle,
-    storyboards, 
-    isLoading, 
-    onStoryboardTap 
+    storyboards,
+    isLoading,
+    onStoryboardTap
 }: StoryBranchesSectionProps) {
+    const { t } = useTranslation();
+
     if (isLoading) {
         return (
             <div className="flex flex-col items-center justify-center py-16">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-                <p className="text-sm text-muted-foreground mt-3">Loading storyboards...</p>
+                <p className="text-sm text-muted-foreground mt-3">{t("common.loading", "Loading storyboards...")}</p>
             </div>
         );
     }
@@ -33,9 +37,9 @@ export function StoryBranchesSection({
     }
 
     return (
-        <div className="space-y-3">
-            <h2 className="text-base font-semibold text-foreground">
-                Story Branches
+        <div className="space-y-4">
+            <h2 className="text-xl font-bold tracking-tight">
+                {t("story_detail.story_branches", "Story Branches")}
             </h2>
             {Array.isArray(storyboards) && storyboards.map((storyboard) => (
                 <StoryboardCard

@@ -36,7 +36,9 @@ export const storyboards = {
     getByStoryId: async (storyId: string, parentId?: string | null, page = 1, limit = 20): Promise<{ storyboards: Storyboard[], total: number }> => {
         const offset = (page - 1) * limit;
         let endpoint = `/api/storyboards?storyId=${storyId}&limit=${limit}&offset=${offset}`;
-        if (parentId !== undefined) {
+        // Only add parentId parameter if it's explicitly set (not null or undefined)
+        // Backend expects: empty string or "root" for root storyboards, or specific ID for children
+        if (parentId !== undefined && parentId !== null) {
             endpoint += `&parentId=${parentId}`;
         }
         return request(endpoint);
