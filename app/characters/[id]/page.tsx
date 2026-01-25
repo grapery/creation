@@ -10,7 +10,7 @@ import { Header } from "@/components/layout/header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, MessageCircle, Heart, Share2, MoreHorizontal, Film, Image, Info } from "lucide-react";
+import { Loader2, MessageCircle, Share2, MoreHorizontal, Film, Image, Info } from "lucide-react";
 import Link from "next/link";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
@@ -34,9 +34,7 @@ export default function CharacterDetailPage() {
     const [loadingPosters, setLoadingPosters] = useState(true);
 
     // Interaction states
-    const [isLiked, setIsLiked] = useState(false);
     const [isFollowing, setIsFollowing] = useState(false);
-    const [likeCount, setLikeCount] = useState(0);
     const [activeTab, setActiveTab] = useState("timeline");
 
     useEffect(() => {
@@ -45,9 +43,7 @@ export default function CharacterDetailPage() {
             try {
                 const data = await characters.get(id as string);
                 setCharacter(data);
-                setLikeCount(data.likes || 0);
                 setIsFollowing(data.isFollowing || false);
-                setIsLiked(data.isLiked || false);
             } catch (e) {
                 console.error(e);
             } finally {
@@ -96,22 +92,6 @@ export default function CharacterDetailPage() {
             setPosters([]);
         } finally {
             setLoadingPosters(false);
-        }
-    };
-
-    const handleLike = async () => {
-        if (!id) return;
-        try {
-            if (isLiked) {
-                await characters.unlike(id as string);
-                setLikeCount(prev => Math.max(0, prev - 1));
-            } else {
-                await characters.like(id as string);
-                setLikeCount(prev => prev + 1);
-            }
-            setIsLiked(!isLiked);
-        } catch (e) {
-            console.error("Failed to toggle like:", e);
         }
     };
 
@@ -165,12 +145,11 @@ export default function CharacterDetailPage() {
                             </Button>
                             <div className="flex gap-2">
                                 <Button
-                                    variant={isLiked ? "default" : "outline"}
+                                    variant={isFollowing ? "default" : "outline"}
                                     className="flex-1"
-                                    onClick={handleLike}
+                                    onClick={handleFollow}
                                 >
-                                    <Heart className={`mr-2 h-4 w-4 ${isLiked ? "fill-current" : ""}`} />
-                                    {likeCount}
+                                    {isFollowing ? "Following" : "Follow"}
                                 </Button>
                                 <Button variant="outline" size="icon">
                                     <Share2 className="h-4 w-4" />
@@ -179,13 +158,6 @@ export default function CharacterDetailPage() {
                                     <MoreHorizontal className="h-4 w-4" />
                                 </Button>
                             </div>
-                            <Button
-                                variant={isFollowing ? "outline" : "default"}
-                                className="w-full"
-                                onClick={handleFollow}
-                            >
-                                {isFollowing ? "Following" : "Follow"}
-                            </Button>
                         </div>
                     </div>
 

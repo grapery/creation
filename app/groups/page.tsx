@@ -34,7 +34,7 @@ export default function GroupsPage() {
     const [loadingMore, setLoadingMore] = useState(false);
     const [showCreateDialog, setShowCreateDialog] = useState(false);
 
-    const searchTimeoutRef = useRef<NodeJS.Timeout>();
+    const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const [myGroupsPage, setMyGroupsPage] = useState(1);
     const [discoverGroupsPage, setDiscoverGroupsPage] = useState(1);
     const [hasMoreMyGroups, setHasMoreMyGroups] = useState(false);

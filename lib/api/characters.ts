@@ -33,8 +33,6 @@ export const characters = {
     },
 
     // Interaction
-    like: async (id: string) => request(`/api/characters/${id}/like`, 'POST'),
-    unlike: async (id: string) => request(`/api/characters/${id}/like`, 'DELETE'),
     follow: async (id: string) => request(`/api/characters/${id}/follow`, 'POST'),
     unfollow: async (id: string) => request(`/api/characters/${id}/follow`, 'DELETE'),
 };

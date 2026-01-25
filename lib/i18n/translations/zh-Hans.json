@@ -86,7 +86,10 @@
       "guidelines": "社区指南",
       "privacy": "隐私政策",
       "terms": "服务条款"
-    }
+    },
+    "about": "关于",
+    "notify": "通知",
+    "messages": "消息"
   },
   "settings": {
     "title": "设置",

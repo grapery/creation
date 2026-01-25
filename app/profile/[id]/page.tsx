@@ -12,6 +12,7 @@ import { User, ActivityHeatmapData, ActivityTimeRange, Storyboard, Story } from 
 import { cn } from "@/lib/utils";
 import { profile } from "@/lib/api/profile";
 import { useTranslation } from "@/providers/language-provider";
+import { getAuthToken } from "@/lib/api/client";
 import Link from "next/link";
 
 enum ProfileTab {
@@ -118,18 +119,27 @@ export default function ProfilePage() {
             setLoading(true);
             try {
                 console.log('[Profile] Fetching user profile for userId:', userId);
-                const token = localStorage.getItem('voyager_auth_token');
+                const token = getAuthToken();
                 console.log('[Profile] Token exists:', !!token, 'Token length:', token?.length);
 
+                // Check if token exists, if not and it's not own profile, we may want to fetch public profile
+                const headers: Record<string, string> = {};
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+
                 const response = await fetch(`/api/users/${userId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                    },
+                    headers,
                 });
 
                 console.log('[Profile] Response status:', response.status, 'ok:', response.ok);
 
                 if (!response.ok) {
+                    // Handle 401 (Unauthorized) specifically
+                    if (response.status === 401) {
+                        console.log('[Profile] Unauthorized - token may be invalid or expired');
+                        throw new Error('Authentication required. Please log in again.');
+                    }
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
@@ -144,7 +154,12 @@ export default function ProfilePage() {
             } catch (e) {
                 console.error("Failed to fetch profile:", e);
                 if (isMounted) {
-                    setProfileUser(null);
+                    // Don't clear profile on 401 - just show error state
+                    if (e instanceof Error && e.message.includes('Authentication')) {
+                        setProfileUser(null);
+                    } else {
+                        setProfileUser(null);
+                    }
                 }
             } finally {
                 if (isMounted) {
@@ -163,19 +178,21 @@ export default function ProfilePage() {
     const handleFollow = async () => {
         if (!profileUser) return;
         try {
+            const token = getAuthToken();
+            const headers: Record<string, string> = {};
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
             if (isFollowing) {
                 await fetch(`/api/users/${profileUser.id}/follow`, {
                     method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('voyager_auth_token')}`,
-                    },
+                    headers,
                 });
             } else {
                 await fetch(`/api/users/${profileUser.id}/follow`, {
                     method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('voyager_auth_token')}`,
-                    },
+                    headers,
                 });
             }
             setIsFollowing(!isFollowing);
@@ -327,10 +344,10 @@ export default function ProfilePage() {
             </div>
 
             {/* Tabs Navigation */}
-            <ProfileTabs currentPath={pathname} userId={userId!} isOwnProfile={isOwnProfile} />
+            <ProfileTabs currentPath={pathname} userId={userId as string} isOwnProfile={!!isOwnProfile} />
 
             {/* Activity Tab Content (default) */}
-            <ActivityTabContent userId={userId!} />
+            <ActivityTabContent userId={userId as string} />
         </div>
     );
 }

@@ -16,7 +16,7 @@ export default function CreateStory({ storyId, groupId }: CreateStoryProps) {
     const [description, setDescription] = useState("");
     const [selectedGenre, setSelectedGenre] = useState("Fantasy");
     const [defaultSceneCount, setDefaultSceneCount] = useState(3);
-    
+
     // AI Enrichment states
     const [useAIEnrich, setUseAIEnrich] = useState(false);
     const [generateCover, setGenerateCover] = useState(false);
@@ -53,7 +53,7 @@ export default function CreateStory({ storyId, groupId }: CreateStoryProps) {
             alert("Please enter a title");
             return;
         }
-        
+
         if (useAIEnrich || generateCover || generatePoster || generateBackground) {
             setIsAIProcessing(true);
             // Simulate AI creation
@@ -74,7 +74,7 @@ export default function CreateStory({ storyId, groupId }: CreateStoryProps) {
         <div className="min-h-screen bg-background flex flex-col">
             {/* Custom Top Bar */}
             <div className="h-14 border-b flex items-center justify-between px-4 bg-card">
-                <button 
+                <button
                     onClick={() => router.back()}
                     className="text-foreground hover:text-foreground/70 transition-colors"
                 >
@@ -91,9 +91,8 @@ export default function CreateStory({ storyId, groupId }: CreateStoryProps) {
                         <button
                             key={tab.id}
                             onClick={() => setSelectedTab(tab.id)}
-                            className={`relative px-6 py-3 text-sm font-medium transition-colors ${
-                                selectedTab === tab.id ? "text-foreground" : "text-muted-foreground"
-                            }`}
+                            className={`relative px-6 py-3 text-sm font-medium transition-colors ${selectedTab === tab.id ? "text-foreground" : "text-muted-foreground"
+                                }`}
                         >
                             {tab.label}
                             {selectedTab === tab.id && (
@@ -109,7 +108,7 @@ export default function CreateStory({ storyId, groupId }: CreateStoryProps) {
                 {selectedTab === 0 && (
                     <div className="space-y-6">
                         <h2 className="text-xl font-semibold text-foreground">Story Information</h2>
-                        
+
                         {/* Title Field */}
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-foreground">Title</label>
@@ -157,11 +156,10 @@ export default function CreateStory({ storyId, groupId }: CreateStoryProps) {
                                     <button
                                         key={count}
                                         onClick={() => setDefaultSceneCount(count)}
-                                        className={`w-9 h-9 rounded-full border flex items-center justify-center transition-colors ${
-                                            defaultSceneCount === count 
-                                                ? "bg-primary text-white" 
+                                        className={`w-9 h-9 rounded-full border flex items-center justify-center transition-colors ${defaultSceneCount === count
+                                                ? "bg-primary text-white"
                                                 : "bg-background hover:bg-muted"
-                                        }`}
+                                            }`}
                                     >
                                         <span className="text-sm font-semibold">{count}</span>
                                     </button>
@@ -193,7 +191,7 @@ export default function CreateStory({ storyId, groupId }: CreateStoryProps) {
                                 AI Smart Creation
                             </h3>
                             <p className="text-sm text-muted-foreground mb-4">AI can help enhance your story with descriptions and images</p>
-                            
+
                             {/* AI Options */}
                             <div className="space-y-3">
                                 {/* Enrich Description Toggle */}
@@ -207,12 +205,11 @@ export default function CreateStory({ storyId, groupId }: CreateStoryProps) {
                                     </div>
                                     <button
                                         onClick={() => setUseAIEnrich(!useAIEnrich)}
-                                        disabled={description.isEmpty}
-                                        className={`w-11 h-6 rounded-full transition-colors ${
-                                            useAIEnrich 
-                                                ? "bg-purple-500 text-white" 
+                                        disabled={description.length === 0}
+                                        className={`w-11 h-6 rounded-full transition-colors ${useAIEnrich
+                                                ? "bg-purple-500 text-white"
                                                 : "bg-muted"
-                                        }`}
+                                            }`}
                                     >
                                     </button>
                                 </div>
@@ -228,11 +225,10 @@ export default function CreateStory({ storyId, groupId }: CreateStoryProps) {
                                     </div>
                                     <button
                                         onClick={() => setGenerateCover(!generateCover)}
-                                        className={`w-11 h-6 rounded-full transition-colors ${
-                                            generateCover 
-                                                ? "bg-purple-500 text-white" 
+                                        className={`w-11 h-6 rounded-full transition-colors ${generateCover
+                                                ? "bg-purple-500 text-white"
                                                 : "bg-muted"
-                                        }`}
+                                            }`}
                                     >
                                     </button>
                                 </div>
@@ -248,11 +244,10 @@ export default function CreateStory({ storyId, groupId }: CreateStoryProps) {
                                     </div>
                                     <button
                                         onClick={() => setGenerateBackground(!generateBackground)}
-                                        className={`w-11 h-6 rounded-full transition-colors ${
-                                            generateBackground 
-                                                ? "bg-purple-500 text-white" 
+                                        className={`w-11 h-6 rounded-full transition-colors ${generateBackground
+                                                ? "bg-purple-500 text-white"
                                                 : "bg-muted"
-                                        }`}
+                                            }`}
                                     >
                                     </button>
                                 </div>
@@ -268,11 +263,10 @@ export default function CreateStory({ storyId, groupId }: CreateStoryProps) {
                                     </div>
                                     <button
                                         onClick={() => setGeneratePoster(!generatePoster)}
-                                        className={`w-11 h-6 rounded-full transition-colors ${
-                                            generatePoster 
-                                                ? "bg-purple-500 text-white" 
+                                        className={`w-11 h-6 rounded-full transition-colors ${generatePoster
+                                                ? "bg-purple-500 text-white"
                                                 : "bg-muted"
-                                        }`}
+                                            }`}
                                     >
                                     </button>
                                 </div>
@@ -290,7 +284,7 @@ export default function CreateStory({ storyId, groupId }: CreateStoryProps) {
                             )}
 
                             {/* AI Enriched Content Preview */}
-                            {!aiEnrichedDescription.isEmpty && (
+                            {aiEnrichedDescription.length > 0 && (
                                 <div className="p-4 bg-green-50/10 rounded-lg">
                                     <div className="flex items-center gap-2 mb-2">
                                         <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -310,7 +304,7 @@ export default function CreateStory({ storyId, groupId }: CreateStoryProps) {
                 {selectedTab === 1 && (
                     <div className="space-y-4">
                         <h2 className="text-xl font-semibold text-foreground">Panels</h2>
-                        
+
                         {/* Header with Add Button */}
                         <div className="flex items-center justify-between">
                             <p className="text-sm text-muted-foreground">
@@ -346,7 +340,7 @@ export default function CreateStory({ storyId, groupId }: CreateStoryProps) {
                 {selectedTab === 2 && (
                     <div className="space-y-4">
                         <h2 className="text-xl font-semibold text-foreground">Cast</h2>
-                        
+
                         {/* Header with Add Button */}
                         <div className="flex items-center justify-between">
                             <p className="text-sm text-muted-foreground">
@@ -396,9 +390,8 @@ export default function CreateStory({ storyId, groupId }: CreateStoryProps) {
                 <button
                     onClick={handleCreate}
                     disabled={title.trim().length === 0 || isAIProcessing}
-                    className={`flex-1 py-3 font-semibold rounded-lg transition-colors ${
-                        isAIProcessing ? "bg-gray-400" : "bg-black hover:bg-gray-800 text-white"
-                    }`}
+                    className={`flex-1 py-3 font-semibold rounded-lg transition-colors ${isAIProcessing ? "bg-gray-400" : "bg-black hover:bg-gray-800 text-white"
+                        }`}
                 >
                     {isAIProcessing ? (
                         <>

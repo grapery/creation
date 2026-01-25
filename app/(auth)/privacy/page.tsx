@@ -404,11 +404,10 @@ Grapery（"我们"、"平台"）非常重视用户的隐私保护和个人信息
                                 {content.map((block, index) => (
                                     <div key={index}>
                                         {block.type === "heading" && (
-                                            <h2 className={`font-bold ${
-                                                block.level === 1 ? "text-3xl" :
-                                                block.level === 2 ? "text-2xl" :
-                                                "text-xl"
-                                            }`}>
+                                            <h2 className={`font-bold ${block.level === 1 ? "text-3xl" :
+                                                    block.level === 2 ? "text-2xl" :
+                                                        "text-xl"
+                                                }`}>
                                                 {block.text}
                                             </h2>
                                         )}
@@ -455,7 +454,7 @@ Grapery（"我们"、"平台"）非常重视用户的隐私保护和个人信息
     );
 }
 
-function parseInlineMarkdown(text: string): JSX.Element {
+function parseInlineMarkdown(text: string) {
     // Simple inline markdown parsing for bold and links
     let result = text;
 

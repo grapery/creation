@@ -9,6 +9,7 @@ import { Loader2, Sparkles, FileText, Layers, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useTranslation } from "@/providers/language-provider";
+import { getAuthToken } from "@/lib/api/client";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
@@ -106,10 +107,14 @@ export default function ProfileDraftsPage() {
             setLoading(true);
             try {
                 // Fetch user profile
+                const token = getAuthToken();
+                const headers: Record<string, string> = {};
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+
                 const userResponse = await fetch(`/api/users/${userId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('voyager_auth_token')}`,
-                    },
+                    headers,
                 });
                 const userData = await userResponse.json();
 
@@ -287,7 +292,7 @@ export default function ProfileDraftsPage() {
             </div>
 
             {/* Tabs Navigation */}
-            <ProfileTabs currentPath={pathname} userId={userId!} isOwnProfile={isOwnProfile} />
+            <ProfileTabs currentPath={pathname} userId={userId as string} isOwnProfile={!!isOwnProfile} />
 
             {/* Drafts Content */}
             <main className="flex-1 container max-w-6xl mx-auto px-4 py-8">

@@ -23,7 +23,6 @@ export interface Character {
     followers?: number;
     stories?: number;
     isFollowing?: boolean;
-    isLiked?: boolean;
     chatCount?: number;
     tags?: string[];
     creator?: User;

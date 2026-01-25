@@ -89,7 +89,7 @@ export function StoryboardCard({
                             <h3 className="text-[16px] font-bold text-foreground truncate pr-2">
                                 {storyboard.title}
                             </h3>
-                            {storyboard.parentId && !storyboard.isRoot && (
+                            {storyboard.parentId && (
                                 <span className="flex-shrink-0 px-2 py-0.5 rounded-full bg-secondary text-[10px] font-medium text-secondary-foreground flex items-center gap-1">
                                     <GitBranch className="w-3 h-3" />
                                     {t("common.forks")}

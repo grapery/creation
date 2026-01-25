@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Wand2, FileText, Image as ImageIcon, Video, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -34,35 +35,35 @@ export function PublishStep({ data, onPublish, onBack }: PublishStepProps) {
                 <h2 className="text-xl font-semibold text-foreground mb-4">
                     Preview
                 </h2>
-                
+
                 {/* Cover */}
                 {data.images && data.images.length > 0 && (
                     <div className="rounded-lg overflow-hidden mb-4">
-                        <img 
-                            src={data.images[0]} 
-                            alt="Cover" 
+                        <img
+                            src={data.images[0]}
+                            alt="Cover"
                             className="w-full h-[240px] object-cover"
                         />
                     </div>
                 )}
-                
+
                 {/* Title */}
                 <h3 className="text-2xl font-bold text-foreground">{data.title}</h3>
-                
+
                 {/* Style Badge */}
                 {data.style && (
                     <span className="inline-block px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
                         {data.style}
                     </span>
                 )}
-                
+
                 {/* Content */}
                 {data.content && (
                     <p className="text-base text-muted-foreground leading-relaxed mt-4">
                         {data.content}
                     </p>
                 )}
-                
+
                 {/* Stats */}
                 <div className="flex items-center gap-4 mt-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1.5">
@@ -83,7 +84,7 @@ export function PublishStep({ data, onPublish, onBack }: PublishStepProps) {
                 <h2 className="text-xl font-semibold text-foreground">
                     Metadata
                 </h2>
-                
+
                 <div className="space-y-3">
                     <div className="flex justify-between">
                         <span className="text-sm text-muted-foreground">Title</span>

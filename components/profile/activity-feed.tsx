@@ -1,27 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { profile } from "@/lib/api/profile";
+import { profile, UserActivity } from "@/lib/api/profile";
 import { Loader2, Star, UserPlus, BookOpen, MessageCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
-interface Activity {
-    id: string;
-    type: 'like_story' | 'follow' | 'create_story' | 'comment';
-    userId: string;
-    targetId?: string;
-    targetName?: string;
-    createdAt: number;
-    details?: string;
-}
 
 interface ActivityFeedProps {
     userId: string;
 }
 
 export function ActivityFeed({ userId }: ActivityFeedProps) {
-    const [activities, setActivities] = useState<Activity[]>([]);
+    const [activities, setActivities] = useState<UserActivity[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -38,23 +28,12 @@ export function ActivityFeed({ userId }: ActivityFeedProps) {
         load();
     }, [userId]);
 
-    const getIcon = (type: string) => {
+    const getIcon = (type?: string) => {
         switch (type) {
-            case 'like_story': return <Star className="h-4 w-4 text-yellow-500" />;
-            case 'follow': return <UserPlus className="h-4 w-4 text-blue-500" />;
-            case 'create_story': return <BookOpen className="h-4 w-4 text-green-500" />;
-            case 'comment': return <MessageCircle className="h-4 w-4 text-purple-500" />;
-            default: return <div className="h-2 w-2 rounded-full bg-primary" />;
-        }
-    };
-
-    const getDescription = (activity: Activity) => {
-        switch (activity.type) {
-            case 'like_story': return <span>liked a story <b>{activity.targetName}</b></span>;
-            case 'follow': return <span>started following <b>{activity.targetName}</b></span>;
-            case 'create_story': return <span>published a new story <b>{activity.targetName}</b></span>;
-            case 'comment': return <span>commented on <b>{activity.targetName}</b></span>;
-            default: return <span>performed an action</span>;
+            case 'story': return <BookOpen className="h-4 w-4 text-green-500" />;
+            case 'character': return <UserPlus className="h-4 w-4 text-blue-500" />;
+            case 'storyboard': return <BookOpen className="h-4 w-4 text-purple-500" />;
+            default: return <Star className="h-4 w-4 text-yellow-500" />;
         }
     };
 
@@ -70,14 +49,15 @@ export function ActivityFeed({ userId }: ActivityFeedProps) {
             {activities.map(activity => (
                 <div key={activity.id} className="flex gap-4 items-start pb-4 border-b last:border-0 last:pb-0">
                     <div className="mt-1 bg-secondary/50 p-2 rounded-full">
-                        {getIcon(activity.type)}
+                        {getIcon(activity.targetType)}
                     </div>
                     <div>
                         <div className="text-sm">
-                            {getDescription(activity)}
+                            <span>{activity.message}</span>
+                            {activity.targetName && <span> <b>{activity.targetName}</b></span>}
                         </div>
                         <div className="text-xs text-muted-foreground mt-1">
-                            {formatDistanceToNow(new Date(activity.createdAt * 1000), { addSuffix: true })}
+                            {formatDistanceToNow(new Date(activity.timestamp * 1000), { addSuffix: true })}
                         </div>
                     </div>
                 </div>

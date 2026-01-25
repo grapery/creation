@@ -9,6 +9,7 @@ import { Loader2, Sparkles, FileText, Layers, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useTranslation } from "@/providers/language-provider";
+import { getAuthToken } from "@/lib/api/client";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
@@ -107,10 +108,14 @@ export default function ProfileStoriesPage() {
             setLoading(true);
             try {
                 // Fetch user profile
+                const token = getAuthToken();
+                const headers: Record<string, string> = {};
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+
                 const userResponse = await fetch(`/api/users/${userId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('voyager_auth_token')}`,
-                    },
+                    headers,
                 });
                 const userData = await userResponse.json();
 
@@ -120,7 +125,7 @@ export default function ProfileStoriesPage() {
                 setIsFollowing(userData.isFollowing || false);
 
                 // Fetch user's stories
-                const storiesData = await profile.getStories(userId, 1, 50);
+                const storiesData = await profile.getStories(userId as string, 1, 50);
 
                 if (!isMounted) return;
 
@@ -147,19 +152,21 @@ export default function ProfileStoriesPage() {
     const handleFollow = async () => {
         if (!profileUser) return;
         try {
+            const token = getAuthToken();
+            const headers: Record<string, string> = {};
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
             if (isFollowing) {
                 await fetch(`/api/users/${profileUser.id}/unfollow`, {
                     method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('voyager_auth_token')}`,
-                    },
+                    headers,
                 });
             } else {
                 await fetch(`/api/users/${profileUser.id}/follow`, {
                     method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('voyager_auth_token')}`,
-                    },
+                    headers,
                 });
             }
             setIsFollowing(!isFollowing);
@@ -311,7 +318,7 @@ export default function ProfileStoriesPage() {
             </div>
 
             {/* Tabs Navigation */}
-            <ProfileTabs currentPath={pathname} userId={userId!} isOwnProfile={isOwnProfile} />
+            <ProfileTabs currentPath={pathname} userId={userId as string} isOwnProfile={!!isOwnProfile} />
 
             {/* Stories Content */}
             <main className="flex-1 container max-w-6xl mx-auto px-4 py-8">

@@ -354,11 +354,10 @@ Grapery 平台按"按原样"和"按可用"基础提供服务，不提供任何�
                                 {content.map((block, index) => (
                                     <div key={index}>
                                         {block.type === "heading" && (
-                                            <h2 className={`font-bold ${
-                                                block.level === 1 ? "text-3xl" :
-                                                block.level === 2 ? "text-2xl" :
-                                                "text-xl"
-                                            }`}>
+                                            <h2 className={`font-bold ${block.level === 1 ? "text-3xl" :
+                                                    block.level === 2 ? "text-2xl" :
+                                                        "text-xl"
+                                                }`}>
                                                 {block.text}
                                             </h2>
                                         )}
@@ -405,7 +404,7 @@ Grapery 平台按"按原样"和"按可用"基础提供服务，不提供任何�
     );
 }
 
-function parseInlineMarkdown(text: string): JSX.Element {
+function parseInlineMarkdown(text: string) {
     // Simple inline markdown parsing for bold and links
     let result = text;
 

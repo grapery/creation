@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -96,7 +96,7 @@ export default function ProfileSettingsPage() {
                 <Card>
                     <CardContent className="p-6">
                         <h2 className="text-base font-semibold text-foreground mb-4">Profile Photo</h2>
-                        
+
                         <div className="flex items-center gap-6">
                             {/* Avatar Preview */}
                             <div className="relative">
@@ -109,7 +109,7 @@ export default function ProfileSettingsPage() {
                                         </AvatarFallback>
                                     )}
                                 </Avatar>
-                                
+
                                 {/* Upload Button Overlay */}
                                 <label className="absolute inset-0 flex items-center justify-center cursor-pointer hover:bg-black/5 transition-colors rounded-full">
                                     <Upload className="w-8 h-8 text-white" />
@@ -219,7 +219,7 @@ export default function ProfileSettingsPage() {
                 <Card>
                     <CardContent className="p-6">
                         <h2 className="text-base font-semibold text-foreground mb-4">AI Preferences</h2>
-                        
+
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-foreground">AI Prompt Style</label>
                             <div className="flex gap-2">
@@ -232,10 +232,9 @@ export default function ProfileSettingsPage() {
                                         key={option.value}
                                         onClick={() => setAiPromptPreference(option.value as any)}
                                         className={`
-                                            flex-1 p-3 rounded-lg border ${
-                                                aiPromptPreference === option.value
-                                                    ? "bg-primary text-white border-primary"
-                                                    : "bg-secondary border-border hover:border-primary/50"
+                                            flex-1 p-3 rounded-lg border ${aiPromptPreference === option.value
+                                                ? "bg-primary text-white border-primary"
+                                                : "bg-secondary border-border hover:border-primary/50"
                                             } transition-colors
                                         `}
                                     >

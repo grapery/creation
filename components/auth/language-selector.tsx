@@ -6,10 +6,13 @@ import { Language, useTranslation, LANGUAGE_NAMES } from "@/providers/language-p
 
 interface LanguageSelectorProps {
     className?: string;
+    currentLanguage?: Language;
+    onLanguageChange?: (language: Language) => void;
 }
 
-export function LanguageSelector({ className }: LanguageSelectorProps) {
-    const { language, setLanguage, t } = useTranslation();
+export function LanguageSelector({ className, currentLanguage, onLanguageChange }: LanguageSelectorProps) {
+    const { language: contextLanguage, setLanguage: setContextLanguage, t } = useTranslation();
+    const language = currentLanguage || contextLanguage;
     const [isOpen, setIsOpen] = useState(false);
 
     const languages = Object.entries(LANGUAGE_NAMES).map(([code, info]) => ({
@@ -47,7 +50,11 @@ export function LanguageSelector({ className }: LanguageSelectorProps) {
                                     key={lang.code}
                                     type="button"
                                     onClick={() => {
-                                        setLanguage(lang.code);
+                                        if (onLanguageChange) {
+                                            onLanguageChange(lang.code);
+                                        } else {
+                                            setContextLanguage(lang.code);
+                                        }
                                         setIsOpen(false);
                                     }}
                                     className="flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-accent transition-colors"

@@ -1,7 +1,7 @@
 export interface User {
     id: string;
     username: string;
-    email: string;
+    email?: string;
     displayName?: string;
     bio?: string;
     avatar?: string;
@@ -169,6 +169,7 @@ export interface Character {
     author?: User;
     createdAt?: number;
     updatedAt?: number;
+    tags?: string[];
 }
 
 // Scene Models (Story-level scenes, not storyboard scenes)

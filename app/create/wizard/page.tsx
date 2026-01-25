@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { StepIndicator, WizardStep } from "@/components/create/wizard/step-indicator";
 import { SetupStep } from "@/components/create/wizard/setup-step";
@@ -9,7 +9,7 @@ import { ImagesStep } from "@/components/create/wizard/images-step";
 import { VideoStep } from "@/components/create/wizard/video-step";
 import { PublishStep } from "@/components/create/wizard/publish-step";
 
-export default function WizardPage() {
+function WizardContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [step, setStep] = useState<WizardStep>('setup');
@@ -18,11 +18,11 @@ export default function WizardPage() {
         style: "",
         useAI: true,
         sceneCount: 3,
-        characters: [],
+        characters: [] as any[],
         content: "",
         generatedContent: "",
-        scenes: [],
-        images: [],
+        scenes: [] as any[],
+        images: [] as any[],
         video: "",
     });
 
@@ -31,8 +31,8 @@ export default function WizardPage() {
         const storyId = searchParams.get('storyId');
         if (storyId) {
             // Load existing story data
-            setData(prev => ({ 
-                ...prev, 
+            setData(prev => ({
+                ...prev,
                 title: `Continuing from Story ${storyId}`,
                 content: "Loading story content..."
             }));
@@ -64,7 +64,7 @@ export default function WizardPage() {
         <div className="min-h-screen bg-background flex flex-col">
             {/* Header */}
             <div className="h-14 border-b flex items-center justify-between px-4 bg-card">
-                <button 
+                <button
                     onClick={() => router.back()}
                     className="text-foreground hover:text-foreground/70 transition-colors"
                 >
@@ -89,7 +89,7 @@ export default function WizardPage() {
                         onBack={handleBack}
                     />
                 )}
-                
+
                 {step === 'create' && (
                     <CreateStep
                         data={data}
@@ -98,7 +98,7 @@ export default function WizardPage() {
                         onBack={handleBack}
                     />
                 )}
-                
+
                 {step === 'images' && (
                     <ImagesStep
                         data={data}
@@ -107,7 +107,7 @@ export default function WizardPage() {
                         onBack={handleBack}
                     />
                 )}
-                
+
                 {step === 'video' && (
                     <VideoStep
                         data={data}
@@ -116,17 +116,24 @@ export default function WizardPage() {
                         onBack={handleBack}
                     />
                 )}
-                
+
                 {step === 'publish' && (
                     <PublishStep
                         data={data}
                         onChange={setData}
-                        onNext={handlePublish}
                         onBack={handleBack}
                         onPublish={handlePublish}
                     />
                 )}
             </main>
         </div>
+    );
+}
+
+export default function WizardPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+            <WizardContent />
+        </Suspense>
     );
 }

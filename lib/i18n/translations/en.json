@@ -86,7 +86,10 @@
       "guidelines": "Guidelines",
       "privacy": "Privacy",
       "terms": "Terms"
-    }
+    },
+    "about": "About",
+    "notify": "Notify",
+    "messages": "Messages"
   },
   "settings": {
     "title": "Settings",
