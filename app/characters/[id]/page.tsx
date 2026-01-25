@@ -194,9 +194,11 @@ export default function CharacterDetailPage() {
                         <div>
                             <h1 className="text-3xl md:text-4xl font-bold">{character.name}</h1>
                             <div className="flex items-center gap-2 mt-2 text-muted-foreground">
-                                <span className="text-sm">@{character.creator?.username || "System"}</span>
+                                <span className="text-sm">@{character.author?.username || "System"}</span>
                                 <span>•</span>
-                                <span className="text-sm">{character.likes || 0} Likes</span>
+                                <span className="text-sm">{character.followers || 0} Followers</span>
+                                <span>•</span>
+                                <span className="text-sm">{character.stories || 0} Stories</span>
                             </div>
                         </div>
 
@@ -205,6 +207,33 @@ export default function CharacterDetailPage() {
                                 <p className="text-lg leading-relaxed">{character.description}</p>
                             </CardContent>
                         </Card>
+
+                        {/* Additional Character Details */}
+                        {(character.personality || character.background || character.appearance) && (
+                            <Card>
+                                <CardContent className="p-6 space-y-4">
+                                    <h3 className="text-lg font-semibold">About {character.name}</h3>
+                                    {character.personality && character.personality.trim() !== '' && (
+                                        <div>
+                                            <h4 className="text-sm font-medium text-muted-foreground mb-2">Personality</h4>
+                                            <p className="text-sm leading-relaxed">{character.personality}</p>
+                                        </div>
+                                    )}
+                                    {character.background && character.background.trim() !== '' && (
+                                        <div>
+                                            <h4 className="text-sm font-medium text-muted-foreground mb-2">Background</h4>
+                                            <p className="text-sm leading-relaxed">{character.background}</p>
+                                        </div>
+                                    )}
+                                    {character.appearance && character.appearance.trim() !== '' && (
+                                        <div>
+                                            <h4 className="text-sm font-medium text-muted-foreground mb-2">Appearance</h4>
+                                            <p className="text-sm leading-relaxed">{character.appearance}</p>
+                                        </div>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        )}
 
                         <Tabs defaultValue="timeline" value={activeTab} onValueChange={setActiveTab}>
                             <TabsList className="bg-secondary/50">
@@ -326,15 +355,27 @@ export default function CharacterDetailPage() {
                             <TabsContent value="info" className="mt-6">
                                 <Card>
                                     <CardContent className="p-6 space-y-6">
-                                        {/* Character Info */}
+                                        {/* Character Stats */}
                                         <div>
-                                            <h3 className="text-sm font-semibold text-muted-foreground mb-3">Character Information</h3>
+                                            <h3 className="text-sm font-semibold text-muted-foreground mb-3">Statistics</h3>
                                             <div className="space-y-3">
                                                 <div className="flex items-center justify-between">
                                                     <span className="text-sm text-muted-foreground">Visibility</span>
                                                     <span className="text-sm font-medium">
                                                         {character.isPublic ? 'Public' : 'Group Only'}
                                                     </span>
+                                                </div>
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-sm text-muted-foreground">Likes</span>
+                                                    <span className="text-sm font-medium">{character.likes || 0}</span>
+                                                </div>
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-sm text-muted-foreground">Followers</span>
+                                                    <span className="text-sm font-medium">{character.followers || 0}</span>
+                                                </div>
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-sm text-muted-foreground">Stories</span>
+                                                    <span className="text-sm font-medium">{character.stories || 0}</span>
                                                 </div>
                                                 {character.createdAt && (
                                                     <div className="flex items-center justify-between">
@@ -344,30 +385,53 @@ export default function CharacterDetailPage() {
                                                         </span>
                                                     </div>
                                                 )}
-                                                <div className="flex items-center justify-between">
-                                                    <span className="text-sm text-muted-foreground">Likes</span>
-                                                    <span className="text-sm font-medium">{character.likes || 0}</span>
-                                                </div>
                                             </div>
                                         </div>
 
-                                        {/* Creator Info */}
-                                        {character.creator && (
+                                        {/* Author Info */}
+                                        {character.author && (
                                             <div>
                                                 <h3 className="text-sm font-semibold text-muted-foreground mb-3">Creator</h3>
                                                 <div className="flex items-center gap-3">
                                                     <Avatar className="h-10 w-10">
-                                                        <AvatarImage src={character.creator.avatar} />
+                                                        <AvatarImage src={character.author.avatar} />
                                                         <AvatarFallback>
-                                                            {character.creator.username?.[0]?.toUpperCase()}
+                                                            {character.author.username?.[0]?.toUpperCase()}
                                                         </AvatarFallback>
                                                     </Avatar>
                                                     <div>
-                                                        <p className="text-sm font-medium">@{character.creator.username}</p>
+                                                        <p className="text-sm font-medium">@{character.author.username}</p>
                                                         <p className="text-xs text-muted-foreground">
-                                                            {character.creator.displayName || 'Creator'}
+                                                            {character.author.displayName || 'Creator'}
                                                         </p>
                                                     </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Goals & Features */}
+                                        {(character.shortTermGoal || character.longTermGoal || character.abilityFeatures) && (
+                                            <div>
+                                                <h3 className="text-sm font-semibold text-muted-foreground mb-3">Goals & Abilities</h3>
+                                                <div className="space-y-3">
+                                                    {character.shortTermGoal && character.shortTermGoal.trim() !== '' && (
+                                                        <div>
+                                                            <h4 className="text-xs font-medium text-muted-foreground mb-1">Short-term Goal</h4>
+                                                            <p className="text-sm leading-relaxed">{character.shortTermGoal}</p>
+                                                        </div>
+                                                    )}
+                                                    {character.longTermGoal && character.longTermGoal.trim() !== '' && (
+                                                        <div>
+                                                            <h4 className="text-xs font-medium text-muted-foreground mb-1">Long-term Goal</h4>
+                                                            <p className="text-sm leading-relaxed">{character.longTermGoal}</p>
+                                                        </div>
+                                                    )}
+                                                    {character.abilityFeatures && character.abilityFeatures.trim() !== '' && (
+                                                        <div>
+                                                            <h4 className="text-xs font-medium text-muted-foreground mb-1">Abilities</h4>
+                                                            <p className="text-sm leading-relaxed">{character.abilityFeatures}</p>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         )}

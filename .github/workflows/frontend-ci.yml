@@ -2,14 +2,10 @@ name: creation-frontend-ci
 
 on:
   push:
-    paths:
-      - 'creation/**'
     branches:
       - main
       - develop
   pull_request:
-    paths:
-      - 'creation/**'
   # 手动触发部署
   workflow_dispatch:
     inputs:
