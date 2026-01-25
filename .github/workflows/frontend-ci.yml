@@ -140,36 +140,18 @@ jobs:
           echo "=== DEV_DEPLOY_HOST Parsing ===" >> $GITHUB_STEP_SUMMARY
           echo "Original: $DEV_HOST" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
-          # Try multiple methods to remove port
-          # Method 1: parameter expansion
-          HOSTNAME_1="${DEV_HOST%%:*}"
-          # Method 2: cut command
-          HOSTNAME_2=$(echo "$DEV_HOST" | cut -d: -f1)
-          # Method 3: sed command
-          HOSTNAME_3=$(echo "$DEV_HOST" | sed 's/:.*//')
-          
-          echo "Method 1 (%%): $HOSTNAME_1" >> $GITHUB_STEP_SUMMARY
-          echo "Method 2 (cut): $HOSTNAME_2" >> $GITHUB_STEP_SUMMARY
-          echo "Method 3 (sed): $HOSTNAME_3" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          
-          # Use result that looks most like a hostname (no colon)
-          if [[ "$HOSTNAME_1" != "$DEV_HOST" ]]; then
-            echo "Using method 1" >> $GITHUB_STEP_SUMMARY
-            FINAL_HOSTNAME="$HOSTNAME_1"
-          elif [[ "$HOSTNAME_2" != "$DEV_HOST" ]]; then
-            echo "Using method 2" >> $GITHUB_STEP_SUMMARY
-            FINAL_HOSTNAME="$HOSTNAME_2"
-          elif [[ "$HOSTNAME_3" != "$DEV_HOST" ]]; then
-            echo "Using method 3" >> $GITHUB_STEP_SUMMARY
-            FINAL_HOSTNAME="$HOSTNAME_3"
-          else
-            echo "No port detected, using original" >> $GITHUB_STEP_SUMMARY
+
+          # Remove port using parameter expansion (removes :port)
+          FINAL_HOSTNAME="${DEV_HOST%:*}"
+
+          # If the result still contains a colon or is the same, there was no port
+          if [[ "$FINAL_HOSTNAME" == *:* ]] || [[ "$FINAL_HOSTNAME" == "$DEV_HOST" ]]; then
             FINAL_HOSTNAME="$DEV_HOST"
+            echo "No port detected, using original" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Port detected and removed" >> $GITHUB_STEP_SUMMARY
           fi
-          
-          echo "" >> $GITHUB_STEP_SUMMARY
+
           echo "Final hostname: $FINAL_HOSTNAME" >> $GITHUB_STEP_SUMMARY
           echo "hostname=$FINAL_HOSTNAME" >> $GITHUB_OUTPUT
 
@@ -186,6 +168,23 @@ jobs:
           echo "| Commit | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Host | ${{ steps.parse-dev-host.outputs.hostname }} |" >> $GITHUB_STEP_SUMMARY
 
+      - name: Upload .env to ECS - Log
+        run: |
+          echo "## 📤 Uploading .env File" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Setting | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Source File | .env |" >> $GITHUB_STEP_SUMMARY
+          echo "| Target Host | ${{ steps.parse-dev-host.outputs.hostname }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Target Path | /home/ubuntu/grapery/creation/ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Port | 22 |" >> $GITHUB_STEP_SUMMARY
+          echo "| Username | ${{ vars.SSH_USER }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📋 .env file contents:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          cat .env >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
       - name: Upload .env to ECS
         uses: appleboy/scp-action@v0.1.4
         with:
@@ -195,6 +194,10 @@ jobs:
           port: 22
           source: ".env"
           target: "/home/ubuntu/grapery/creation/"
+
+      - name: Upload .env to ECS - Success
+        run: |
+          echo "✅ .env file uploaded successfully to ${{ steps.parse-dev-host.outputs.hostname }}:/home/ubuntu/grapery/creation/" >> $GITHUB_STEP_SUMMARY
 
       - name: Remote Deploy to Development Server
         uses: appleboy/ssh-action@v0.1.10
@@ -313,36 +316,22 @@ jobs:
         shell: bash
         run: |
           PROD_HOST="${{ vars.PROD_DEPLOY_HOST }}"
-          echo "Original PROD_DEPLOY_HOST: $PROD_HOST"
-          
-          # Try multiple methods to remove port
-          # Method 1: parameter expansion
-          HOSTNAME_1="${PROD_HOST%%:*}"
-          # Method 2: cut command
-          HOSTNAME_2=$(echo "$PROD_HOST" | cut -d: -f1)
-          # Method 3: sed command
-          HOSTNAME_3=$(echo "$PROD_HOST" | sed 's/:.*//')
-          
-          echo "Method 1 (%%): $HOSTNAME_1"
-          echo "Method 2 (cut): $HOSTNAME_2"
-          echo "Method 3 (sed): $HOSTNAME_3"
-          
-          # Use the result that looks most like a hostname (no colon)
-          if [[ "$HOSTNAME_1" != "$PROD_HOST" ]]; then
-            echo "Using method 1"
-            FINAL_HOSTNAME="$HOSTNAME_1"
-          elif [[ "$HOSTNAME_2" != "$PROD_HOST" ]]; then
-            echo "Using method 2"
-            FINAL_HOSTNAME="$HOSTNAME_2"
-          elif [[ "$HOSTNAME_3" != "$PROD_HOST" ]]; then
-            echo "Using method 3"
-            FINAL_HOSTNAME="$HOSTNAME_3"
-          else
-            echo "No port detected, using original"
+          echo "=== PROD_DEPLOY_HOST Parsing ===" >> $GITHUB_STEP_SUMMARY
+          echo "Original: $PROD_HOST" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Remove port using parameter expansion (removes :port)
+          FINAL_HOSTNAME="${PROD_HOST%:*}"
+
+          # If the result still contains a colon or is the same, there was no port
+          if [[ "$FINAL_HOSTNAME" == *:* ]] || [[ "$FINAL_HOSTNAME" == "$PROD_HOST" ]]; then
             FINAL_HOSTNAME="$PROD_HOST"
+            echo "No port detected, using original" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Port detected and removed" >> $GITHUB_STEP_SUMMARY
           fi
-          
-          echo "Final hostname: $FINAL_HOSTNAME"
+
+          echo "Final hostname: $FINAL_HOSTNAME" >> $GITHUB_STEP_SUMMARY
           echo "hostname=$FINAL_HOSTNAME" >> $GITHUB_OUTPUT
 
       - name: Deploy notification
@@ -358,6 +347,23 @@ jobs:
           echo "| Commit | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Host | ${{ steps.parse-prod-host.outputs.hostname }} |" >> $GITHUB_STEP_SUMMARY
 
+      - name: Upload .env to ECS - Log
+        run: |
+          echo "## 📤 Uploading .env File" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Setting | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Source File | .env |" >> $GITHUB_STEP_SUMMARY
+          echo "| Target Host | ${{ steps.parse-prod-host.outputs.hostname }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Target Path | /home/ubuntu/grapery/creation/ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Port | 22 |" >> $GITHUB_STEP_SUMMARY
+          echo "| Username | ${{ vars.SSH_USER }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📋 .env file contents:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          cat .env >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
       - name: Upload .env to ECS
         uses: appleboy/scp-action@v0.1.4
         with:
@@ -367,6 +373,10 @@ jobs:
           port: 22
           source: ".env"
           target: "/home/ubuntu/grapery/creation/"
+
+      - name: Upload .env to ECS - Success
+        run: |
+          echo "✅ .env file uploaded successfully to ${{ steps.parse-prod-host.outputs.hostname }}:/home/ubuntu/grapery/creation/" >> $GITHUB_STEP_SUMMARY
 
       - name: Remote Deploy to Production Server
         uses: appleboy/ssh-action@v0.1.10
