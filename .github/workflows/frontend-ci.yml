@@ -132,6 +132,43 @@ jobs:
           echo "✅ Development .env file generated"
           cat .env
 
+      - name: Parse deploy host (remove port if present)
+        id: parse-dev-host
+        shell: bash
+        run: |
+          DEV_HOST="${{ vars.DEV_DEPLOY_HOST }}"
+          echo "Original DEV_DEPLOY_HOST: $DEV_HOST"
+          
+          # Try multiple methods to remove port
+          # Method 1: parameter expansion
+          HOSTNAME_1="${DEV_HOST%%:*}"
+          # Method 2: cut command
+          HOSTNAME_2=$(echo "$DEV_HOST" | cut -d: -f1)
+          # Method 3: sed command
+          HOSTNAME_3=$(echo "$DEV_HOST" | sed 's/:.*//')
+          
+          echo "Method 1 (%%): $HOSTNAME_1"
+          echo "Method 2 (cut): $HOSTNAME_2"
+          echo "Method 3 (sed): $HOSTNAME_3"
+          
+          # Use the result that looks most like a hostname (no colon)
+          if [[ "$HOSTNAME_1" != "$DEV_HOST" ]]; then
+            echo "Using method 1"
+            FINAL_HOSTNAME="$HOSTNAME_1"
+          elif [[ "$HOSTNAME_2" != "$DEV_HOST" ]]; then
+            echo "Using method 2"
+            FINAL_HOSTNAME="$HOSTNAME_2"
+          elif [[ "$HOSTNAME_3" != "$DEV_HOST" ]]; then
+            echo "Using method 3"
+            FINAL_HOSTNAME="$HOSTNAME_3"
+          else
+            echo "No port detected, using original"
+            FINAL_HOSTNAME="$DEV_HOST"
+          fi
+          
+          echo "Final hostname: $FINAL_HOSTNAME"
+          echo "hostname=$FINAL_HOSTNAME" >> $GITHUB_OUTPUT
+
       - name: Deploy notification
         run: |
           echo "## 🚀 Development Deployment - Frontend Service" >> $GITHUB_STEP_SUMMARY
@@ -143,11 +180,12 @@ jobs:
           echo "| Image | \`${{ env.REGISTRY }}/grapery-dev/${{ env.IMAGE_NAME }}:dev\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Environment | development |" >> $GITHUB_STEP_SUMMARY
           echo "| Commit | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Host | ${{ steps.parse-dev-host.outputs.hostname }} |" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload .env to ECS
         uses: appleboy/scp-action@v0.1.4
         with:
-          host: ${{ vars.DEV_DEPLOY_HOST }}
+          host: ${{ steps.parse-dev-host.outputs.hostname }}
           username: ${{ vars.SSH_USER }}
           key: ${{ vars.SSH_KEY }}
           port: 22
@@ -157,7 +195,7 @@ jobs:
       - name: Remote Deploy to Development Server
         uses: appleboy/ssh-action@v0.1.10
         with:
-          host: ${{ vars.DEV_DEPLOY_HOST }}
+          host: ${{ steps.parse-dev-host.outputs.hostname }}
           username: ${{ vars.SSH_USER }}
           key: ${{ vars.SSH_KEY }}
           port: 22
@@ -266,6 +304,43 @@ jobs:
           echo "✅ Production .env file generated"
           cat .env
 
+      - name: Parse deploy host (remove port if present)
+        id: parse-prod-host
+        shell: bash
+        run: |
+          PROD_HOST="${{ vars.PROD_DEPLOY_HOST }}"
+          echo "Original PROD_DEPLOY_HOST: $PROD_HOST"
+          
+          # Try multiple methods to remove port
+          # Method 1: parameter expansion
+          HOSTNAME_1="${PROD_HOST%%:*}"
+          # Method 2: cut command
+          HOSTNAME_2=$(echo "$PROD_HOST" | cut -d: -f1)
+          # Method 3: sed command
+          HOSTNAME_3=$(echo "$PROD_HOST" | sed 's/:.*//')
+          
+          echo "Method 1 (%%): $HOSTNAME_1"
+          echo "Method 2 (cut): $HOSTNAME_2"
+          echo "Method 3 (sed): $HOSTNAME_3"
+          
+          # Use the result that looks most like a hostname (no colon)
+          if [[ "$HOSTNAME_1" != "$PROD_HOST" ]]; then
+            echo "Using method 1"
+            FINAL_HOSTNAME="$HOSTNAME_1"
+          elif [[ "$HOSTNAME_2" != "$PROD_HOST" ]]; then
+            echo "Using method 2"
+            FINAL_HOSTNAME="$HOSTNAME_2"
+          elif [[ "$HOSTNAME_3" != "$PROD_HOST" ]]; then
+            echo "Using method 3"
+            FINAL_HOSTNAME="$HOSTNAME_3"
+          else
+            echo "No port detected, using original"
+            FINAL_HOSTNAME="$PROD_HOST"
+          fi
+          
+          echo "Final hostname: $FINAL_HOSTNAME"
+          echo "hostname=$FINAL_HOSTNAME" >> $GITHUB_OUTPUT
+
       - name: Deploy notification
         run: |
           echo "## 🚀 Production Deployment - Frontend Service" >> $GITHUB_STEP_SUMMARY
@@ -277,11 +352,12 @@ jobs:
           echo "| Image | \`${{ env.REGISTRY }}/grapery-prod/${{ env.IMAGE_NAME }}:prod\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Environment | production |" >> $GITHUB_STEP_SUMMARY
           echo "| Commit | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Host | ${{ steps.parse-prod-host.outputs.hostname }} |" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload .env to ECS
         uses: appleboy/scp-action@v0.1.4
         with:
-          host: ${{ vars.PROD_DEPLOY_HOST }}
+          host: ${{ steps.parse-prod-host.outputs.hostname }}
           username: ${{ vars.SSH_USER }}
           key: ${{ vars.SSH_KEY }}
           port: 22
@@ -291,7 +367,7 @@ jobs:
       - name: Remote Deploy to Production Server
         uses: appleboy/ssh-action@v0.1.10
         with:
-          host: ${{ vars.PROD_DEPLOY_HOST }}
+          host: ${{ steps.parse-prod-host.outputs.hostname }}
           username: ${{ vars.SSH_USER }}
           key: ${{ vars.SSH_KEY }}
           port: 22
