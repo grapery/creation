@@ -99,7 +99,7 @@ export default function ProfileDraftsPage() {
     const [drafts, setDrafts] = useState<Storyboard[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const isOwnProfile = currentUser?.id === id || (!id && currentUser?.id);
+    const isOwnProfile = !!currentUser?.id && currentUser.id === id;
     const userId = id || currentUser?.id;
 
     useEffect(() => {

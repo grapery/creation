@@ -100,7 +100,7 @@ export default function ProfileStoriesPage() {
     const [loading, setLoading] = useState(true);
     const [isFollowing, setIsFollowing] = useState(false);
 
-    const isOwnProfile = currentUser?.id === id || (!id && currentUser?.id);
+    const isOwnProfile = !!currentUser?.id && currentUser.id === id;
     const userId = id || currentUser?.id;
 
     useEffect(() => {
