@@ -3,6 +3,13 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   output: 'standalone',
+  
+  // Ensure static assets are properly handled
+  generateBuildId: async () => {
+    // Use commit SHA if available, otherwise use timestamp
+    return process.env.COMMIT_SHA || `build-${Date.now()}`;
+  },
+  
   async rewrites() {
     return [
       // DO NOT proxy /api/auth/me - handled by Next.js API route
