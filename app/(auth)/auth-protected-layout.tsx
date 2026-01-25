@@ -18,7 +18,7 @@ export default function AuthProtectedLayout({ children }: AuthProtectedLayoutPro
   const { user, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const LoginPrompt, { show: showLoginPrompt } = useLoginPrompt();
+  const { LoginPromptModal, show: showLoginPrompt } = useLoginPrompt();
 
   useEffect(() => {
     // Only check auth after loading is complete
@@ -45,7 +45,7 @@ export default function AuthProtectedLayout({ children }: AuthProtectedLayoutPro
         <div className="p-4 text-center text-muted-foreground">
           Please sign in to access this page.
         </div>
-        <LoginPrompt />
+        <LoginPromptModal />
       </div>
     );
   }

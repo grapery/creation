@@ -22,7 +22,7 @@ interface WithAuthCheckProps {
  */
 export function WithAuthCheck({ children, fallback }: WithAuthCheckProps) {
   const { user, loading } = useAuth();
-  const LoginPrompt, { show } = useLoginPrompt();
+  const { LoginPromptModal, show } = useLoginPrompt();
 
   // Show loading while checking auth
   if (loading) {
@@ -40,7 +40,7 @@ export function WithAuthCheck({ children, fallback }: WithAuthCheckProps) {
       return (
         <>
           {fallback}
-          <LoginPrompt />
+          <LoginPromptModal />
         </>
       );
     }
@@ -54,7 +54,7 @@ export function WithAuthCheck({ children, fallback }: WithAuthCheckProps) {
             Please sign in to access this content
           </div>
         </div>
-        <LoginPrompt />
+        <LoginPromptModal />
       </div>
     );
   }

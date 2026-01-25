@@ -10,7 +10,7 @@ import { stories } from "@/lib/api/stories";
 import { Storyboard, Story } from "@/lib/types";
 import { Loader2, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "next/link";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
