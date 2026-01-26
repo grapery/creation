@@ -11,7 +11,7 @@ export interface UserActivity {
     targetName: string;
     targetImage?: string;
     message: string;
-    timestamp: number;
+    timestamp: number | null;
     date?: string;
     user: {
         id: string;

@@ -22,6 +22,11 @@ export interface User {
     updatedAt?: number;
     status?: string;
 
+    // Group Statistics
+    groupsCount?: number;      // Number of groups the user has joined
+    groupsCreated?: number;    // Number of groups created by this user
+    storyboardCount?: number;
+
     // Follow Status
     isFollowing?: boolean;
 
@@ -61,6 +66,7 @@ export interface BranchGroup {
     name: string;
     description?: string;
     avatar?: string;
+    coverImage?: string;
     displayImage?: string; // For display purposes
     ownerId: string;
     isPublic: boolean;
@@ -68,11 +74,12 @@ export interface BranchGroup {
     stories?: number;
     memberCount?: number;
     storyCount?: number;
+    followers?: number;
+    blockedCount?: number;
     createdAt?: string; // string in Go/JSON typically
     updatedAt?: string;
     myRole?: string; // 'owner', 'admin', 'member'
     isFollowing?: boolean;
-    followers?: number;
     creator?: {
         id: string;
         username?: string;
@@ -110,6 +117,53 @@ export interface GroupInvite {
     inviter?: {
         id: string;
         username?: string;
+        displayName?: string;
+        avatar?: string;
+    };
+}
+
+export interface GroupBlacklist {
+    id: string;
+    groupId: string;
+    userId: string;
+    blockedBy: string;
+    reason?: string;
+    createdAt: number;
+    group?: {
+        id: string;
+        name: string;
+        avatar?: string;
+    };
+    user?: {
+        id: string;
+        username: string;
+        displayName?: string;
+        avatar?: string;
+    };
+    admin?: {
+        id: string;
+        username: string;
+        displayName?: string;
+        avatar?: string;
+    };
+}
+
+export interface GroupBlacklistInfo {
+    id: string;
+    groupId: string;
+    userId: string;
+    blockedBy: string;
+    reason?: string;
+    createdAt: number;
+    user?: {
+        id: string;
+        username: string;
+        displayName?: string;
+        avatar?: string;
+    };
+    admin?: {
+        id: string;
+        username: string;
         displayName?: string;
         avatar?: string;
     };

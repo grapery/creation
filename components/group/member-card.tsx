@@ -1,9 +1,32 @@
 "use client";
 
+import { useState } from "react";
 import { User } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
-import { Shield, Crown, User as UserIcon } from "lucide-react";
+import { Shield, Crown, User as UserIcon, Ban, MoreVertical } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { groups } from "@/lib/api/groups";
 
 interface MemberCardProps {
     member: {
@@ -13,9 +36,59 @@ interface MemberCardProps {
         joinedAt: number;
         user?: User;
     };
+    groupId?: string;
+    currentUserId?: string;
+    currentUserRole?: string;
+    onBlocked?: () => void;
 }
 
-export function MemberCard({ member }: MemberCardProps) {
+export function MemberCard({
+    member,
+    groupId,
+    currentUserId,
+    currentUserRole,
+    onBlocked
+}: MemberCardProps) {
+    const { toast } = useToast();
+    const [blocking, setBlocking] = useState(false);
+    const [blockReason, setBlockReason] = useState("");
+
+    // Check if current user can block this member
+    const canBlock = currentUserRole && ['owner', 'admin'].includes(currentUserRole) &&
+                    member.userId !== currentUserId &&
+                    member.role !== 'owner';
+
+    const roleIcon = member.role === "owner" ? <Crown className="w-3 h-3 text-yellow-500" /> :
+        member.role === "admin" ? <Shield className="w-3 h-3 text-blue-500" /> : null;
+
+    const roleLabel = member.role === "owner" ? "Owner" :
+        member.role === "admin" ? "Admin" : "Member";
+
+    const joinedDate = member.joinedAt ? formatDistanceToNow(new Date(member.joinedAt * 1000), { addSuffix: true }) : 'recently';
+
+    const handleBlock = async () => {
+        if (!groupId) return;
+
+        setBlocking(true);
+        try {
+            await groups.blockUser(groupId, member.userId, blockReason);
+            toast({
+                title: "Success",
+                description: `${member.user?.displayName || member.user?.username} has been blocked`,
+            });
+            setBlockReason("");
+            onBlocked?.();
+        } catch (error: any) {
+            console.error(error);
+            toast({
+                title: "Error",
+                description: error.message || "Failed to block user",
+                variant: "destructive",
+            });
+        } finally {
+            setBlocking(false);
+        }
+    };
     // Golden Ratio Calculations
     // Card Aspect Ratio: Height = Width * 1.618
     // Internal Split: Image Height = Total Height * 0.618
@@ -30,14 +103,14 @@ export function MemberCard({ member }: MemberCardProps) {
 
     return (
         <div className="w-full relative group">
-            {/* 
-                Enforce Golden Rectangle Aspect Ratio (Portrait) 
+            {/*
+                Enforce Golden Rectangle Aspect Ratio (Portrait)
                 Width: 1, Height: 1.618
-                padding-bottom = 161.8% 
+                padding-bottom = 161.8%
             */}
             <div className="w-full pb-[161.8%] relative rounded-xl overflow-hidden shadow-sm border border-border/50 bg-card hover:shadow-md transition-all duration-300 group-hover:translate-y-[-4px]">
                 <div className="absolute inset-0 flex flex-col">
-                    {/* 
+                    {/*
                         Golden Section Split
                         Image Area: 61.8%
                         Info Area: 38.2%
@@ -59,6 +132,67 @@ export function MemberCard({ member }: MemberCardProps) {
 
                         {/* Overlay Gradient for Text Contrast Transition */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                        {/* Action Menu Button (Top Right) */}
+                        {canBlock && (
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button
+                                            variant="secondary"
+                                            size="icon"
+                                            className="h-8 w-8 bg-background/80 backdrop-blur-sm"
+                                        >
+                                            <MoreVertical className="h-4 w-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <DropdownMenuItem
+                                                    className="text-destructive focus:text-destructive"
+                                                    onSelect={(e) => e.preventDefault()}
+                                                >
+                                                    <Ban className="h-4 w-4 mr-2" />
+                                                    Block User
+                                                </DropdownMenuItem>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>Block User</AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        Are you sure you want to block{" "}
+                                                        <span className="font-semibold">
+                                                            {member.user?.displayName || member.user?.username}
+                                                        </span>
+                                                        ? They will be removed from the group and unable to rejoin.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <div className="space-y-2 py-4">
+                                                    <Label htmlFor="reason">Reason (optional)</Label>
+                                                    <Input
+                                                        id="reason"
+                                                        placeholder="Why are you blocking this user?"
+                                                        value={blockReason}
+                                                        onChange={(e) => setBlockReason(e.target.value)}
+                                                    />
+                                                </div>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                    <AlertDialogAction
+                                                        onClick={handleBlock}
+                                                        disabled={blocking}
+                                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                    >
+                                                        {blocking ? "Blocking..." : "Block User"}
+                                                    </AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
+                        )}
                     </div>
 
                     {/* Info Area (38.2%) */}

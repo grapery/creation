@@ -6,6 +6,7 @@ import {
     ActivityHeatmapResponse,
     ActivityTimeRange,
     GroupMember,
+    GroupBlacklistInfo,
 } from '../types';
 
 // Export for backward compatibility
@@ -162,5 +163,23 @@ export const groups = {
     // Delete Group
     delete: async (id: string): Promise<void> => {
         return request(`/api/groups/${id}`, 'DELETE');
+    },
+
+    // ========== Blacklist Management ==========
+
+    // Block User from Group
+    blockUser: async (groupId: string, userId: string, reason?: string): Promise<void> => {
+        return request(`/api/groups/${groupId}/blacklist/${userId}`, 'POST', { reason });
+    },
+
+    // Unblock User from Group
+    unblockUser: async (groupId: string, userId: string): Promise<void> => {
+        return request(`/api/groups/${groupId}/blacklist/${userId}`, 'DELETE');
+    },
+
+    // Get Group Blacklist
+    getBlacklist: async (groupId: string, page = 1, limit = 20): Promise<{ blacklist: GroupBlacklistInfo[], count: number }> => {
+        const offset = (page - 1) * limit;
+        return request(`/api/groups/${groupId}/blacklist?limit=${limit}&offset=${offset}`);
     },
 };
