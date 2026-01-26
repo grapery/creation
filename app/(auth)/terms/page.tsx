@@ -222,7 +222,7 @@ export default function TermsOfServicePage() {
 
 如果您对本协议有任何疑问、意见或建议，请通过以下方式联系我们：
 
-- 电子邮件：**support@grapery.com**
+- 电子邮件：**support@grapery.xyz**
 - 在线客服：通过平台的"帮助中心"联系我们
 - 邮寄地址：上海市浦东新区[具体地址]（请先通过电子邮件联系我们）
 

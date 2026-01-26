@@ -172,7 +172,7 @@ export default function PrivacyPolicyPage() {
 您可以通过以下方式行使您的权利：
 
 - 通过账户设置直接管理某些信息和偏好
-- 发送电子邮件至 **privacy@grapery.com**
+- 发送电子邮件至 **privacy@grapery.xyz**
 - 通过"帮助中心"提交请求
 
 我们将在收到您的请求后 **30 天内**回复。某些请求可能需要验证您的身份。
@@ -250,8 +250,8 @@ export default function PrivacyPolicyPage() {
 
 如果您对本隐私政策有任何疑问、意见或请求，或想要行使您的隐私权利，请通过以下方式联系我们：
 
-- 隐私负责人邮箱：**privacy@grapery.com**
-- 一般咨询邮箱：**support@grapery.com**
+- 隐私负责人邮箱：**privacy@grapery.xyz**
+- 一般咨询邮箱：**support@grapery.xyz**
 - 在线客服：通过应用的"帮助中心"联系我们
 - 邮寄地址：上海市浦东新区[具体地址]（请先通过电子邮件联系我们）
 
