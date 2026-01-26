@@ -23,49 +23,49 @@ type SettingsGroup = {
 
 const accountSettings: SettingsGroup = {
     title: "Account",
-    titleKey: "profile",
+    titleKey: "settings.account",
     icon: User,
     color: "text-primary",
     items: [
-        { label: "Profile Information", labelKey: "profile.edit_profile", href: "/settings/profile" },
-        { label: "Membership & Billing", labelKey: "vip", href: "/settings/membership" },
+        { label: "Profile Information", labelKey: "settings.profile_info", href: "/settings/profile" },
+        { label: "Membership & Billing", labelKey: "settings.membership_billing", href: "/settings/membership" },
     ],
 };
 
 const preferencesSettings: SettingsGroup = {
     title: "Preferences",
-    titleKey: "",
+    titleKey: "settings.preferences",
     icon: Monitor,
     color: "text-purple-500",
     items: [
         { label: "Appearance", labelKey: "settings.appearance", href: "/settings/appearance" },
-        { label: "Notifications", labelKey: "settings.notifications", href: "/notifications" },
-        { label: "Language", labelKey: "settings.language", href: "/settings/language", description: "Choose your preferred language" },
-        { label: "Privacy & Safety", labelKey: "settings.privacy", href: "/settings/privacy" },
+        { label: "Notifications", labelKey: "settings.notifications", href: "/settings/notifications", description: "Choose your notification preferences", descriptionKey: "settings.notifications_desc" },
+        { label: "Language", labelKey: "settings.language", href: "/settings/language", description: "Choose your preferred language", descriptionKey: "settings.language_desc" },
+        { label: "Privacy & Safety", labelKey: "settings.privacy_safety", href: "/settings/privacy" },
     ],
 };
 
 const legalSettings: SettingsGroup = {
     title: "Legal",
-    titleKey: "",
+    titleKey: "settings.legal",
     icon: Shield,
     color: "text-green-500",
     items: [
-        { label: "Terms of Service", labelKey: "auth.terms_of_service", href: "/settings/terms" },
-        { label: "Privacy Policy", labelKey: "auth.privacy_policy", href: "/settings/privacy-policy" },
-        { label: "About App", labelKey: "", href: "/settings/about" },
-        { label: "Regulatory Information", labelKey: "", href: "/settings/regulatory" },
+        { label: "Terms of Service", labelKey: "settings.terms_of_service", href: "/settings/terms" },
+        { label: "Privacy Policy", labelKey: "settings.privacy_policy", href: "/settings/privacy-policy" },
+        { label: "About App", labelKey: "settings.about", href: "/settings/about" },
+        { label: "Regulatory Information", labelKey: "settings.regulatory", href: "/settings/regulatory" },
     ],
 };
 
 const accountActionsSettings: SettingsGroup = {
     title: "Account Actions",
-    titleKey: "",
+    titleKey: "settings.account_actions",
     icon: Shield,
     color: "text-destructive",
     items: [
-        { label: "Delete Account", labelKey: "", href: "/settings/delete-account", description: "Permanently delete your account" },
-        { label: "Sign Out", labelKey: "auth.sign_out", href: "/settings/signout", description: "Sign out of your account" },
+        { label: "Delete Account", labelKey: "settings.delete_account", href: "/settings/delete-account", description: "Permanently delete your account", descriptionKey: "settings.delete_account_desc" },
+        { label: "Sign Out", labelKey: "auth.sign_out", href: "/settings/signout", description: "Sign out of your account", descriptionKey: "settings.sign_out_desc" },
     ],
 };
 
@@ -117,7 +117,7 @@ function SettingsGroupCard({ group, isActionGroup = false }: { group: SettingsGr
 }
 
 export default function SettingsPage() {
-    const { t } = useTranslation();
+    const { t, language } = useTranslation();
 
     return (
         <div className="space-y-6">
@@ -136,7 +136,9 @@ export default function SettingsPage() {
 
             <div className="text-center py-8">
                 <p className="text-sm text-muted-foreground">
-                    Voyager v1.0.0 (Web)
+                    {language === 'zh-Hans' ? '未择 Voyager v1.0.0 (网页版)' :
+                     language === 'ja' ? 'Voyager v1.0.0 (Web)' :
+                     'Voyager v1.0.0 (Web)'}
                 </p>
             </div>
         </div>

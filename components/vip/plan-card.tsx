@@ -14,7 +14,7 @@ interface PlanCardProps {
 }
 
 export function PlanCard({ plan, isCurrent, onSubscribe, loading }: PlanCardProps) {
-    const { language } = useTranslation();
+    const { language, t } = useTranslation();
 
     // Get localized name and description
     const displayName = plan.name[language as keyof typeof plan.name] || plan.name.en;
@@ -37,24 +37,24 @@ export function PlanCard({ plan, isCurrent, onSubscribe, loading }: PlanCardProp
             {plan.recommended && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs px-3 py-1 rounded-full font-bold flex items-center gap-1">
                     <Star className="h-3 w-3" />
-                    RECOMMENDED
+                    {t('vip.recommended')}
                 </div>
             )}
             {plan.popular && !plan.recommended && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs px-3 py-1 rounded-full font-bold flex items-center gap-1">
                     <Tag className="h-3 w-3" />
-                    POPULAR
+                    {t('vip.popular')}
                 </div>
             )}
             {isCurrent && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-600 text-white text-xs px-3 py-1 rounded-full font-bold">
-                    CURRENT PLAN
+                    {t('vip.current_plan')}
                 </div>
             )}
 
             {plan.discountPercent && plan.discountPercent > 0 && (
                 <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold">
-                    SAVE {plan.discountPercent}%
+                    {t('vip.save')} {plan.discountPercent}%
                 </div>
             )}
 
@@ -72,7 +72,7 @@ export function PlanCard({ plan, isCurrent, onSubscribe, loading }: PlanCardProp
                 <p className="text-sm text-muted-foreground mt-2">{displayDescription}</p>
                 {plan.trialDays && (
                     <div className="text-xs text-green-600 font-semibold mt-1">
-                        {plan.trialDays} {language === 'zh-Hans' ? '天免费试用' : language === 'ja' ? '日間無料トライアル' : '-day free trial'}
+                        {plan.trialDays} {t('vip.trial_days')}
                     </div>
                 )}
             </CardHeader>
@@ -81,7 +81,7 @@ export function PlanCard({ plan, isCurrent, onSubscribe, loading }: PlanCardProp
                     {plan.features.map((feature, i) => (
                         <li key={i} className="flex items-center gap-2 text-sm">
                             <Check className="h-4 w-4 text-green-500 shrink-0" />
-                            <span>{feature}</span>
+                            <span>{t(`vip.features.${feature}`)}</span>
                         </li>
                     ))}
                 </ul>
@@ -90,32 +90,32 @@ export function PlanCard({ plan, isCurrent, onSubscribe, loading }: PlanCardProp
                 <div className="mt-4 pt-4 border-t space-y-2 text-xs">
                     <div className="flex justify-between">
                         <span className="text-muted-foreground">
-                            {language === 'zh-Hans' ? 'AI 配额' : language === 'ja' ? 'AIクオータ' : 'AI Quota'}:
+                            {t('vip.ai_quota')}:
                         </span>
                         <span className="font-semibold">
                             {plan.limits.aiQuota === -1 ?
-                                (language === 'zh-Hans' ? '无限' : language === 'ja' ? '無制限' : 'Unlimited') :
+                                t('vip.unlimited') :
                                 plan.limits.aiQuota.toLocaleString()
                             }
                         </span>
                     </div>
                     <div className="flex justify-between">
                         <span className="text-muted-foreground">
-                            {language === 'zh-Hans' ? '角色上限' : language === 'ja' ? 'キャラクター上限' : 'Max Roles'}:
+                            {t('vip.max_roles')}:
                         </span>
                         <span className="font-semibold">
                             {plan.limits.maxRoles === -1 ?
-                                (language === 'zh-Hans' ? '无限' : language === 'ja' ? '無制限' : 'Unlimited') :
+                                t('vip.unlimited') :
                                 plan.limits.maxRoles
                             }
                         </span>
                     </div>
                     <div className="flex justify-between">
                         <span className="text-muted-foreground">
-                            {language === 'zh-Hans' ? '导出质量' : language === 'ja' ? 'エクスポート品質' : 'Export Quality'}:
+                            {t('vip.export_quality')}:
                         </span>
                         <span className="font-semibold capitalize">
-                            {plan.limits.exportQuality}
+                            {t(`vip.export_quality_${plan.limits.exportQuality}`, plan.limits.exportQuality)}
                         </span>
                     </div>
                 </div>
@@ -128,8 +128,8 @@ export function PlanCard({ plan, isCurrent, onSubscribe, loading }: PlanCardProp
                     disabled={isCurrent || loading}
                 >
                     {isCurrent ?
-                        (language === 'zh-Hans' ? '当前计划' : language === 'ja' ? '現在のプラン' : 'Active') :
-                        (language === 'zh-Hans' ? '订阅' : language === 'ja' ? '購読する' : 'Subscribe')
+                        t('vip.active') :
+                        t('vip.subscribe_button')
                     }
                 </Button>
             </CardFooter>

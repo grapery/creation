@@ -8,11 +8,13 @@ import { Button } from "@/components/ui/button";
 import { User, Upload } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/providers/auth-provider";
+import { useTranslation } from "@/providers/language-provider";
 import { profile } from "@/lib/api/profile";
 
 export default function ProfileSettingsPage() {
     const router = useRouter();
     const { user } = useAuth();
+    const { language } = useTranslation();
     const [isSaving, setIsSaving] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
     const [showError, setShowError] = useState(false);
@@ -66,7 +68,11 @@ export default function ProfileSettingsPage() {
             setTimeout(() => setShowSuccess(false), 2000);
         } catch (e) {
             console.error("Failed to save profile:", e);
-            setErrorMessage("Failed to update profile. Please try again.");
+            setErrorMessage(
+                language === 'zh-Hans' ? '更新个人资料失败，请重试' :
+                language === 'ja' ? 'プロフィールの更新に失敗しました。もう一度お試しください' :
+                'Failed to update profile. Please try again.'
+            );
             setShowError(true);
         } finally {
             setIsSaving(false);
@@ -85,7 +91,9 @@ export default function ProfileSettingsPage() {
                         >
                             <span className="text-sm">←</span>
                         </button>
-                        <h1 className="text-base font-semibold text-foreground">Profile Settings</h1>
+                        <h1 className="text-base font-semibold text-foreground">
+                            {language === 'zh-Hans' ? '个人资料设置' : language === 'ja' ? 'プロフィール設定' : 'Profile Settings'}
+                        </h1>
                     </div>
                 </div>
             </div>
@@ -95,7 +103,9 @@ export default function ProfileSettingsPage() {
                 {/* Avatar Section */}
                 <Card>
                     <CardContent className="p-6">
-                        <h2 className="text-base font-semibold text-foreground mb-4">Profile Photo</h2>
+                        <h2 className="text-base font-semibold text-foreground mb-4">
+                            {language === 'zh-Hans' ? '头像照片' : language === 'ja' ? 'プロフィール写真' : 'Profile Photo'}
+                        </h2>
 
                         <div className="flex items-center gap-6">
                             {/* Avatar Preview */}
@@ -123,8 +133,12 @@ export default function ProfileSettingsPage() {
                             </div>
 
                             <div className="flex-1">
-                                <div className="text-sm font-medium text-foreground mb-1">Current Photo</div>
-                                <div className="text-xs text-muted-foreground">Tap the camera to change</div>
+                                <div className="text-sm font-medium text-foreground mb-1">
+                                    {language === 'zh-Hans' ? '当前照片' : language === 'ja' ? '現在の写真' : 'Current Photo'}
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                    {language === 'zh-Hans' ? '点击相机图标更改' : language === 'ja' ? 'カメラをタップして変更' : 'Tap the camera to change'}
+                                </div>
                             </div>
                         </div>
                     </CardContent>
@@ -133,14 +147,18 @@ export default function ProfileSettingsPage() {
                 {/* Basic Information Section */}
                 <Card>
                     <CardContent className="p-6 space-y-4">
-                        <h2 className="text-base font-semibold text-foreground mb-4">Basic Information</h2>
+                        <h2 className="text-base font-semibold text-foreground mb-4">
+                            {language === 'zh-Hans' ? '基本信息' : language === 'ja' ? '基本情報' : 'Basic Information'}
+                        </h2>
 
                         {/* Display Name */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-foreground">Display Name</label>
+                            <label className="text-sm font-medium text-foreground">
+                                {language === 'zh-Hans' ? '显示名称' : language === 'ja' ? '表示名' : 'Display Name'}
+                            </label>
                             <Input
                                 type="text"
-                                placeholder="Enter your display name"
+                                placeholder={language === 'zh-Hans' ? '输入您的显示名称' : language === 'ja' ? '表示名を入力' : 'Enter your display name'}
                                 value={displayName}
                                 onChange={(e) => setDisplayName(e.target.value)}
                                 className="w-full"
@@ -149,7 +167,9 @@ export default function ProfileSettingsPage() {
 
                         {/* Username */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-foreground">Username</label>
+                            <label className="text-sm font-medium text-foreground">
+                                {language === 'zh-Hans' ? '用户名' : language === 'ja' ? 'ユーザー名' : 'Username'}
+                            </label>
                             <Input
                                 type="text"
                                 placeholder="username"
@@ -157,7 +177,9 @@ export default function ProfileSettingsPage() {
                                 disabled
                                 className="w-full bg-muted/30 cursor-not-allowed"
                             />
-                            <p className="text-xs text-muted-foreground">Username cannot be changed</p>
+                            <p className="text-xs text-muted-foreground">
+                                {language === 'zh-Hans' ? '用户名无法更改' : language === 'ja' ? 'ユーザー名は変更できません' : 'Username cannot be changed'}
+                            </p>
                         </div>
 
                         {/* Email */}
@@ -177,7 +199,7 @@ export default function ProfileSettingsPage() {
                             <label className="text-sm font-medium text-foreground">Bio</label>
                             <div className="relative">
                                 <textarea
-                                    placeholder="Tell us about yourself"
+                                    placeholder={language === 'zh-Hans' ? '介绍一下你自己' : language === 'ja' ? '自己紹介をしてください' : 'Tell us about yourself'}
                                     value={bio}
                                     onChange={(e) => setBio(e.target.value)}
                                     rows={4}
@@ -206,7 +228,7 @@ export default function ProfileSettingsPage() {
                             <label className="text-sm font-medium text-foreground">Location</label>
                             <Input
                                 type="text"
-                                placeholder="City, Country"
+                                placeholder={language === 'zh-Hans' ? '城市，国家' : language === 'ja' ? '都市、国' : 'City, Country'}
                                 value={location}
                                 onChange={(e) => setLocation(e.target.value)}
                                 className="w-full"
@@ -218,15 +240,31 @@ export default function ProfileSettingsPage() {
                 {/* AI Preferences Section */}
                 <Card>
                     <CardContent className="p-6">
-                        <h2 className="text-base font-semibold text-foreground mb-4">AI Preferences</h2>
+                        <h2 className="text-base font-semibold text-foreground mb-4">
+                            {language === 'zh-Hans' ? 'AI 偏好设置' : language === 'ja' ? 'AI設定' : 'AI Preferences'}
+                        </h2>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-foreground">AI Prompt Style</label>
+                            <label className="text-sm font-medium text-foreground">
+                                {language === 'zh-Hans' ? 'AI 提示风格' : language === 'ja' ? 'AIプロンプトスタイル' : 'AI Prompt Style'}
+                            </label>
                             <div className="flex gap-2">
                                 {[
-                                    { value: "detailed", label: "Detailed", tag: "detailed" },
-                                    { value: "balanced", label: "Balanced", tag: "balanced" },
-                                    { value: "concise", label: "Concise", tag: "concise" },
+                                    {
+                                        value: "detailed",
+                                        label: language === 'zh-Hans' ? '详细' : language === 'ja' ? '詳細' : 'Detailed',
+                                        tag: "detailed"
+                                    },
+                                    {
+                                        value: "balanced",
+                                        label: language === 'zh-Hans' ? '平衡' : language === 'ja' ? 'バランス' : 'Balanced',
+                                        tag: "balanced"
+                                    },
+                                    {
+                                        value: "concise",
+                                        label: language === 'zh-Hans' ? '简洁' : language === 'ja' ? '簡潔' : 'Concise',
+                                        tag: "concise"
+                                    },
                                 ].map((option) => (
                                     <button
                                         key={option.value}
@@ -252,7 +290,7 @@ export default function ProfileSettingsPage() {
                         </div>
 
                         <p className="text-xs text-muted-foreground mt-2">
-                            Choose your preferred level of AI-generated content detail
+                            {language === 'zh-Hans' ? '选择您偏好的 AI 生成内容详细程度' : language === 'ja' ? 'AI生成コンテンツの詳細レベルを選択' : 'Choose your preferred level of AI-generated content detail'}
                         </p>
                     </CardContent>
                 </Card>
@@ -263,13 +301,18 @@ export default function ProfileSettingsPage() {
                     disabled={isSaving}
                     className="w-full h-11 text-base font-semibold"
                 >
-                    {isSaving ? "Saving..." : "Save Changes"}
+                    {isSaving ?
+                        (language === 'zh-Hans' ? '保存中...' : language === 'ja' ? '保存中...' : 'Saving...') :
+                        (language === 'zh-Hans' ? '保存更改' : language === 'ja' ? '変更を保存' : 'Save Changes')
+                    }
                 </Button>
 
                 {/* Success Message */}
                 {showSuccess && (
                     <div className="bg-green-50 text-green-600 px-4 py-3 rounded-lg flex items-center justify-center">
-                        <span className="font-medium">Profile updated successfully!</span>
+                        <span className="font-medium">
+                            {language === 'zh-Hans' ? '个人资料更新成功！' : language === 'ja' ? 'プロフィールが正常に更新されました！' : 'Profile updated successfully!'}
+                        </span>
                     </div>
                 )}
 
@@ -284,7 +327,7 @@ export default function ProfileSettingsPage() {
                             }}
                             className="mt-2 text-xs underline"
                         >
-                            Dismiss
+                            {language === 'zh-Hans' ? '关闭' : language === 'ja' ? '閉じる' : 'Dismiss'}
                         </button>
                     </div>
                 )}

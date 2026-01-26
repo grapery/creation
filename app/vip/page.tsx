@@ -10,7 +10,7 @@ import { Loader2, Crown } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function VIPPage() {
-    const { t } = useTranslation();
+    const { t, language } = useTranslation();
     const { user, refreshUser } = useAuth();
     const router = useRouter();
     const [plans, setPlans] = useState<MembershipPlan[]>([]);
@@ -36,11 +36,22 @@ export default function VIPPage() {
         try {
             // Mock subscription flow
             await new Promise(r => setTimeout(r, 2000));
-            alert(`Successfully subscribed to ${plan.name.en}!`);
+            const planName = plan.name[language as keyof typeof plan.name] || plan.name.en;
+            const successMessage = language === 'zh-Hans'
+                ? `成功订阅 ${planName}！`
+                : language === 'ja'
+                ? `${planName}に正常に購読されました！`
+                : `Successfully subscribed to ${planName}!`;
+            alert(successMessage);
             router.push('/profile');
         } catch (e) {
             console.error(e);
-            alert("Subscription failed.");
+            const errorMessage = language === 'zh-Hans'
+                ? '订阅失败，请重试。'
+                : language === 'ja'
+                ? '購読に失敗しました。もう一度お試しください。'
+                : 'Subscription failed.';
+            alert(errorMessage);
         } finally {
             setSubscribing(null);
         }
