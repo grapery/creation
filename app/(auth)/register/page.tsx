@@ -106,7 +106,7 @@ export default function RegisterPage() {
     return (
         <AuthBackground>
             <div className="flex min-h-screen items-center justify-center p-4">
-                <div className="w-full max-w-md">
+                <div className="w-full max-w-2xl">
                     {/* Back Button */}
                     <div className="mb-4 flex justify-end">
                         <Link href="/login">
@@ -163,48 +163,51 @@ export default function RegisterPage() {
 
                     {/* Registration Form Card */}
                     <Card className="border-0 shadow-lg">
-                        <CardContent className="p-6 space-y-5">
-                            {/* Full Name / Display Name */}
-                            <div className="space-y-2">
-                                <label htmlFor="displayName" className="text-sm font-medium">
-                                    {t('auth.full_name')}
-                                </label>
-                                <div className="relative">
-                                    <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                    <Input
-                                        id="displayName"
-                                        placeholder={t('auth.full_name_placeholder')}
-                                        type="text"
-                                        autoCapitalize="words"
-                                        autoCorrect="off"
-                                        disabled={isLoading}
-                                        value={formData.displayName}
-                                        onChange={handleChange}
-                                        className="pl-10"
-                                        required
-                                    />
+                        <CardContent className="p-8 space-y-6">
+                            {/* Two Column Layout for Display Name and Username */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Full Name / Display Name */}
+                                <div className="space-y-2">
+                                    <label htmlFor="displayName" className="text-sm font-medium">
+                                        {t('auth.full_name')}
+                                    </label>
+                                    <div className="relative">
+                                        <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                        <Input
+                                            id="displayName"
+                                            placeholder={t('auth.full_name_placeholder')}
+                                            type="text"
+                                            autoCapitalize="words"
+                                            autoCorrect="off"
+                                            disabled={isLoading}
+                                            value={formData.displayName}
+                                            onChange={handleChange}
+                                            className="pl-10"
+                                            required
+                                        />
+                                    </div>
                                 </div>
-                            </div>
 
-                            {/* Username */}
-                            <div className="space-y-2">
-                                <label htmlFor="username" className="text-sm font-medium">
-                                    {t('profile.username')}
-                                </label>
-                                <div className="relative">
-                                    <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                    <Input
-                                        id="username"
-                                        placeholder={t('auth.username_placeholder')}
-                                        type="text"
-                                        autoCapitalize="none"
-                                        autoCorrect="off"
-                                        disabled={isLoading}
-                                        value={formData.username}
-                                        onChange={handleChange}
-                                        className="pl-10"
-                                        required
-                                    />
+                                {/* Username */}
+                                <div className="space-y-2">
+                                    <label htmlFor="username" className="text-sm font-medium">
+                                        {t('profile.username')}
+                                    </label>
+                                    <div className="relative">
+                                        <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                        <Input
+                                            id="username"
+                                            placeholder={t('auth.username_placeholder')}
+                                            type="text"
+                                            autoCapitalize="none"
+                                            autoCorrect="off"
+                                            disabled={isLoading}
+                                            value={formData.username}
+                                            onChange={handleChange}
+                                            className="pl-10"
+                                            required
+                                        />
+                                    </div>
                                 </div>
                             </div>
 
@@ -254,45 +257,48 @@ export default function RegisterPage() {
                                 </p>
                             </div>
 
-                            {/* Password */}
-                            <div className="space-y-2">
-                                <label htmlFor="password" className="text-sm font-medium">
-                                    {t('auth.password')}
-                                </label>
-                                <div className="relative">
-                                    <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                    <Input
-                                        id="password"
-                                        placeholder={t('auth.create_password_placeholder')}
-                                        type="password"
-                                        autoComplete="new-password"
-                                        disabled={isLoading}
-                                        value={formData.password}
-                                        onChange={handleChange}
-                                        className="pl-10"
-                                        required
-                                    />
+                            {/* Two Column Layout for Password Fields */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Password */}
+                                <div className="space-y-2">
+                                    <label htmlFor="password" className="text-sm font-medium">
+                                        {t('auth.password')}
+                                    </label>
+                                    <div className="relative">
+                                        <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                        <Input
+                                            id="password"
+                                            placeholder={t('auth.create_password_placeholder')}
+                                            type="password"
+                                            autoComplete="new-password"
+                                            disabled={isLoading}
+                                            value={formData.password}
+                                            onChange={handleChange}
+                                            className="pl-10"
+                                            required
+                                        />
+                                    </div>
                                 </div>
-                            </div>
 
-                            {/* Confirm Password */}
-                            <div className="space-y-2">
-                                <label htmlFor="confirmPassword" className="text-sm font-medium">
-                                    {t('auth.confirm_password')}
-                                </label>
-                                <div className="relative">
-                                    <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                    <Input
-                                        id="confirmPassword"
-                                        placeholder={t('auth.confirm_password_placeholder')}
-                                        type="password"
-                                        autoComplete="new-password"
-                                        disabled={isLoading}
-                                        value={formData.confirmPassword}
-                                        onChange={handleChange}
-                                        className="pl-10"
-                                        required
-                                    />
+                                {/* Confirm Password */}
+                                <div className="space-y-2">
+                                    <label htmlFor="confirmPassword" className="text-sm font-medium">
+                                        {t('auth.confirm_password')}
+                                    </label>
+                                    <div className="relative">
+                                        <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                        <Input
+                                            id="confirmPassword"
+                                            placeholder={t('auth.confirm_password_placeholder')}
+                                            type="password"
+                                            autoComplete="new-password"
+                                            disabled={isLoading}
+                                            value={formData.confirmPassword}
+                                            onChange={handleChange}
+                                            className="pl-10"
+                                            required
+                                        />
+                                    </div>
                                 </div>
                             </div>
 
