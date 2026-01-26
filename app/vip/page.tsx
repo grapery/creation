@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Header } from "@/components/layout/header";
-import { vip, VIPPlan } from "@/lib/api/vip";
+import { vip, VIPPlan, MembershipPlan } from "@/lib/api/vip";
 import { PlanCard } from "@/components/vip/plan-card";
 import { useAuth } from "@/providers/auth-provider";
 import { useTranslation } from "@/providers/language-provider";
@@ -13,7 +13,7 @@ export default function VIPPage() {
     const { t } = useTranslation();
     const { user, refreshUser } = useAuth();
     const router = useRouter();
-    const [plans, setPlans] = useState<VIPPlan[]>([]);
+    const [plans, setPlans] = useState<MembershipPlan[]>([]);
     const [loading, setLoading] = useState(true);
     const [subscribing, setSubscribing] = useState<string | null>(null);
 
@@ -31,12 +31,12 @@ export default function VIPPage() {
         load();
     }, []);
 
-    const onSubscribe = async (plan: VIPPlan) => {
+    const onSubscribe = async (plan: MembershipPlan) => {
         setSubscribing(plan.id);
         try {
             // Mock subscription flow
             await new Promise(r => setTimeout(r, 2000));
-            alert(`Successfully subscribed to ${plan.name}!`);
+            alert(`Successfully subscribed to ${plan.name.en}!`);
             router.push('/profile');
         } catch (e) {
             console.error(e);
@@ -61,7 +61,7 @@ export default function VIPPage() {
                 {loading ? (
                     <div className="flex justify-center py-20"><Loader2 className="animate-spin" /></div>
                 ) : (
-                    <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
                         {plans.map(plan => (
                             <PlanCard
                                 key={plan.id}

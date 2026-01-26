@@ -58,6 +58,81 @@ export interface VIPInfo {
     maxRoles: number;
     maxContexts: number;
     expiresAt?: string;
+    planId?: string;
+    subscriptionId?: string;
+}
+
+// Membership Tier Types
+export enum MembershipTier {
+    BASIC = 'basic',         // 普通付费会员
+    PRO = 'pro',             // Pro 付费会员
+    ULTRA = 'ultra'          // Ultra 付费会员
+}
+
+export enum BillingCycle {
+    MONTHLY = 'month',       // 按月
+    QUARTERLY = 'quarter',   // 按季度
+    YEARLY = 'year'          // 按年
+}
+
+// Product SKU Definition
+// Format: {tier}_{cycle}
+// Examples: basic_month, pro_quarter, ultra_year
+export type MembershipSKU = `${MembershipTier}_${BillingCycle}`;
+
+export interface MembershipPlan {
+    id: MembershipSKU;                    // e.g., "basic_month"
+    tier: MembershipTier;                 // basic, pro, ultra
+    cycle: BillingCycle;                 // month, quarter, year
+    name: {
+        en: string;
+        zh: string;
+        ja: string;
+    };
+    description: {
+        en: string;
+        zh: string;
+        ja: string;
+    };
+    price: number;                       // Price in cents (e.g., 999 = $9.99)
+    currency: string;                    // e.g., "USD"
+    originalPrice?: number;               // For discount display
+    discountPercent?: number;            // Discount percentage (0-100)
+    features: string[];                  // List of feature keys
+    limits: {
+        aiQuota: number;                  // AI generation quota per month
+        maxRoles: number;                 // Max character roles
+        maxContexts: number;              // Max story contexts
+        maxStoryboards: number;           // Max storyboards
+        exportQuality: 'standard' | 'high' | 'ultra';
+        prioritySupport: boolean;
+        advancedFeatures: boolean;
+    };
+    popular?: boolean;                   // Highlight as popular choice
+    recommended?: boolean;                // AI recommended
+    trialDays?: number;                   // Free trial days
+}
+
+export interface SubscriptionInfo {
+    id: string;
+    userId: string;
+    planId: MembershipSKU;
+    tier: MembershipTier;
+    status: 'active' | 'expired' | 'cancelled' | 'pending';
+    autoRenew: boolean;
+    currentPeriodStart: number;          // Timestamp
+    currentPeriodEnd: number;            // Timestamp
+    cancelAtPeriodEnd: boolean;
+    createdAt: number;
+    updatedAt: number;
+    plan?: MembershipPlan;
+}
+
+export interface TokenUsage {
+    total: number;
+    used: number;
+    remaining: number;
+    resetAt: number;                     // Timestamp when quota resets
 }
 
 // Group Models

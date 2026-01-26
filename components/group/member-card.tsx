@@ -89,17 +89,6 @@ export function MemberCard({
             setBlocking(false);
         }
     };
-    // Golden Ratio Calculations
-    // Card Aspect Ratio: Height = Width * 1.618
-    // Internal Split: Image Height = Total Height * 0.618
-
-    const roleIcon = member.role === "owner" ? <Crown className="w-3 h-3 text-yellow-500" /> :
-        member.role === "admin" ? <Shield className="w-3 h-3 text-blue-500" /> : null;
-
-    const roleLabel = member.role === "owner" ? "Owner" :
-        member.role === "admin" ? "Admin" : "Member";
-
-    const joinedDate = member.joinedAt ? formatDistanceToNow(new Date(member.joinedAt * 1000), { addSuffix: true }) : 'recently';
 
     return (
         <div className="w-full relative group">
