@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Header } from "@/components/layout/header";
 import { vip, VIPPlan, MembershipPlan } from "@/lib/api/vip";
 import { PlanCard } from "@/components/vip/plan-card";
+import { PaymentDialog } from "@/components/payment/payment-dialog";
 import { useAuth } from "@/providers/auth-provider";
 import { useTranslation } from "@/providers/language-provider";
 import { Loader2, Crown } from "lucide-react";
@@ -15,7 +16,8 @@ export default function VIPPage() {
     const router = useRouter();
     const [plans, setPlans] = useState<MembershipPlan[]>([]);
     const [loading, setLoading] = useState(true);
-    const [subscribing, setSubscribing] = useState<string | null>(null);
+    const [selectedPlan, setSelectedPlan] = useState<MembershipPlan | null>(null);
+    const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
 
     useEffect(() => {
         async function load() {
@@ -31,30 +33,33 @@ export default function VIPPage() {
         load();
     }, []);
 
-    const onSubscribe = async (plan: MembershipPlan) => {
-        setSubscribing(plan.id);
-        try {
-            // Mock subscription flow
-            await new Promise(r => setTimeout(r, 2000));
-            const planName = plan.name[language as keyof typeof plan.name] || plan.name.en;
-            const successMessage = language === 'zh-Hans'
-                ? `成功订阅 ${planName}！`
-                : language === 'ja'
-                ? `${planName}に正常に購読されました！`
-                : `Successfully subscribed to ${planName}!`;
-            alert(successMessage);
-            router.push('/profile');
-        } catch (e) {
-            console.error(e);
-            const errorMessage = language === 'zh-Hans'
-                ? '订阅失败，请重试。'
-                : language === 'ja'
-                ? '購読に失敗しました。もう一度お試しください。'
-                : 'Subscription failed.';
-            alert(errorMessage);
-        } finally {
-            setSubscribing(null);
-        }
+    const onSubscribe = (plan: MembershipPlan) => {
+        setSelectedPlan(plan);
+        setPaymentDialogOpen(true);
+    };
+
+    const handlePaymentSuccess = async (paymentId: string) => {
+        // Refresh user data to get updated membership status
+        await refreshUser?.();
+
+        const planName = selectedPlan?.name[language as keyof typeof selectedPlan.name] || selectedPlan?.name.en;
+        const successMessage = language === 'zh-Hans'
+            ? `成功订阅 ${planName}！`
+            : language === 'ja'
+            ? `${planName}に正常に購読されました！`
+            : `Successfully subscribed to ${planName}!`;
+
+        alert(successMessage);
+        router.push('/profile');
+    };
+
+    const handlePaymentError = (error: string) => {
+        const errorMessage = language === 'zh-Hans'
+            ? `支付失败: ${error}`
+            : language === 'ja'
+            ? `支払いに失敗しました: ${error}`
+            : `Payment failed: ${error}`;
+        alert(errorMessage);
     };
 
     return (
@@ -79,12 +84,26 @@ export default function VIPPage() {
                                 plan={plan}
                                 isCurrent={false} // Would check user.vipLevel/planId here
                                 onSubscribe={onSubscribe}
-                                loading={!!subscribing}
+                                loading={false}
                             />
                         ))}
                     </div>
                 )}
             </main>
+
+            {/* Payment Dialog */}
+            {selectedPlan && (
+                <PaymentDialog
+                    open={paymentDialogOpen}
+                    onOpenChange={setPaymentDialogOpen}
+                    planId={selectedPlan.id}
+                    planName={selectedPlan.name[language as keyof typeof selectedPlan.name] || selectedPlan.name.en}
+                    amount={selectedPlan.price}
+                    currency={selectedPlan.currency}
+                    onSuccess={handlePaymentSuccess}
+                    onError={handlePaymentError}
+                />
+            )}
         </div>
     );
 }
