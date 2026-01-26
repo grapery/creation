@@ -52,20 +52,8 @@ const legalSettings: SettingsGroup = {
     color: "text-green-500",
     items: [
         { label: "Terms of Service", labelKey: "settings.terms_of_service", href: "/settings/terms" },
-        { label: "Privacy Policy", labelKey: "settings.privacy_policy", href: "/settings/privacy-policy" },
+        { label: "Privacy Policy", labelKey: "settings.privacy_policy", href: "/settings/privacy" },
         { label: "About App", labelKey: "settings.about", href: "/settings/about" },
-        { label: "Regulatory Information", labelKey: "settings.regulatory", href: "/settings/regulatory" },
-    ],
-};
-
-const accountActionsSettings: SettingsGroup = {
-    title: "Account Actions",
-    titleKey: "settings.account_actions",
-    icon: Shield,
-    color: "text-destructive",
-    items: [
-        { label: "Delete Account", labelKey: "settings.delete_account", href: "/settings/delete-account", description: "Permanently delete your account", descriptionKey: "settings.delete_account_desc" },
-        { label: "Sign Out", labelKey: "auth.sign_out", href: "/settings/signout", description: "Sign out of your account", descriptionKey: "settings.sign_out_desc" },
     ],
 };
 
@@ -128,9 +116,6 @@ export default function SettingsPage() {
                 </div>
                 <div className="space-y-6">
                     <SettingsGroupCard group={legalSettings} />
-                    <div className="md:hidden">
-                        <SettingsGroupCard group={accountActionsSettings} isActionGroup />
-                    </div>
                 </div>
             </div>
 

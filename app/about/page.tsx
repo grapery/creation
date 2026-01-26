@@ -82,7 +82,7 @@ export default function AboutPage() {
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             <Button size="lg" asChild>
-                                <Link href="/stories">
+                                <Link href="/">
                                     <BookOpen className="mr-2 h-5 w-5" />
                                     探索故事
                                 </Link>
@@ -432,7 +432,7 @@ export default function AboutPage() {
                                 </Link>
                             </Button>
                             <Button size="lg" variant="outline" asChild>
-                                <Link href="/stories">
+                                <Link href="/">
                                     浏览热门故事
                                 </Link>
                             </Button>

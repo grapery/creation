@@ -20,21 +20,17 @@ export function Sidebar({ className }: { className?: string }) {
                 <CardContent className="space-y-3">
                     <div className="grid grid-cols-2 gap-2">
                         <Button variant="outline" className="h-20 flex-col gap-2" asChild>
-                            <Link href="/create/story">
+                            <Link href="/create">
                                 <BookOpen className="h-5 w-5 text-primary" />
                                 <span>Write Story</span>
                             </Link>
                         </Button>
                         <Button variant="outline" className="h-20 flex-col gap-2" asChild>
-                            <Link href="/create/storyboard">
+                            <Link href="/create">
                                 <Target className="h-5 w-5 text-purple-500" />
                                 <span>Storyboard</span>
                             </Link>
                         </Button>
-                    </div>
-                    <div className="text-xs text-muted-foreground pt-1 flex justify-between">
-                        <Link href="/profile/drafts" className="hover:text-primary">My Drafts</Link>
-                        <Link href="/analytics" className="hover:text-primary">Analytics</Link>
                     </div>
                 </CardContent>
             </Card>

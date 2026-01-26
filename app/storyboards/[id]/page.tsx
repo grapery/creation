@@ -622,7 +622,7 @@ export default function StoryboardPage() {
                                     return (
                                         <Link
                                             key={char.characterId}
-                                            href={`/profile/characters/${char.characterId}`}
+                                            href={`/characters/${char.characterId}`}
                                             className="flex items-start gap-4 p-4 rounded-lg border border-border hover:bg-secondary/50 transition-colors"
                                         >
                                             <div className="h-16 w-16 rounded-lg bg-muted overflow-hidden flex-shrink-0">

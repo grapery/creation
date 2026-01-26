@@ -25,7 +25,7 @@ export function SetupStep({ data, onChange, onNext, onBack }: SetupStepProps) {
 
     const canRenderStory = data.title.length > 0 && data.content.length > 0;
     const canCreateStoryboard = data.useAI
-        ? data.generatedContent.length > 0 || (data.title.length > 0 && data.content.length > 0)
+        ? generatedContent.length > 0 || (data.title.length > 0 && data.content.length > 0)
         : data.title.length > 0 && data.content.length > 0;
 
     const toggleAI = () => {
@@ -39,7 +39,10 @@ export function SetupStep({ data, onChange, onNext, onBack }: SetupStepProps) {
 
     const renderContent = async () => {
         // Mock AI content generation
-        setGeneratedContent(`Chapter 1: ${data.title}\n\nScene 1: The Beginning\n${data.content}\n\nScene 2: Rising Action\nAs the plot thickens, new challenges emerge for our characters...\n\nScene 3: The Climax\nEverything comes to a head in this pivotal moment.\n\nScene ${data.sceneCount}: Resolution\nThe story concludes with meaningful closure.`);
+        const content = `Chapter 1: ${data.title}\n\nScene 1: The Beginning\n${data.content}\n\nScene 2: Rising Action\nAs the plot thickens, new challenges emerge for our characters...\n\nScene 3: The Climax\nEverything comes to a head in this pivotal moment.\n\nScene ${data.sceneCount}: Resolution\nThe story concludes with meaningful closure.`;
+        setGeneratedContent(content);
+        // Update parent component data to enable the "Continue" button
+        onChange({ ...data, generatedContent: content });
     };
 
     return (
