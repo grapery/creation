@@ -2,17 +2,17 @@
  * GitHub Assets Configuration
  * 
  * This file configures image assets to be loaded from GitHub.
- * To use GitHub as image CDN:
  * 
- * 1. Create a public GitHub repository (e.g., "voyager-assets")
- * 2. Upload your images to the repository
- * 3. Get the raw GitHub URL for each image:
- *    https://raw.githubusercontent.com/{username}/{repo}/{branch}/{path}
+ * Current setup:
+ * Images are stored in the develop/public directory:
+ * https://github.com/grapery/creation/tree/develop/public
  * 
- * 4. Set NEXT_PUBLIC_GITHUB_ASSETS_URL in your .env.local file
- *    Example: https://raw.githubusercontent.com/grapery/voyager-assets/main/images
+ * Raw URL format:
+ * https://raw.githubusercontent.com/grapery/creation/develop/public/{filename}
  * 
- * 5. Or set individual image URLs below
+ * To customize:
+ * 1. Set NEXT_PUBLIC_GITHUB_ASSETS_URL in your .env.local file
+ * 2. Or modify the individual image URLs below
  */
 
 // Base URL for GitHub assets (set via environment variable)
