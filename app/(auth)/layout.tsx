@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from "framer-motion";
 import { ArrowDown, GitBranch, Users, BookOpen, Layers, MessageSquare, X, ChevronRight, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { githubImages } from "@/lib/github-assets";
+import { imageCache, useCachedImage } from "@/lib/image-cache";
 
 // Image paths - can be configured to load from GitHub via GITHUB_ASSETS_BASE_URL env var
 // See lib/github-assets.ts for configuration details
@@ -23,6 +24,43 @@ const ChalkLine = () => (
   </div>
 );
 
+// Cached Image Component
+const CachedImage = ({ 
+  src, 
+  alt, 
+  className,
+  onLoad
+}: { 
+  src: string; 
+  alt: string; 
+  className?: string;
+  onLoad?: () => void;
+}) => {
+  const { src: cachedSrc, isLoading, error } = useCachedImage(src);
+
+  useEffect(() => {
+    if (!isLoading && onLoad) {
+      onLoad();
+    }
+  }, [isLoading, onLoad]);
+
+  if (isLoading) {
+    return (
+      <div className={`${className} flex items-center justify-center bg-white/5`}>
+        <div className="w-8 h-8 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <img 
+      src={cachedSrc || src} 
+      alt={alt}
+      className={className}
+    />
+  );
+};
+
 // Feature Card with Image Component
 const FeatureCard = ({ 
   title, 
@@ -37,7 +75,6 @@ const FeatureCard = ({
   icon: any; 
   index: number;
 }) => {
-  const [imgError, setImgError] = React.useState(false);
   const [imgLoaded, setImgLoaded] = React.useState(false);
 
   return (
@@ -57,30 +94,18 @@ const FeatureCard = ({
       
       {/* Image Container */}
       <div className="relative w-full overflow-hidden rounded-lg shadow-2xl border-2 border-white/10 bg-white/5">
-        {/* Loading placeholder */}
-        {!imgLoaded && !imgError && (
-          <div className="w-full aspect-video flex items-center justify-center bg-white/5">
-            <div className="w-8 h-8 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
-          </div>
-        )}
-        
-        {/* Error state */}
-        {imgError && (
-          <div className="w-full aspect-video flex flex-col items-center justify-center bg-white/5 text-white/40">
-            <Icon className="w-12 h-12 mb-2" />
-            <span className="text-sm">{title}</span>
-          </div>
-        )}
-        
-        <motion.img 
+        <motion.div
           whileHover={{ scale: 1.05 }}
           transition={{ type: "spring", stiffness: 300 }}
-          src={img} 
-          alt={title}
-          className={`w-full h-auto object-cover transition-opacity duration-300 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
-          onLoad={() => setImgLoaded(true)}
-          onError={() => setImgError(true)}
-        />
+          className="w-full"
+        >
+          <CachedImage 
+            src={img}
+            alt={title}
+            className={`w-full h-auto object-cover transition-opacity duration-300 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
+            onLoad={() => setImgLoaded(true)}
+          />
+        </motion.div>
         <div className="absolute inset-0 pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
       </div>
       
@@ -96,6 +121,15 @@ const FeatureCard = ({
 
 // Feature Carousel Component
 const FeatureCarousel = () => {
+  // Preload all images on mount
+  useEffect(() => {
+    const preloadImages = async () => {
+      const urls = features.map(f => f.img);
+      await imageCache.preload(urls);
+    };
+    preloadImages();
+  }, []);
+
   const features = [
     {
       index: 0,
