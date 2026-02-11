@@ -43,7 +43,7 @@ export default function AboutPage() {
             {/* Hero Section */}
             <section className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-primary/5">
                 <div className="absolute inset-0 bg-grid-pattern opacity-5" />
-                <div className="container mx-auto px-4 py-20 md:py-32 relative z-10">
+                <div className="container max-w-6xl mx-auto px-4 py-20 md:py-32 relative z-10">
                     <div className="max-w-4xl mx-auto text-center">
                         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary mb-6">
                             <Sparkles className="w-4 h-4" />
@@ -79,19 +79,18 @@ export default function AboutPage() {
 
             {/* Core Feature - Branching Story System */}
             <section className="py-20 bg-muted/30">
-                <div className="container mx-auto px-4">
-                    <div className="max-w-6xl mx-auto">
-                        <div className="text-center mb-16">
-                            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 text-primary mb-4">
-                                <TreeDeciduous className="w-8 h-8" />
-                            </div>
-                            <h2 className="text-3xl md:text-4xl font-bold mb-4">核心特色：分支故事系统</h2>
-                            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                                独创的树状分支叙事结构，让每个故事节点都能衍生出无限可能
-                            </p>
+                <div className="container max-w-6xl mx-auto px-4">
+                    <div className="text-center mb-16">
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 text-primary mb-4">
+                            <TreeDeciduous className="w-8 h-8" />
                         </div>
+                        <h2 className="text-3xl md:text-4xl font-bold mb-4">核心特色：分支故事系统</h2>
+                        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                            独创的树状分支叙事结构，让每个故事节点都能衍生出无限可能
+                        </p>
+                    </div>
 
-                        <div className="grid md:grid-cols-3 gap-8">
+                    <div className="grid md:grid-cols-3 gap-8">
                             <Card className="border-2 hover:border-primary/50 transition-colors">
                                 <CardContent className="p-8">
                                     <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-4">
@@ -161,22 +160,20 @@ export default function AboutPage() {
                                 </CardContent>
                             </Card>
                         </div>
-                    </div>
                 </div>
             </section>
 
             {/* Services & Features */}
             <section className="py-20">
-                <div className="container mx-auto px-4">
-                    <div className="max-w-6xl mx-auto">
-                        <div className="text-center mb-16">
-                            <h2 className="text-3xl md:text-4xl font-bold mb-4">完整的产品功能矩阵</h2>
-                            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                                从创作到分享，提供全方位的故事创作工具和服务
-                            </p>
-                        </div>
+                <div className="container max-w-6xl mx-auto px-4">
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl md:text-4xl font-bold mb-4">完整的产品功能矩阵</h2>
+                        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                            从创作到分享，提供全方位的故事创作工具和服务
+                        </p>
+                    </div>
 
-                        <div className="grid md:grid-cols-2 gap-8">
+                    <div className="grid md:grid-cols-2 gap-8">
                             {/* AI Creation Engine */}
                             <Card className="border-2">
                                 <CardContent className="p-8">
@@ -257,22 +254,20 @@ export default function AboutPage() {
                                 </CardContent>
                             </Card>
                         </div>
-                    </div>
                 </div>
             </section>
 
             {/* Target Users */}
             <section className="py-20 bg-muted/30">
-                <div className="container mx-auto px-4">
-                    <div className="max-w-6xl mx-auto">
-                        <div className="text-center mb-16">
-                            <h2 className="text-3xl md:text-4xl font-bold mb-4">适用人群</h2>
-                            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                                无论您是创作者、教育者还是游戏开发者，未择 Voyager都能为您提供强大的支持
-                            </p>
-                        </div>
+                <div className="container max-w-6xl mx-auto px-4">
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl md:text-4xl font-bold mb-4">适用人群</h2>
+                        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                            无论您是创作者、教育者还是游戏开发者，未择 Voyager都能为您提供强大的支持
+                        </p>
+                    </div>
 
-                        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                             <Card className="text-center hover:shadow-lg transition-shadow">
                                 <CardContent className="p-6">
                                     <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 text-white flex items-center justify-center mx-auto mb-4">
@@ -313,22 +308,20 @@ export default function AboutPage() {
                                 </CardContent>
                             </Card>
                         </div>
-                    </div>
                 </div>
             </section>
 
             {/* Platform Features */}
             <section className="py-20">
-                <div className="container mx-auto px-4">
-                    <div className="max-w-6xl mx-auto">
-                        <div className="text-center mb-16">
-                            <h2 className="text-3xl md:text-4xl font-bold mb-4">平台优势</h2>
-                            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                                为什么选择未择 Voyager作为您的故事创作平台
-                            </p>
-                        </div>
+                <div className="container max-w-6xl mx-auto px-4">
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl md:text-4xl font-bold mb-4">平台优势</h2>
+                        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                            为什么选择未择 Voyager作为您的故事创作平台
+                        </p>
+                    </div>
 
-                        <div className="grid md:grid-cols-3 gap-8">
+                    <div className="grid md:grid-cols-3 gap-8">
                             <div className="text-center">
                                 <div className="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
                                     <Zap className="w-8 h-8" />
@@ -388,14 +381,13 @@ export default function AboutPage() {
                                     定期更新功能，引入最新AI技术
                                 </p>
                             </div>
-                        </div>
                     </div>
                 </div>
             </section>
 
             {/* CTA Section */}
             <section className="py-20 bg-gradient-to-br from-primary/10 to-primary/5">
-                <div className="container mx-auto px-4">
+                <div className="container max-w-6xl mx-auto px-4">
                     <div className="max-w-4xl mx-auto text-center">
                         <h2 className="text-3xl md:text-4xl font-bold mb-4">
                             开始您的创作之旅
@@ -422,9 +414,8 @@ export default function AboutPage() {
 
             {/* Footer */}
             <footer className="py-12 border-t">
-                <div className="container mx-auto px-4">
-                    <div className="max-w-6xl mx-auto">
-                        <div className="grid md:grid-cols-4 gap-8 mb-8">
+                <div className="container max-w-6xl mx-auto px-4">
+                    <div className="grid md:grid-cols-4 gap-8 mb-8">
                             <div>
                                 <h4 className="font-semibold mb-4">产品</h4>
                                 <ul className="space-y-2 text-sm text-muted-foreground">
@@ -457,9 +448,8 @@ export default function AboutPage() {
                                 </ul>
                             </div>
                         </div>
-                        <div className="pt-8 border-t text-center text-sm text-muted-foreground">
-                            <p>&copy; 2025 未择 Voyager. All rights reserved.</p>
-                        </div>
+                    <div className="pt-8 border-t text-center text-sm text-muted-foreground">
+                        <p>&copy; 2025 未择 Voyager. All rights reserved.</p>
                     </div>
                 </div>
             </footer>

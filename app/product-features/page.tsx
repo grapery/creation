@@ -46,7 +46,7 @@ export default function ProductFeaturesPage() {
             {/* Hero Section */}
             <section className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-primary/5">
                 <div className="absolute inset-0 bg-grid-pattern opacity-5" />
-                <div className="container mx-auto px-4 py-20 md:py-32 relative z-10">
+                <div className="container max-w-6xl mx-auto px-4 py-20 md:py-32 relative z-10">
                     <div className="max-w-4xl mx-auto text-center">
                         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary mb-6">
                             <Sparkles className="w-4 h-4" />
@@ -68,19 +68,18 @@ export default function ProductFeaturesPage() {
 
             {/* Product Features - Story Exploration */}
             <section className="py-20">
-                <div className="container mx-auto px-4">
-                    <div className="max-w-6xl mx-auto">
-                        <div className="text-center mb-16">
-                            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-500/10 text-blue-500 mb-4">
-                                <BookOpen className="w-8 h-8" />
-                            </div>
-                            <h2 className="text-3xl md:text-4xl font-bold mb-4">故事探索</h2>
-                            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                                发现海量精彩故事，体验不同创作者的想象力
-                            </p>
+                <div className="container max-w-6xl mx-auto px-4">
+                    <div className="text-center mb-16">
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-500/10 text-blue-500 mb-4">
+                            <BookOpen className="w-8 h-8" />
                         </div>
+                        <h2 className="text-3xl md:text-4xl font-bold mb-4">故事探索</h2>
+                        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                            发现海量精彩故事，体验不同创作者的想象力
+                        </p>
+                    </div>
 
-                        <div className="grid md:grid-cols-3 gap-8">
+                    <div className="grid md:grid-cols-3 gap-8">
                             <Card className="border-2 hover:border-blue-500/50 transition-colors">
                                 <CardContent className="p-8">
                                     <div className="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center mb-4">
@@ -159,25 +158,23 @@ export default function ProductFeaturesPage() {
                                 </CardContent>
                             </Card>
                         </div>
-                    </div>
                 </div>
             </section>
 
             {/* Character Library */}
             <section className="py-20 bg-muted/30">
-                <div className="container mx-auto px-4">
-                    <div className="max-w-6xl mx-auto">
-                        <div className="text-center mb-16">
-                            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-purple-500/10 text-purple-500 mb-4">
-                                <Users className="w-8 h-8" />
-                            </div>
-                            <h2 className="text-3xl md:text-4xl font-bold mb-4">角色库</h2>
-                            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                                丰富的角色资源，为你的故事增添活力
-                            </p>
+                <div className="container max-w-6xl mx-auto px-4">
+                    <div className="text-center mb-16">
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-purple-500/10 text-purple-500 mb-4">
+                            <Users className="w-8 h-8" />
                         </div>
+                        <h2 className="text-3xl md:text-4xl font-bold mb-4">角色库</h2>
+                        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                            丰富的角色资源，为你的故事增添活力
+                        </p>
+                    </div>
 
-                        <div className="grid md:grid-cols-2 gap-8">
+                    <div className="grid md:grid-cols-2 gap-8">
                             <Card className="border-2 hover:border-purple-500/50 transition-colors">
                                 <CardContent className="p-8">
                                     <div className="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center mb-4">
@@ -238,13 +235,12 @@ export default function ProductFeaturesPage() {
                                 </CardContent>
                             </Card>
                         </div>
-                    </div>
                 </div>
             </section>
 
             {/* CTA Section */}
             <section className="py-20 bg-gradient-to-br from-primary/10 to-primary/5">
-                <div className="container mx-auto px-4">
+                <div className="container max-w-6xl mx-auto px-4">
                     <div className="max-w-4xl mx-auto text-center">
                         <h2 className="text-3xl md:text-4xl font-bold mb-4">开始创作你的故事</h2>
                         <p className="text-lg text-muted-foreground mb-8">

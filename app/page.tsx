@@ -153,10 +153,10 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
 
-      <main className="flex-1 container max-w-6xl px-4 py-8 md:px-6 mx-auto">
+      <main className="flex-1 container max-w-6xl px-4 py-6 md:px-6 mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
           {/* Main Feed Column */}
-          <div className="md:col-span-8 space-y-6">
+          <div className="md:col-span-8 min-w-0 space-y-6">
             {/* Tabs */}
             <div className="flex items-center overflow-x-auto pb-2 scrollbar-hide">
               <div className="flex items-center space-x-2">
