@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { getAuthToken, clearTokens } from "@/lib/api/client";
+import { showSuccess, showInfo } from "@/lib/toast-utils";
 
 export default function DebugAuthPage() {
   const [tokenInfo, setTokenInfo] = useState<any>(null);
+  const [checkResult, setCheckResult] = useState<string>("");
 
   useEffect(() => {
     const token = getAuthToken();
@@ -46,7 +48,9 @@ export default function DebugAuthPage() {
           <button
             onClick={() => {
               const token = getAuthToken();
-              alert(token ? `Token exists (length: ${token.length})` : 'No token found');
+              const result = token ? `Token exists (length: ${token.length})` : 'No token found';
+              setCheckResult(result);
+              showInfo(result);
             }}
             className="px-4 py-2 bg-primary text-primary-foreground rounded"
           >
@@ -56,8 +60,8 @@ export default function DebugAuthPage() {
           <button
             onClick={() => {
               clearTokens();
-              alert('Tokens cleared!');
-              window.location.reload();
+              showSuccess('Tokens cleared!');
+              setTimeout(() => window.location.reload(), 1000);
             }}
             className="px-4 py-2 bg-destructive text-destructive-foreground rounded"
           >
@@ -73,6 +77,13 @@ export default function DebugAuthPage() {
             Go Home
           </button>
         </div>
+
+        {checkResult && (
+          <div className="border rounded-lg p-4 bg-secondary">
+            <h2 className="text-lg font-semibold mb-2">Check Result</h2>
+            <p className="text-sm">{checkResult}</p>
+          </div>
+        )}
 
         <div className="border rounded-lg p-4 space-y-2">
           <h2 className="text-lg font-semibold">Instructions</h2>

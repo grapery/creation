@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, Save } from "lucide-react";
+import { showSuccess } from "@/lib/toast-utils";
 
 // Inline components if not created
 function SimpleLabel({ children, htmlFor }: { children: React.ReactNode, htmlFor?: string }) {
@@ -62,7 +63,7 @@ export default function EditorPage() {
             // await storyboards.create({ ...formData, parentId: parent.id, storyId: parent.storyId });
             console.log("Creating branch from", parent.id, formData);
             // router.push(`/storyboards/${newId}`);
-            alert("Branch saved (Mock)");
+            showSuccess("Branch saved successfully");
         } catch (e) {
             console.error(e);
         } finally {

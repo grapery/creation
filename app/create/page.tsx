@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { X, Share2, Users, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { stories } from "@/lib/api/stories";
+import { showSuccess, showError } from "@/lib/toast-utils";
 import { StyleConfig, CreateStoryRequest } from "@/lib/types";
 
 interface CreateStoryProps {
@@ -112,7 +113,7 @@ export default function CreateStory({ storyId }: CreateStoryProps) {
             setAiGeneratedCoverURL("");
         } catch (error) {
             console.error("Failed to upload cover:", error);
-            alert("Failed to upload cover image");
+            showError("上传失败", "封面图片上传失败，请重试");
         } finally {
             setIsUploadingCover(false);
         }
@@ -124,7 +125,7 @@ export default function CreateStory({ storyId }: CreateStoryProps) {
 
     const handleCreate = async () => {
         if (!title.trim()) {
-            alert("Please enter a title");
+            showError("请输入标题", "故事标题不能为空");
             return;
         }
 
@@ -151,12 +152,12 @@ export default function CreateStory({ storyId }: CreateStoryProps) {
             // but the Swift code sets `createdStory` and then maybe refreshes?
             // For now, assume success and redirect.
 
-            alert("Story created successfully!");
+            showSuccess("创建成功", "故事创建成功！");
             router.push(`/stories/${createdStory.id}`); // Redirect to new story
 
         } catch (error) {
             console.error("Failed to create story:", error);
-            alert("Failed to create story. Please try again.");
+            showError("创建失败", "故事创建失败，请重试");
         } finally {
             setIsAIProcessing(false);
         }
@@ -595,12 +596,7 @@ export default function CreateStory({ storyId }: CreateStoryProps) {
             {/* Action Buttons */}
             <div className="flex gap-3 p-4 bg-card border-t border-border">
                 <button
-                    onClick={() => {
-                        if (useAIEnrich || generateCover || generatePoster || generateBackground) {
-                            alert("Confirm AI creation - this will consume tokens");
-                        }
-                        handleCreate();
-                    }}
+                    onClick={() => router.back()}
                     className="flex-1 py-3 border border-border bg-card hover:bg-muted text-foreground font-medium rounded-lg disabled:opacity-50"
                 >
                     Cancel

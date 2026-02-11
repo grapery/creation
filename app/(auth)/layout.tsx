@@ -4,14 +4,16 @@ import React, { useState } from "react";
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from "framer-motion";
 import { ArrowDown, GitBranch, Users, BookOpen, Layers, MessageSquare, X, ChevronRight, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { githubImages } from "@/lib/github-assets";
 
-// Image paths (located in public/)
+// Image paths - can be configured to load from GitHub via GITHUB_ASSETS_BASE_URL env var
+// See lib/github-assets.ts for configuration details
 const images = {
-  storyOverview: "/story_overview.jpeg",
-  storyboard: "/storyboard.jpeg",
-  branching: "/branching.jpeg",
-  roles: "/roles.jpeg",
-  collaboration: "/collaboration.jpeg"
+  storyOverview: githubImages.storyOverview,
+  storyboard: githubImages.storyboard,
+  branching: githubImages.branching,
+  roles: githubImages.roles,
+  collaboration: githubImages.collaboration
 };
 
 // Chalk styled separator

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useTranslation } from "@/providers/language-provider";
 import { getAuthToken } from "@/lib/api/client";
+import { showConfirm, showSuccess, showError } from "@/lib/toast-utils";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import ProfileHeader from "@/components/profile/profile-header-v2";
@@ -152,9 +153,15 @@ export default function ProfileDraftsPage() {
     }, [userId]);
 
     const handleDelete = async (draftId: string) => {
-        if (!confirm(t("profile.confirm_delete", "Are you sure you want to delete this draft?"))) {
-            return;
-        }
+        const confirmed = await showConfirm(
+            t("profile.confirm_delete", "Are you sure you want to delete this draft?"),
+            {
+                confirmText: t("common.delete", "Delete"),
+                cancelText: t("common.cancel", "Cancel"),
+            }
+        );
+        
+        if (!confirmed) return;
 
         try {
             const token = getAuthToken();
@@ -170,8 +177,10 @@ export default function ProfileDraftsPage() {
 
             // Remove from local state
             setDrafts(drafts.filter(draft => draft.id !== draftId));
+            showSuccess(t("profile.draft_deleted", "Draft deleted successfully"));
         } catch (e) {
             console.error("Failed to delete draft:", e);
+            showError(t("profile.delete_failed", "Failed to delete draft"));
         }
     };
 

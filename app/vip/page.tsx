@@ -9,6 +9,7 @@ import { useAuth } from "@/providers/auth-provider";
 import { useTranslation } from "@/providers/language-provider";
 import { Loader2, Crown } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { showSuccess, showError } from "@/lib/toast-utils";
 
 export default function VIPPage() {
     const { t, language } = useTranslation();
@@ -49,7 +50,7 @@ export default function VIPPage() {
             ? `${planName}に正常に購読されました！`
             : `Successfully subscribed to ${planName}!`;
 
-        alert(successMessage);
+        showSuccess(successMessage);
         router.push('/profile');
     };
 
@@ -59,7 +60,7 @@ export default function VIPPage() {
             : language === 'ja'
             ? `支払いに失敗しました: ${error}`
             : `Payment failed: ${error}`;
-        alert(errorMessage);
+        showError(errorMessage);
     };
 
     return (

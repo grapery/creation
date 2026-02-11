@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/providers/language-provider";
+import { showSuccess } from "@/lib/toast-utils";
 
 export default function NotificationSettingsPage() {
     const { language } = useTranslation();
@@ -22,7 +23,7 @@ export default function NotificationSettingsPage() {
 
     const handleSave = () => {
         // Save notification preferences
-        alert(language === 'zh-Hans' ? '通知设置已保存' : language === 'ja' ? '通知設定が保存されました' : 'Notification settings saved');
+        showSuccess(language === 'zh-Hans' ? '通知设置已保存' : language === 'ja' ? '通知設定が保存されました' : 'Notification settings saved');
     };
 
     return (

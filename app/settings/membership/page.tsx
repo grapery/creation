@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { useRouter } from "next/navigation";
+import { showSuccess, showError } from "@/lib/toast-utils";
 
 export default function MembershipSettingsPage() {
     const { language } = useTranslation();
@@ -47,11 +48,11 @@ export default function MembershipSettingsPage() {
         try {
             // Mock subscription flow - replace with actual API call
             await new Promise(r => setTimeout(r, 2000));
-            alert(`Successfully subscribed to ${plan.name.en}!`);
+            showSuccess(`Successfully subscribed to ${plan.name.en}!`);
             router.push('/settings/membership');
         } catch (e) {
             console.error(e);
-            alert("Subscription failed.");
+            showError("Subscription failed.");
         } finally {
             setSubscribing(null);
         }
