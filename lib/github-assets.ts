@@ -16,7 +16,10 @@
  */
 
 // Base URL for GitHub assets (set via environment variable)
-const GITHUB_ASSETS_BASE_URL = process.env.NEXT_PUBLIC_GITHUB_ASSETS_URL || "";
+// Default uses jsDelivr CDN for better global availability (especially in China)
+// Format: https://cdn.jsdelivr.net/gh/{user}/{repo}@{branch}/{path}
+const GITHUB_ASSETS_BASE_URL = process.env.NEXT_PUBLIC_GITHUB_ASSETS_URL || 
+  "https://cdn.jsdelivr.net/gh/grapery/creation@develop/public";
 
 // Individual image URLs - can be customized per image
 // Fallback to local paths if GitHub URLs are not set

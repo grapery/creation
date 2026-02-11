@@ -37,6 +37,9 @@ const FeatureCard = ({
   icon: any; 
   index: number;
 }) => {
+  const [imgError, setImgError] = React.useState(false);
+  const [imgLoaded, setImgLoaded] = React.useState(false);
+
   return (
     <motion.div 
       initial={{ opacity: 0, x: -20 }}
@@ -53,13 +56,30 @@ const FeatureCard = ({
       </div>
       
       {/* Image Container */}
-      <div className="relative w-full overflow-hidden rounded-lg shadow-2xl border-2 border-white/10">
+      <div className="relative w-full overflow-hidden rounded-lg shadow-2xl border-2 border-white/10 bg-white/5">
+        {/* Loading placeholder */}
+        {!imgLoaded && !imgError && (
+          <div className="w-full aspect-video flex items-center justify-center bg-white/5">
+            <div className="w-8 h-8 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
+          </div>
+        )}
+        
+        {/* Error state */}
+        {imgError && (
+          <div className="w-full aspect-video flex flex-col items-center justify-center bg-white/5 text-white/40">
+            <Icon className="w-12 h-12 mb-2" />
+            <span className="text-sm">{title}</span>
+          </div>
+        )}
+        
         <motion.img 
           whileHover={{ scale: 1.05 }}
           transition={{ type: "spring", stiffness: 300 }}
           src={img} 
           alt={title}
-          className="w-full h-auto object-cover"
+          className={`w-full h-auto object-cover transition-opacity duration-300 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
+          onLoad={() => setImgLoaded(true)}
+          onError={() => setImgError(true)}
         />
         <div className="absolute inset-0 pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
       </div>
