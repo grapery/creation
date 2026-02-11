@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <!-- 极简深蓝背景 -->
+    <linearGradient id="minimalDark" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0e1a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#141b2d;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- 微弱光晕 -->
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- 背景 -->
+  <rect width="100%" height="100%" fill="url(#minimalDark)"/>
+  
+  <!-- 稀疏的星星 -->
+  <g fill="#ffffff" opacity="0.6">
+    <!-- 第一排 -->
+    <circle cx="150" cy="100" r="0.8"/>
+    <circle cx="450" cy="80" r="1"/>
+    <circle cx="750" cy="120" r="0.7"/>
+    <circle cx="1050" cy="90" r="1.1"/>
+    <circle cx="1350" cy="110" r="0.9"/>
+    <circle cx="1650" cy="85" r="1"/>
+    <circle cx="1850" cy="105" r="0.8"/>
+    
+    <!-- 第二排 -->
+    <circle cx="300" cy="250" r="0.9"/>
+    <circle cx="600" cy="280" r="0.7"/>
+    <circle cx="900" cy="240" r="1"/>
+    <circle cx="1200" cy="270" r="0.8"/>
+    <circle cx="1500" cy="230" r="1.1"/>
+    <circle cx="1800" cy="260" r="0.9"/>
+    
+    <!-- 第三排 -->
+    <circle cx="200" cy="400" r="1"/>
+    <circle cx="500" cy="430" r="0.8"/>
+    <circle cx="800" cy="390" r="0.9"/>
+    <circle cx="1100" cy="420" r="1.1"/>
+    <circle cx="1400" cy="380" r="0.7"/>
+    <circle cx="1700" cy="410" r="1"/>
+    
+    <!-- 第四排 -->
+    <circle cx="350" cy="550" r="0.8"/>
+    <circle cx="650" cy="580" r="1"/>
+    <circle cx="950" cy="540" r="0.9"/>
+    <circle cx="1250" cy="570" r="0.7"/>
+    <circle cx="1550" cy="530" r="1.1"/>
+    <circle cx="1850" cy="560" r="0.8"/>
+    
+    <!-- 第五排 -->
+    <circle cx="100" cy="700" r="1.1"/>
+    <circle cx="400" cy="730" r="0.9"/>
+    <circle cx="700" cy="690" r="0.8"/>
+    <circle cx="1000" cy="720" r="1"/>
+    <circle cx="1300" cy="680" r="0.9"/>
+    <circle cx="1600" cy="710" r="0.7"/>
+    <circle cx="1900" cy="740" r="1.1"/>
+    
+    <!-- 第六排 -->
+    <circle cx="250" cy="850" r="0.9"/>
+    <circle cx="550" cy="880" r="0.8"/>
+    <circle cx="850" cy="840" r="1"/>
+    <circle cx="1150" cy="870" r="0.7"/>
+    <circle cx="1450" cy="830" r="1.1"/>
+    <circle cx="1750" cy="860" r="0.9"/>
+    
+    <!-- 第七排 -->
+    <circle cx="50" cy="1000" r="1"/>
+    <circle cx="350" cy="1020" r="0.8"/>
+    <circle cx="650" cy="990" r="0.9"/>
+    <circle cx="950" cy="1010" r="1.1"/>
+    <circle cx="1250" cy="980" r="0.8"/>
+    <circle cx="1550" cy="1000" r="1"/>
+    <circle cx="1850" cy="1020" r="0.9"/>
+  </g>
+  
+  <!-- 几颗稍亮的星 -->
+  <g fill="#ffffff" opacity="0.9" filter="url(#softGlow)">
+    <circle cx="500" cy="150" r="1.5"/>
+    <circle cx="1000" cy="300" r="1.8"/>
+    <circle cx="1500" cy="450" r="1.6"/>
+    <circle cx="750" cy="600" r="1.7"/>
+    <circle cx="1250" cy="750" r="1.5"/>
+    <circle cx="1750" cy="900" r="1.8"/>
+    <circle cx="250" cy="800" r="1.6"/>
+  </g>
+  
+  <!-- 远处的微弱星云 -->
+  <ellipse cx="960" cy="540" rx="800" ry="300" fill="#1e3a5f" opacity="0.1"/>
+  <ellipse cx="600" cy="400" rx="400" ry="200" fill="#2d5a87" opacity="0.05"/>
+  <ellipse cx="1300" cy="650" rx="350" ry="180" fill="#1e4d6b" opacity="0.06"/>
+</svg>

@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <!-- 星云漩涡渐变 -->
+    <radialGradient id="nebulaCenter" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#e0c3fc;stop-opacity:0.6" />
+      <stop offset="30%" style="stop-color:#8ec5fc;stop-opacity:0.4" />
+      <stop offset="60%" style="stop-color:#5c6bc0;stop-opacity:0.2" />
+      <stop offset="100%" style="stop-color:#1a237e;stop-opacity:0" />
+    </radialGradient>
+    
+    <!-- 紫色星云 -->
+    <radialGradient id="purpleNebula" cx="30%" cy="30%" r="60%">
+      <stop offset="0%" style="stop-color:#d500f9;stop-opacity:0.3" />
+      <stop offset="50%" style="stop-color:#7c4dff;stop-opacity:0.15" />
+      <stop offset="100%" style="stop-color:#311b92;stop-opacity:0" />
+    </radialGradient>
+    
+    <!-- 青色星云 -->
+    <radialGradient id="cyanNebula" cx="70%" cy="60%" r="50%">
+      <stop offset="0%" style="stop-color:#00e5ff;stop-opacity:0.25" />
+      <stop offset="50%" style="stop-color:#00b8d4;stop-opacity:0.12" />
+      <stop offset="100%" style="stop-color:#006064;stop-opacity:0" />
+    </radialGradient>
+    
+    <!-- 背景渐变 -->
+    <linearGradient id="deepSpace" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d1b2a;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#1b263b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0d1b2a;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- 星光滤镜 -->
+    <filter id="starLight" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- 背景 -->
+  <rect width="100%" height="100%" fill="url(#deepSpace)"/>
+  
+  <!-- 星云层 -->
+  <ellipse cx="960" cy="540" rx="800" ry="500" fill="url(#nebulaCenter)" opacity="0.8"/>
+  <ellipse cx="400" cy="300" rx="600" ry="400" fill="url(#purpleNebula)" opacity="0.7"/>
+  <ellipse cx="1500" cy="700" rx="500" ry="350" fill="url(#cyanNebula)" opacity="0.6"/>
+  
+  <!-- 漩涡线条 -->
+  <g fill="none" opacity="0.15" stroke-width="2">
+    <!-- 紫色漩涡 -->
+    <path d="M400,300 Q600,200 800,300 T1200,400" stroke="#d500f9"/>
+    <path d="M350,350 Q550,250 750,350 T1150,450" stroke="#e040fb"/>
+    <path d="M450,250 Q650,150 850,250 T1250,350" stroke="#ea80fc"/>
+    
+    <!-- 青色漩涡 -->
+    <path d="M1500,700 Q1300,600 1100,700 T700,800" stroke="#00e5ff"/>
+    <path d="M1550,650 Q1350,550 1150,650 T750,750" stroke="#18ffff"/>
+    <path d="M1450,750 Q1250,650 1050,750 T650,850" stroke="#64ffda"/>
+  </g>
+  
+  <!-- 星星 -->
+  <g fill="#ffffff">
+    <!-- 普通星星 -->
+    <circle cx="200" cy="150" r="1" opacity="0.7"/>
+    <circle cx="500" cy="100" r="1.2" opacity="0.8"/>
+    <circle cx="800" cy="180" r="0.9" opacity="0.6"/>
+    <circle cx="1100" cy="120" r="1.1" opacity="0.75"/>
+    <circle cx="1400" cy="160" r="1" opacity="0.65"/>
+    <circle cx="1700" cy="140" r="1.3" opacity="0.8"/>
+    
+    <circle cx="300" cy="400" r="1" opacity="0.6"/>
+    <circle cx="600" cy="450" r="1.2" opacity="0.7"/>
+    <circle cx="900" cy="380" r="0.9" opacity="0.5"/>
+    <circle cx="1200" cy="420" r="1.1" opacity="0.65"/>
+    <circle cx="1500" cy="390" r="1" opacity="0.7"/>
+    <circle cx="1800" cy="430" r="1.2" opacity="0.6"/>
+    
+    <circle cx="250" cy="650" r="1.1" opacity="0.7"/>
+    <circle cx="550" cy="700" r="0.9" opacity="0.6"/>
+    <circle cx="850" cy="620" r="1.2" opacity="0.75"/>
+    <circle cx="1150" cy="680" r="1" opacity="0.65"/>
+    <circle cx="1450" cy="640" r="1.3" opacity="0.8"/>
+    <circle cx="1750" cy="690" r="1.1" opacity="0.6"/>
+    
+    <circle cx="350" cy="900" r="1" opacity="0.6"/>
+    <circle cx="650" cy="950" r="1.2" opacity="0.7"/>
+    <circle cx="950" cy="880" r="0.9" opacity="0.5"/>
+    <circle cx="1250" cy="920" r="1.1" opacity="0.65"/>
+    <circle cx="1550" cy="890" r="1" opacity="0.7"/>
+    <circle cx="1850" cy="930" r="1.2" opacity="0.6"/>
+    
+    <!-- 亮星 -->
+    <circle cx="450" cy="200" r="2" opacity="0.9" filter="url(#starLight)"/>
+    <circle cx="950" cy="300" r="2.5" opacity="0.95" filter="url(#starLight)"/>
+    <circle cx="1350" cy="250" r="2.2" opacity="0.9" filter="url(#starLight)"/>
+    <circle cx="750" cy="550" r="2" opacity="0.85" filter="url(#starLight)"/>
+    <circle cx="1650" cy="500" r="2.3" opacity="0.9" filter="url(#starLight)"/>
+    <circle cx="550" cy="800" r="2.1" opacity="0.85" filter="url(#starLight)"/>
+    <circle cx="1050" cy="750" r="2.4" opacity="0.95" filter="url(#starLight)"/>
+    <circle cx="1750" cy="850" r="2" opacity="0.8" filter="url(#starLight)"/>
+  </g>
+  
+  <!-- 彩色星星点缀 -->
+  <circle cx="350" cy="280" r="1.5" fill="#ff80ab" opacity="0.8"/>
+  <circle cx="650" cy="180" r="1.2" fill="#82b1ff" opacity="0.7"/>
+  <circle cx="1250" cy="320" r="1.3" fill="#b388ff" opacity="0.75"/>
+  <circle cx="1550" cy="220" r="1.4" fill="#8c9eff" opacity="0.8"/>
+  <circle cx="850" cy="480" r="1.5" fill="#80d8ff" opacity="0.7"/>
+  <circle cx="450" cy="580" r="1.2" fill="#ea80fc" opacity="0.75"/>
+  <circle cx="1450" cy="520" r="1.3" fill="#84ffff" opacity="0.8"/>
+  <circle cx="1850" cy="600" r="1.4" fill="#ff80ab" opacity="0.7"/>
+  
+  <!-- 光点粒子 -->
+  <g opacity="0.4">
+    <circle cx="100" cy="100" r="0.5" fill="#ffffff"/>
+    <circle cx="300" cy="250" r="0.5" fill="#ffffff"/>
+    <circle cx="500" cy="150" r="0.5" fill="#ffffff"/>
+    <circle cx="700" cy="300" r="0.5" fill="#ffffff"/>
+    <circle cx="900" cy="200" r="0.5" fill="#ffffff"/>
+    <circle cx="1100" cy="350" r="0.5" fill="#ffffff"/>
+    <circle cx="1300" cy="180" r="0.5" fill="#ffffff"/>
+    <circle cx="1500" cy="320" r="0.5" fill="#ffffff"/>
+    <circle cx="1700" cy="240" r="0.5" fill="#ffffff"/>
+    <circle cx="1900" cy="380" r="0.5" fill="#ffffff"/>
+  </g>
+</svg>

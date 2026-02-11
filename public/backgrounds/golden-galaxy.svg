@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <!-- 深邃宇宙背景 -->
+    <radialGradient id="goldenUniverse" cx="50%" cy="40%" r="70%">
+      <stop offset="0%" style="stop-color:#1a1a2e;stop-opacity:1" />
+      <stop offset="40%" style="stop-color:#16213e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0f0f23;stop-opacity:1" />
+    </radialGradient>
+    
+    <!-- 金色星云 -->
+    <radialGradient id="goldNebula" cx="60%" cy="30%" r="50%">
+      <stop offset="0%" style="stop-color:#ffd700;stop-opacity:0.25" />
+      <stop offset="30%" style="stop-color:#ffaa00;stop-opacity:0.15" />
+      <stop offset="60%" style="stop-color:#ff8c00;stop-opacity:0.08" />
+      <stop offset="100%" style="stop-color:#1a1a2e;stop-opacity:0" />
+    </radialGradient>
+    
+    <!-- 紫色星云 -->
+    <radialGradient id="purpleNebula2" cx="30%" cy="60%" r="45%">
+      <stop offset="0%" style="stop-color:#9d4edd;stop-opacity:0.2" />
+      <stop offset="50%" style="stop-color:#7b2cbf;stop-opacity:0.1" />
+      <stop offset="100%" style="stop-color:#1a1a2e;stop-opacity:0" />
+    </radialGradient>
+    
+    <!-- 金色光晕 -->
+    <filter id="goldenGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- 钻石星星效果 -->
+    <filter id="diamondStar" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="1" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- 背景 -->
+  <rect width="100%" height="100%" fill="url(#goldenUniverse)"/>
+  
+  <!-- 星云层 -->
+  <ellipse cx="1150" cy="320" rx="700" ry="400" fill="url(#goldNebula)" opacity="0.8"/>
+  <ellipse cx="580" cy="650" rx="500" ry="300" fill="url(#purpleNebula2)" opacity="0.7"/>
+  
+  <!-- 背景星星 -->
+  <g fill="#ffffff" opacity="0.5">
+    <circle cx="100" cy="80" r="0.8"/>
+    <circle cx="300" cy="150" r="1"/>
+    <circle cx="500" cy="60" r="0.9"/>
+    <circle cx="700" cy="180" r="0.7"/>
+    <circle cx="900" cy="100" r="1.1"/>
+    <circle cx="1100" cy="170" r="0.8"/>
+    <circle cx="1300" cy="90" r="1"/>
+    <circle cx="1500" cy="160" r="0.9"/>
+    <circle cx="1700" cy="70" r="1.2"/>
+    <circle cx="1900" cy="140" r="0.8"/>
+    
+    <circle cx="200" cy="300" r="1"/>
+    <circle cx="400" cy="350" r="0.8"/>
+    <circle cx="600" cy="280" r="1.1"/>
+    <circle cx="800" cy="330" r="0.9"/>
+    <circle cx="1000" cy="260" r="1"/>
+    <circle cx="1200" cy="340" r="0.7"/>
+    <circle cx="1400" cy="290" r="1.2"/>
+    <circle cx="1600" cy="360" r="0.8"/>
+    <circle cx="1800" cy="270" r="1.1"/>
+  </g>
+  
+  <!-- 金色星星 -->
+  <g fill="#ffd700" filter="url(#goldenGlow)">
+    <circle cx="450" cy="200" r="2.5" opacity="0.9"/>
+    <circle cx="950" cy="150" r="3" opacity="0.95"/>
+    <circle cx="1350" cy="250" r="2.8" opacity="0.9"/>
+    <circle cx="750" cy="450" r="3.2" opacity="0.9"/>
+    <circle cx="1150" cy="500" r="2.5" opacity="0.85"/>
+    <circle cx="1650" cy="400" r="3" opacity="0.9"/>
+    <circle cx="550" cy="750" r="2.8" opacity="0.85"/>
+    <circle cx="1050" cy="800" r="3.2" opacity="0.9"/>
+    <circle cx="1550" cy="700" r="2.5" opacity="0.9"/>
+  </g>
+  
+  <!-- 钻石形状的亮星 -->
+  <g fill="#fff8dc" filter="url(#diamondStar)">
+    <polygon points="500,180 503,190 513,193 503,196 500,206 497,196 487,193 497,190" opacity="0.9"/>
+    <polygon points="1000,130 1004,143 1017,147 1004,151 1000,164 996,151 983,147 996,143" opacity="0.95"/>
+    <polygon points="1400,230 1403,240 1413,243 1403,246 1400,256 1397,246 1387,243 1397,240" opacity="0.9"/>
+    <polygon points="800,430 803,440 813,443 803,446 800,456 797,446 787,443 797,440" opacity="0.9"/>
+    <polygon points="1200,480 1204,493 1217,497 1204,501 1200,514 1196,501 1183,497 1196,493" opacity="0.85"/>
+    <polygon points="600,730 603,740 613,743 603,746 600,756 597,746 587,743 597,740" opacity="0.85"/>
+    <polygon points="1100,780 1103,790 1113,793 1103,796 1100,806 1097,796 1087,793 1097,790" opacity="0.9"/>
+  </g>
+  
+  <!-- 彩色星星点缀 -->
+  <circle cx="350" cy="280" r="1.5" fill="#ff6b6b" opacity="0.7"/>
+  <circle cx="650" cy="380" r="1.3" fill="#4ecdc4" opacity="0.7"/>
+  <circle cx="850" cy="180" r="1.4" fill="#ffe66d" opacity="0.75"/>
+  <circle cx="1250" cy="380" r="1.5" fill="#a8e6cf" opacity="0.7"/>
+  <circle cx="1450" cy="180" r="1.3" fill="#ff8b94" opacity="0.75"/>
+  <circle cx="1750" cy="300" r="1.4" fill="#c7ceea" opacity="0.7"/>
+  <circle cx="250" cy="550" r="1.5" fill="#ffd93d" opacity="0.75"/>
+  <circle cx="450" cy="650" r="1.3" fill="#6bcf7f" opacity="0.7"/>
+  <circle cx="950" cy="600" r="1.4" fill="#ff8b94" opacity="0.75"/>
+  <circle cx="1350" cy="650" r="1.5" fill="#4d96ff" opacity="0.7"/>
+  <circle cx="1850" cy="550" r="1.3" fill="#ffd93d" opacity="0.75"/>
+  
+  <!-- 银河光尘 -->
+  <ellipse cx="960" cy="400" rx="1000" ry="200" fill="url(#goldNebula)" opacity="0.3" transform="rotate(-10 960 400)"/>
+  
+  <!-- 远处的星云模糊 -->
+  <ellipse cx="300" cy="850" rx="400" ry="150" fill="#7b2cbf" opacity="0.08"/>
+  <ellipse cx="1600" cy="900" rx="350" ry="120" fill="#ffaa00" opacity="0.06"/>
+</svg>

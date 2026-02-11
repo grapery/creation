@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <!-- 天空到海洋的渐变 -->
+    <linearGradient id="skyToOcean" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0c1445;stop-opacity:1" />
+      <stop offset="35%" style="stop-color:#1e3a5f;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#2d5a87;stop-opacity:1" />
+      <stop offset="65%" style="stop-color:#1e4d6b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0f2d3d;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- 水面反光渐变 -->
+    <linearGradient id="waterReflection" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4a90e2;stop-opacity:0.3" />
+      <stop offset="50%" style="stop-color:#4a90e2;stop-opacity:0.1" />
+      <stop offset="100%" style="stop-color:#4a90e2;stop-opacity:0" />
+    </linearGradient>
+    
+    <!-- 星星发光 -->
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- 波浪滤镜 -->
+    <filter id="wave" x="0%" y="0%" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.01 0.005" numOctaves="2" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="20" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    
+    <!-- 月亮光晕 -->
+    <radialGradient id="moonGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#fff8dc;stop-opacity:0.8" />
+      <stop offset="50%" style="stop-color:#fff8dc;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#fff8dc;stop-opacity:0" />
+    </radialGradient>
+  </defs>
+  
+  <!-- 背景 -->
+  <rect width="100%" height="100%" fill="url(#skyToOcean)"/>
+  
+  <!-- 月亮 -->
+  <circle cx="1600" cy="150" r="60" fill="url(#moonGlow)" opacity="0.6"/>
+  <circle cx="1600" cy="150" r="40" fill="#fff8dc" opacity="0.9" filter="url(#glow)"/>
+  
+  <!-- 星星（只在天空部分） -->
+  <g fill="#ffffff" opacity="0.8">
+    <circle cx="100" cy="50" r="1.2"/>
+    <circle cx="300" cy="80" r="0.8" opacity="0.6"/>
+    <circle cx="500" cy="40" r="1.5" filter="url(#glow)"/>
+    <circle cx="700" cy="100" r="1"/>
+    <circle cx="900" cy="60" r="1.3"/>
+    <circle cx="1100" cy="90" r="0.9" opacity="0.7"/>
+    <circle cx="1300" cy="45" r="1.4" filter="url(#glow)"/>
+    <circle cx="1500" cy="110" r="1.1"/>
+    <circle cx="1700" cy="70" r="1.2"/>
+    <circle cx="1850" cy="95" r="0.8" opacity="0.6"/>
+    
+    <circle cx="150" cy="180" r="0.9" opacity="0.5"/>
+    <circle cx="400" cy="220" r="1.1"/>
+    <circle cx="600" cy="190" r="1.3" filter="url(#glow)"/>
+    <circle cx="850" cy="240" r="0.8" opacity="0.6"/>
+    <circle cx="1050" cy="200" r="1"/>
+    <circle cx="1250" cy="250" r="1.2"/>
+    <circle cx="1450" cy="210" r="0.9" opacity="0.7"/>
+    <circle cx="1650" cy="260" r="1.1"/>
+    <circle cx="1820" cy="230" r="1" opacity="0.5"/>
+  </g>
+  
+  <!-- 银河 -->
+  <ellipse cx="960" cy="280" rx="1000" ry="200" fill="#ffffff" opacity="0.05" transform="rotate(-10 960 280)"/>
+  <ellipse cx="960" cy="280" rx="800" ry="150" fill="#a8c5e2" opacity="0.08" transform="rotate(-10 960 280)"/>
+  
+  <!-- 海面 -->
+  <path d="M0,540 Q480,520 960,540 T1920,540 L1920,1080 L0,1080 Z" fill="#0f2d3d" opacity="0.3"/>
+  
+  <!-- 波浪层 -->
+  <g opacity="0.4">
+    <path d="M0,550 Q240,530 480,550 T960,550 T1440,550 T1920,550 L1920,560 Q1680,540 1440,560 T960,560 T480,560 T0,560 Z" fill="#2d5a87"/>
+    <path d="M0,570 Q240,550 480,570 T960,570 T1440,570 T1920,570 L1920,580 Q1680,560 1440,580 T960,580 T480,580 T0,580 Z" fill="#1e4d6b"/>
+    <path d="M0,590 Q240,570 480,590 T960,590 T1440,590 T1920,590 L1920,600 Q1680,580 1440,600 T960,600 T480,600 T0,600 Z" fill="#0f2d3d"/>
+  </g>
+  
+  <!-- 星星的倒影 -->
+  <g opacity="0.15" fill="#4a90e2">
+    <ellipse cx="1600" cy="650" rx="40" ry="80"/>
+    <ellipse cx="500" cy="620" rx="1.5" ry="3"/>
+    <ellipse cx="900" cy="640" rx="1.3" ry="2.6"/>
+    <ellipse cx="1300" cy="610" rx="1.4" ry="2.8"/>
+  </g>
+  
+  <!-- 水面闪光 -->
+  <g fill="#ffffff" opacity="0.3">
+    <ellipse cx="200" cy="700" rx="30" ry="3" opacity="0.2"/>
+    <ellipse cx="600" cy="750" rx="40" ry="4" opacity="0.15"/>
+    <ellipse cx="1000" cy="680" rx="50" ry="5" opacity="0.25"/>
+    <ellipse cx="1400" cy="720" rx="35" ry="3.5" opacity="0.2"/>
+    <ellipse cx="1800" cy="690" rx="45" ry="4.5" opacity="0.18"/>
+    
+    <ellipse cx="400" cy="800" rx="25" ry="2.5" opacity="0.12"/>
+    <ellipse cx="800" cy="850" rx="35" ry="3.5" opacity="0.15"/>
+    <ellipse cx="1200" cy="780" rx="30" ry="3" opacity="0.18"/>
+    <ellipse cx="1600" cy="820" rx="40" ry="4" opacity="0.14"/>
+  </g>
+  
+  <!-- 更多波浪 -->
+  <g opacity="0.2" fill="none" stroke="#4a90e2" stroke-width="1">
+    <path d="M0,650 Q480,630 960,650 T1920,650"/>
+    <path d="M0,700 Q480,680 960,700 T1920,700"/>
+    <path d="M0,800 Q480,780 960,800 T1920,800"/>
+    <path d="M0,900 Q480,880 960,900 T1920,900"/>
+  </g>
+</svg>
