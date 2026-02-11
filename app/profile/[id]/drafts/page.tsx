@@ -186,7 +186,7 @@ export default function ProfileDraftsPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-background flex items-center justify-center">
+            <div className="flex items-center justify-center py-20">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
         );
@@ -194,7 +194,7 @@ export default function ProfileDraftsPage() {
 
     if (!profileUser) {
         return (
-            <div className="min-h-screen bg-background flex items-center justify-center">
+            <div className="flex items-center justify-center py-20">
                 <div className="text-center space-y-4">
                     <h1 className="text-2xl font-bold">{t("profile.user_not_found", "User Not Found")}</h1>
                     <Button onClick={() => router.back()}>{t("common.go_back", "Go Back")}</Button>
@@ -206,7 +206,7 @@ export default function ProfileDraftsPage() {
     const totalLikes = profileUser.totalLikes || 0;
 
     return (
-        <div className="min-h-screen bg-background flex flex-col">
+        <div className="flex flex-col">
             {/* Profile Header - Improved version */}
             <ProfileHeader
                 user={profileUser}

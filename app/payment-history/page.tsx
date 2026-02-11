@@ -21,7 +21,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Loader2, ArrowLeft, Download, Search, Filter } from "lucide-react";
+import { Loader2, Download, Filter } from "lucide-react";
 import { payment, PaymentHistoryQuery } from "@/lib/api/payment";
 import { PaymentMethod, PaymentStatus, PaymentRecord } from "@/lib/types/payment";
 import { useTranslation } from "@/providers/language-provider";
@@ -141,185 +141,171 @@ export default function PaymentHistoryPage() {
     }
 
     return (
-        <div className="min-h-screen bg-background">
-            {/* Header */}
-            <div className="border-b">
-                <div className="container mx-auto px-4 py-4">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <Button variant="ghost" size="sm" onClick={() => router.back()}>
-                                <ArrowLeft className="h-4 w-4 mr-2" />
-                                Back
-                            </Button>
-                            <div>
-                                <h1 className="text-2xl font-bold">Payment History</h1>
-                                <p className="text-sm text-muted-foreground">
-                                    View and manage your payment records
-                                </p>
-                            </div>
-                        </div>
-                        <Button onClick={exportHistory} variant="outline" size="sm">
-                            <Download className="h-4 w-4 mr-2" />
-                            Export
-                        </Button>
-                    </div>
+        <div className="space-y-6">
+            {/* Page Header */}
+            <div className="flex items-center justify-between">
+                <div>
+                    <h2 className="text-2xl font-bold tracking-tight">Payment History</h2>
+                    <p className="text-muted-foreground">View and manage your payment records</p>
                 </div>
+                <Button onClick={exportHistory} variant="outline" size="sm">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export
+                </Button>
             </div>
 
             {/* Content */}
-            <div className="container mx-auto px-4 py-8">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Payment Records</CardTitle>
-                        <CardDescription>
-                            Total {total} payment{total !== 1 ? "s" : ""} found
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        {/* Filters */}
-                        <div className="flex gap-4 mb-6">
-                            <div className="flex items-center gap-2">
-                                <Filter className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-sm font-medium">Filters:</span>
-                            </div>
-                            <Select
-                                value={statusFilter}
-                                onValueChange={(value) => {
-                                    setStatusFilter(value as any);
-                                    setPage(1);
-                                }}
-                            >
-                                <SelectTrigger className="w-[180px]">
-                                    <SelectValue placeholder="Status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Statuses</SelectItem>
-                                    <SelectItem value={PaymentStatus.SUCCEEDED}>Succeeded</SelectItem>
-                                    <SelectItem value={PaymentStatus.PENDING}>Pending</SelectItem>
-                                    <SelectItem value={PaymentStatus.FAILED}>Failed</SelectItem>
-                                    <SelectItem value={PaymentStatus.REFUNDED}>Refunded</SelectItem>
-                                </SelectContent>
-                            </Select>
-
-                            <Select
-                                value={methodFilter}
-                                onValueChange={(value) => {
-                                    setMethodFilter(value as any);
-                                    setPage(1);
-                                }}
-                            >
-                                <SelectTrigger className="w-[180px]">
-                                    <SelectValue placeholder="Payment Method" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Methods</SelectItem>
-                                    <SelectItem value={PaymentMethod.STRIPE}>Card</SelectItem>
-                                    <SelectItem value={PaymentMethod.GOOGLE_PAY}>Google Pay</SelectItem>
-                                    <SelectItem value={PaymentMethod.APPLE_PAY}>Apple Pay</SelectItem>
-                                    <SelectItem value={PaymentMethod.ALIPAY}>Alipay</SelectItem>
-                                </SelectContent>
-                            </Select>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Payment Records</CardTitle>
+                    <CardDescription>
+                        Total {total} payment{total !== 1 ? "s" : ""} found
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    {/* Filters */}
+                    <div className="flex gap-4 mb-6">
+                        <div className="flex items-center gap-2">
+                            <Filter className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm font-medium">Filters:</span>
                         </div>
+                        <Select
+                            value={statusFilter}
+                            onValueChange={(value) => {
+                                setStatusFilter(value as any);
+                                setPage(1);
+                            }}
+                        >
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Statuses</SelectItem>
+                                <SelectItem value={PaymentStatus.SUCCEEDED}>Succeeded</SelectItem>
+                                <SelectItem value={PaymentStatus.PENDING}>Pending</SelectItem>
+                                <SelectItem value={PaymentStatus.FAILED}>Failed</SelectItem>
+                                <SelectItem value={PaymentStatus.REFUNDED}>Refunded</SelectItem>
+                            </SelectContent>
+                        </Select>
 
-                        {/* Table */}
-                        {isLoading ? (
-                            <div className="flex justify-center py-12">
-                                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                            </div>
-                        ) : payments.length === 0 ? (
-                            <div className="text-center py-12">
-                                <p className="text-muted-foreground">No payment records found</p>
-                            </div>
-                        ) : (
-                            <>
-                                <div className="rounded-md border">
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead>Date</TableHead>
-                                                <TableHead>Plan</TableHead>
-                                                <TableHead>Amount</TableHead>
-                                                <TableHead>Method</TableHead>
-                                                <TableHead>Status</TableHead>
-                                                <TableHead className="text-right">Actions</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {payments.map((payment) => (
-                                                <TableRow key={payment.id}>
-                                                    <TableCell className="font-medium">
-                                                        <div>
-                                                            <div>{new Date(payment.createdAt).toLocaleDateString()}</div>
-                                                            <div className="text-xs text-muted-foreground">
-                                                                {formatDistanceToNow(payment.createdAt, { addSuffix: true })}
-                                                            </div>
+                        <Select
+                            value={methodFilter}
+                            onValueChange={(value) => {
+                                setMethodFilter(value as any);
+                                setPage(1);
+                            }}
+                        >
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Payment Method" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Methods</SelectItem>
+                                <SelectItem value={PaymentMethod.STRIPE}>Card</SelectItem>
+                                <SelectItem value={PaymentMethod.GOOGLE_PAY}>Google Pay</SelectItem>
+                                <SelectItem value={PaymentMethod.APPLE_PAY}>Apple Pay</SelectItem>
+                                <SelectItem value={PaymentMethod.ALIPAY}>Alipay</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    {/* Table */}
+                    {isLoading ? (
+                        <div className="flex justify-center py-12">
+                            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                        </div>
+                    ) : payments.length === 0 ? (
+                        <div className="text-center py-12">
+                            <p className="text-muted-foreground">No payment records found</p>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="rounded-md border">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Date</TableHead>
+                                            <TableHead>Plan</TableHead>
+                                            <TableHead>Amount</TableHead>
+                                            <TableHead>Method</TableHead>
+                                            <TableHead>Status</TableHead>
+                                            <TableHead className="text-right">Actions</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {payments.map((payment) => (
+                                            <TableRow key={payment.id}>
+                                                <TableCell className="font-medium">
+                                                    <div>
+                                                        <div>{new Date(payment.createdAt).toLocaleDateString()}</div>
+                                                        <div className="text-xs text-muted-foreground">
+                                                            {formatDistanceToNow(payment.createdAt, { addSuffix: true })}
                                                         </div>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <span className="capitalize">{payment.planId.replace("_", " ")}</span>
-                                                        {payment.metadata?.productName && (
-                                                            <div className="text-xs text-muted-foreground">
-                                                                {payment.metadata.productName}
-                                                            </div>
-                                                        )}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <span className="font-semibold">
-                                                            {formatAmount(payment.amount, payment.currency)}
-                                                        </span>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <span className="text-sm">{getMethodLabel(payment.method)}</span>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <Badge className={getStatusColor(payment.status)}>
-                                                            <span className="capitalize">{payment.status}</span>
-                                                        </Badge>
-                                                    </TableCell>
-                                                    <TableCell className="text-right">
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            onClick={() => router.push(`/payment-history/${payment.id}`)}
-                                                        >
-                                                            View
-                                                        </Button>
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
-                                </div>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <span className="capitalize">{payment.planId.replace("_", " ")}</span>
+                                                    {payment.metadata?.productName && (
+                                                        <div className="text-xs text-muted-foreground">
+                                                            {payment.metadata.productName}
+                                                        </div>
+                                                    )}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <span className="font-semibold">
+                                                        {formatAmount(payment.amount, payment.currency)}
+                                                    </span>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <span className="text-sm">{getMethodLabel(payment.method)}</span>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Badge className={getStatusColor(payment.status)}>
+                                                        <span className="capitalize">{payment.status}</span>
+                                                    </Badge>
+                                                </TableCell>
+                                                <TableCell className="text-right">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() => router.push(`/payment-history/${payment.id}`)}
+                                                    >
+                                                        View
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
 
-                                {/* Pagination */}
-                                <div className="flex items-center justify-between mt-6">
-                                    <p className="text-sm text-muted-foreground">
-                                        Showing {(page - 1) * limit + 1} to {Math.min(page * limit, total)} of {total}
-                                    </p>
-                                    <div className="flex gap-2">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => setPage((p) => Math.max(1, p - 1))}
-                                            disabled={page === 1}
-                                        >
-                                            Previous
-                                        </Button>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => setPage((p) => p + 1)}
-                                            disabled={page * limit >= total}
-                                        >
-                                            Next
-                                        </Button>
-                                    </div>
+                            {/* Pagination */}
+                            <div className="flex items-center justify-between mt-6">
+                                <p className="text-sm text-muted-foreground">
+                                    Showing {(page - 1) * limit + 1} to {Math.min(page * limit, total)} of {total}
+                                </p>
+                                <div className="flex gap-2">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setPage((p) => Math.max(1, p - 1))}
+                                        disabled={page === 1}
+                                    >
+                                        Previous
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setPage((p) => p + 1)}
+                                        disabled={page * limit >= total}
+                                    >
+                                        Next
+                                    </Button>
                                 </div>
-                            </>
-                        )}
-                    </CardContent>
-                </Card>
-            </div>
+                            </div>
+                        </>
+                    )}
+                </CardContent>
+            </Card>
         </div>
     );
 }

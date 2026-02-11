@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -41,13 +40,11 @@ export default function CreateCharacterPage() {
     };
 
     return (
-        <div className="min-h-screen bg-background flex flex-col">
-            <Header />
-            <main className="flex-1 container max-w-lg px-4 py-8 mx-auto">
-                <div className="mb-8 text-center">
-                    <h1 className="text-2xl font-bold">Create Character</h1>
-                    <p className="text-muted-foreground">Bring a new personality to life</p>
-                </div>
+        <div className="max-w-lg mx-auto">
+            <div className="mb-8 text-center">
+                <h1 className="text-2xl font-bold">Create Character</h1>
+                <p className="text-muted-foreground">Bring a new personality to life</p>
+            </div>
 
                 <Card>
                     <CardHeader>
@@ -111,7 +108,6 @@ export default function CreateCharacterPage() {
                         </Button>
                     </CardFooter>
                 </Card>
-            </main>
         </div>
     );
 }

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { X, Share2, Users, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Share2, Users, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { stories } from "@/lib/api/stories";
 import { showSuccess, showError } from "@/lib/toast-utils";
 import { StyleConfig, CreateStoryRequest } from "@/lib/types";
@@ -164,21 +164,15 @@ export default function CreateStory({ storyId }: CreateStoryProps) {
     };
 
     return (
-        <div className="min-h-screen bg-background flex flex-col">
-            {/* Custom Top Bar */}
-            <div className="h-14 border-b flex items-center justify-between px-4 bg-card">
-                <button
-                    onClick={() => router.back()}
-                    className="text-foreground hover:text-foreground/70 transition-colors"
-                >
-                    <X className="w-5 h-5" />
-                </button>
-                <div className="font-semibold">New Story</div>
-                <div className="w-10"></div>
+        <div className="space-y-6">
+            {/* Page Header */}
+            <div>
+                <h2 className="text-2xl font-bold tracking-tight">New Story</h2>
+                <p className="text-muted-foreground">Create a new story with AI assistance.</p>
             </div>
 
             {/* Tab Navigation */}
-            <div className="border-b border-border/50 bg-card">
+            <div className="border-b border-border/50">
                 <div className="flex items-center justify-center max-w-md mx-auto">
                     {tabs.map((tab) => (
                         <button
@@ -197,10 +191,10 @@ export default function CreateStory({ storyId }: CreateStoryProps) {
             </div>
 
             {/* Content */}
-            <main className="flex-1 max-w-2xl mx-auto p-4 overflow-y-auto">
+            <div className="max-w-2xl mx-auto space-y-6">
                 {selectedTab === 0 && (
                     <div className="space-y-6">
-                        <h2 className="text-xl font-semibold text-foreground">Story Information</h2>
+                        <h3 className="text-xl font-semibold text-foreground">Story Information</h3>
 
                         {/* Title Field */}
                         <div className="space-y-2">
@@ -315,12 +309,12 @@ export default function CreateStory({ storyId }: CreateStoryProps) {
 
                         {/* AI Enrichment Section */}
                         <div className="p-4 bg-purple-50/10 border border-purple-500/20 rounded-xl">
-                            <h3 className="text-base font-semibold text-purple-900 mb-3 flex items-center gap-2">
+                            <h4 className="text-base font-semibold text-purple-900 mb-3 flex items-center gap-2">
                                 <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M17 20h5v-2a3 3 0 006 1.061l-.431.431.061-3.061L16 16z" />
                                 </svg>
                                 AI Smart Creation
-                            </h3>
+                            </h4>
                             <p className="text-sm text-muted-foreground mb-4">AI can help enhance your story with descriptions and images</p>
 
                             {/* AI Options */}
@@ -406,7 +400,7 @@ export default function CreateStory({ storyId }: CreateStoryProps) {
                             {/* Style Selection */}
                             {(generateCover || generatePoster || generateBackground) && (
                                 <div className="space-y-3 pt-3 border-t border-purple-200/50">
-                                    <h4 className="text-sm font-medium text-purple-900">Art Style</h4>
+                                    <h5 className="text-sm font-medium text-purple-900">Art Style</h5>
 
                                     {/* Search */}
                                     <div className="relative">
@@ -522,7 +516,7 @@ export default function CreateStory({ storyId }: CreateStoryProps) {
 
                 {selectedTab === 1 && (
                     <div className="space-y-4">
-                        <h2 className="text-xl font-semibold text-foreground">Panels</h2>
+                        <h3 className="text-xl font-semibold text-foreground">Panels</h3>
 
                         {/* Header with Add Button */}
                         <div className="flex items-center justify-between">
@@ -558,7 +552,7 @@ export default function CreateStory({ storyId }: CreateStoryProps) {
 
                 {selectedTab === 2 && (
                     <div className="space-y-4">
-                        <h2 className="text-xl font-semibold text-foreground">Cast</h2>
+                        <h3 className="text-xl font-semibold text-foreground">Cast</h3>
 
                         {/* Header with Add Button */}
                         <div className="flex items-center justify-between">
@@ -591,40 +585,39 @@ export default function CreateStory({ storyId }: CreateStoryProps) {
                         </div>
                     </div>
                 )}
-            </main>
-
-            {/* Action Buttons */}
-            <div className="flex gap-3 p-4 bg-card border-t border-border">
-                <button
-                    onClick={() => router.back()}
-                    className="flex-1 py-3 border border-border bg-card hover:bg-muted text-foreground font-medium rounded-lg disabled:opacity-50"
-                >
-                    Cancel
-                </button>
-                <button
-                    onClick={handleCreate}
-                    disabled={title.trim().length === 0 || isAIProcessing}
-                    className={`flex-1 py-3 font-semibold rounded-lg transition-colors ${isAIProcessing ? "bg-gray-400" : "bg-black hover:bg-gray-800 text-white"
-                        }`}
-                >
-                    {isAIProcessing ? (
-                        <>
-                            <div className="w-4 h-4 border-2 border-white/50 border-t-transparent rounded-full animate-spin mr-2" />
-                            Creating...
-                        </>
-                    ) : useAIEnrich || generateCover || generatePoster || generateBackground ? (
-                        <>
-                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M17 20h5v-2a3 3 0 006 1.061l-.431.431.061-3.061L16 16z" />
-                            </svg>
-                            AI Create
-                        </>
-                    ) : (
-                        <>
-                            Create Story
-                        </>
-                    )}
-                </button>
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-6 border-t">
+                    <button
+                        onClick={() => router.back()}
+                        className="flex-1 py-3 border border-border bg-card hover:bg-muted text-foreground font-medium rounded-lg disabled:opacity-50"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={handleCreate}
+                        disabled={title.trim().length === 0 || isAIProcessing}
+                        className={`flex-1 py-3 font-semibold rounded-lg transition-colors ${isAIProcessing ? "bg-gray-400" : "bg-black hover:bg-gray-800 text-white"
+                            }`}
+                    >
+                        {isAIProcessing ? (
+                            <>
+                                <div className="w-4 h-4 border-2 border-white/50 border-t-transparent rounded-full animate-spin mr-2" />
+                                Creating...
+                            </>
+                        ) : useAIEnrich || generateCover || generatePoster || generateBackground ? (
+                            <>
+                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M17 20h5v-2a3 3 0 006 1.061l-.431.431.061-3.061L16 16z" />
+                                </svg>
+                                AI Create
+                            </>
+                        ) : (
+                            <>
+                                Create Story
+                            </>
+                        )}
+                    </button>
+                </div>
             </div>
         </div>
     );

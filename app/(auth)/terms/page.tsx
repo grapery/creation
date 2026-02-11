@@ -1,11 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, Clock, FileText } from "lucide-react";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import { Loader2, FileText } from "lucide-react";
 
 type MarkdownBlock =
     | { type: "heading"; level: number; text: string }
@@ -307,99 +304,82 @@ export default function TermsOfServicePage() {
     }
 
     return (
-        <div className="min-h-screen bg-background">
-            {/* Top Bar */}
-            <div className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                <div className="container mx-auto px-4 py-3">
-                    <div className="flex items-center justify-between">
-                        <Link href="/login">
-                            <Button variant="ghost" size="sm" className="gap-2">
-                                <ArrowLeft className="h-4 w-4" />
-                                Back
-                            </Button>
-                        </Link>
-
-                        <Button variant="ghost" size="sm" onClick={() => window.history.back()}>
-                            Done
-                        </Button>
-                    </div>
-                </div>
+        <div className="container max-w-6xl px-4 py-6 mx-auto">
+            {/* Header */}
+            <div className="mb-6">
+                <h1 className="text-2xl font-bold flex items-center gap-2">
+                    <FileText className="h-6 w-6 text-primary" />
+                    Terms of Service
+                </h1>
+                {lastUpdated && (
+                    <p className="text-muted-foreground mt-1">
+                        Last Updated: {lastUpdated}
+                    </p>
+                )}
             </div>
 
             {/* Content */}
-            <div className="container mx-auto px-4 py-8 max-w-4xl">
-                {isLoading ? (
-                    <div className="flex items-center justify-center py-20">
-                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    </div>
-                ) : error ? (
-                    <div className="flex items-center justify-center py-20 text-destructive">
-                        {error}
-                    </div>
-                ) : (
-                    <Card className="border-0 shadow-none bg-transparent">
-                        <CardContent className="space-y-6">
-                            {/* Last Updated */}
-                            {lastUpdated && (
-                                <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-secondary/50">
-                                    <Clock className="h-4 w-4 text-muted-foreground" />
-                                    <span className="text-sm text-muted-foreground">
-                                        Last Updated: {lastUpdated}
-                                    </span>
+            {isLoading ? (
+                <div className="flex items-center justify-center py-20">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+            ) : error ? (
+                <div className="flex items-center justify-center py-20 text-destructive">
+                    {error}
+                </div>
+            ) : (
+                <Card className="border shadow-sm">
+                    <CardContent className="space-y-6 p-6">
+                        {/* Document Content */}
+                        <div className="space-y-6">
+                            {content.map((block, index) => (
+                                <div key={index}>
+                                    {block.type === "heading" && (
+                                        <h2 className={`font-bold ${block.level === 1 ? "text-3xl" :
+                                                block.level === 2 ? "text-2xl" :
+                                                    "text-xl"
+                                            }`}>
+                                            {block.text}
+                                        </h2>
+                                    )}
+
+                                    {block.type === "paragraph" && (
+                                        <p className="text-base leading-relaxed text-foreground">
+                                            {parseInlineMarkdown(block.text)}
+                                        </p>
+                                    )}
+
+                                    {block.type === "bullet" && (
+                                        <ul className="space-y-2 pl-6">
+                                            {block.items.map((item, i) => (
+                                                <li key={i} className="flex gap-2">
+                                                    <span className="font-semibold text-muted-foreground">•</span>
+                                                    <span className="text-base leading-relaxed">
+                                                        {parseInlineMarkdown(item)}
+                                                    </span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+
+                                    {block.type === "ordered" && (
+                                        <ol className="space-y-2 pl-6 list-decimal">
+                                            {block.items.map((item, i) => (
+                                                <li key={i} className="flex gap-2">
+                                                    <span className="font-semibold text-muted-foreground">{i + 1}.</span>
+                                                    <span className="text-base leading-relaxed">
+                                                        {parseInlineMarkdown(item)}
+                                                    </span>
+                                                </li>
+                                            ))}
+                                        </ol>
+                                    )}
                                 </div>
-                            )}
-
-                            {/* Document Content */}
-                            <div className="space-y-6">
-                                {content.map((block, index) => (
-                                    <div key={index}>
-                                        {block.type === "heading" && (
-                                            <h2 className={`font-bold ${block.level === 1 ? "text-3xl" :
-                                                    block.level === 2 ? "text-2xl" :
-                                                        "text-xl"
-                                                }`}>
-                                                {block.text}
-                                            </h2>
-                                        )}
-
-                                        {block.type === "paragraph" && (
-                                            <p className="text-base leading-relaxed text-foreground">
-                                                {parseInlineMarkdown(block.text)}
-                                            </p>
-                                        )}
-
-                                        {block.type === "bullet" && (
-                                            <ul className="space-y-2 pl-6">
-                                                {block.items.map((item, i) => (
-                                                    <li key={i} className="flex gap-2">
-                                                        <span className="font-semibold text-muted-foreground">•</span>
-                                                        <span className="text-base leading-relaxed">
-                                                            {parseInlineMarkdown(item)}
-                                                        </span>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        )}
-
-                                        {block.type === "ordered" && (
-                                            <ol className="space-y-2 pl-6 list-decimal">
-                                                {block.items.map((item, i) => (
-                                                    <li key={i} className="flex gap-2">
-                                                        <span className="font-semibold text-muted-foreground">{i + 1}.</span>
-                                                        <span className="text-base leading-relaxed">
-                                                            {parseInlineMarkdown(item)}
-                                                        </span>
-                                                    </li>
-                                                ))}
-                                            </ol>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
-                )}
-            </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
         </div>
     );
 }

@@ -61,26 +61,17 @@ function WizardContent() {
     };
 
     return (
-        <div className="min-h-screen bg-background flex flex-col">
-            {/* Header */}
-            <div className="h-14 border-b flex items-center justify-between px-4 bg-card">
-                <button
-                    onClick={() => router.back()}
-                    className="text-foreground hover:text-foreground/70 transition-colors"
-                >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-                <div className="font-semibold">Creation Wizard</div>
-                <div className="w-10"></div>
+        <div className="space-y-6">
+            <div className="text-center">
+                <h2 className="text-2xl font-bold tracking-tight">Creation Wizard</h2>
+                <p className="text-muted-foreground">Create your story step by step.</p>
             </div>
 
             {/* Step Indicator */}
             <StepIndicator currentStep={step} />
 
             {/* Content */}
-            <main className="flex-1 container max-w-3xl mx-auto p-4">
+            <div className="max-w-3xl mx-auto">
                 {step === 'setup' && (
                     <SetupStep
                         data={data}
@@ -125,14 +116,14 @@ function WizardContent() {
                         onPublish={handlePublish}
                     />
                 )}
-            </main>
+            </div>
         </div>
     );
 }
 
 export default function WizardPage() {
     return (
-        <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+        <Suspense fallback={<div className="flex items-center justify-center py-20">Loading...</div>}>
             <WizardContent />
         </Suspense>
     );

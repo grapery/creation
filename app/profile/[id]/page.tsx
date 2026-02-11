@@ -204,7 +204,7 @@ export default function ProfilePage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-background flex items-center justify-center">
+            <div className="flex items-center justify-center py-20">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
         );
@@ -212,7 +212,7 @@ export default function ProfilePage() {
 
     if (!profileUser) {
         return (
-            <div className="min-h-screen bg-background flex items-center justify-center">
+            <div className="flex items-center justify-center py-20">
                 <div className="text-center">
                     <h1 className="text-2xl font-bold mb-4">{t("profile.user_not_found", "User Not Found")}</h1>
                     <Button onClick={() => router.back()}>{t("common.go_back", "Go Back")}</Button>
@@ -224,7 +224,7 @@ export default function ProfilePage() {
     const totalLikes = profileUser.totalLikes || 0;
 
     return (
-        <div className="min-h-screen bg-background flex flex-col">
+        <div className="flex flex-col">
             {/* Profile Header - Improved version */}
             <ProfileHeader
                 user={profileUser}
@@ -287,7 +287,7 @@ function ActivityTabContent({ userId }: { userId: string }) {
     }, [userId, selectedTimeRange]);
 
     return (
-        <main className="flex-1 container max-w-6xl mx-auto px-4 py-8">
+        <div className="py-4">
             <div className="space-y-4">
                 {/* Heatmap Card */}
                 <Card>
@@ -311,6 +311,6 @@ function ActivityTabContent({ userId }: { userId: string }) {
                     </CardContent>
                 </Card>
             </div>
-        </main>
+        </div>
     );
 }
