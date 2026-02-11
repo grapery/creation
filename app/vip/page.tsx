@@ -66,7 +66,7 @@ export default function VIPPage() {
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <Header />
-            <main className="flex-1 container max-w-6xl px-4 py-12 mx-auto">
+            <main className="flex-1 container max-w-6xl px-4 py-6 md:px-6 mx-auto">
                 <div className="text-center max-w-2xl mx-auto mb-12 space-y-4">
                     <div className="mx-auto h-16 w-16 rounded-full bg-yellow-500/10 flex items-center justify-center mb-6">
                         <Crown className="h-8 w-8 text-yellow-500" />
