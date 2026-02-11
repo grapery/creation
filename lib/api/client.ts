@@ -202,7 +202,7 @@ const createClient = (serviceType: ServiceType = ServiceType.MAIN): AxiosInstanc
                 // This prevents console errors when backend is down
                 if (status >= 500 || status === 0) {
                     // Return a safe empty object that matches common response formats
-                    return Promise.resolve({ data: [], stories: [], storyboards: [], groups: [], total: 0 } as any);
+                    return Promise.resolve({ data: [], stories: [], storyboards: [], total: 0 } as any);
                 }
 
                 return Promise.reject(new APIError(message, status, error));
@@ -232,7 +232,7 @@ const createClient = (serviceType: ServiceType = ServiceType.MAIN): AxiosInstanc
                     console.warn('[API] Backend not available - returning empty data');
                 }
                 // Return empty data instead of throwing error for data endpoints
-                return Promise.resolve({ data: [], stories: [], storyboards: [], groups: [], total: 0 } as any);
+                return Promise.resolve({ data: [], stories: [], storyboards: [], total: 0 } as any);
             }
 
             // For other errors, still throw

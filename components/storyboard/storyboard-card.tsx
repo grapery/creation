@@ -62,7 +62,7 @@ export function StoryboardCard({
 
     return (
         <div
-            className="group bg-card border border-border/60 hover:border-border/80 rounded-[16px] p-4 cursor-pointer hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5"
+            className="group floating-card p-4 cursor-pointer card-press"
             onClick={onTap}
         >
             <div className="flex gap-4">
@@ -161,7 +161,7 @@ export function StoryboardCard({
                 <div className="flex items-center gap-4 text-xs text-muted-foreground font-medium">
                     <div className="flex items-center gap-1.5 hover:text-foreground transition-colors">
                         <Heart className="w-3.5 h-3.5" />
-                        <span>{formatCount(storyboard.likes)} {t("groups.likes").toLowerCase()}</span>
+                        <span>{formatCount(storyboard.likes)} {t("common.likes").toLowerCase()}</span>
                     </div>
                     <div className="flex items-center gap-1.5 hover:text-foreground transition-colors">
                         <MessageSquare className="w-3.5 h-3.5" />

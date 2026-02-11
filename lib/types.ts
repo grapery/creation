@@ -22,9 +22,6 @@ export interface User {
     updatedAt?: number;
     status?: string;
 
-    // Group Statistics
-    groupsCount?: number;      // Number of groups the user has joined
-    groupsCreated?: number;    // Number of groups created by this user
     storyboardCount?: number;
 
     // Follow Status
@@ -135,158 +132,6 @@ export interface TokenUsage {
     resetAt: number;                     // Timestamp when quota resets
 }
 
-// Group Models
-export interface BranchGroup {
-    id: string;
-    name: string;
-    description?: string;
-    avatar?: string;
-    coverImage?: string;
-    displayImage?: string; // For display purposes
-    ownerId: string;
-    isPublic: boolean;
-    members?: number;
-    stories?: number;
-    memberCount?: number;
-    storyCount?: number;
-    followers?: number;
-    blockedCount?: number;
-    createdAt?: string; // string in Go/JSON typically
-    updatedAt?: string;
-    myRole?: string; // 'owner', 'admin', 'member'
-    isFollowing?: boolean;
-    creator?: {
-        id: string;
-        username?: string;
-        displayName?: string;
-        avatar?: string;
-    };
-}
-
-export interface GroupMember {
-    id: string;
-    userId: string;
-    groupId: string;
-    role: 'owner' | 'admin' | 'member';
-    joinedAt: number;
-    user: {
-        id: string;
-        username: string;
-        displayName?: string;
-        avatar?: string;
-    };
-}
-
-export interface GroupInvite {
-    id: string;
-    groupId: string;
-    invitedBy: string;
-    status: 'pending' | 'accepted' | 'rejected';
-    createdAt: number;
-    group?: {
-        id: string;
-        name: string;
-        avatar?: string;
-        description?: string;
-    };
-    inviter?: {
-        id: string;
-        username?: string;
-        displayName?: string;
-        avatar?: string;
-    };
-}
-
-export interface GroupBlacklist {
-    id: string;
-    groupId: string;
-    userId: string;
-    blockedBy: string;
-    reason?: string;
-    createdAt: number;
-    group?: {
-        id: string;
-        name: string;
-        avatar?: string;
-    };
-    user?: {
-        id: string;
-        username: string;
-        displayName?: string;
-        avatar?: string;
-    };
-    admin?: {
-        id: string;
-        username: string;
-        displayName?: string;
-        avatar?: string;
-    };
-}
-
-export interface GroupBlacklistInfo {
-    id: string;
-    groupId: string;
-    userId: string;
-    blockedBy: string;
-    reason?: string;
-    createdAt: number;
-    user?: {
-        id: string;
-        username: string;
-        displayName?: string;
-        avatar?: string;
-    };
-    admin?: {
-        id: string;
-        username: string;
-        displayName?: string;
-        avatar?: string;
-    };
-}
-
-export enum GroupActivityType {
-    STORY_CREATED = 'story_created',
-    STORYBOARD_CREATED = 'storyboard_created',
-    MEMBER_JOINED = 'member_joined',
-    PANEL_ADDED = 'panel_added',
-    COMMENT = 'comment',
-    UNKNOWN = 'unknown'
-}
-
-export interface GroupActivity {
-    id: string;
-    groupId: string;
-    userId: string;
-    type: GroupActivityType;
-    targetId?: string;
-    targetName: string;
-    targetImage?: string;
-    createdAt: number;
-    user: {
-        id: string;
-        username: string;
-        displayName?: string;
-        avatar?: string;
-    };
-}
-
-export interface ActivityHeatmapData {
-    date: string;
-    count: number;
-}
-
-export enum ActivityTimeRange {
-    TODAY = 'today',
-    WEEK = 'week',
-    MONTH = 'month'
-}
-
-export interface ActivityHeatmapResponse {
-    data: ActivityHeatmapData[];
-    totalCount: number;
-    timeRange: ActivityTimeRange;
-}
-
 // Character Models
 export interface Character {
     id: string;
@@ -355,8 +200,7 @@ export interface Story {
     cover?: string;
     coverImage?: string; // Backend field name
     authorId: string;
-    groupId?: string;
-    status: number; // 0: draft, 1: published
+    status: 'draft' | 'published' | 'rendering';
     viewCount?: number;
     likeCount?: number;
     commentCount?: number;
@@ -367,13 +211,50 @@ export interface Story {
     isLiked?: boolean;
     likes?: number; // Alias for likeCount
     followers?: number; // Number of followers
-    panels?: number; // Number of panels
+    panels?: number; // Number of panels (alias for storyboardCount)
     storyboardCount?: number; // Number of storyboards
     characterCount?: number; // Number of characters
     genre?: string; // Story genre
+    
+    // AI Enrichment fields
+    isCollaborationOpen?: boolean; // Whether anyone can edit
+    rootStoryboardId?: string; // Root storyboard ID
+    originalDescription?: string; // User's original description before AI enrichment
+    enrichedDescription?: string; // AI enriched description
+    isAIEnriched?: boolean; // Whether AI enrichment was applied
+    aiEnrichedAt?: number; // When AI enrichment was done
+    coverGeneratedByAI?: boolean; // Whether cover was AI generated
+    posterImage?: string; // AI generated poster image URL
+    backgroundImage?: string; // AI generated background image URL
+    useAI?: boolean; // Whether AI assistance is enabled
+    aiAssistanceOptions?: AIAssistanceOptions; // AI assistance configuration
+    
+    // Token consumption
+    tokensUsed?: number; // Total tokens used
+    textTokensUsed?: number; // Text generation tokens
+    imageTokensUsed?: number; // Image generation tokens
+    aiGenerationCost?: number; // AI generation cost in credits
+    
+    // Source tracking
+    sourceFragmentId?: string; // Source fragment ID if converted from fragment
+    
+    // Default path (for story navigation)
+    defaultPathNodeIds?: string[]; // Default path node IDs
+    defaultPathUpdatedAt?: number; // When default path was last updated
+    defaultPathType?: 'manual' | 'auto'; // How default path was set
+    
+    // Relations
     characters?: Character[]; // Characters in the story
     scenes?: StoryScene[]; // Scenes in the story
     contributors?: Contributor[]; // Contributors to the story
+}
+
+// AI Assistance Options
+export interface AIAssistanceOptions {
+    generateMetadata?: boolean; // Generate title/description
+    generateVisuals?: boolean; // Generate background/cover
+    assistStoryboard?: boolean; // AI assist with storyboards
+    generateVideo?: boolean; // Generate video (optional)
 }
 
 // AI Style Configuration
@@ -384,7 +265,6 @@ export interface StyleConfig {
     name: string;
     description?: string;
     preview_image?: string;
-    group_id?: string;
     is_public?: boolean;
     created_at?: number;
 }
@@ -393,11 +273,11 @@ export interface StyleConfig {
 export interface CreateStoryRequest {
     title: string;
     description?: string;
-    coverImage?: string; // Backend expects cover_image, client adapter handles mapping or backend accepts camelCase
+    coverImage?: string;
     genre?: string;
-    status?: string | number;
-    groupId?: string;
+    status?: 'draft' | 'published';
     defaultSceneCount?: number;
+    tags?: string[];
 
     // AI Enrichment
     useAIEnrich?: boolean;
@@ -454,6 +334,24 @@ export interface RenderTask {
 export interface RenderStoryResponse {
     story?: Story;
     taskId?: string;
+}
+
+// Activity Heatmap Types
+export interface ActivityHeatmapData {
+    date: string;
+    count: number;
+}
+
+export enum ActivityTimeRange {
+    TODAY = 'today',
+    WEEK = 'week',
+    MONTH = 'month'
+}
+
+export interface ActivityHeatmapResponse {
+    data: ActivityHeatmapData[];
+    totalCount: number;
+    timeRange: ActivityTimeRange;
 }
 
 export interface StoryboardCharacterRef {

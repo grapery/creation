@@ -1,12 +1,20 @@
-import { request } from './client';
+import { paymentClient, request } from './client';
 import {
     PaymentMethod,
     PaymentRequest,
     PaymentResponse,
     PaymentRecord,
     PaymentStatus,
-    PaymentNotificationType,
 } from '../types/payment';
+
+// Helper to make requests to payment service
+const paymentServiceRequest = async <T>(
+    endpoint: string,
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET',
+    body?: any
+): Promise<T> => {
+    return request(endpoint, method, body, paymentClient);
+};
 
 export interface PaymentHistoryResponse {
     payments: PaymentRecord[];
@@ -24,45 +32,41 @@ export interface PaymentHistoryQuery {
     endDate?: number;
 }
 
+// Note: Web payment endpoints are on vippay service at /api/vippay/web/payments
+// Backend routes:
+// POST /api/vippay/web/payments - Create payment
+// GET /api/vippay/web/payments/:id - Get payment
+// GET /api/vippay/web/payments/user/:userId - Get user payments
+
 export const payment = {
     /**
-     * Create a payment intent
+     * Create a payment
+     * Uses /api/vippay/web/payments on payment service
+     * Payment provider (stripe/alipay/etc.) is specified in the request data
      */
     createPayment: async (data: PaymentRequest): Promise<PaymentResponse> => {
-        return request('/api/payments/create', 'POST', data);
-    },
-
-    /**
-     * Confirm a payment (for Stripe, etc.)
-     */
-    confirmPayment: async (paymentId: string, paymentMethodId?: string): Promise<PaymentResponse> => {
-        return request('/api/payments/confirm', 'POST', {
-            paymentId,
-            paymentMethodId,
-        });
+        return paymentServiceRequest('/api/vippay/web/payments', 'POST', data);
     },
 
     /**
      * Get payment status
+     * Uses /api/vippay/web/payments/:id on payment service
      */
     getPaymentStatus: async (paymentId: string): Promise<{
         status: PaymentStatus;
         payment?: PaymentRecord;
     }> => {
-        return request(`/api/payments/${paymentId}/status`);
-    },
-
-    /**
-     * Cancel a payment
-     */
-    cancelPayment: async (paymentId: string): Promise<{ success: boolean }> => {
-        return request(`/api/payments/${paymentId}/cancel`, 'POST');
+        return paymentServiceRequest(`/api/vippay/web/payments/${paymentId}`);
     },
 
     /**
      * Get payment history
+     * Uses /api/vippay/web/payments/user/:userId on payment service
      */
-    getPaymentHistory: async (query: PaymentHistoryQuery = {}): Promise<PaymentHistoryResponse> => {
+    getPaymentHistory: async (
+        userId: string,
+        query: PaymentHistoryQuery = {}
+    ): Promise<PaymentHistoryResponse> => {
         const { page = 1, limit = 20, status, method, startDate, endDate } = query;
         const params = new URLSearchParams({
             limit: limit.toString(),
@@ -74,90 +78,127 @@ export const payment = {
         if (startDate) params.append('startDate', startDate.toString());
         if (endDate) params.append('endDate', endDate.toString());
 
-        return request(`/api/payments/history?${params.toString()}`);
+        return paymentServiceRequest(
+            `/api/vippay/web/payments/user/${userId}?${params.toString()}`
+        );
     },
 
     /**
      * Get payment by ID
      */
     getPaymentById: async (paymentId: string): Promise<PaymentRecord> => {
-        return request(`/api/payments/${paymentId}`);
+        return paymentServiceRequest(`/api/vippay/web/payments/${paymentId}`);
+    },
+
+    // Note: The following methods are NOT IMPLEMENTED in backend
+    // They are kept as stubs for future implementation
+
+    /**
+     * Cancel a payment
+     * @deprecated Not implemented in backend
+     */
+    cancelPayment: async (_paymentId: string): Promise<{ success: boolean }> => {
+        console.warn('Cancel payment is not implemented in backend');
+        throw new Error('Not implemented');
+    },
+
+    /**
+     * Confirm a payment (for Stripe, etc.)
+     * @deprecated Not implemented in backend - use webhook instead
+     */
+    confirmPayment: async (
+        _paymentId: string,
+        _paymentMethodId?: string
+    ): Promise<PaymentResponse> => {
+        console.warn('Confirm payment is not implemented in backend - use webhook');
+        throw new Error('Not implemented');
     },
 
     /**
      * Create Stripe payment intent
+     * @deprecated Use createPayment with provider: 'stripe' instead
      */
-    createStripePayment: async (planId: string): Promise<{
+    createStripePayment: async (_planId: string): Promise<{
         clientSecret: string;
         paymentIntentId: string;
         amount: number;
         currency: string;
     }> => {
-        return request('/api/payments/stripe/create-intent', 'POST', { planId });
+        console.warn('createStripePayment is deprecated - use createPayment with provider: "stripe"');
+        throw new Error('Not implemented - use createPayment with provider: "stripe"');
     },
 
     /**
      * Create Alipay payment
+     * @deprecated Use createPayment with provider: 'alipay' instead
      */
-    createAlipayPayment: async (planId: string): Promise<{
+    createAlipayPayment: async (_planId: string): Promise<{
         paymentUrl: string;
         qrCode: string;
         outTradeNo: string;
         orderId: string;
     }> => {
-        return request('/api/payments/alipay/create', 'POST', { planId });
+        console.warn('createAlipayPayment is deprecated - use createPayment with provider: "alipay"');
+        throw new Error('Not implemented - use createPayment with provider: "alipay"');
     },
 
     /**
      * Create Google Pay payment
+     * @deprecated Use createPayment with provider: 'googlepay' instead
      */
-    createGooglePayPayment: async (planId: string, paymentData: any): Promise<PaymentResponse> => {
-        return request('/api/payments/google-pay/create', 'POST', {
-            planId,
-            paymentData,
-        });
+    createGooglePayPayment: async (_planId: string, _paymentData: any): Promise<PaymentResponse> => {
+        console.warn('createGooglePayPayment is deprecated - use createPayment with provider: "googlepay"');
+        throw new Error('Not implemented - use createPayment with provider: "googlepay"');
     },
 
     /**
      * Create Apple Pay payment
+     * @deprecated Use createPayment with provider: 'applepay' instead
      */
-    createApplePayPayment: async (planId: string, paymentData: any): Promise<PaymentResponse> => {
-        return request('/api/payments/apple-pay/create', 'POST', {
-            planId,
-            paymentData,
-        });
+    createApplePayPayment: async (_planId: string, _paymentData: any): Promise<PaymentResponse> => {
+        console.warn('createApplePayPayment is deprecated - use createPayment with provider: "applepay"');
+        throw new Error('Not implemented - use createPayment with provider: "applepay"');
     },
 
     /**
      * Request refund
+     * @deprecated Not implemented in backend
      */
-    requestRefund: async (paymentId: string, reason?: string): Promise<{
+    requestRefund: async (
+        _paymentId: string,
+        _reason?: string
+    ): Promise<{
         success: boolean;
         refundId?: string;
         error?: string;
     }> => {
-        return request(`/api/payments/${paymentId}/refund`, 'POST', { reason });
+        console.warn('Request refund is not implemented in backend');
+        throw new Error('Not implemented');
     },
 
     /**
      * Get payment notifications settings
+     * @deprecated Not implemented in backend
      */
     getNotificationSettings: async (): Promise<{
         emailEnabled: boolean;
         pushEnabled: boolean;
-        types: PaymentNotificationType[];
+        types: string[];
     }> => {
-        return request('/api/payments/notifications/settings');
+        console.warn('Notification settings are not implemented in backend');
+        throw new Error('Not implemented');
     },
 
     /**
      * Update notification settings
+     * @deprecated Not implemented in backend
      */
-    updateNotificationSettings: async (settings: {
+    updateNotificationSettings: async (_settings: {
         emailEnabled?: boolean;
         pushEnabled?: boolean;
-        types?: PaymentNotificationType[];
+        types?: string[];
     }): Promise<{ success: boolean }> => {
-        return request('/api/payments/notifications/settings', 'PUT', settings);
+        console.warn('Notification settings are not implemented in backend');
+        throw new Error('Not implemented');
     },
 };

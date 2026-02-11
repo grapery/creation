@@ -1,4 +1,4 @@
-import { apiClient, request } from './client';
+import { request } from './client';
 import { Story } from '../types';
 
 export const stories = {
@@ -26,21 +26,62 @@ export const stories = {
         return request(`/api/stories/${id}`, 'PUT', data);
     },
 
-    like: async (id: string) => request(`/api/stories/${id}/like`, 'POST'),
-    unlike: async (id: string) => request(`/api/stories/${id}/like`, 'DELETE'),
+    // Like/Unlike story
+    // Note: Using /api/likes endpoint with likeableType and likeableId
+    like: async (id: string) => request('/api/likes', 'POST', {
+        likeableType: 'story',
+        likeableId: id
+    }),
+    unlike: async (id: string) => request('/api/likes', 'DELETE', {
+        likeableType: 'story',
+        likeableId: id
+    }),
+
+    // Follow/Unfollow story
+    // Note: Using /api/follows endpoint with followableType and followableID
+    follow: async (id: string) => request('/api/follows', 'POST', {
+        followableType: 'story',
+        followableId: id
+    }),
+    unfollow: async (id: string) => request('/api/follows', 'DELETE', {
+        followableType: 'story',
+        followableId: id
+    }),
+
+    // Check follow status
+    isFollowing: async (id: string): Promise<{ isFollowing: boolean }> => {
+        return request(`/api/follows/check?type=story&id=${id}`);
+    },
+
+    // Check like status
+    isLiked: async (id: string): Promise<{ isLiked: boolean }> => {
+        return request(`/api/likes/check?type=story&id=${id}`);
+    },
+
+    // Batch check like status
+    batchCheckLiked: async (storyIds: string[]): Promise<Record<string, boolean>> => {
+        if (storyIds.length === 0) return {};
+        return request('/api/likes/batch-check', 'POST', {
+            likeableType: 'story',
+            likeableIds: storyIds
+        });
+    },
+
+    // Batch check follow status
+    batchCheckFollowing: async (storyIds: string[]): Promise<Record<string, boolean>> => {
+        if (storyIds.length === 0) return {};
+        return request('/api/follows/batch-check', 'POST', {
+            followableType: 'story',
+            followableIds: storyIds
+        });
+    },
 
     // Following Feed (Dashboard)
-    getFollowingStories: async (page = 1, limit = 20): Promise<{ stories: Story[], total: number }> => {
-        // Note: iOS DashboardView calls viewModel.followingStories.
-        // DashboardViewModel usually calls StoryService.shared.getFollowingStories or similar?
-        // Swift code showed `getTrendingStories24h` and `listStories`.
-        // Checking DashboardViewModel (not viewed yet). 
-        // Assuming there is an endpoint for followed stories. 
-        // Based on GroupService `listFollowedGroups`, maybe `stories/followed`?
-        // Let's assume /api/stories/feed or /api/stories/following. 
-        // Use general list for now or check if I missed it.
-        // In Swift `FollowingContentView` iterates `viewModel.followingStories`.
-        return request(`/api/stories/following?limit=${limit}`); // Guessing endpoint
+    // Note: Backend doesn't have a dedicated endpoint for following stories.
+    // Use dashboard storyboards or fetch user's following list then fetch their stories.
+    getFollowingStories: async (_page = 1, _limit = 20): Promise<{ stories: Story[], total: number }> => {
+        console.warn('Following stories endpoint not implemented in backend');
+        return { stories: [], total: 0 };
     },
     // AI Styles
     uploadCover: async (file: File): Promise<{ url: string }> => {
@@ -49,16 +90,13 @@ export const stories = {
         return request('/api/upload/image', 'POST', formData);
     },
 
-    getStyles: async (groupId?: string, limit = 20, offset = 0): Promise<{ styles: any[], total: number }> => {
-        let url = `/api/stories/styles?limit=${limit}&offset=${offset}`;
-        if (groupId) url += `&group_id=${groupId}`;
-        return request(url);
+    // Note: Style endpoints are at /api/styles, not /api/stories/styles
+    getStyles: async (limit = 20, offset = 0): Promise<{ styles: any[], total: number }> => {
+        return request(`/api/styles?limit=${limit}&offset=${offset}`);
     },
 
-    searchStyles: async (query: string, groupId?: string, limit = 20, offset = 0): Promise<{ styles: any[], total: number }> => {
-        let url = `/api/stories/styles/search?q=${encodeURIComponent(query)}&limit=${limit}&offset=${offset}`;
-        if (groupId) url += `&group_id=${groupId}`;
-        return request(url);
+    searchStyles: async (query: string, limit = 20, offset = 0): Promise<{ styles: any[], total: number }> => {
+        return request(`/api/styles/search?q=${encodeURIComponent(query)}&limit=${limit}&offset=${offset}`);
     },
 
     // ==================== Scenes Management ====================

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://127.0.0.1:8080';
+// VIP payment service runs on port 8060
+const VIP_PAY_URL = process.env.VIP_PAY_URL || 'http://127.0.0.1:8060';
 
 export async function GET(
     req: NextRequest,
@@ -15,8 +16,8 @@ export async function GET(
 
         const { paymentId } = await params;
 
-        // Fetch payment details from backend
-        const response = await fetch(`${BACKEND_URL}/api/payments/${paymentId}`, {
+        // Fetch payment details from vippay service
+        const response = await fetch(`${VIP_PAY_URL}/api/vippay/web/payments/${paymentId}`, {
             headers: {
                 'Authorization': authHeader,
             },
@@ -29,7 +30,8 @@ export async function GET(
             throw new Error('Failed to fetch payment status');
         }
 
-        const payment = await response.json();
+        const data = await response.json();
+        const payment = data.data || data;
 
         return NextResponse.json({
             status: payment.status,
@@ -57,7 +59,7 @@ export async function POST(
 
         const { paymentId } = await params;
         const body = await req.json();
-        const { status, metadata } = body;
+        const { status } = body;
 
         if (!status) {
             return NextResponse.json(
@@ -66,42 +68,28 @@ export async function POST(
             );
         }
 
-        // Update payment status in backend
-        const response = await fetch(`${BACKEND_URL}/api/payments/${paymentId}`, {
-            method: 'PATCH',
+        // Note: Backend doesn't support PATCH for payment status update
+        // Payment status is managed internally by the payment service
+        console.warn('[Payment Status] Backend does not support manual status updates');
+
+        // Return current payment status instead
+        const response = await fetch(`${VIP_PAY_URL}/api/vippay/web/payments/${paymentId}`, {
             headers: {
-                'Content-Type': 'application/json',
                 'Authorization': authHeader,
             },
-            body: JSON.stringify({
-                status,
-                metadata,
-                updatedAt: Date.now(),
-            }),
         });
 
         if (!response.ok) {
-            throw new Error('Failed to update payment status');
+            throw new Error('Failed to fetch payment status');
         }
 
-        const payment = await response.json();
-
-        // Send notification if payment succeeded
-        if (status === 'succeeded') {
-            const { sendPaymentNotification } = await import('@/lib/payment/notifications');
-            const { PaymentNotificationType } = await import('@/lib/types/payment');
-            await sendPaymentNotification(payment.userId, {
-                type: PaymentNotificationType.PAYMENT_SUCCESS,
-                paymentId,
-                amount: payment.amount,
-                currency: payment.currency,
-                planId: payment.planId,
-            });
-        }
+        const data = await response.json();
+        const payment = data.data || data;
 
         return NextResponse.json({
             success: true,
             payment,
+            note: 'Payment status updates are handled internally by the payment service',
         });
     } catch (error: any) {
         console.error('[API /api/payments/[id]/status] Error:', error);

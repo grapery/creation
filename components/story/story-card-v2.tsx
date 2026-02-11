@@ -2,75 +2,96 @@
 
 import { Story } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
-import { BookOpen, Heart, MessageSquare, Calendar } from "lucide-react";
+import { BookOpen, Heart, Users, Book, User } from "lucide-react";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 interface StoryCardProps {
     story: Story;
+    className?: string;
 }
 
-export default function StoryCard({ story }: StoryCardProps) {
+export default function StoryCard({ story, className }: StoryCardProps) {
+    const effectiveCharacterCount = story.characterCount || story.characters?.length || 0;
+
     return (
         <Link href={`/stories/${story.id}`}>
-            <Card className="group cursor-pointer border-border/50 hover:border-primary/30 transition-all hover:shadow-lg hover:-translate-y-1">
+            <Card 
+                floating 
+                pressable
+                className={cn("group cursor-pointer", className)}
+            >
                 <CardContent className="p-4 sm:p-5">
-                    {/* Story Image/Preview */}
-                    <div className="relative aspect-video rounded-lg bg-muted/30 mb-4 overflow-hidden">
-                        {story.coverImage ? (
-                            <img
-                                src={story.coverImage}
-                                alt={story.title}
-                                className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300"
-                            />
-                        ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-secondary/20">
-                                <BookOpen className="h-12 w-12 text-muted-foreground/50" />
-                            </div>
-                        )}
-
-                        {/* Overlay with stats */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                            <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-white/90">
-                                <div className="flex items-center gap-3 text-sm">
-                                    <div className="flex items-center gap-1">
-                                        <Heart className="h-3.5 w-3.5" />
-                                        <span className="font-medium tabular-nums">{story.likeCount || 0}</span>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                        <MessageSquare className="h-3.5 w-3.5" />
-                                        <span className="font-medium tabular-nums">{story.commentCount || 0}</span>
-                                    </div>
+                    <div className="flex gap-4">
+                        {/* Cover Image - 88x88 like iOS */}
+                        <div className="relative w-[88px] h-[88px] flex-shrink-0 rounded-xl overflow-hidden bg-muted">
+                            {story.coverImage ? (
+                                <img
+                                    src={story.coverImage}
+                                    alt={story.title}
+                                    className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300"
+                                />
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-secondary/20">
+                                    <BookOpen className="h-8 w-8 text-muted-foreground/50" />
                                 </div>
-                            </div>
+                            )}
                         </div>
-                    </div>
 
-                    {/* Story Info */}
-                    <div className="space-y-2">
-                        <h3 className="text-lg font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors">
-                            {story.title}
-                        </h3>
+                        {/* Content */}
+                        <div className="flex-1 min-w-0 flex flex-col justify-between">
+                            <div>
+                                {/* Title */}
+                                <h3 className="text-base font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors mb-1">
+                                    {story.title}
+                                </h3>
 
-                        <div className="flex items-center justify-between text-sm text-muted-foreground">
-                            <div className="flex items-center gap-1.5">
-                                {story.author && story.createdAt && (
-                                    <>
-                                        <Calendar className="h-3.5 w-3.5" />
-                                        <span>
-                                            {new Date(story.createdAt).toLocaleDateString("en-US", {
-                                                month: "short",
-                                                day: "numeric"
-                                            })}
+                                {/* Description */}
+                                {story.description && (
+                                    <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+                                        {story.description}
+                                    </p>
+                                )}
+
+                                {/* Author */}
+                                {story.author && (
+                                    <div className="flex items-center gap-2 mb-2">
+                                        {story.author.avatar ? (
+                                            <img 
+                                                src={story.author.avatar} 
+                                                alt={story.author.displayName || story.author.username}
+                                                className="w-5 h-5 rounded-full object-cover"
+                                            />
+                                        ) : (
+                                            <User className="w-5 h-5 text-muted-foreground" />
+                                        )}
+                                        <span className="text-sm text-foreground font-medium truncate">
+                                            {story.author.displayName || story.author.username}
                                         </span>
-                                    </>
+                                    </div>
                                 )}
                             </div>
-                            <div className="flex items-center gap-1">
-                                {story.tags && story.tags.length > 0 && (
-                                    <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium">
-                                        {story.tags[0]}
-                                    </span>
+
+                            {/* Stats Row */}
+                            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                <div className="flex items-center gap-1">
+                                    <Heart className="h-3.5 w-3.5" />
+                                    <span className="font-medium tabular-nums">{story.likes || story.likeCount || 0}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                    <Users className="h-3.5 w-3.5" />
+                                    <span className="font-medium tabular-nums">{story.followers || 0}</span>
+                                </div>
+                                {effectiveCharacterCount > 0 && (
+                                    <div className="flex items-center gap-1">
+                                        <User className="h-3.5 w-3.5" />
+                                        <span className="font-medium tabular-nums">{effectiveCharacterCount}</span>
+                                    </div>
                                 )}
+                                <div className="flex items-center gap-1">
+                                    <Book className="h-3.5 w-3.5" />
+                                    <span className="font-medium tabular-nums">{story.storyboardCount || story.panels || 0}</span>
+                                </div>
                             </div>
                         </div>
                     </div>

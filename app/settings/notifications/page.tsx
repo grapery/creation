@@ -18,7 +18,6 @@ export default function NotificationSettingsPage() {
     const [commentNotifs, setCommentNotifs] = useState(true);
     const [mentionNotifs, setMentionNotifs] = useState(true);
     const [storyNotifs, setStoryNotifs] = useState(false);
-    const [groupNotifs, setGroupNotifs] = useState(true);
     const [marketingEmails, setMarketingEmails] = useState(false);
 
     const handleSave = () => {
@@ -212,10 +211,10 @@ export default function NotificationSettingsPage() {
                         </CardTitle>
                         <CardDescription>
                             {language === 'zh-Hans'
-                                ? '关于故事和群组协作的通知'
+                                ? '关于故事协作的通知'
                                 : language === 'ja'
-                                ? 'ストーリーとグループコラボレーションに関する通知'
-                                : 'Notifications about stories and group collaboration'}
+                                ? 'ストーリーコラボレーションに関する通知'
+                                : 'Notifications about story collaboration'}
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -240,26 +239,6 @@ export default function NotificationSettingsPage() {
                             <Switch checked={storyNotifs} onCheckedChange={setStoryNotifs} />
                         </div>
 
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-lg bg-cyan-100">
-                                    <UserPlus className="h-5 w-5 text-cyan-500" />
-                                </div>
-                                <div>
-                                    <p className="font-medium">
-                                        {language === 'zh-Hans' ? '群组活动' : language === 'ja' ? 'グループアクティビティ' : 'Group Activity'}
-                                    </p>
-                                    <p className="text-sm text-muted-foreground">
-                                        {language === 'zh-Hans'
-                                            ? '群组邀请、成员变更等活动通知'
-                                            : language === 'ja'
-                                            ? 'グループ招待、メンバー変更などのアクティビティ通知'
-                                            : 'Group invites, member changes, and activity'}
-                                    </p>
-                                </div>
-                            </div>
-                            <Switch checked={groupNotifs} onCheckedChange={setGroupNotifs} />
-                        </div>
                     </CardContent>
                 </Card>
 

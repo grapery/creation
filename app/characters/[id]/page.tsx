@@ -336,7 +336,7 @@ export default function CharacterDetailPage() {
                                                 <div className="flex items-center justify-between">
                                                     <span className="text-sm text-muted-foreground">Visibility</span>
                                                     <span className="text-sm font-medium">
-                                                        {character.isPublic ? 'Public' : 'Group Only'}
+                                                        {character.isPublic ? 'Public' : 'Private'}
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center justify-between">

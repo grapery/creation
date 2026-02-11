@@ -9,7 +9,7 @@ interface StoryDetailHeaderProps {
 
 export function StoryDetailHeader({ story }: StoryDetailHeaderProps) {
     const { t } = useTranslation();
-    const isPublished = story.status === 1;
+    const isPublished = story.status === 'published';
 
     return (
         <div className="relative mb-6">
@@ -67,13 +67,6 @@ export function StoryDetailHeader({ story }: StoryDetailHeaderProps) {
                     {/* Story Info - Dark Text for contrast on white background */}
                     <div className="flex-1 w-full pt-1 md:pt-2 text-center md:text-left space-y-2">
                         <div className="space-y-1">
-                            {story.groupId && (
-                                <div className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-medium mb-0.5">
-                                    <ShieldCheck className="w-2.5 h-2.5" />
-                                    <span>{t("story_detail.header.open_to_all", "Open")}</span>
-                                </div>
-                            )}
-
                             <h1 className="text-xl md:text-2xl font-bold tracking-tight text-foreground font-display leading-tight">
                                 {story.title}
                             </h1>

@@ -318,10 +318,6 @@ export default function StoryPage() {
                                 // TODO: Show invite modal
                                 console.log("Invite clicked");
                             }}
-                            onOpenWritersRoom={() => {
-                                // TODO: Navigate to writers room
-                                console.log("Open writers room clicked");
-                            }}
                         />
                     )}
                 </div>

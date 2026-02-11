@@ -68,7 +68,7 @@ export default function PaymentHistoryPage() {
                 query.method = methodFilter;
             }
 
-            const response = await payment.getPaymentHistory(query);
+            const response = await payment.getPaymentHistory(user?.id || '', query);
             setPayments(response.payments);
             setTotal(response.total);
         } catch (error: any) {

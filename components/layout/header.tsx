@@ -34,13 +34,6 @@ export function Header() {
                 <div className="mr-4 hidden md:flex">
                     <nav className="flex items-center space-x-6 text-sm font-medium">
                         <Link href="/" className="transition-colors hover:text-foreground/80 text-foreground">{t("navigation.home")}</Link>
-                        <Link 
-                            href="/groups" 
-                            onClick={(e) => handleProtectedLink(e, "/groups")}
-                            className="transition-colors hover:text-foreground/80 text-foreground/60"
-                        >
-                            {t("navigation.groups")}
-                        </Link>
                     </nav>
                 </div>
 
@@ -51,29 +44,27 @@ export function Header() {
                         {t("navigation.about")}
                     </Link>
                     <div className="relative flex-1">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
                             type="search"
-                            placeholder="Search stories, people, groups..."
-                            className="w-full bg-secondary/50 border-0 focus-visible:ring-1 focus-visible:ring-primary pl-9 h-9"
+                            placeholder="Search stories, people..."
+                            className="w-full bg-secondary border-0 rounded-full focus-visible:ring-1 focus-visible:ring-primary/30 pl-10 h-10 text-sm transition-all"
                         />
                     </div>
-                    <nav className="flex items-center space-x-4 text-sm font-medium">
+                    <nav className="flex items-center space-x-3 text-sm font-medium">
                         <Link 
                             href="/notifications" 
                             onClick={(e) => handleProtectedLink(e, "/notifications")}
-                            className="transition-colors hover:text-foreground/80 text-foreground/60 flex items-center gap-1"
+                            className="transition-all hover:bg-secondary rounded-full p-2 text-foreground/70 hover:text-foreground"
                         >
-                            <Bell className="h-4 w-4" />
-                            {t("navigation.notify")}
+                            <Bell className="h-5 w-5" />
                         </Link>
                         <Link 
                             href="/chat" 
                             onClick={(e) => handleProtectedLink(e, "/chat")}
-                            className="transition-colors hover:text-foreground/80 text-foreground/60 flex items-center gap-1"
+                            className="transition-all hover:bg-secondary rounded-full p-2 text-foreground/70 hover:text-foreground"
                         >
-                            <MessageSquare className="h-4 w-4" />
-                            {t("navigation.messages")}
+                            <MessageSquare className="h-5 w-5" />
                         </Link>
                     </nav>
                 </div>
@@ -86,32 +77,32 @@ export function Header() {
                     ) : user ? (
                         <div className="flex items-center gap-4">
                             {!user.isVip && (
-                                <Button variant="outline" size="sm" className="hidden md:flex border-yellow-500/50 hover:bg-yellow-500/10 hover:text-yellow-500 text-yellow-600 dark:text-yellow-500" asChild>
+                                <Button variant="capsule" size="ios-sm" className="hidden md:flex bg-gradient-to-r from-amber-500 to-yellow-400 text-white border-0 hover:opacity-90" asChild>
                                     <Link href="/vip">
-                                        <Crown className="w-3.5 h-3.5 fill-current" /> Get Pro
+                                        <Crown className="w-3.5 h-3.5 fill-current mr-1.5" /> Pro
                                     </Link>
                                 </Button>
                             )}
-                            <Button variant="ghost" size="sm" asChild>
+                            <Button variant="ghost" size="sm" className="rounded-full px-3" asChild>
                                 <Link href="/profile">
-                                    <Avatar className="h-5 w-5 mr-2">
+                                    <Avatar className="h-7 w-7 mr-2 ring-2 ring-border">
                                         <AvatarImage src={user.avatar} alt={user.displayName || user.username} />
-                                        <AvatarFallback><UserCircle className="h-5 w-5" /></AvatarFallback>
+                                        <AvatarFallback><UserCircle className="h-7 w-7" /></AvatarFallback>
                                     </Avatar>
-                                    {user.displayName || user.username}
+                                    <span className="hidden lg:inline">{user.displayName || user.username}</span>
                                 </Link>
                             </Button>
-                            <Button variant="ghost" size="icon" onClick={() => logout()}>
+                            <Button variant="ghost" size="icon" className="rounded-full" onClick={() => logout()}>
                                 <LogOut className="h-4 w-4" />
                                 <span className="sr-only">{t("auth.sign_out")}</span>
                             </Button>
                         </div>
                     ) : (
                         <nav className="flex items-center gap-2">
-                            <Button variant="ghost" size="sm" asChild>
+                            <Button variant="ghost" size="sm" className="rounded-full" asChild>
                                 <Link href="/login">{t("auth.sign_in")}</Link>
                             </Button>
-                            <Button size="sm" asChild>
+                            <Button variant="capsule" size="ios-sm" asChild>
                                 <Link href="/register">{t("auth.sign_up")}</Link>
                             </Button>
                         </nav>

@@ -1,4 +1,4 @@
-import { apiClient, request, setTokens, clearTokens } from './client';
+import { apiClient, paymentClient, request, setTokens, clearTokens } from './client';
 import { User, AuthResponse } from '../types';
 
 export const auth = {
@@ -86,12 +86,12 @@ export const auth = {
         accessToken?: string;
         refreshToken?: string;
     }): Promise<AuthResponse> => {
-        // Call vippay API for Google OAuth
+        // Call vippay API for Google OAuth (uses payment service on port 8060)
         const response = await request<any>('/api/vippay/google-oauth/signin', 'POST', {
             idToken: data.idToken,
             accessToken: data.accessToken,
             refreshToken: data.refreshToken,
-        });
+        }, paymentClient);
 
         console.log('[Auth] Google OAuth response:', response);
 
@@ -144,10 +144,10 @@ export const auth = {
     }): Promise<AuthResponse> => {
         console.log('[Auth] WeChat OAuth login with code:', data.code ? 'received' : 'missing');
 
-        // Call vippay API for WeChat OAuth
+        // Call vippay API for WeChat OAuth (uses payment service on port 8060)
         const response = await request<any>('/api/vippay/wechat-oauth/signin', 'POST', {
             code: data.code,
-        });
+        }, paymentClient);
 
         console.log('[Auth] WeChat OAuth response:', response);
 

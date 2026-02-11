@@ -1,4 +1,4 @@
-import { apiClient, request } from './client';
+import { request } from './client';
 import { User } from '../types';
 
 export interface Comment {

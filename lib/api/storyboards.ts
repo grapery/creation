@@ -1,4 +1,4 @@
-import { apiClient, request } from './client';
+import { request } from './client';
 import { Storyboard } from '../types';
 
 export const storyboards = {
@@ -18,12 +18,6 @@ export const storyboards = {
     getTrending: async (page = 1, limit = 20): Promise<{ storyboards: Storyboard[], total: number }> => {
         const offset = (page - 1) * limit;
         return request(`/api/dashboard/trending/storyboards?limit=${limit}&offset=${offset}`);
-    },
-
-    // Dashboard: Group Storyboards
-    getGroupStoryboards: async (page = 1, limit = 20): Promise<{ storyboards: Storyboard[], total: number }> => {
-        const offset = (page - 1) * limit;
-        return request(`/api/dashboard/groups/storyboards?limit=${limit}&offset=${offset}`);
     },
 
     // Dashboard: Character Storyboards
@@ -60,6 +54,27 @@ export const storyboards = {
     },
 
     // Actions
-    like: async (id: string) => request(`/api/storyboards/${id}/like`, 'POST'),
-    unlike: async (id: string) => request(`/api/storyboards/${id}/like`, 'DELETE'),
+    // Note: Using /api/likes endpoint with likeableType and likeableId
+    like: async (id: string) => request('/api/likes', 'POST', {
+        likeableType: 'storyboard_node',
+        likeableId: id
+    }),
+    unlike: async (id: string) => request('/api/likes', 'DELETE', {
+        likeableType: 'storyboard_node',
+        likeableId: id
+    }),
+
+    // Check like status
+    isLiked: async (id: string): Promise<{ isLiked: boolean }> => {
+        return request(`/api/likes/check?type=storyboard_node&id=${id}`);
+    },
+
+    // Batch check like status
+    batchCheckLiked: async (storyboardIds: string[]): Promise<Record<string, boolean>> => {
+        if (storyboardIds.length === 0) return {};
+        return request('/api/likes/batch-check', 'POST', {
+            likeableType: 'storyboard_node',
+            likeableIds: storyboardIds
+        });
+    },
 };

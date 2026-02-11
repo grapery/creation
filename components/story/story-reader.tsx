@@ -8,7 +8,6 @@ interface StoryReaderContent {
     storyboardId: string;
     storyId: string;
     parentId?: string;
-    groupId?: string | null;
     backgroundImageURL?: string;
     title: string;
     summary: string;

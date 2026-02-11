@@ -8,10 +8,9 @@ import { StyleConfig, CreateStoryRequest } from "@/lib/types";
 
 interface CreateStoryProps {
     storyId?: string;
-    groupId?: string;
 }
 
-export default function CreateStory({ storyId, groupId }: CreateStoryProps) {
+export default function CreateStory({ storyId }: CreateStoryProps) {
     const router = useRouter();
     const [selectedTab, setSelectedTab] = useState(0);
     const [title, setTitle] = useState("");
@@ -44,14 +43,14 @@ export default function CreateStory({ storyId, groupId }: CreateStoryProps) {
 
     useEffect(() => {
         loadStyles();
-    }, [groupId]);
+    }, []);
 
     const loadStyles = async (page = 0, query = "") => {
         setIsLoadingStyles(true);
         try {
             const result = query
-                ? await stories.searchStyles(query, groupId, 20, page * 20)
-                : await stories.getStyles(groupId, 20, page * 20);
+                ? await stories.searchStyles(query, 20, page * 20)
+                : await stories.getStyles(20, page * 20);
 
             setStyles(result.styles);
             setStylesTotal(result.total);
@@ -137,7 +136,6 @@ export default function CreateStory({ storyId, groupId }: CreateStoryProps) {
                 coverImage: coverImage || aiGeneratedCoverURL || undefined,
                 genre: selectedGenre,
                 defaultSceneCount,
-                groupId,
                 useAIEnrich,
                 generateCover,
                 generatePoster,

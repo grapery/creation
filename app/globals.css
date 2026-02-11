@@ -34,6 +34,17 @@
   --ring: #262626;
 
   --radius: 0.75rem;
+
+  /* Status Colors */
+  --follow: #4d9fff;
+  --like: #e54d4d;
+  --comment: #4dd966;
+  --ai-complete: #ffcc00;
+  --membership: #cc9933;
+  
+  /* Video Colors */
+  --video: #8c33e6;
+  --video-background: #4d4d59;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -106,6 +117,15 @@ body {
   --color-input: var(--input);
   --color-ring: var(--ring);
 
+  /* Status Colors */
+  --color-follow: var(--follow);
+  --color-like: var(--like);
+  --color-comment: var(--comment);
+  --color-ai-complete: var(--ai-complete);
+  --color-membership: var(--membership);
+  --color-video: var(--video);
+  --color-video-background: var(--video-background);
+
   --radius-xl: calc(var(--radius) + 4px);
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
@@ -115,4 +135,156 @@ body {
   --font-mono: var(--font-geist-mono);
   --font-display: "ZCOOL KuaiLe", cursive;
   --font-body: "Ma Shan Zheng", cursive;
+}
+
+/* Utility Classes for Voyager iOS Design System */
+
+/* Floating Card - Glassmorphism effect similar to iOS */
+.floating-card {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+.dark .floating-card {
+  background: rgba(30, 30, 35, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Floating Button - Primary with gradient */
+.floating-button-primary {
+  background: linear-gradient(135deg, var(--primary) 0%, rgba(38, 38, 38, 0.8) 100%);
+  color: var(--primary-foreground);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(38, 38, 38, 0.3);
+  transition: all 0.2s ease;
+}
+
+.floating-button-primary:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 20px rgba(38, 38, 38, 0.4);
+}
+
+.floating-button-primary:active {
+  transform: scale(0.96);
+}
+
+/* Floating Button - Secondary */
+.floating-button-secondary {
+  background: rgba(247, 247, 247, 0.9);
+  backdrop-filter: blur(10px);
+  border: 0.5px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.dark .floating-button-secondary {
+  background: rgba(46, 46, 51, 0.9);
+  border: 0.5px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Capsule Button - iOS Style */
+.capsule-button {
+  border-radius: 9999px;
+  padding: 10px 24px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.capsule-button:active {
+  transform: scale(0.95);
+}
+
+/* Card Press Effect */
+.card-press {
+  transition: transform 0.1s ease, box-shadow 0.2s ease;
+}
+
+.card-press:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.card-press:active {
+  transform: scale(0.98);
+}
+
+/* Status Badge Colors */
+.badge-follow {
+  background-color: rgba(77, 159, 255, 0.15);
+  color: var(--follow);
+}
+
+.badge-like {
+  background-color: rgba(229, 77, 77, 0.15);
+  color: var(--like);
+}
+
+.badge-comment {
+  background-color: rgba(77, 217, 102, 0.15);
+  color: var(--comment);
+}
+
+.badge-ai {
+  background-color: rgba(255, 204, 0, 0.15);
+  color: #b38f00;
+}
+
+/* Tab Bar Floating Style */
+.tab-bar-floating {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 0.5px solid rgba(0, 0, 0, 0.1);
+  border-radius: 24px;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.08);
+}
+
+.dark .tab-bar-floating {
+  background: rgba(20, 20, 26, 0.85);
+  border: 0.5px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Create Button - Center floating */
+.create-button-center {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary) 0%, rgba(38, 38, 38, 0.8) 100%);
+  color: white;
+  box-shadow: 0 4px 16px rgba(38, 38, 38, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.create-button-center:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(38, 38, 38, 0.4);
+}
+
+.create-button-center:active {
+  transform: scale(0.95);
+}
+
+/* Animation Utilities */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
 }

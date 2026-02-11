@@ -1,4 +1,4 @@
-import { apiClient, request, getUserIdFromToken } from './client';
+import { request, getUserIdFromToken } from './client';
 import { User, Story, Storyboard, ActivityHeatmapData, ActivityTimeRange, ActivityHeatmapResponse } from '../types';
 
 export interface UserActivity {
@@ -55,17 +55,33 @@ export const profile = {
     },
 
     // Social - Follow/Unfollow
+    // Note: Using /api/follows endpoint with followableType and followableID
     followUser: async (userId: string): Promise<void> => {
-        return request(`/api/users/${userId}/follow`, 'POST');
+        return request('/api/follows', 'POST', {
+            followableType: 'user',
+            followableId: userId
+        });
     },
 
     unfollowUser: async (userId: string): Promise<void> => {
-        return request(`/api/users/${userId}/follow`, 'DELETE');
+        return request('/api/follows', 'DELETE', {
+            followableType: 'user',
+            followableId: userId
+        });
     },
 
     // Check follow status
     isFollowing: async (userId: string): Promise<{ isFollowing: boolean }> => {
-        return request(`/api/users/${userId}/follow/status`);
+        return request(`/api/follows/check?type=user&id=${userId}`);
+    },
+
+    // Batch check follow status
+    batchCheckFollowing: async (userIds: string[]): Promise<Record<string, boolean>> => {
+        if (userIds.length === 0) return {};
+        return request('/api/follows/batch-check', 'POST', {
+            followableType: 'user',
+            followableIds: userIds
+        });
     },
 
     // Activity
@@ -113,6 +129,7 @@ export const profile = {
     },
 
     // Update own profile
+    // Note: Backend uses PUT /api/users/:id
     updateProfile: async (data: {
         displayName?: string;
         bio?: string;
@@ -122,21 +139,30 @@ export const profile = {
         location?: string;
         dateOfBirth?: number;
     }): Promise<User> => {
-        return request('/api/profile', 'PUT', data);
+        const userId = getUserIdFromToken();
+        if (!userId) {
+            throw new Error('User not authenticated');
+        }
+        return request(`/api/users/${userId}`, 'PUT', data);
     },
 
     // Block/Unblock User
-    blockUser: async (userId: string): Promise<void> => {
-        return request(`/api/users/${userId}/block`, 'POST');
+    // Note: Backend does not have block/unblock endpoints yet
+    blockUser: async (_userId: string): Promise<void> => {
+        console.warn('Block user not implemented');
+        return Promise.resolve();
     },
 
-    unblockUser: async (userId: string): Promise<void> => {
-        return request(`/api/users/${userId}/block`, 'DELETE');
+    unblockUser: async (_userId: string): Promise<void> => {
+        console.warn('Unblock user not implemented');
+        return Promise.resolve();
     },
 
     // Report User
-    reportUser: async (userId: string, reason: string): Promise<void> => {
-        return request(`/api/users/${userId}/report`, 'POST', { reason });
+    // Note: Backend does not have report endpoint yet
+    reportUser: async (_userId: string, _reason: string): Promise<void> => {
+        console.warn('Report user not implemented');
+        return Promise.resolve();
     },
 
     // Share profile
@@ -145,7 +171,8 @@ export const profile = {
     },
 
     // Get own profile
+    // Note: Using /api/auth/me endpoint
     getMyProfile: async (): Promise<User> => {
-        return request('/api/profile');
+        return request('/api/auth/me');
     },
 };

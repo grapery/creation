@@ -1,7 +1,7 @@
 "use client";
 
 import { Contributor } from "@/lib/types";
-import { UserPlus, MessageSquare, Crown, BookOpen, User, Image as ImageIcon, Users2 } from "lucide-react";
+import { UserPlus, Crown, BookOpen, User, Image as ImageIcon, Users2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/providers/language-provider";
 
@@ -12,7 +12,6 @@ interface StoryTeamSectionProps {
     isLoading?: boolean;
     error?: string;
     onInvite?: () => void;
-    onOpenWritersRoom?: () => void;
 }
 
 export interface ContentCreator {
@@ -38,8 +37,7 @@ export function StoryTeamSection({
     contributors,
     isLoading = false,
     error,
-    onInvite,
-    onOpenWritersRoom
+    onInvite
 }: StoryTeamSectionProps) {
     const { t } = useTranslation();
     const totalCount = creators.length + contributors.length;
@@ -60,27 +58,6 @@ export function StoryTeamSection({
                     <UserPlus className="w-4 h-4" />
                     <span className="text-sm font-semibold">{t("story_detail.empty.invite", "Invite")}</span>
                 </Button>
-            </div>
-
-            {/* Writers Room Card */}
-            <div className="bg-muted/50 border border-border/5 rounded-2xl p-4.5">
-                <div className="flex items-center gap-4">
-                    <div className="flex-1">
-                        <div className="flex items-center gap-2.5 mb-2">
-                            <MessageSquare className="w-5 h-5 text-foreground" />
-                            <h3 className="text-[15px] font-semibold text-foreground">{t("story_detail.empty.writers_room", "Writers Room")}</h3>
-                        </div>
-                        <p className="text-sm text-muted-foreground line-clamp-2">
-                            {t("story_detail.empty.writers_room_desc", "Collaborate in real-time with AI assistance")}
-                        </p>
-                    </div>
-                    <Button
-                        onClick={onOpenWritersRoom}
-                        className="bg-foreground text-foreground px-4 py-2.5 text-sm font-semibold rounded-xl"
-                    >
-                        {t("story_detail.empty.open_chat", "Open Chat")}
-                    </Button>
-                </div>
             </div>
 
             {/* Content */}

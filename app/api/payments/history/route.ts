@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://127.0.0.1:8080';
+// VIP payment service runs on port 8060
+const VIP_PAY_URL = process.env.VIP_PAY_URL || 'http://127.0.0.1:8060';
 
 export async function GET(req: NextRequest) {
     try {
@@ -15,8 +16,6 @@ export async function GET(req: NextRequest) {
         const offset = parseInt(searchParams.get('offset') || '0');
         const status = searchParams.get('status');
         const method = searchParams.get('method');
-        const startDate = searchParams.get('startDate');
-        const endDate = searchParams.get('endDate');
 
         // Build query parameters
         const queryParams = new URLSearchParams({
@@ -26,14 +25,17 @@ export async function GET(req: NextRequest) {
 
         if (status) queryParams.append('status', status);
         if (method) queryParams.append('method', method);
-        if (startDate) queryParams.append('startDate', startDate);
-        if (endDate) queryParams.append('endDate', endDate);
 
-        // Fetch from backend - using a placeholder userId for now
-        // In production, extract userId from auth token
-        const userId = 'user_placeholder';
+        // Extract userId from auth token
+        // In production, decode JWT to get userId
+        const userId = extractUserIdFromToken(authHeader);
+        if (!userId) {
+            return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+        }
+
+        // Fetch from vippay service
         const response = await fetch(
-            `${BACKEND_URL}/api/users/${userId}/payments?${queryParams.toString()}`,
+            `${VIP_PAY_URL}/api/vippay/web/payments/user/${userId}?${queryParams.toString()}`,
             {
                 headers: {
                     'Content-Type': 'application/json',
@@ -44,6 +46,7 @@ export async function GET(req: NextRequest) {
 
         if (!response.ok) {
             // If backend returns 404 or error, return empty data for now
+            console.warn('[Payment History] Backend returned error:', response.status);
             return NextResponse.json({
                 payments: [],
                 total: 0,
@@ -55,8 +58,8 @@ export async function GET(req: NextRequest) {
         const data = await response.json();
 
         return NextResponse.json({
-            payments: data.payments || [],
-            total: data.total || 0,
+            payments: data.payments || data.data || [],
+            total: data.total || data.data?.length || 0,
             page: Math.floor(offset / limit) + 1,
             limit,
         });
@@ -67,4 +70,10 @@ export async function GET(req: NextRequest) {
             { status: 500 }
         );
     }
+}
+
+function extractUserIdFromToken(authHeader: string): string | null {
+    // TODO: Implement proper JWT decoding
+    // For now, return a placeholder - this should be implemented properly
+    return 'user_placeholder';
 }

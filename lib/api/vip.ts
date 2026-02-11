@@ -1,4 +1,4 @@
-import { apiClient, request } from './client';
+import { paymentClient, request } from './client';
 import {
     VIPInfo,
     MembershipPlan,
@@ -314,30 +314,87 @@ export const MEMBERSHIP_PLANS: MembershipPlan[] = [
     },
 ];
 
+// Helper function to make requests to payment service
+const paymentRequest = async <T>(
+    endpoint: string,
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET',
+    body?: any
+): Promise<T> => {
+    return request(endpoint, method, body, paymentClient);
+};
+
+// Backend VIP endpoints (from vippay service):
+// GET /api/vippay/vip/info - Get VIP info
+// GET /api/vippay/vip/check - Check if user is VIP
+// GET /api/vippay/vip/quota - Get quota usage
+// GET /api/vippay/vip/max-roles - Get max roles limit
+// GET /api/vippay/vip/max-contexts - Get max contexts limit
+
 export const vip = {
     // Get Current VIP Status
+    // Note: Using /api/vippay/vip/info endpoint on payment service (8060)
     getStatus: async (): Promise<VIPInfo> => {
-        return request('/api/vip/status');
+        return paymentRequest('/api/vippay/vip/info');
     },
 
-    // Get Token Usage
+    // Check if user is VIP
+    checkIsVip: async (): Promise<{ isVip: boolean }> => {
+        return paymentRequest('/api/vippay/vip/check');
+    },
+
+    // Get Token/Quota Usage
+    // Note: Backend uses /quota not /usage, and returns different field names
     getTokenUsage: async (): Promise<TokenUsage> => {
-        return request('/api/vip/usage');
+        const response = await paymentRequest<{
+            quota_used: number;
+            quota_limit: number;
+            remaining: number;
+        }>('/api/vippay/vip/quota');
+        // Transform to TokenUsage format
+        return {
+            total: response.quota_limit,
+            used: response.quota_used,
+            remaining: response.remaining,
+            resetAt: Date.now() + 30 * 24 * 60 * 60 * 1000, // Approximate next month
+        };
+    },
+
+    // Get Max Roles
+    getMaxRoles: async (): Promise<{ max_roles: number }> => {
+        return paymentRequest('/api/vippay/vip/max-roles');
+    },
+
+    // Get Max Contexts
+    getMaxContexts: async (): Promise<{ max_contexts: number }> => {
+        return paymentRequest('/api/vippay/vip/max-contexts');
     },
 
     // Get Subscription Info
+    // Note: Backend doesn't have this endpoint, use getStatus instead
     getSubscription: async (): Promise<SubscriptionInfo> => {
-        return request('/api/vip/subscription');
+        const info = await vip.getStatus();
+        // Transform VIPInfo to SubscriptionInfo format
+        // Note: planId from backend might not match MembershipSKU type
+        const planId = (info.planId || 'basic_month') as MembershipSKU;
+        return {
+            id: info.userId || '',
+            userId: info.userId || '',
+            planId: planId,
+            tier: info.level > 0 ? MembershipTier.PRO : MembershipTier.BASIC,
+            status: info.isVip ? 'active' : ('cancelled' as const),
+            autoRenew: info.autoRenew,
+            currentPeriodStart: Date.now(),
+            currentPeriodEnd: info.expiresAt ? new Date(info.expiresAt).getTime() : Date.now(),
+            cancelAtPeriodEnd: false,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+        };
     },
 
     // Get Available Plans
+    // Note: Backend doesn't have this endpoint, use static data
     getPlans: async (): Promise<MembershipPlan[]> => {
-        // Return plans from backend, fallback to static data
-        try {
-            return await request('/api/vip/plans');
-        } catch {
-            return MEMBERSHIP_PLANS;
-        }
+        return MEMBERSHIP_PLANS;
     },
 
     // Get Plans by Tier
@@ -347,27 +404,37 @@ export const vip = {
     },
 
     // Subscribe to a plan
-    subscribe: async (planId: MembershipSKU): Promise<{ success: boolean; subscription?: SubscriptionInfo; paymentUrl?: string }> => {
-        return request('/api/vip/subscribe', 'POST', { planId });
+    // Note: Backend doesn't have direct subscribe endpoint
+    // This should be handled via IAP (Apple/Google) or web payment flow
+    subscribe: async (_planId: MembershipSKU): Promise<{ success: boolean; subscription?: SubscriptionInfo; paymentUrl?: string }> => {
+        console.warn('Direct subscribe not implemented in backend. Use IAP flow instead.');
+        return { success: false };
     },
 
     // Cancel subscription
+    // Note: Backend doesn't have this endpoint
     cancelSubscription: async (): Promise<void> => {
-        return request('/api/vip/subscription/cancel', 'POST');
+        console.warn('Cancel subscription not implemented in backend');
+        return Promise.resolve();
     },
 
     // Update subscription plan
-    updatePlan: async (newPlanId: MembershipSKU): Promise<{ success: boolean; subscription?: SubscriptionInfo }> => {
-        return request('/api/vip/subscription/update', 'POST', { planId: newPlanId });
+    // Note: Backend doesn't have this endpoint
+    updatePlan: async (_newPlanId: MembershipSKU): Promise<{ success: boolean; subscription?: SubscriptionInfo }> => {
+        console.warn('Update plan not implemented in backend');
+        return { success: false };
     },
 
     // Toggle auto-renew
-    toggleAutoRenew: async (enabled: boolean): Promise<void> => {
-        return request('/api/vip/subscription/auto-renew', 'PUT', { enabled });
+    // Note: Backend doesn't have this endpoint
+    toggleAutoRenew: async (_enabled: boolean): Promise<void> => {
+        console.warn('Toggle auto-renew not implemented in backend');
+        return Promise.resolve();
     },
 
     // Get payment history
-    getPaymentHistory: async (page = 1, limit = 20): Promise<{
+    // Note: Backend doesn't have this endpoint
+    getPaymentHistory: async (_page = 1, _limit = 20): Promise<{
         payments: Array<{
             id: string;
             date: number;
@@ -380,17 +447,24 @@ export const vip = {
         page: number;
         limit: number;
     }> => {
-        const offset = (page - 1) * limit;
-        return request(`/api/vip/payments?limit=${limit}&offset=${offset}`);
+        console.warn('Payment history not implemented in backend');
+        return {
+            payments: [],
+            total: 0,
+            page: 1,
+            limit: 20,
+        };
     },
 
     // Redeem promo code
-    redeemPromoCode: async (code: string): Promise<{
+    // Note: Backend doesn't have this endpoint
+    redeemPromoCode: async (_code: string): Promise<{
         success: boolean;
         discount?: number;
         message?: string;
     }> => {
-        return request('/api/vip/promo/redeem', 'POST', { code });
+        console.warn('Promo code redemption not implemented in backend');
+        return { success: false, message: 'Not implemented' };
     },
 };
 
