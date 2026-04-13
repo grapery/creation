@@ -6,148 +6,72 @@ import { useAuth } from "@/providers/auth-provider";
 import { useTranslation } from "@/providers/language-provider";
 import { StoryboardCard } from "@/components/storyboard/storyboard-card";
 import { storyboards } from "@/lib/api/storyboards";
-import { stories } from "@/lib/api/stories";
-import { Storyboard, Story } from "@/lib/types";
-import { Loader2, Lock } from "lucide-react";
+import { Storyboard } from "@/lib/types";
+import { Loader2, Lock, Compass, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
 import { useLoginPrompt } from "@/components/auth/login-prompt";
-import { withAuth } from "@/lib/utils/api-auth";
 
 enum Tab {
-  TRENDING = "trending",
   STORYBOARDS = "storyboards",
   FOLLOWING = "following",
-  CHARACTERS = "characters",
 }
 
 export default function DashboardPage() {
   const router = useRouter();
   const { t } = useTranslation();
   const { user, loading: authLoading } = useAuth();
-  const [activeTab, setActiveTab] = useState<Tab>(Tab.TRENDING);
+  const [activeTab, setActiveTab] = useState<Tab>(Tab.STORYBOARDS);
   const [items, setItems] = useState<Storyboard[]>([]);
-  const [trendingStories, setTrendingStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState(true);
   const { LoginPromptModal, show: showLoginPrompt } = useLoginPrompt();
 
-  // Set default tab on auth load
+  // Redirect unauthenticated users to plaza
   useEffect(() => {
-    if (!authLoading) {
-      if (user) {
-        setActiveTab(Tab.STORYBOARDS);
-      } else {
-        setActiveTab(Tab.TRENDING);
-      }
+    if (!authLoading && !user) {
+      router.replace("/plaza");
     }
-  }, [authLoading, user]);
+  }, [authLoading, user, router]);
 
-  // Fetch data when tab changes - with deduplication
+  // Fetch data when tab changes
   useEffect(() => {
+    if (!user) return;
     let isMounted = true;
-    let hasFetched = false;
 
     async function fetchData() {
-      // Prevent duplicate fetches
-      if (hasFetched) return;
-      hasFetched = true;
-
       setLoading(true);
       try {
-        if (activeTab === Tab.TRENDING) {
-          // Fetch trending stories (public endpoint)
-          try {
-            const res = await stories.getTrending();
-            // Handle different response formats
-            if (res && typeof res === 'object') {
-              setTrendingStories(Array.isArray(res.stories) ? res.stories : []);
-            } else {
-              setTrendingStories([]);
-            }
-            setItems([]); // Clear storyboards when showing stories
-          } catch (apiError: any) {
-            console.error('Failed to fetch trending stories:', apiError);
-            // If trending API fails, show empty state (not error)
-            setTrendingStories([]);
-            setItems([]);
-          }
-        } else if (activeTab === Tab.STORYBOARDS && user) {
-          // Only fetch if user is logged in
-          try {
-            const res = await storyboards.getDashboardStoryboards();
-            setItems(res.storyboards || []);
-            setTrendingStories([]); // Clear stories when showing storyboards
-          } catch (apiError: any) {
-            console.error('Failed to fetch storyboards:', apiError);
-            setItems([]);
-            setTrendingStories([]);
-          }
-        } else if (activeTab === Tab.FOLLOWING && user) {
-          // res = await storyboards.getFollowing(); // Not implemented yet, using placeholder
+        if (activeTab === Tab.STORYBOARDS) {
+          const res = await storyboards.getDashboardStoryboards();
+          setItems(res.storyboards || []);
+        } else if (activeTab === Tab.FOLLOWING) {
+          // TODO: Implement following feed
           setItems([]);
-          setTrendingStories([]);
-        } else {
-          setItems([]);
-          setTrendingStories([]);
         }
       } catch (e: any) {
-        // Log error but don't show to user
         console.error('Failed to fetch data:', e);
-
-        // If it's a 401 error, clear data and let the login prompt show
-        if (e?.code === 401 || e?.message?.includes('401') || e?.message?.includes('token')) {
-          setItems([]);
-          setTrendingStories([]);
-        } else {
-          // For other errors, also clear data
-          setItems([]);
-          setTrendingStories([]);
-        }
+        setItems([]);
       } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+        if (isMounted) setLoading(false);
       }
     }
 
-    // Only fetch if we have access or it's public
-    if (activeTab === Tab.TRENDING) {
-      // Always fetch trending (public)
-      fetchData();
-    } else if (user) {
-      // Fetch authenticated tabs only if user is logged in
-      fetchData();
-    } else {
-      // User not logged in and trying to access authenticated tab
-      setItems([]);
-      setTrendingStories([]);
-      setLoading(false);
-    }
-
-    return () => {
-      isMounted = false;
-    };
+    fetchData();
+    return () => { isMounted = false; };
   }, [activeTab, user]);
 
-  const tabs = [
-    { value: Tab.TRENDING, label: t("dashboard.trending") },
-    { value: Tab.STORYBOARDS, label: t("dashboard.start_here"), requiredAuth: true },
-    { value: Tab.FOLLOWING, label: t("dashboard.following"), requiredAuth: true },
-    { value: Tab.CHARACTERS, label: t("navigation.characters"), requiredAuth: true },
-  ];
+  // Don't render dashboard content for unauthenticated users (they get redirected)
+  if (!user && !authLoading) {
+    return null;
+  }
 
-  // Handle tab click
-  const handleTabClick = (tab: typeof tabs[0]) => {
-    if (tab.requiredAuth && !user) {
-      // Show login prompt for unauthenticated users
-      showLoginPrompt();
-    } else {
-      setActiveTab(tab.value);
-    }
-  };
+  const tabs = [
+    { value: Tab.STORYBOARDS, label: t("dashboard.start_here") },
+    { value: Tab.FOLLOWING, label: t("dashboard.following") },
+  ];
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -157,13 +81,41 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
           {/* Main Feed Column */}
           <div className="md:col-span-8 min-w-0 space-y-6">
+            {/* Quick Actions - replacing old Trending tab */}
+            <div className="grid grid-cols-2 gap-3">
+              <Link
+                href="/plaza"
+                className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card hover:bg-muted transition-colors"
+              >
+                <div className="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                  <Compass className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">{t("dashboard.discover")}</p>
+                  <p className="text-xs text-muted-foreground">{t("dashboard.trending_topics")}</p>
+                </div>
+              </Link>
+              <Link
+                href="/fragments"
+                className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card hover:bg-muted transition-colors"
+              >
+                <div className="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">{t("navigation.sidebar.write_story")}</p>
+                  <p className="text-xs text-muted-foreground">Fragments & Stories</p>
+                </div>
+              </Link>
+            </div>
+
             {/* Tabs */}
             <div className="flex items-center overflow-x-auto pb-2 scrollbar-hide">
               <div className="flex items-center space-x-2">
                 {tabs.map((tab) => (
                   <button
                     key={tab.value}
-                    onClick={() => handleTabClick(tab)}
+                    onClick={() => setActiveTab(tab.value)}
                     className={cn(
                       "px-4 py-2 rounded-full text-sm font-medium transition-all duration-200",
                       activeTab === tab.value
@@ -177,45 +129,20 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Header for Tab - Removed or Simplified */}
-            {/* <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold tracking-tight capitalize">
-                {activeTab === Tab.STORYBOARDS ? "Community Feed" : activeTab}
-              </h2>
-            </div> */}
-
             {/* Feed Content */}
             <div className="space-y-4">
               {loading ? (
                 <div className="flex justify-center py-20">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
-              ) : !user && tabs.find(t => t.value === activeTab)?.requiredAuth ? (
-                <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 border rounded-lg bg-card p-8">
-                  <div className="h-16 w-16 bg-secondary/50 rounded-full flex items-center justify-center">
-                    <Lock className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                  <h3 className="text-xl font-bold">Login Required</h3>
-                  <p className="text-muted-foreground max-w-md">
-                    Please login to access {activeTab} content and join the community.
-                  </p>
-                  <div className="flex gap-4">
-                    <Button asChild>
-                      <Link href="/login">Login</Link>
-                    </Button>
-                    <Button variant="outline" asChild>
-                      <Link href="/register">Sign Up</Link>
-                    </Button>
-                  </div>
-                </div>
-              ) : items.length === 0 && trendingStories.length === 0 ? (
+              ) : items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
-                  <div className="text-muted-foreground">
-                    {activeTab === Tab.TRENDING
-                      ? "No trending stories at the moment. Check back later!"
-                      : `No ${activeTab.toLowerCase()} found yet.`
+                  <p className="text-muted-foreground">
+                    {activeTab === Tab.FOLLOWING
+                      ? t("dashboard.no_stories_yet")
+                      : t("empty")
                     }
-                  </div>
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -239,16 +166,6 @@ export default function DashboardPage() {
                         router.push(`/profile/${creatorId}`);
                       }}
                     />
-                  ))}
-                  {trendingStories.map((story) => (
-                    <div key={story.id} className="border border-border rounded-lg p-4 bg-card">
-                      <h3 className="font-bold text-lg mb-1">{story.title}</h3>
-                      <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{story.description}</p>
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">❤️ {story.likes}</span>
-                        <span className="flex items-center gap-1">👥 {story.followers}</span>
-                      </div>
-                    </div>
                   ))}
                 </div>
               )}
