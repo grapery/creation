@@ -1,19 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { Header } from "@/components/layout/header";
 import { useAuth } from "@/providers/auth-provider";
 import { useTranslation } from "@/providers/language-provider";
 import { StoryboardCard } from "@/components/storyboard/storyboard-card";
 import { storyboards } from "@/lib/api/storyboards";
 import { Storyboard } from "@/lib/types";
-import { Loader2, Lock, Compass, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Loader2, Compass, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
 import { useLoginPrompt } from "@/components/auth/login-prompt";
+
+const PlazaFeed = lazy(() =>
+  import("@/components/plaza/plaza-feed").then((m) => ({
+    default: m.PlazaFeed,
+  }))
+);
 
 enum Tab {
   STORYBOARDS = "storyboards",
@@ -29,14 +34,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const { LoginPromptModal, show: showLoginPrompt } = useLoginPrompt();
 
-  // Redirect unauthenticated users to plaza
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.replace("/plaza");
-    }
-  }, [authLoading, user, router]);
-
-  // Fetch data when tab changes
+  // Fetch data when tab changes (authenticated only)
   useEffect(() => {
     if (!user) return;
     let isMounted = true;
@@ -63,16 +61,32 @@ export default function DashboardPage() {
     return () => { isMounted = false; };
   }, [activeTab, user]);
 
-  // Don't render dashboard content for unauthenticated users (they get redirected)
-  if (!user && !authLoading) {
-    return null;
-  }
-
   const tabs = [
     { value: Tab.STORYBOARDS, label: t("dashboard.start_here") },
     { value: Tab.FOLLOWING, label: t("dashboard.following") },
   ];
 
+  // Unauthenticated users: show Header + Plaza content
+  if (!user && !authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Header />
+        <main className="flex-1 container max-w-6xl px-4 py-6 md:px-6 mx-auto">
+          <Suspense
+            fallback={
+              <div className="flex justify-center py-20">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            }
+          >
+            <PlazaFeed />
+          </Suspense>
+        </main>
+      </div>
+    );
+  }
+
+  // Authenticated users: full dashboard
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
@@ -81,7 +95,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
           {/* Main Feed Column */}
           <div className="md:col-span-8 min-w-0 space-y-6">
-            {/* Quick Actions - replacing old Trending tab */}
+            {/* Quick Actions */}
             <div className="grid grid-cols-2 gap-3">
               <Link
                 href="/plaza"
