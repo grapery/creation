@@ -1,143 +1,138 @@
 import { request } from './client';
-
-export interface Fragment {
-    id: string;
-    userId: string;
-    userName?: string;
-    userAvatar?: string;
-    content: string;
-    images?: string[];
-    style?: string;
-    likes: number;
-    comments: number;
-    shares: number;
-    isLiked?: boolean;
-    isPublic: boolean;
-    createdAt: number;
-}
-
-export interface FragmentComment {
-    id: string;
-    fragmentId: string;
-    userId: string;
-    userName?: string;
-    userAvatar?: string;
-    content: string;
-    parentId?: string;
-    createdAt: number;
-}
-
-export interface FragmentStats {
-    likes: number;
-    comments: number;
-    shares: number;
-    isLiked: boolean;
-}
+import type {
+    StoryFragment,
+    FragmentListResponse,
+    CreateFragmentRequest,
+    UpdateFragmentRequest,
+    FragmentStyle,
+    FragmentStoryPrefillAIRequest,
+    FragmentStoryPrefillAIResponse,
+    ConvertFragmentRequest,
+    ConvertFragmentResponse,
+    GenerateFragmentTaskResponse,
+    GenerateFragmentPanelsRequest,
+    GenerateFragmentPanelsTaskResponse,
+} from '@/lib/types';
 
 export const fragments = {
     // List fragments (feed)
     list: async (params?: {
-        feedType?: 'following' | 'popular' | 'recent';
-        page?: number;
+        tab?: 'discover' | 'following';
         limit?: number;
-    }): Promise<{ fragments: Fragment[]; total: number }> => {
-        const { feedType = 'recent', page = 1, limit = 20 } = params || {};
-        const offset = (page - 1) * limit;
-        // Note: Backend endpoint may vary, using common pattern
-        return request(`/api/fragments?feed=${feedType}&limit=${limit}&offset=${offset}`);
+        offset?: number;
+    }): Promise<FragmentListResponse> => {
+        const { tab = 'discover', limit = 20, offset = 0 } = params || {};
+        return request(`/api/v1/fragments?tab=${tab}&limit=${limit}&offset=${offset}`);
+    },
+
+    // List fragments by topic
+    getByTopic: async (topic: string, limit = 20, offset = 0): Promise<FragmentListResponse> => {
+        return request(`/api/v1/fragments?topic=${encodeURIComponent(topic)}&limit=${limit}&offset=${offset}`);
     },
 
     // Get fragment by ID
-    get: async (id: string): Promise<Fragment> => {
-        return request(`/api/fragments/${id}`);
+    get: async (id: string): Promise<StoryFragment> => {
+        return request(`/api/v1/fragments/${id}`);
     },
 
     // Create fragment
-    create: async (data: {
-        content: string;
-        images?: string[];
-        style?: string;
-        isPublic?: boolean;
-    }): Promise<Fragment> => {
-        return request('/api/fragments', 'POST', data);
+    create: async (data: CreateFragmentRequest): Promise<StoryFragment> => {
+        return request('/api/v1/fragments', 'POST', data);
+    },
+
+    // Update fragment
+    update: async (id: string, data: UpdateFragmentRequest): Promise<StoryFragment> => {
+        return request(`/api/v1/fragments/${id}`, 'PUT', data);
     },
 
     // Delete fragment
     delete: async (id: string): Promise<void> => {
-        return request(`/api/fragments/${id}`, 'DELETE');
+        return request(`/api/v1/fragments/${id}`, 'DELETE');
     },
 
-    // Convert fragment to story
-    convertToStory: async (fragmentId: string): Promise<{ storyId: string }> => {
-        return request(`/api/fragments/${fragmentId}/convert-to-story`, 'POST');
+    // Get fragment stats
+    getStats: async (id: string): Promise<{ likes: number; comments: number; shares: number; isLiked: boolean }> => {
+        return request(`/api/v1/fragments/${id}/stats`);
+    },
+
+    // AI text-only fragment generation (async task)
+    generate: async (data: {
+        content: string;
+        style?: string;
+        visibility?: string;
+        topic?: string;
+    }): Promise<{ taskId: string }> => {
+        return request('/api/v1/fragments/generate', 'POST', data);
+    },
+
+    // Poll text generation task status
+    getGenerateStatus: async (taskId: string): Promise<GenerateFragmentTaskResponse> => {
+        return request(`/api/v1/fragments/generate/${taskId}`);
+    },
+
+    // AI panel generation from reference image (async task)
+    generatePanels: async (data: GenerateFragmentPanelsRequest): Promise<{ taskId: string }> => {
+        return request('/api/v1/fragment-panels/generate', 'POST', data);
+    },
+
+    // Poll panel generation task status
+    getPanelGenerateStatus: async (taskId: string): Promise<GenerateFragmentPanelsTaskResponse> => {
+        return request(`/api/v1/fragment-panels/generate/${taskId}`);
+    },
+
+    // Resume failed panel generation
+    resumePanelGenerate: async (taskId: string): Promise<GenerateFragmentPanelsTaskResponse> => {
+        return request(`/api/v1/fragment-panels/generate/${taskId}/resume`, 'POST');
     },
 
     // Like fragment
     like: async (id: string): Promise<void> => {
-        return request(`/api/fragments/${id}/like`, 'POST');
+        return request(`/api/v1/fragments/${id}/like`, 'POST');
     },
 
     // Unlike fragment
     unlike: async (id: string): Promise<void> => {
-        return request(`/api/fragments/${id}/like`, 'DELETE');
+        return request(`/api/v1/fragments/${id}/like`, 'DELETE');
     },
 
-    // Get fragment likes
-    getLikes: async (id: string, page = 1, limit = 20): Promise<{ users: any[]; total: number }> => {
-        const offset = (page - 1) * limit;
-        return request(`/api/fragments/${id}/likes?limit=${limit}&offset=${offset}`);
+    // Record share
+    share: async (id: string): Promise<{ shareUrl: string }> => {
+        return request(`/api/v1/fragments/${id}/share`, 'POST');
     },
 
     // Get fragment comments
-    getComments: async (id: string, page = 1, limit = 20): Promise<{ comments: FragmentComment[]; total: number }> => {
-        const offset = (page - 1) * limit;
-        return request(`/api/fragments/${id}/comments?limit=${limit}&offset=${offset}`);
+    getComments: async (id: string, limit = 20, offset = 0): Promise<{ comments: any[]; total: number }> => {
+        return request(`/api/v1/fragments/${id}/comments?limit=${limit}&offset=${offset}`);
     },
 
-    // Add comment to fragment
-    addComment: async (fragmentId: string, content: string, parentId?: string): Promise<FragmentComment> => {
-        return request(`/api/fragments/${fragmentId}/comments`, 'POST', { content, parentId });
+    // Add comment
+    addComment: async (fragmentId: string, content: string, parentId?: string): Promise<any> => {
+        return request(`/api/v1/fragments/${fragmentId}/comments`, 'POST', { content, parentId });
     },
 
-    // Update comment
-    updateComment: async (commentId: string, content: string): Promise<FragmentComment> => {
-        return request(`/api/fragments/comments/${commentId}`, 'PUT', { content });
+    // Get user's fragments
+    getByUser: async (userId: string, limit = 20, offset = 0): Promise<FragmentListResponse> => {
+        return request(`/api/v1/users/${userId}/fragments?limit=${limit}&offset=${offset}`);
     },
 
-    // Delete comment
-    deleteComment: async (commentId: string): Promise<void> => {
-        return request(`/api/fragments/comments/${commentId}`, 'DELETE');
+    // AI prefill for story creation from fragment
+    storyPrefillAI: async (fragmentId: string, data?: FragmentStoryPrefillAIRequest): Promise<FragmentStoryPrefillAIResponse> => {
+        return request(`/api/v1/fragments/${fragmentId}/story-prefill-ai`, 'POST', data || {});
     },
 
-    // Share fragment
-    share: async (id: string): Promise<{ shareUrl: string }> => {
-        return request(`/api/fragments/${id}/share`, 'POST');
+    // Convert fragment to story
+    convertToStory: async (fragmentId: string, data: ConvertFragmentRequest): Promise<ConvertFragmentResponse> => {
+        return request(`/api/v1/fragments/${fragmentId}/convert-to-story`, 'POST', data);
     },
 
-    // Get fragment stats
-    getStats: async (id: string): Promise<FragmentStats> => {
-        return request(`/api/fragments/${id}/stats`);
+    // Get comic styles (paginated batch)
+    getStyles: async (cursor?: string): Promise<{ styles: FragmentStyle[]; nextCursor?: string }> => {
+        const params = cursor ? `?cursor=${cursor}` : '';
+        return request(`/api/v1/fragments/styles/next${params}`);
     },
 
-    // Generate fragment with AI
-    generate: async (data: {
-        prompt: string;
-        style?: string;
-    }): Promise<{ taskId: string }> => {
-        return request('/api/fragments/generate', 'POST', data);
+    // Search fragments
+    search: async (query: string, limit = 20, offset = 0): Promise<FragmentListResponse> => {
+        return request(`/api/v1/fragments/search?q=${encodeURIComponent(query)}&limit=${limit}&offset=${offset}`);
     },
-
-    // Get generation status
-    getGenerationStatus: async (taskId: string): Promise<{
-        status: 'pending' | 'processing' | 'completed' | 'failed';
-        result?: Fragment;
-        error?: string;
-    }> => {
-        return request(`/api/fragments/generate/${taskId}`);
-    },
-
-    // Get generation styles
-    getStyles: async (): Promise<{ styles: string[] }> => {
-        return request('/api/fragments/styles');
-    }
 };

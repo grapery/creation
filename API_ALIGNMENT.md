@@ -38,9 +38,10 @@ DELETE /api/follows  { followableType: 'story', followableId: id }  // Unfollow
 POST   /api/follows  { followableType: 'character', followableId: id }
 DELETE /api/follows  { followableType: 'character', followableId: id }
 
-// Storyboard interactions  
-POST   /api/likes    { likeableType: 'storyboard_node', likeableId: id }
-DELETE /api/likes    { likeableType: 'storyboard_node', likeableId: id }
+// Storyboard interactions（唯一数据源：storyboard_likes）
+POST   /api/storyboards/:id/like
+DELETE /api/storyboards/:id/like
+// 批量/检查仍可用：POST /api/likes/batch-check、GET /api/likes/check?type=storyboard_node（服务端委托到 storyboard_likes）
 
 // Batch check endpoints
 POST /api/likes/batch-check    { likeableType, likeableIds }
@@ -210,8 +211,8 @@ interface APIResponse<T> {
 | `storyboards.getByStoryId()` | GET | `/api/storyboards?storyId=` | Yes |
 | `storyboards.get()` | GET | `/api/storyboards/:id` | Yes |
 | `storyboards.getChildren()` | GET | `/api/storyboards/:id/children` | Yes |
-| `storyboards.like()` | POST | `/api/likes` | Yes |
-| `storyboards.unlike()` | DELETE | `/api/likes` | Yes |
+| `storyboards.like()` | POST | `/api/storyboards/:id/like` | Yes |
+| `storyboards.unlike()` | DELETE | `/api/storyboards/:id/like` | Yes |
 
 #### Characters
 | Frontend API | Method | Backend Route | Auth Required |

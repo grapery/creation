@@ -1,125 +1,151 @@
 "use client";
 
 import { useState } from "react";
-import { Image as ImageIcon, Wand2, RefreshCw, SkipForward } from "lucide-react";
+import { Wand2, RefreshCw, Loader2, RotateCcw } from "lucide-react";
+import { creation } from "@/lib/api/creation";
+import type { StoryboardScene, StoryboardImageGeneration } from "@/lib/types";
+import { showSuccess, showError } from "@/lib/toast-utils";
 
 interface ImagesStepProps {
-    data: {
-        scenes: any[];
-        images?: string[];
-    };
-    onChange: (data: any) => void;
+    storyboardId: string;
+    scenes: StoryboardScene[];
+    onScenesUpdate: (scenes: StoryboardScene[]) => void;
     onNext: () => void;
     onBack: () => void;
 }
 
-export function ImagesStep({ data, onChange, onNext, onBack }: ImagesStepProps) {
+export function ImagesStep({ storyboardId, scenes, onScenesUpdate, onNext, onBack }: ImagesStepProps) {
     const [generating, setGenerating] = useState(false);
     const [generatingSceneId, setGeneratingSceneId] = useState<string | null>(null);
+    const [sceneStatuses, setSceneStatuses] = useState<Record<string, string>>({});
 
-    const generateImages = async () => {
+    const generateAllImages = async () => {
         setGenerating(true);
-        // Mock image generation
-        setTimeout(() => {
-            const mockImages = [
-                "https://images.unsplash.com/photo-1544716279-ca5e3f4abd8c?w=400",
-                "https://images.unsplash.com/photo-15187092688082-2e5c8d0c3b9?w=400",
-                "https://images.unsplash.com/photo-1534998052134-364b6257462c?w=400",
-            ];
-            onChange({ ...data, images: mockImages });
+        try {
+            const result = await creation.generateAllImages(storyboardId);
+            if (result.results) {
+                const updated = scenes.map(scene => {
+                    const r = result.results.find(res => res.sceneId === scene.id);
+                    if (r?.generation?.generatedImageUrl) {
+                        return { ...scene, image: r.generation.generatedImageUrl };
+                    }
+                    return scene;
+                });
+                onScenesUpdate(updated);
+            }
+            showSuccess("Images Generated", `${result.successCount}/${result.total} scenes`);
+        } catch (err) {
+            console.error("Failed to generate images:", err);
+            showError("Generation Failed", "Failed to generate scene images");
+        } finally {
             setGenerating(false);
-        }, 2000);
+        }
     };
 
-    const generateSceneImage = async (sceneId: string) => {
-        setGeneratingSceneId(sceneId);
-        // Mock scene image generation
-        setTimeout(() => {
-            const mockImage = `https://images.unsplash.com/photo-${Math.floor(Math.random() * 100000000)}?w=400`;
-            // Update scene with new image
-            const updatedScenes = data.scenes.map((scene: any) => 
-                scene.id === sceneId ? { ...scene, image: mockImage } : scene
-            );
-            onChange({ ...data, scenes: updatedScenes });
+    const generateSingleImage = async (scene: StoryboardScene) => {
+        setGeneratingSceneId(scene.id);
+        setSceneStatuses(prev => ({ ...prev, [scene.id]: "generating" }));
+        try {
+            const result = await creation.generateImage(storyboardId, {
+                sceneId: scene.id,
+                sceneTitle: scene.title,
+                sceneDescription: scene.description || scene.title,
+            });
+            if (result.generatedImageUrl) {
+                const updated = scenes.map(s =>
+                    s.id === scene.id ? { ...s, image: result.generatedImageUrl } : s
+                );
+                onScenesUpdate(updated);
+            }
+            setSceneStatuses(prev => ({ ...prev, [scene.id]: "completed" }));
+        } catch (err) {
+            console.error("Failed to generate image for scene:", err);
+            setSceneStatuses(prev => ({ ...prev, [scene.id]: "failed" }));
+        } finally {
             setGeneratingSceneId(null);
-        }, 1500);
+        }
     };
 
-    const regenerateAll = async () => {
-        setGenerating(true);
-        setTimeout(() => {
-            const mockImages = [
-                "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=400",
-                "https://images.unsplash.com/photo-1516339921822-447e038a1e3?w=400",
-                "https://images.unsplash.com/photo-1476602775248-537d0f8136c?w=400",
-            ];
-            onChange({ ...data, images: mockImages });
-            setGenerating(false);
-        }, 2000);
-    };
-
-    const images = data.images || [];
+    const hasImages = scenes.some(s => s.image);
+    const allHaveImages = scenes.length > 0 && scenes.every(s => s.image);
 
     return (
         <div className="space-y-4">
-            {/* Generate Images Card */}
-            {images.length === 0 ? (
+            {/* Generate All Button */}
+            {!hasImages ? (
                 <div className="p-8 bg-background border border-border rounded-xl text-center space-y-6">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-green-500/20 to-blue-500/20 flex items-center justify-center mx-auto">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center mx-auto">
                         <Wand2 className="w-8 h-8 text-purple-500" />
                     </div>
-                    <h3 className="text-xl font-semibold text-foreground">
-                        Generate Scene Images
-                    </h3>
+                    <h3 className="text-xl font-semibold">Generate Scene Images</h3>
                     <p className="text-sm text-muted-foreground max-w-sm mx-auto">
                         AI will create visual representations for each scene based on your descriptions
                     </p>
                     <button
-                        onClick={generateImages}
+                        onClick={generateAllImages}
                         disabled={generating}
-                        className="w-full py-3.5 bg-purple-500 hover:bg-purple-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+                        className="w-full py-3 bg-primary hover:bg-primary/90 disabled:bg-gray-300 text-primary-foreground font-semibold rounded-lg flex items-center justify-center gap-2"
                     >
-                        {generating ? (
-                            <>
-                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                Generating Images...
-                            </>
-                        ) : (
-                            <>
-                                <Wand2 className="w-4 h-4" />
-                                Generate Images
-                            </>
-                        )}
+                        {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
+                        {generating ? "Generating..." : "Generate All Images"}
                     </button>
                 </div>
             ) : (
                 <div className="space-y-4">
                     {/* Images Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {images.map((imageUrl, index) => (
-                            <div 
-                                key={index}
-                                className="relative rounded-lg overflow-hidden border border-border bg-muted"
-                            >
-                                <img 
-                                    src={imageUrl} 
-                                    alt={`Scene ${index + 1}`}
-                                    className="w-full h-[200px] object-cover"
-                                />
-                                <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 rounded-md backdrop-blur-sm">
-                                    <span className="text-white text-xs font-medium">
-                                        Scene {index + 1}
-                                    </span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {scenes.map((scene, index) => (
+                            <div key={scene.id} className="relative rounded-xl overflow-hidden border border-border bg-muted group">
+                                {scene.image ? (
+                                    <img
+                                        src={scene.image}
+                                        alt={scene.title}
+                                        className="w-full h-[200px] object-cover"
+                                    />
+                                ) : (
+                                    <div className="w-full h-[200px] flex flex-col items-center justify-center gap-2">
+                                        {sceneStatuses[scene.id] === "generating" || generatingSceneId === scene.id ? (
+                                            <Loader2 className="w-6 h-6 text-primary animate-spin" />
+                                        ) : (
+                                            <>
+                                                <p className="text-xs text-muted-foreground">{scene.title}</p>
+                                                <button
+                                                    onClick={() => generateSingleImage(scene)}
+                                                    disabled={generatingSceneId !== null}
+                                                    className="px-3 py-1.5 text-xs bg-primary text-primary-foreground rounded-md disabled:opacity-50"
+                                                >
+                                                    Generate
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
+                                )}
+                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <span className="text-white text-xs font-medium">Scene {index + 1}</span>
+                                            <p className="text-white/80 text-[10px] line-clamp-1">{scene.title}</p>
+                                        </div>
+                                        {scene.image && (
+                                            <button
+                                                onClick={() => generateSingleImage(scene)}
+                                                disabled={generatingSceneId !== null}
+                                                className="p-1.5 rounded-md bg-white/20 hover:bg-white/30 backdrop-blur-sm"
+                                            >
+                                                <RefreshCw className="w-3 h-3 text-white" />
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         ))}
                     </div>
 
-                    {/* Regenerate Button */}
+                    {/* Regenerate All */}
                     <button
-                        onClick={regenerateAll}
+                        onClick={generateAllImages}
                         disabled={generating}
-                        className="w-full py-2.5 border border-border bg-background hover:bg-muted text-foreground font-medium rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full py-2.5 border border-border bg-background hover:bg-muted text-foreground font-medium rounded-lg flex items-center justify-center gap-2 disabled:opacity-50"
                     >
                         <RefreshCw className="w-4 h-4" />
                         {generating ? "Regenerating..." : "Regenerate All"}
@@ -137,10 +163,9 @@ export function ImagesStep({ data, onChange, onNext, onBack }: ImagesStepProps) 
                 </button>
                 <button
                     onClick={onNext}
-                    disabled={images.length === 0}
-                    className="flex-1 py-3 bg-black hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors"
+                    className="flex-1 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-colors"
                 >
-                    {images.length === 0 ? "Skip" : "Next"}
+                    {allHaveImages ? "Next" : "Skip"}
                 </button>
             </div>
         </div>

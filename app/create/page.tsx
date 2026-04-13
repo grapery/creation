@@ -1,26 +1,46 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { Share2, Users, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useEffect, useRef, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Share2, Users, Search, ChevronLeft, ChevronRight, Eye, MessageSquare, Sparkles, Save } from "lucide-react";
 import { stories } from "@/lib/api/stories";
 import { showSuccess, showError } from "@/lib/toast-utils";
-import { StyleConfig, CreateStoryRequest } from "@/lib/types";
+import { StyleConfig, CreateStoryRequest, FragmentStoryCreationPrefill, GENRES, FragmentVisibility } from "@/lib/types";
 
 interface CreateStoryProps {
     storyId?: string;
 }
 
-export default function CreateStory({ storyId }: CreateStoryProps) {
+export default function CreateStoryPage({ storyId }: CreateStoryProps) {
+    return (
+        <Suspense fallback={<div className="flex items-center justify-center py-20">Loading...</div>}>
+            <CreateStory storyId={storyId} />
+        </Suspense>
+    );
+}
+
+function CreateStory({ storyId }: CreateStoryProps) {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [selectedTab, setSelectedTab] = useState(0);
     const [title, setTitle] = useState("");
+    const [titleMaxLength, setTitleMaxLength] = useState(200);
     const [description, setDescription] = useState("");
-    const [selectedGenre, setSelectedGenre] = useState("Fantasy");
+    const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
     const [defaultSceneCount, setDefaultSceneCount] = useState(3);
     const [coverImage, setCoverImage] = useState<string | null>(null);
     const [isUploadingCover, setIsUploadingCover] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Fragment prefill state
+    const [fragmentPrefill, setFragmentPrefill] = useState<FragmentStoryCreationPrefill | null>(null);
+    const [sourceFragmentId, setSourceFragmentId] = useState<string | null>(null);
+
+    // Publish settings
+    const [visibility, setVisibility] = useState<string>("public");
+    const [isCollaborationOpen, setIsCollaborationOpen] = useState(false);
+    const [allowComments, setAllowComments] = useState(true);
+    const [showAILabel, setShowAILabel] = useState(false);
 
     // AI Enrichment states
     const [useAIEnrich, setUseAIEnrich] = useState(false);
@@ -44,7 +64,26 @@ export default function CreateStory({ storyId }: CreateStoryProps) {
 
     useEffect(() => {
         loadStyles();
-    }, []);
+        // Load fragment prefill from URL params
+        const prefillParam = searchParams.get("fragmentPrefill");
+        if (prefillParam) {
+            try {
+                const prefill: FragmentStoryCreationPrefill = JSON.parse(decodeURIComponent(prefillParam));
+                setFragmentPrefill(prefill);
+                setSourceFragmentId(prefill.fragmentId);
+                setTitle(prefill.title);
+                setDescription(prefill.description || "");
+                if (prefill.genre) setSelectedGenres([prefill.genre]);
+                if (prefill.defaultSceneCount) setDefaultSceneCount(prefill.defaultSceneCount);
+                if (prefill.limitTitleToSevenCharacters) setTitleMaxLength(7);
+                if (prefill.suggestedTags && prefill.suggestedTags.length > 0) {
+                    // Tags will be applied to the request
+                }
+            } catch (e) {
+                console.error("Failed to parse fragment prefill:", e);
+            }
+        }
+    }, [searchParams]);
 
     const loadStyles = async (page = 0, query = "") => {
         setIsLoadingStyles(true);
@@ -80,25 +119,24 @@ export default function CreateStory({ storyId }: CreateStoryProps) {
         return () => clearTimeout(timeoutId);
     };
 
-    const genres = [
-        "Fantasy",
-        "Science Fiction",
-        "Romance",
-        "Mystery",
-        "Thriller",
-        "Horror",
-        "Adventure",
-        "Historical",
-        "Contemporary"
-    ];
+    const genreOptions = GENRES;
 
 
 
     const tabs = [
         { id: 0, label: "Details" },
         { id: 1, label: "Panels" },
-        { id: 2, label: "Cast" }
+        { id: 2, label: "Cast" },
+        { id: 3, label: "Settings" }
     ];
+
+    const toggleGenre = (key: string) => {
+        setSelectedGenres(prev => {
+            if (prev.includes(key)) return prev.filter(g => g !== key);
+            if (prev.length >= 3) return prev;
+            return [...prev, key];
+        });
+    };
 
     const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -124,6 +162,10 @@ export default function CreateStory({ storyId }: CreateStoryProps) {
     };
 
     const handleCreate = async () => {
+        return handleCreateWithStatus("published");
+    };
+
+    const handleCreateWithStatus = async (status: "draft" | "published") => {
         if (!title.trim()) {
             showError("请输入标题", "故事标题不能为空");
             return;
@@ -135,25 +177,24 @@ export default function CreateStory({ storyId }: CreateStoryProps) {
                 title,
                 description,
                 coverImage: coverImage || aiGeneratedCoverURL || undefined,
-                genre: selectedGenre,
+                genre: selectedGenres.length > 0 ? selectedGenres[0] : undefined,
                 defaultSceneCount,
-                useAIEnrich,
-                generateCover,
-                generatePoster,
-                generateBackground,
+                status,
+                useAIEnrich: status === "published" ? useAIEnrich : false,
+                generateCover: status === "published" ? generateCover : false,
+                generatePoster: status === "published" ? generatePoster : false,
+                generateBackground: status === "published" ? generateBackground : false,
                 aiStyle: selectedAIStyle || undefined,
-                style: selectedAIStyle?.style // Passing style name as string as well if needed
+                style: selectedAIStyle?.style,
+                isCollaborationOpen,
+                sourceFragmentId: sourceFragmentId || undefined,
+                tags: fragmentPrefill?.suggestedTags,
             };
 
             const createdStory = await stories.create(request);
 
-            // If AI processing happened, we might get enriched content back immediately 
-            // or we might need to poll. The backend implementation detail isn't fully visible,
-            // but the Swift code sets `createdStory` and then maybe refreshes?
-            // For now, assume success and redirect.
-
-            showSuccess("创建成功", "故事创建成功！");
-            router.push(`/stories/${createdStory.id}`); // Redirect to new story
+            showSuccess(status === "draft" ? "草稿已保存" : "创建成功", status === "draft" ? "故事已保存为草稿" : "故事创建成功！");
+            router.push(`/stories/${createdStory.id}`);
 
         } catch (error) {
             console.error("Failed to create story:", error);
@@ -196,14 +237,29 @@ export default function CreateStory({ storyId }: CreateStoryProps) {
                     <div className="space-y-6">
                         <h3 className="text-xl font-semibold text-foreground">Story Information</h3>
 
+                        {/* Fragment Source Indicator */}
+                        {fragmentPrefill && (
+                            <div className="flex items-center gap-2 p-3 bg-purple-50/10 border border-purple-500/20 rounded-lg">
+                                <Sparkles className="w-4 h-4 text-purple-500" />
+                                <span className="text-sm text-purple-700">
+                                    Created from Fragment &ldquo;{fragmentPrefill.title}&rdquo;
+                                </span>
+                            </div>
+                        )}
+
                         {/* Title Field */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-foreground">Title</label>
+                            <div className="flex items-center justify-between">
+                                <label className="text-sm font-medium text-foreground">Title</label>
+                                <span className={`text-xs ${title.length > titleMaxLength * 0.9 ? "text-red-500" : "text-muted-foreground"}`}>
+                                    {title.length}/{titleMaxLength}
+                                </span>
+                            </div>
                             <input
                                 type="text"
                                 value={title}
-                                onChange={(e) => setTitle(e.target.value)}
-                                placeholder="Enter story title"
+                                onChange={(e) => setTitle(e.target.value.slice(0, titleMaxLength))}
+                                placeholder={fragmentPrefill ? "AI suggested title" : "Enter story title"}
                                 className="w-full px-4 py-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
                             />
                         </div>
@@ -220,19 +276,27 @@ export default function CreateStory({ storyId }: CreateStoryProps) {
                             />
                         </div>
 
-                        {/* Genre Picker */}
+                        {/* Genre Chips */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-foreground">Genre</label>
-                            <select
-                                value={selectedGenre}
-                                onChange={(e) => setSelectedGenre(e.target.value)}
-                                className="w-full px-4 py-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                            >
-                                <option value="">Select a genre</option>
-                                {genres.map((genre) => (
-                                    <option key={genre} value={genre}>{genre}</option>
+                            <div className="flex items-center justify-between">
+                                <label className="text-sm font-medium text-foreground">Genre</label>
+                                <span className="text-xs text-muted-foreground">{selectedGenres.length}/3</span>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                {genreOptions.map((genre) => (
+                                    <button
+                                        key={genre.key}
+                                        onClick={() => toggleGenre(genre.key)}
+                                        className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all border ${
+                                            selectedGenres.includes(genre.key)
+                                                ? "bg-primary text-primary-foreground border-primary"
+                                                : "bg-background text-foreground border-border hover:border-primary/40"
+                                        }`}
+                                    >
+                                        {genre.label.en}
+                                    </button>
                                 ))}
-                            </select>
+                            </div>
                         </div>
 
                         {/* Default Scene Count Picker */}
@@ -585,6 +649,87 @@ export default function CreateStory({ storyId }: CreateStoryProps) {
                         </div>
                     </div>
                 )}
+
+                {/* Settings Tab */}
+                {selectedTab === 3 && (
+                    <div className="space-y-6">
+                        <h3 className="text-xl font-semibold text-foreground">Publish Settings</h3>
+
+                        {/* Visibility */}
+                        <div className="space-y-3">
+                            <div className="flex items-center gap-2">
+                                <Eye className="w-4 h-4 text-muted-foreground" />
+                                <label className="text-sm font-medium">Visibility</label>
+                            </div>
+                            <div className="flex gap-2">
+                                {(["public", "followers", "private"] as const).map((v) => (
+                                    <button
+                                        key={v}
+                                        onClick={() => setVisibility(v)}
+                                        className={`flex-1 py-2 text-sm font-medium rounded-lg border transition-all ${
+                                            visibility === v
+                                                ? "bg-primary text-primary-foreground border-primary"
+                                                : "bg-background text-foreground border-border hover:border-primary/40"
+                                        }`}
+                                    >
+                                        {v.charAt(0).toUpperCase() + v.slice(1)}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Collaboration */}
+                        <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-border/50">
+                            <div className="flex items-center gap-3">
+                                <Users className="w-4 h-4 text-muted-foreground" />
+                                <div>
+                                    <p className="text-sm font-medium">Allow Collaboration</p>
+                                    <p className="text-xs text-muted-foreground">Let others contribute to your story</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setIsCollaborationOpen(!isCollaborationOpen)}
+                                className={`relative w-11 h-6 rounded-full transition-colors ${isCollaborationOpen ? "bg-primary" : "bg-gray-300"}`}
+                            >
+                                <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${isCollaborationOpen ? "translate-x-5" : "translate-x-1"}`} />
+                            </button>
+                        </div>
+
+                        {/* Comments */}
+                        <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-border/50">
+                            <div className="flex items-center gap-3">
+                                <MessageSquare className="w-4 h-4 text-muted-foreground" />
+                                <div>
+                                    <p className="text-sm font-medium">Allow Comments</p>
+                                    <p className="text-xs text-muted-foreground">Enable comments on your story</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setAllowComments(!allowComments)}
+                                className={`relative w-11 h-6 rounded-full transition-colors ${allowComments ? "bg-primary" : "bg-gray-300"}`}
+                            >
+                                <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${allowComments ? "translate-x-5" : "translate-x-1"}`} />
+                            </button>
+                        </div>
+
+                        {/* AI Label */}
+                        <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-border/50">
+                            <div className="flex items-center gap-3">
+                                <Sparkles className="w-4 h-4 text-purple-500" />
+                                <div>
+                                    <p className="text-sm font-medium">AI Content Label</p>
+                                    <p className="text-xs text-muted-foreground">Show AI-generated content label</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setShowAILabel(!showAILabel)}
+                                className={`relative w-11 h-6 rounded-full transition-colors ${showAILabel ? "bg-purple-500" : "bg-gray-300"}`}
+                            >
+                                <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${showAILabel ? "translate-x-5" : "translate-x-1"}`} />
+                            </button>
+                        </div>
+                    </div>
+                )}
                 {/* Action Buttons */}
                 <div className="flex gap-3 pt-6 border-t">
                     <button
@@ -594,7 +739,15 @@ export default function CreateStory({ storyId }: CreateStoryProps) {
                         Cancel
                     </button>
                     <button
-                        onClick={handleCreate}
+                        onClick={() => handleCreateWithStatus("draft")}
+                        disabled={title.trim().length === 0}
+                        className="flex-1 py-3 border border-border bg-card hover:bg-muted text-foreground font-medium rounded-lg flex items-center justify-center gap-2"
+                    >
+                        <Save className="w-4 h-4" />
+                        Save Draft
+                    </button>
+                    <button
+                        onClick={() => handleCreateWithStatus("published")}
                         disabled={title.trim().length === 0 || isAIProcessing}
                         className={`flex-1 py-3 font-semibold rounded-lg transition-colors ${isAIProcessing ? "bg-gray-400" : "bg-black hover:bg-gray-800 text-white"
                             }`}
@@ -613,7 +766,7 @@ export default function CreateStory({ storyId }: CreateStoryProps) {
                             </>
                         ) : (
                             <>
-                                Create Story
+                                Publish
                             </>
                         )}
                     </button>

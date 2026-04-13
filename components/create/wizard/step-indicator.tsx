@@ -1,6 +1,6 @@
 "use client";
 
-export type WizardStep = "setup" | "create" | "images" | "video" | "publish";
+export type WizardStep = "setup" | "generating" | "images" | "publish";
 
 interface StepIndicatorProps {
     currentStep: WizardStep;
@@ -8,15 +8,13 @@ interface StepIndicatorProps {
 
 export function StepIndicator({ currentStep }: StepIndicatorProps) {
     const steps = [
-        { id: "setup" as WizardStep, label: "Setup", icon: "⚙️" },
-        { id: "create" as WizardStep, label: "Create", icon: "✏️" },
-        { id: "images" as WizardStep, label: "Images", icon: "🖼️" },
-        { id: "video" as WizardStep, label: "Video", icon: "🎬" },
-        { id: "publish" as WizardStep, label: "Publish", icon: "📤" },
+        { id: "setup" as WizardStep, label: "Setup", icon: "1" },
+        { id: "generating" as WizardStep, label: "Generate", icon: "2" },
+        { id: "images" as WizardStep, label: "Images", icon: "3" },
+        { id: "publish" as WizardStep, label: "Publish", icon: "4" },
     ];
 
     const currentIndex = steps.findIndex(s => s.id === currentStep);
-    const canNavigateToStep = (stepIndex: number) => stepIndex <= currentIndex + 1;
 
     return (
         <div className="px-4 py-3">
@@ -24,44 +22,34 @@ export function StepIndicator({ currentStep }: StepIndicatorProps) {
                 {steps.map((step, index) => {
                     const isActive = currentStep === step.id;
                     const isPast = currentIndex > index;
-                    const canNavigate = canNavigateToStep(index);
 
                     return (
                         <div key={step.id} className="flex items-center flex-1">
-                            {/* Step Circle */}
-                            <button
-                                disabled={!canNavigate}
-                                className={`relative flex flex-col items-center ${
-                                    canNavigate ? "cursor-pointer" : "cursor-not-allowed opacity-60"
-                                }`}
-                            >
+                            <div className="flex flex-col items-center">
                                 <div
-                                    className={`w-9 h-9 rounded-full flex items-center justify-center ${
+                                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
                                         isActive
-                                            ? "bg-black text-white"
+                                            ? "bg-primary text-primary-foreground"
                                             : isPast
-                                            ? "bg-black/70 text-white"
-                                            : "bg-gray-300"
+                                            ? "bg-primary/70 text-primary-foreground"
+                                            : "bg-muted text-muted-foreground"
                                     }`}
                                 >
-                                    <span className="text-[14px] font-semibold">{step.icon}</span>
+                                    {step.icon}
                                 </div>
-                                
-                                {/* Step Label */}
                                 <span
-                                    className={`text-[9px] mt-1 font-medium ${
-                                        isActive ? "text-black" : isPast ? "text-black/70" : "text-gray-400"
+                                    className={`text-[10px] mt-1 font-medium ${
+                                        isActive ? "text-primary" : isPast ? "text-primary/70" : "text-muted-foreground"
                                     }`}
                                 >
                                     {step.label}
                                 </span>
-                            </button>
+                            </div>
 
-                            {/* Connector Line */}
                             {index < steps.length - 1 && (
                                 <div
-                                    className={`flex-1 h-0.5 mx-1 ${
-                                        currentIndex > index ? "bg-black/50" : "bg-gray-300"
+                                    className={`flex-1 h-0.5 mx-2 ${
+                                        currentIndex > index ? "bg-primary/50" : "bg-border"
                                     }`}
                                 />
                             )}

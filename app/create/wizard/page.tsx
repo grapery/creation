@@ -4,115 +4,165 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { StepIndicator, WizardStep } from "@/components/create/wizard/step-indicator";
 import { SetupStep } from "@/components/create/wizard/setup-step";
-import { CreateStep } from "@/components/create/wizard/create-step";
+import { GeneratingStep } from "@/components/create/wizard/generating-step";
 import { ImagesStep } from "@/components/create/wizard/images-step";
-import { VideoStep } from "@/components/create/wizard/video-step";
 import { PublishStep } from "@/components/create/wizard/publish-step";
+import { useGenerationPolling } from "@/hooks/use-generation-polling";
+import { creation } from "@/lib/api/creation";
+import { storyboards } from "@/lib/api/storyboards";
+import type { Storyboard, StoryboardScene, Character } from "@/lib/types";
 
 function WizardContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const [step, setStep] = useState<WizardStep>('setup');
-    const [data, setData] = useState({
-        title: "",
+
+    const storyId = searchParams.get("storyId") || "";
+    const parentStoryboardId = searchParams.get("parentStoryboardId") || "";
+    const existingStoryboardId = searchParams.get("existingStoryboardId") || "";
+
+    const [step, setStep] = useState<WizardStep>("setup");
+    const [storyboardId, setStoryboardId] = useState<string>(existingStoryboardId);
+    const [storyboard, setStoryboard] = useState<Storyboard | null>(null);
+    const [scenes, setScenes] = useState<StoryboardScene[]>([]);
+    const [characters, setCharacters] = useState<Character[]>([]);
+    const [coverImage, setCoverImage] = useState<string | null>(null);
+    const [creating, setCreating] = useState(false);
+
+    const setupData = {
+        storyId,
+        rawInput: "",
         style: "",
-        useAI: true,
         sceneCount: 3,
-        characters: [] as any[],
-        content: "",
-        generatedContent: "",
-        scenes: [] as any[],
-        images: [] as any[],
-        video: "",
-    });
+        characters,
+    };
 
-    // Check if continuing from an existing story
+    // Poll generation progress
+    const { progress, isGenerating, retryFailedImages, cancelGeneration, refetch } =
+        useGenerationPolling({
+            storyboardId: step === "generating" ? storyboardId : null,
+            enabled: step === "generating",
+        });
+
+    // Load existing storyboard if provided
     useEffect(() => {
-        const storyId = searchParams.get('storyId');
-        if (storyId) {
-            // Load existing story data
-            setData(prev => ({
-                ...prev,
-                title: `Continuing from Story ${storyId}`,
-                content: "Loading story content..."
-            }));
+        if (existingStoryboardId) {
+            loadStoryboard(existingStoryboardId);
         }
-    }, [searchParams]);
+    }, [existingStoryboardId]);
 
-    const handleNext = () => {
-        const steps: WizardStep[] = ['setup', 'create', 'images', 'video', 'publish'];
-        const idx = steps.indexOf(step);
-        if (idx < steps.length - 1) {
-            setStep(steps[idx + 1]);
+    const loadStoryboard = async (id: string) => {
+        try {
+            const data = await storyboards.get(id);
+            setStoryboard(data);
+            setScenes(data.storyboardScenes || []);
+            setStoryboardId(id);
+        } catch (err) {
+            console.error("Failed to load storyboard:", err);
         }
     };
 
-    const handleBack = () => {
-        const steps: WizardStep[] = ['setup', 'create', 'images', 'video', 'publish'];
-        const idx = steps.indexOf(step);
-        if (idx > 0) {
-            setStep(steps[idx - 1]);
+    // Step 1: Setup → Create storyboard and trigger generation
+    const handleSetupComplete = async (data: typeof setupData) => {
+        if (!data.rawInput.trim() || !storyId) return;
+        setCreating(true);
+        try {
+            // Create the storyboard via the API
+            const response = await fetch(`/api/v1/storyboards`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    storyId,
+                    parentId: parentStoryboardId || undefined,
+                    rawInput: data.rawInput,
+                    sceneCount: data.sceneCount,
+                }),
+            });
+            if (!response.ok) throw new Error("Failed to create storyboard");
+            const result = await response.json();
+            const newStoryboard = result.data || result;
+            setStoryboardId(newStoryboard.id);
+            setStoryboard(newStoryboard);
+
+            // Trigger content generation
+            await creation.generateContent(newStoryboard.id, {
+                rawInput: data.rawInput,
+                style: data.style || undefined,
+            });
+
+            setStep("generating");
+        } catch (err) {
+            console.error("Failed to create storyboard:", err);
+        } finally {
+            setCreating(false);
         }
     };
 
-    const handlePublish = () => {
-        // Navigate to the created storyboard
-        router.push('/storyboards/new-created-id');
+    // Step 2: Generating → move to images when done
+    const handleGenerationComplete = () => {
+        // Load the updated storyboard with scenes
+        if (storyboardId) {
+            loadStoryboard(storyboardId);
+        }
+        setStep("images");
+    };
+
+    // Step 3: Images → move to publish
+    const handleImagesComplete = () => {
+        setStep("publish");
+    };
+
+    // Step 4: Publish
+    const handlePublish = (publishedId: string) => {
+        router.push(`/storyboards/${publishedId}`);
     };
 
     return (
         <div className="space-y-6">
             <div className="text-center">
                 <h2 className="text-2xl font-bold tracking-tight">Creation Wizard</h2>
-                <p className="text-muted-foreground">Create your story step by step.</p>
+                <p className="text-muted-foreground">Create your storyboard with AI assistance</p>
             </div>
 
-            {/* Step Indicator */}
             <StepIndicator currentStep={step} />
 
-            {/* Content */}
             <div className="max-w-3xl mx-auto">
-                {step === 'setup' && (
+                {step === "setup" && (
                     <SetupStep
-                        data={data}
-                        onChange={setData}
-                        onNext={handleNext}
-                        onBack={handleBack}
+                        data={setupData}
+                        onChange={() => {}}
+                        onNext={() => handleSetupComplete(setupData)}
+                        onBack={() => router.back()}
                     />
                 )}
 
-                {step === 'create' && (
-                    <CreateStep
-                        data={data}
-                        onChange={setData}
-                        onNext={handleNext}
-                        onBack={handleBack}
+                {step === "generating" && (
+                    <GeneratingStep
+                        progress={progress}
+                        isPolling={isGenerating}
+                        error={null}
+                        onRetryFailedImages={retryFailedImages}
+                        onCancel={cancelGeneration}
+                        onComplete={handleGenerationComplete}
+                        backgroundImage={coverImage || undefined}
                     />
                 )}
 
-                {step === 'images' && (
+                {step === "images" && (
                     <ImagesStep
-                        data={data}
-                        onChange={setData}
-                        onNext={handleNext}
-                        onBack={handleBack}
+                        storyboardId={storyboardId}
+                        scenes={scenes}
+                        onScenesUpdate={setScenes}
+                        onNext={handleImagesComplete}
+                        onBack={() => setStep("setup")}
                     />
                 )}
 
-                {step === 'video' && (
-                    <VideoStep
-                        data={data}
-                        onChange={setData}
-                        onNext={handleNext}
-                        onBack={handleBack}
-                    />
-                )}
-
-                {step === 'publish' && (
+                {step === "publish" && (
                     <PublishStep
-                        data={data}
-                        onChange={setData}
-                        onBack={handleBack}
+                        storyboardId={storyboardId}
+                        storyboard={storyboard}
+                        scenes={scenes}
+                        onBack={() => setStep("images")}
                         onPublish={handlePublish}
                     />
                 )}

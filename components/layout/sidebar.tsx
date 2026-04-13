@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PenTool, Target, TrendingUp, BookOpen, Lightbulb } from "lucide-react";
+import { PenTool, Target, TrendingUp, BookOpen, Lightbulb, Compass, Sparkles } from "lucide-react";
 import { useTranslation } from "@/providers/language-provider";
 
 export function Sidebar({ className }: { className?: string }) {
@@ -26,9 +26,23 @@ export function Sidebar({ className }: { className?: string }) {
                             </Link>
                         </Button>
                         <Button variant="outline" className="h-20 flex-col gap-2" asChild>
-                            <Link href="/create">
-                                <Target className="h-5 w-5 text-purple-500" />
-                                <span>Storyboard</span>
+                            <Link href="/fragments/create">
+                                <Sparkles className="h-5 w-5 text-purple-500" />
+                                <span>Fragment</span>
+                            </Link>
+                        </Button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                        <Button variant="outline" className="h-16 flex-col gap-1" asChild>
+                            <Link href="/create/wizard">
+                                <Target className="h-4 w-4 text-orange-500" />
+                                <span className="text-xs">Storyboard</span>
+                            </Link>
+                        </Button>
+                        <Button variant="outline" className="h-16 flex-col gap-1" asChild>
+                            <Link href="/plaza">
+                                <Compass className="h-4 w-4 text-blue-500" />
+                                <span className="text-xs">Discover</span>
                             </Link>
                         </Button>
                     </div>

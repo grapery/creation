@@ -9,6 +9,46 @@
 - ✅ 自动处理 401 认证错误
 - ✅ 可复用的 Custom Hook
 - ✅ 国际化支持
+- ✅ 集成DialogManager，防止弹窗重叠
+- ✅ 监听全局`auth:showLogin`事件
+
+## 新增功能 (v2)
+
+### 1. 全局认证事件
+
+组件现在会自动监听全局的`auth:showLogin`事件：
+
+```typescript
+// 在任何地方触发登录提示
+window.dispatchEvent(new CustomEvent('auth:showLogin', {
+    detail: { reason: 'session_expired' }
+}));
+```
+
+### 2. 弹窗优先级管理
+
+使用`DialogManager`管理弹窗优先级，确保：
+- 登录提示弹窗使用最高优先级(CRITICAL)
+- z-index设置为100，高于普通弹窗(50)
+- 不会与其他关键弹窗(如支付)重叠
+
+### 3. 统一错误码处理
+
+新增`error-codes.ts`和`error-handler.ts`模块：
+
+```typescript
+import { handleAPIError, ErrorCodes } from '@/lib/api';
+
+// 在组件中使用
+try {
+    await someAPICall();
+} catch (error) {
+    handleAPIError(error, {
+        customMessage: '自定义错误消息',
+        onAuthError: () => showLoginPrompt(),
+    });
+}
+```
 
 ## 快速开始
 

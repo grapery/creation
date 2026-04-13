@@ -34,6 +34,8 @@ export function Header() {
                 <div className="mr-4 hidden md:flex">
                     <nav className="flex items-center space-x-6 text-sm font-medium">
                         <Link href="/" className="transition-colors hover:text-foreground/80 text-foreground">{t("navigation.home")}</Link>
+                        <Link href="/plaza" className="transition-colors hover:text-foreground/80 text-foreground/60">Discover</Link>
+                        <Link href="/fragments" className="transition-colors hover:text-foreground/80 text-foreground/60">Fragments</Link>
                     </nav>
                 </div>
 

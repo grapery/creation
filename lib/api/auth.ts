@@ -144,37 +144,60 @@ export const auth = {
     }): Promise<AuthResponse> => {
         console.log('[Auth] WeChat OAuth login with code:', data.code ? 'received' : 'missing');
 
-        // Call vippay API for WeChat OAuth (uses payment service on port 8060)
-        const response = await request<any>('/api/vippay/wechat-oauth/signin', 'POST', {
+        const raw = await request<any>('/api/vippay/wechat-oauth/signin', 'POST', {
             code: data.code,
         }, paymentClient);
 
-        console.log('[Auth] WeChat OAuth response:', response);
+        // paymentClient 拦截器在 code===0 时已解包为 data 字段；兼容未解包信封
+        const payload =
+            raw && typeof raw === 'object' && raw.success === true && raw.data != null
+                ? raw.data
+                : raw;
 
-        // Handle vippay API response format
-        if (response && response.success && response.data) {
-            const { token, refreshToken, user } = response.data;
+        console.log('[Auth] WeChat OAuth payload:', payload ? 'received' : 'missing');
 
-            // Transform to AuthResponse format
-            const authResponse: AuthResponse = {
-                accessToken: token,
-                refreshToken: refreshToken,
-                user: user,
-                expiresIn: response.data.expiresIn,
-            };
-
-            // Save tokens
-            if (token && typeof token === 'string') {
-                console.log('[Auth] Saving WeChat OAuth tokens');
-                setTokens(token, refreshToken);
-            } else {
-                console.error('[Auth] Invalid WeChat OAuth token in response');
-            }
-
-            return authResponse;
-        } else {
-            console.error('[Auth] WeChat OAuth failed:', response);
-            throw new Error(response?.msg || response?.message || 'WeChat OAuth login failed');
+        if (!payload || typeof payload.token !== 'string') {
+            console.error('[Auth] WeChat OAuth failed:', raw);
+            throw new Error(raw?.msg || raw?.message || 'WeChat OAuth login failed');
         }
+
+        const { token, refreshToken, user, expiresIn } = payload;
+
+        const authResponse: AuthResponse = {
+            accessToken: token,
+            refreshToken: refreshToken,
+            user: user,
+            expiresIn: expiresIn,
+        };
+
+        if (token) {
+            console.log('[Auth] Saving WeChat OAuth tokens');
+            setTokens(token, refreshToken);
+        }
+
+        return authResponse;
+    },
+
+    /** 将微信账号绑定到当前登录用户（需已登录；先走 qrconnect 拿到 code） */
+    linkWeChat: async (data: { code: string }): Promise<User> => {
+        const raw = await request<any>(
+            '/api/vippay/wechat-oauth/link',
+            'POST',
+            { code: data.code },
+            paymentClient
+        );
+        const payload =
+            raw && typeof raw === 'object' && raw.success === true && raw.data != null
+                ? raw.data
+                : raw;
+        const user = payload?.user;
+        if (!user) {
+            throw new Error(raw?.msg || raw?.message || 'WeChat link failed');
+        }
+        return user;
+    },
+
+    unlinkWeChat: async (): Promise<void> => {
+        await request('/api/vippay/wechat-oauth/unlink', 'POST', undefined, paymentClient);
     }
 };

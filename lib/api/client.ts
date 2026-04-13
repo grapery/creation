@@ -1,4 +1,5 @@
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { ErrorCodes, getErrorInfo, isAuthError, canRefreshToken, shouldRedirectToLogin } from './error-codes';
 
 // Service Types
 export enum ServiceType {
@@ -70,6 +71,76 @@ export const clearTokens = () => {
     if (typeof window !== 'undefined') {
         localStorage.removeItem(TOKEN_KEY);
         localStorage.removeItem(REFRESH_TOKEN_KEY);
+    }
+};
+
+export const getRefreshToken = () => {
+    if (typeof window !== 'undefined') {
+        return localStorage.getItem(REFRESH_TOKEN_KEY);
+    }
+    return null;
+};
+
+// Token刷新状态管理
+let isRefreshing = false;
+let refreshSubscribers: Array<(token: string) => void> = [];
+
+const subscribeTokenRefresh = (cb: (token: string) => void) => {
+    refreshSubscribers.push(cb);
+};
+
+const onTokenRefreshed = (token: string) => {
+    refreshSubscribers.forEach(cb => cb(token));
+    refreshSubscribers = [];
+};
+
+const onRefreshError = () => {
+    refreshSubscribers = [];
+    clearTokens();
+    // 触发全局登出事件
+    if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('auth:logout', {
+            detail: { reason: 'token_refresh_failed' }
+        }));
+    }
+};
+
+// 尝试刷新Token
+const attemptRefreshToken = async (): Promise<string | null> => {
+    const refreshToken = getRefreshToken();
+    if (!refreshToken) {
+        return null;
+    }
+
+    try {
+        const baseURL = SERVICE_URLS[ServiceType.MAIN];
+        const response = await axios.post(`${baseURL}/api/auth/refresh`, {
+            refreshToken,
+        });
+
+        const { accessToken, refreshToken: newRefreshToken } = response.data?.data || response.data;
+
+        if (accessToken) {
+            setTokens(accessToken, newRefreshToken);
+            return accessToken;
+        }
+        return null;
+    } catch (error) {
+        console.error('[API] Token refresh failed:', error);
+        return null;
+    }
+};
+
+// 全局认证事件监听
+export const setupAuthListeners = () => {
+    if (typeof window !== 'undefined') {
+        window.addEventListener('auth:logout', ((event: CustomEvent) => {
+            console.log('[API] Auth logout event:', event.detail);
+            // 可以在这里触发全局的登录提示
+            window.dispatchEvent(new CustomEvent('auth:showLogin', {
+                detail: { reason: event.detail?.reason || 'session_expired' }
+            }));
+        }) as EventListener);
     }
 };
 
@@ -149,6 +220,8 @@ const createClient = (serviceType: ServiceType = ServiceType.MAIN): AxiosInstanc
         (error: AxiosError) => {
             if (error.response) {
                 const { status, data } = error.response;
+                const errorCode = (data as any)?.code;
+                const errorMessage = (data as any)?.message || (data as any)?.msg || error.message;
 
                 // Only log errors in development or for non-connection errors
                 if (process.env.NODE_ENV === 'development' && status !== 0 && status !== 503) {
@@ -156,29 +229,76 @@ const createClient = (serviceType: ServiceType = ServiceType.MAIN): AxiosInstanc
                         console.warn('[API] Server error:', {
                             url: error.config?.url,
                             status,
-                            message: (data as any)?.message || 'Server error'
+                            code: errorCode,
+                            message: errorMessage
                         });
                     } else if (status !== 401) {
-                        // Don't log 401 errors as they're expected for unauthenticated users
                         console.warn('[API] Request failed:', {
                             url: error.config?.url,
                             status,
-                            message: (data as any)?.message || error.message
+                            code: errorCode,
+                            message: errorMessage
                         });
                     }
                 }
 
+                // 处理401认证错误
                 if (status === 401) {
-                    // Unauthorized - emit event or redirect
-                    if (typeof window !== 'undefined') {
-                        // Optional: clearTokens();
-                        // window.location.href = '/login';
-                        // Better to handle in AuthContext
-                        // Silently handle 401 - don't log
+                    const isAuthEndpoint = error.config?.url?.includes('/api/auth/') ||
+                                          error.config?.url?.includes('/api/oauth/');
+
+                    // 认证端点的401直接抛出，由调用方处理
+                    if (isAuthEndpoint) {
+                        return Promise.reject(new APIError(errorMessage, errorCode || status, error));
+                    }
+
+                    // 对于需要刷新Token的情况（Token过期）
+                    if (canRefreshToken(errorCode)) {
+                        if (!isRefreshing) {
+                            isRefreshing = true;
+                            attemptRefreshToken()
+                                .then((newToken) => {
+                                    isRefreshing = false;
+                                    if (newToken) {
+                                        onTokenRefreshed(newToken);
+                                    } else {
+                                        onRefreshError();
+                                    }
+                                })
+                                .catch(() => {
+                                    isRefreshing = false;
+                                    onRefreshError();
+                                });
+                        }
+
+                        // 返回Promise，等待Token刷新完成后重试
+                        return new Promise((resolve, reject) => {
+                            subscribeTokenRefresh((newToken) => {
+                                // 使用新Token重试原请求
+                                if (error.config) {
+                                    error.config.headers.Authorization = `Bearer ${newToken}`;
+                                    client.request(error.config).then(resolve).catch(reject);
+                                } else {
+                                    reject(new APIError(errorMessage, errorCode, error));
+                                }
+                            });
+                        });
+                    }
+
+                    // 其他401错误（无效Token等）- 触发登出
+                    if (shouldRedirectToLogin(errorCode) || isAuthError(errorCode)) {
+                        clearTokens();
+                        if (typeof window !== 'undefined') {
+                            window.dispatchEvent(new CustomEvent('auth:showLogin', {
+                                detail: { reason: 'unauthorized', code: errorCode }
+                            }));
+                        }
+                        // 返回空数据，避免页面报错
+                        return Promise.resolve({ data: [], stories: [], storyboards: [], total: 0 } as any);
                     }
                 }
 
-                const message = (data as any)?.message || (data as any)?.msg || error.message;
+                const message = errorMessage;
 
                 // For authentication endpoints, always throw errors
                 const isAuthEndpoint = error.config?.url?.includes('/api/auth/') ||

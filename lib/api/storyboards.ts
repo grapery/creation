@@ -53,23 +53,15 @@ export const storyboards = {
         return request(`/api/storyboards/${parentId}`);
     },
 
-    // Actions
-    // Note: Using /api/likes endpoint with likeableType and likeableId
-    like: async (id: string) => request('/api/likes', 'POST', {
-        likeableType: 'storyboard_node',
-        likeableId: id
-    }),
-    unlike: async (id: string) => request('/api/likes', 'DELETE', {
-        likeableType: 'storyboard_node',
-        likeableId: id
-    }),
+    // Actions — 与后端唯一数据源一致：storyboard_likes + storyboards.likes
+    like: async (id: string) => request(`/api/storyboards/${id}/like`, 'POST'),
+    unlike: async (id: string) => request(`/api/storyboards/${id}/like`, 'DELETE'),
 
-    // Check like status
+    // 仍走互动接口；服务端已将 storyboard_node 委托到 storyboard_likes
     isLiked: async (id: string): Promise<{ isLiked: boolean }> => {
         return request(`/api/likes/check?type=storyboard_node&id=${id}`);
     },
 
-    // Batch check like status
     batchCheckLiked: async (storyboardIds: string[]): Promise<Record<string, boolean>> => {
         if (storyboardIds.length === 0) return {};
         return request('/api/likes/batch-check', 'POST', {

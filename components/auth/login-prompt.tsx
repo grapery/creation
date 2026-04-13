@@ -1,11 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Lock, LogIn, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import { useTranslation } from "@/providers/language-provider";
+import { DialogManager, DialogType, DialogPriority, hideDialog } from "@/lib/dialog-manager";
+
+// 弹窗ID常量
+const LOGIN_PROMPT_ID = "login_prompt";
 
 interface LoginPromptProps {
   isOpen: boolean;
@@ -22,11 +26,35 @@ export function LoginPrompt({
 }: LoginPromptProps) {
   const { t } = useTranslation();
 
+  // 注册到DialogManager
+  useEffect(() => {
+    if (isOpen) {
+      DialogManager.show(
+        LOGIN_PROMPT_ID,
+        DialogType.LOGIN_PROMPT,
+        DialogPriority.CRITICAL
+      );
+    } else {
+      DialogManager.hide(LOGIN_PROMPT_ID);
+    }
+
+    return () => {
+      if (isOpen) {
+        DialogManager.hide(LOGIN_PROMPT_ID);
+      }
+    };
+  }, [isOpen]);
+
+  const handleClose = useCallback(() => {
+    hideDialog(LOGIN_PROMPT_ID);
+    onClose();
+  }, [onClose]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <Card className="w-full max-w-md p-8">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+      <Card className="w-full max-w-md p-8 relative">
         <div className="flex flex-col items-center text-center space-y-6">
           {/* Icon */}
           <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
@@ -50,7 +78,7 @@ export function LoginPrompt({
             <Button
               asChild
               className="flex-1"
-              onClick={onClose}
+              onClick={handleClose}
             >
               <Link href="/login" className="flex items-center gap-2">
                 <LogIn className="h-4 w-4" />
@@ -61,7 +89,7 @@ export function LoginPrompt({
               variant="outline"
               asChild
               className="flex-1"
-              onClick={onClose}
+              onClick={handleClose}
             >
               <Link href="/register" className="flex items-center gap-2">
                 <UserPlus className="h-4 w-4" />
@@ -74,7 +102,7 @@ export function LoginPrompt({
           <Button
             variant="ghost"
             className="w-full"
-            onClick={onClose}
+            onClick={handleClose}
           >
             {t("auth.maybe_later") || "Maybe Later"}
           </Button>
@@ -87,18 +115,18 @@ export function LoginPrompt({
 /**
  * Custom hook to handle login prompt state
  * Use this in components that need authentication
- * 
+ *
  * @example
  * ```tsx
- * const LoginPrompt, { showLoginPrompt } = useLoginPrompt();
- * 
+ * const { LoginPromptModal, show: showLoginPrompt } = useLoginPrompt();
+ *
  * // Show the prompt
  * showLoginPrompt();
- * 
+ *
  * // In your JSX
  * return (
  *   <div>
- *     {LoginPrompt({ title: "Custom Title" })}
+ *     <LoginPromptModal title="Custom Title" />
  *   </div>
  * );
  * ```
@@ -106,16 +134,48 @@ export function LoginPrompt({
 export function useLoginPrompt() {
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
-  const show = () => setShowLoginPrompt(true);
-  const hide = () => setShowLoginPrompt(false);
+  const show = useCallback(() => {
+    // 检查是否已有其他高优先级弹窗显示
+    if (!DialogManager.hasAnyDialogShowing()) {
+      setShowLoginPrompt(true);
+    } else {
+      // 加入队列，稍后显示
+      DialogManager.show(
+        LOGIN_PROMPT_ID,
+        DialogType.LOGIN_PROMPT,
+        DialogPriority.CRITICAL,
+        {
+          onShow: () => setShowLoginPrompt(true),
+          onHide: () => setShowLoginPrompt(false),
+        }
+      );
+    }
+  }, []);
 
-  const LoginPromptModal = (props: Omit<LoginPromptProps, 'isOpen' | 'onClose'>) => (
+  const hide = useCallback(() => {
+    setShowLoginPrompt(false);
+    hideDialog(LOGIN_PROMPT_ID);
+  }, []);
+
+  const LoginPromptModal = (props: Omit<LoginPromptProps, "isOpen" | "onClose">) => (
     <LoginPrompt
       isOpen={showLoginPrompt}
       onClose={hide}
       {...props}
     />
   );
+
+  // 监听全局认证事件
+  useEffect(() => {
+    const handleShowLogin = () => {
+      show();
+    };
+
+    window.addEventListener("auth:showLogin", handleShowLogin as EventListener);
+    return () => {
+      window.removeEventListener("auth:showLogin", handleShowLogin as EventListener);
+    };
+  }, [show]);
 
   return {
     show,

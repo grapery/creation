@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
     Dialog,
     DialogContent,
@@ -15,6 +15,10 @@ import { PaymentMethod, PaymentResponse } from "@/lib/types/payment";
 import { payment } from "@/lib/api/payment";
 import { loadStripe, Stripe } from "@stripe/stripe-js";
 import { useTranslation } from "@/providers/language-provider";
+import { DialogManager, DialogType, DialogPriority, hideDialog } from "@/lib/dialog-manager";
+
+// 弹窗ID常量
+const PAYMENT_DIALOG_ID = "payment_dialog";
 
 interface PaymentDialogProps {
     open: boolean;
@@ -51,6 +55,32 @@ export function PaymentDialog({
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string>("");
     const [paymentResponse, setPaymentResponse] = useState<PaymentResponse | null>(null);
+
+    // 注册到DialogManager
+    useEffect(() => {
+        if (open) {
+            DialogManager.show(
+                PAYMENT_DIALOG_ID,
+                DialogType.PAYMENT,
+                DialogPriority.CRITICAL
+            );
+        } else {
+            DialogManager.hide(PAYMENT_DIALOG_ID);
+        }
+
+        return () => {
+            if (open) {
+                DialogManager.hide(PAYMENT_DIALOG_ID);
+            }
+        };
+    }, [open]);
+
+    const handleOpenChange = useCallback((newOpen: boolean) => {
+        if (!newOpen) {
+            hideDialog(PAYMENT_DIALOG_ID);
+        }
+        onOpenChange(newOpen);
+    }, [onOpenChange]);
 
     const formatAmount = (amount: number) => {
         return (amount / 100).toFixed(2);
@@ -115,7 +145,7 @@ export function PaymentDialog({
                         // For now, we'll simulate success
                         await new Promise(resolve => setTimeout(resolve, 2000));
                         onSuccess?.(response.paymentId || "simulated_payment_id");
-                        onOpenChange(false);
+                        handleOpenChange(false);
                     } else {
                         throw new Error(response.error || "Payment initialization failed");
                     }
@@ -135,7 +165,7 @@ export function PaymentDialog({
                         // Simulate payment flow
                         await new Promise(resolve => setTimeout(resolve, 2000));
                         onSuccess?.(response.paymentId || "simulated_payment_id");
-                        onOpenChange(false);
+                        handleOpenChange(false);
                     } else {
                         throw new Error(response.error || "Payment initialization failed");
                     }
@@ -169,7 +199,7 @@ export function PaymentDialog({
     };
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogContent className="sm:max-w-2xl">
                 <DialogHeader>
                     <DialogTitle>Complete Your Purchase</DialogTitle>
@@ -246,7 +276,7 @@ export function PaymentDialog({
                 <div className="flex justify-between pt-4">
                     <Button
                         variant="outline"
-                        onClick={() => onOpenChange(false)}
+                        onClick={() => handleOpenChange(false)}
                         disabled={isLoading}
                     >
                         Cancel
