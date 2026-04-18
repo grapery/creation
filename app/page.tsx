@@ -46,8 +46,8 @@ export default function DashboardPage() {
           const res = await storyboards.getDashboardStoryboards();
           setItems(res.storyboards || []);
         } else if (activeTab === Tab.FOLLOWING) {
-          // TODO: Implement following feed
-          setItems([]);
+          const res = await storyboards.getFeed(1, 20, 'following');
+          setItems(res.storyboards || []);
         }
       } catch (e: any) {
         console.error('Failed to fetch data:', e);

@@ -1,4 +1,4 @@
-import { request } from './client';
+import { request, apiClient, AI_TIMEOUT } from './client';
 import type {
     StoryboardContentGeneration,
     StoryboardImageGeneration,
@@ -17,7 +17,7 @@ export const creation = {
         storyboardId: string,
         data: { rawInput: string; characterIds?: string[]; sceneIds?: string[]; style?: string }
     ): Promise<StoryboardContentGeneration> => {
-        return request(`/api/v1/storyboards/${storyboardId}/generate/content`, 'POST', data);
+        return request(`/api/v1/storyboards/${storyboardId}/generate/content`, 'POST', data, apiClient, AI_TIMEOUT);
     },
 
     // Step 2: Generate detailed scene descriptions
@@ -25,7 +25,7 @@ export const creation = {
         storyboardId: string,
         data: { sceneId: string; sceneTitle?: string; sceneLocation?: string; inputDescription: string }
     ): Promise<any> => {
-        return request(`/api/v1/storyboards/${storyboardId}/generate/scene-details`, 'POST', data);
+        return request(`/api/v1/storyboards/${storyboardId}/generate/scene-details`, 'POST', data, apiClient, AI_TIMEOUT);
     },
 
     // Step 3: Generate image for a single scene
@@ -41,7 +41,7 @@ export const creation = {
             storyStyleId?: string;
         }
     ): Promise<StoryboardImageGeneration> => {
-        return request(`/api/v1/storyboards/${storyboardId}/generate/image`, 'POST', data);
+        return request(`/api/v1/storyboards/${storyboardId}/generate/image`, 'POST', data, apiClient, AI_TIMEOUT);
     },
 
     // Step 3 Batch: Generate images for all scenes
@@ -49,7 +49,7 @@ export const creation = {
         storyboardId: string,
         data?: { regenerateAll?: boolean; storyStyleId?: string }
     ): Promise<BatchImageResponse> => {
-        return request(`/api/v1/storyboards/${storyboardId}/generate/images`, 'POST', data || {});
+        return request(`/api/v1/storyboards/${storyboardId}/generate/images`, 'POST', data || {}, apiClient, AI_TIMEOUT);
     },
 
     // Step 4: Generate video for a scene
@@ -63,7 +63,7 @@ export const creation = {
             endFrameUrl?: string;
         }
     ): Promise<StoryboardVideoGeneration> => {
-        return request(`/api/v1/storyboards/${storyboardId}/generate/video`, 'POST', data);
+        return request(`/api/v1/storyboards/${storyboardId}/generate/video`, 'POST', data, apiClient, AI_TIMEOUT);
     },
 
     // Get aggregated generation progress

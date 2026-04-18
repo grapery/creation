@@ -119,9 +119,7 @@ export default function ProfilePage() {
         async function fetchProfile() {
             setLoading(true);
             try {
-                console.log('[Profile] Fetching user profile for userId:', userId);
                 const token = getAuthToken();
-                console.log('[Profile] Token exists:', !!token, 'Token length:', token?.length);
 
                 // Check if token exists, if not and it's not own profile, we may want to fetch public profile
                 const headers: Record<string, string> = {};
@@ -133,8 +131,6 @@ export default function ProfilePage() {
                     headers,
                 });
 
-                console.log('[Profile] Response status:', response.status, 'ok:', response.ok);
-
                 if (!response.ok) {
                     // Handle 401 (Unauthorized) specifically
                     if (response.status === 401) {
@@ -145,8 +141,6 @@ export default function ProfilePage() {
                 }
 
                 const data = await response.json();
-                console.log('[Profile] Response data:', data);
-
                 if (!isMounted) return;
 
                 setProfileUser(data.user);

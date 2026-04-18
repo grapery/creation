@@ -24,292 +24,151 @@ export interface VIPPlan {
 }
 
 // Product SKU definitions
-// These must match the iOS app's In-App Purchase product IDs
 export const MEMBERSHIP_SKUS: Record<MembershipSKU, MembershipSKU> = {
-    // Basic tier
-    basic_month: 'basic_month',
-    basic_quarter: 'basic_quarter',
-    basic_year: 'basic_year',
+    // Free tier
+    free_monthly: 'free_monthly',
+    free_quarterly: 'free_quarterly',
+    free_yearly: 'free_yearly',
 
     // Pro tier
-    pro_month: 'pro_month',
-    pro_quarter: 'pro_quarter',
-    pro_year: 'pro_year',
+    pro_monthly: 'pro_monthly',
+    pro_quarterly: 'pro_quarterly',
+    pro_yearly: 'pro_yearly',
+
+    // Prime tier
+    prime_monthly: 'prime_monthly',
+    prime_quarterly: 'prime_quarterly',
+    prime_yearly: 'prime_yearly',
 
     // Ultra tier
-    ultra_month: 'ultra_month',
-    ultra_quarter: 'ultra_quarter',
-    ultra_year: 'ultra_year',
+    ultra_monthly: 'ultra_monthly',
+    ultra_quarterly: 'ultra_quarterly',
+    ultra_yearly: 'ultra_yearly',
 } as const;
 
-// Membership plans data (could also come from backend)
+// Membership plans data — fallback when backend is unavailable
 export const MEMBERSHIP_PLANS: MembershipPlan[] = [
-    // Basic tier plans
-    {
-        id: 'basic_month',
-        tier: MembershipTier.BASIC,
-        cycle: BillingCycle.MONTHLY,
-        name: {
-            en: 'Basic Monthly',
-            zh: '基础会员 - 月付',
-            ja: 'ベーシック月額',
-        },
-        description: {
-            en: 'Perfect for getting started',
-            zh: '适合入门用户',
-            ja: '初心者に最適',
-        },
-        price: 499,  // $4.99
-        currency: 'USD',
-        features: ['basic_ai_quota', 'basic_roles', 'standard_export'],
-        limits: {
-            aiQuota: 100,
-            maxRoles: 5,
-            maxContexts: 3,
-            maxStoryboards: 10,
-            exportQuality: 'standard',
-            prioritySupport: false,
-            advancedFeatures: false,
-        },
-        trialDays: 7,
-    },
-    {
-        id: 'basic_quarter',
-        tier: MembershipTier.BASIC,
-        cycle: BillingCycle.QUARTERLY,
-        name: {
-            en: 'Basic Quarterly',
-            zh: '基础会员 - 季付',
-            ja: 'ベーシック3ヶ月',
-        },
-        description: {
-            en: 'Save 16% compared to monthly',
-            zh: '季付节省16%',
-            ja: '3ヶ月で16%お得',
-        },
-        price: 1299,  // $12.99
-        originalPrice: 1497,  // $14.97 (3 months)
-        currency: 'USD',
-        discountPercent: 13,
-        features: ['basic_ai_quota', 'basic_roles', 'standard_export'],
-        limits: {
-            aiQuota: 100,
-            maxRoles: 5,
-            maxContexts: 3,
-            maxStoryboards: 10,
-            exportQuality: 'standard',
-            prioritySupport: false,
-            advancedFeatures: false,
-        },
-    },
-    {
-        id: 'basic_year',
-        tier: MembershipTier.BASIC,
-        cycle: BillingCycle.YEARLY,
-        name: {
-            en: 'Basic Yearly',
-            zh: '基础会员 - 年付',
-            ja: 'ベーシック年額',
-        },
-        description: {
-            en: 'Best value - save 50%',
-            zh: '超值选择 - 年付省50%',
-            ja: '最もお得 - 50%オフ',
-        },
-        price: 2999,  // $29.99
-        originalPrice: 5988,  // $59.88 (12 months)
-        currency: 'USD',
-        discountPercent: 50,
-        features: ['basic_ai_quota', 'basic_roles', 'standard_export'],
-        limits: {
-            aiQuota: 100,
-            maxRoles: 5,
-            maxContexts: 3,
-            maxStoryboards: 10,
-            exportQuality: 'standard',
-            prioritySupport: false,
-            advancedFeatures: false,
-        },
-    },
-
     // Pro tier plans
     {
-        id: 'pro_month',
+        id: 'pro_monthly',
         tier: MembershipTier.PRO,
         cycle: BillingCycle.MONTHLY,
-        name: {
-            en: 'Pro Monthly',
-            zh: '专业会员 - 月付',
-            ja: 'プロ月額',
-        },
-        description: {
-            en: 'For serious creators',
-            zh: '专业创作者首选',
-            ja: 'クリエイター向け',
-        },
-        price: 999,  // $9.99
+        name: { en: 'Pro Monthly', zh: '专业会员 - 月付', ja: 'プロ月額' },
+        description: { en: 'For serious creators', zh: '专业创作者首选', ja: 'クリエイター向け' },
+        price: 999,
         currency: 'USD',
         features: ['pro_ai_quota', 'pro_roles', 'high_export', 'priority_support'],
-        limits: {
-            aiQuota: 500,
-            maxRoles: 20,
-            maxContexts: 10,
-            maxStoryboards: 50,
-            exportQuality: 'high',
-            prioritySupport: true,
-            advancedFeatures: true,
-        },
+        limits: { aiQuota: 500, maxRoles: 20, maxContexts: 10, maxStoryboards: 50, exportQuality: 'high', prioritySupport: true, advancedFeatures: true },
         popular: true,
         trialDays: 14,
     },
     {
-        id: 'pro_quarter',
+        id: 'pro_quarterly',
         tier: MembershipTier.PRO,
         cycle: BillingCycle.QUARTERLY,
-        name: {
-            en: 'Pro Quarterly',
-            zh: '专业会员 - 季付',
-            ja: 'プロ3ヶ月',
-        },
-        description: {
-            en: 'Save 25% compared to monthly',
-            zh: '季付节省25%',
-            ja: '3ヶ月で25%お得',
-        },
-        price: 2499,  // $24.99
-        originalPrice: 2997,  // $29.97
+        name: { en: 'Pro Quarterly', zh: '专业会员 - 季付', ja: 'プロ3ヶ月' },
+        description: { en: 'Save 25% compared to monthly', zh: '季付节省25%', ja: '3ヶ月で25%お得' },
+        price: 2499,
+        originalPrice: 2997,
         currency: 'USD',
         discountPercent: 17,
         features: ['pro_ai_quota', 'pro_roles', 'high_export', 'priority_support'],
-        limits: {
-            aiQuota: 500,
-            maxRoles: 20,
-            maxContexts: 10,
-            maxStoryboards: 50,
-            exportQuality: 'high',
-            prioritySupport: true,
-            advancedFeatures: true,
-        },
+        limits: { aiQuota: 500, maxRoles: 20, maxContexts: 10, maxStoryboards: 50, exportQuality: 'high', prioritySupport: true, advancedFeatures: true },
         popular: true,
     },
     {
-        id: 'pro_year',
+        id: 'pro_yearly',
         tier: MembershipTier.PRO,
         cycle: BillingCycle.YEARLY,
-        name: {
-            en: 'Pro Yearly',
-            zh: '专业会员 - 年付',
-            ja: 'プロ年額',
-        },
-        description: {
-            en: 'Best value - save 58%',
-            zh: '超值选择 - 年付省58%',
-            ja: '最もお得 - 58%オフ',
-        },
-        price: 4999,  // $49.99
-        originalPrice: 11988,  // $119.88
+        name: { en: 'Pro Yearly', zh: '专业会员 - 年付', ja: 'プロ年額' },
+        description: { en: 'Best value - save 58%', zh: '超值选择 - 年付省58%', ja: '最もお得 - 58%オフ' },
+        price: 4999,
+        originalPrice: 11988,
         currency: 'USD',
         discountPercent: 58,
         features: ['pro_ai_quota', 'pro_roles', 'high_export', 'priority_support'],
-        limits: {
-            aiQuota: 500,
-            maxRoles: 20,
-            maxContexts: 10,
-            maxStoryboards: 50,
-            exportQuality: 'high',
-            prioritySupport: true,
-            advancedFeatures: true,
-        },
+        limits: { aiQuota: 500, maxRoles: 20, maxContexts: 10, maxStoryboards: 50, exportQuality: 'high', prioritySupport: true, advancedFeatures: true },
         popular: true,
+    },
+
+    // Prime tier plans
+    {
+        id: 'prime_monthly',
+        tier: MembershipTier.PRIME,
+        cycle: BillingCycle.MONTHLY,
+        name: { en: 'Prime Monthly', zh: '尊享会员 - 月付', ja: 'プライム月額' },
+        description: { en: 'Advanced creator tools', zh: '高级创作工具', ja: '高度なクリエイターツール' },
+        price: 1499,
+        currency: 'USD',
+        features: ['prime_ai_quota', 'prime_roles', 'ultra_export', 'priority_support'],
+        limits: { aiQuota: 1000, maxRoles: 50, maxContexts: 20, maxStoryboards: 100, exportQuality: 'ultra', prioritySupport: true, advancedFeatures: true },
+    },
+    {
+        id: 'prime_quarterly',
+        tier: MembershipTier.PRIME,
+        cycle: BillingCycle.QUARTERLY,
+        name: { en: 'Prime Quarterly', zh: '尊享会员 - 季付', ja: 'プライム3ヶ月' },
+        description: { en: 'Save 25% compared to monthly', zh: '季付节省25%', ja: '3ヶ月で25%お得' },
+        price: 3999,
+        originalPrice: 4497,
+        currency: 'USD',
+        discountPercent: 11,
+        features: ['prime_ai_quota', 'prime_roles', 'ultra_export', 'priority_support'],
+        limits: { aiQuota: 1000, maxRoles: 50, maxContexts: 20, maxStoryboards: 100, exportQuality: 'ultra', prioritySupport: true, advancedFeatures: true },
+    },
+    {
+        id: 'prime_yearly',
+        tier: MembershipTier.PRIME,
+        cycle: BillingCycle.YEARLY,
+        name: { en: 'Prime Yearly', zh: '尊享会员 - 年付', ja: 'プライム年額' },
+        description: { en: 'Best value - save 50%', zh: '超值选择 - 年付省50%', ja: '最もお得 - 50%オフ' },
+        price: 7999,
+        originalPrice: 17988,
+        currency: 'USD',
+        discountPercent: 56,
+        features: ['prime_ai_quota', 'prime_roles', 'ultra_export', 'priority_support'],
+        limits: { aiQuota: 1000, maxRoles: 50, maxContexts: 20, maxStoryboards: 100, exportQuality: 'ultra', prioritySupport: true, advancedFeatures: true },
     },
 
     // Ultra tier plans
     {
-        id: 'ultra_month',
+        id: 'ultra_monthly',
         tier: MembershipTier.ULTRA,
         cycle: BillingCycle.MONTHLY,
-        name: {
-            en: 'Ultra Monthly',
-            zh: '旗舰会员 - 月付',
-            ja: 'ウルトラ月額',
-        },
-        description: {
-            en: 'Unlimited everything',
-            zh: '无限制体验',
-            ja: '無制限の体験',
-        },
-        price: 1999,  // $19.99
+        name: { en: 'Ultra Monthly', zh: '旗舰会员 - 月付', ja: 'ウルトラ月額' },
+        description: { en: 'Unlimited everything', zh: '无限制体验', ja: '無制限の体験' },
+        price: 1999,
         currency: 'USD',
         features: ['unlimited_ai', 'unlimited_roles', 'ultra_export', 'vip_support'],
-        limits: {
-            aiQuota: -1,  // -1 means unlimited
-            maxRoles: -1,
-            maxContexts: -1,
-            maxStoryboards: -1,
-            exportQuality: 'ultra',
-            prioritySupport: true,
-            advancedFeatures: true,
-        },
+        limits: { aiQuota: -1, maxRoles: -1, maxContexts: -1, maxStoryboards: -1, exportQuality: 'ultra', prioritySupport: true, advancedFeatures: true },
         recommended: true,
     },
     {
-        id: 'ultra_quarter',
+        id: 'ultra_quarterly',
         tier: MembershipTier.ULTRA,
         cycle: BillingCycle.QUARTERLY,
-        name: {
-            en: 'Ultra Quarterly',
-            zh: '旗舰会员 - 季付',
-            ja: 'ウルトラ3ヶ月',
-        },
-        description: {
-            en: 'Save 25% compared to monthly',
-            zh: '季付节省25%',
-            ja: '3ヶ月で25%お得',
-        },
-        price: 4999,  // $49.99
-        originalPrice: 5997,  // $59.97
+        name: { en: 'Ultra Quarterly', zh: '旗舰会员 - 季付', ja: 'ウルトラ3ヶ月' },
+        description: { en: 'Save 25% compared to monthly', zh: '季付节省25%', ja: '3ヶ月で25%お得' },
+        price: 4999,
+        originalPrice: 5997,
         currency: 'USD',
         discountPercent: 17,
         features: ['unlimited_ai', 'unlimited_roles', 'ultra_export', 'vip_support'],
-        limits: {
-            aiQuota: -1,
-            maxRoles: -1,
-            maxContexts: -1,
-            maxStoryboards: -1,
-            exportQuality: 'ultra',
-            prioritySupport: true,
-            advancedFeatures: true,
-        },
+        limits: { aiQuota: -1, maxRoles: -1, maxContexts: -1, maxStoryboards: -1, exportQuality: 'ultra', prioritySupport: true, advancedFeatures: true },
         recommended: true,
     },
     {
-        id: 'ultra_year',
+        id: 'ultra_yearly',
         tier: MembershipTier.ULTRA,
         cycle: BillingCycle.YEARLY,
-        name: {
-            en: 'Ultra Yearly',
-            zh: '旗舰会员 - 年付',
-            ja: 'ウルトラ年額',
-        },
-        description: {
-            en: 'Best value - save 58%',
-            zh: '超值选择 - 年付省58%',
-            ja: '最もお得 - 58%オフ',
-        },
-        price: 9999,  // $99.99
-        originalPrice: 23988,  // $239.88
+        name: { en: 'Ultra Yearly', zh: '旗舰会员 - 年付', ja: 'ウルトラ年額' },
+        description: { en: 'Best value - save 58%', zh: '超值选择 - 年付省58%', ja: '最もお得 - 58%オフ' },
+        price: 9999,
+        originalPrice: 23988,
         currency: 'USD',
         discountPercent: 58,
         features: ['unlimited_ai', 'unlimited_roles', 'ultra_export', 'vip_support'],
-        limits: {
-            aiQuota: -1,
-            maxRoles: -1,
-            maxContexts: -1,
-            maxStoryboards: -1,
-            exportQuality: 'ultra',
-            prioritySupport: true,
-            advancedFeatures: true,
-        },
+        limits: { aiQuota: -1, maxRoles: -1, maxContexts: -1, maxStoryboards: -1, exportQuality: 'ultra', prioritySupport: true, advancedFeatures: true },
         recommended: true,
     },
 ];
@@ -375,12 +234,12 @@ export const vip = {
         const info = await vip.getStatus();
         // Transform VIPInfo to SubscriptionInfo format
         // Note: planId from backend might not match MembershipSKU type
-        const planId = (info.planId || 'basic_month') as MembershipSKU;
+        const planId = (info.planId || 'free_monthly') as MembershipSKU;
         return {
             id: info.userId || '',
             userId: info.userId || '',
             planId: planId,
-            tier: info.level > 0 ? MembershipTier.PRO : MembershipTier.BASIC,
+            tier: info.level > 0 ? MembershipTier.PRO : MembershipTier.FREE,
             status: info.isVip ? 'active' : ('cancelled' as const),
             autoRenew: info.autoRenew,
             currentPeriodStart: Date.now(),
@@ -391,9 +250,16 @@ export const vip = {
         };
     },
 
-    // Get Available Plans
-    // Note: Backend doesn't have this endpoint, use static data
+    // Get Available Plans — now fetches from backend
     getPlans: async (): Promise<MembershipPlan[]> => {
+        try {
+            const backendPlans = await request<any[]>('/api/membership/plans');
+            if (backendPlans && backendPlans.length > 0) {
+                return backendPlans;
+            }
+        } catch {
+            // Fallback to static data
+        }
         return MEMBERSHIP_PLANS;
     },
 
@@ -403,57 +269,28 @@ export const vip = {
         return plans.filter(plan => plan.tier === tier);
     },
 
-    // Subscribe to a plan
-    // Note: Backend doesn't have direct subscribe endpoint
-    // This should be handled via IAP (Apple/Google) or web payment flow
-    subscribe: async (_planId: MembershipSKU): Promise<{ success: boolean; subscription?: SubscriptionInfo; paymentUrl?: string }> => {
-        console.warn('Direct subscribe not implemented in backend. Use IAP flow instead.');
-        return { success: false };
+    // Subscribe to a plan — now calls backend
+    subscribe: async (planId: MembershipSKU): Promise<{ success: boolean; subscription?: SubscriptionInfo; paymentUrl?: string }> => {
+        return request('/api/membership/subscribe', 'POST', { planId });
     },
 
-    // Cancel subscription
-    // Note: Backend doesn't have this endpoint
+    // Cancel subscription — now calls backend
     cancelSubscription: async (): Promise<void> => {
-        console.warn('Cancel subscription not implemented in backend');
-        return Promise.resolve();
+        return request('/api/membership/cancel', 'POST');
     },
 
-    // Update subscription plan
-    // Note: Backend doesn't have this endpoint
-    updatePlan: async (_newPlanId: MembershipSKU): Promise<{ success: boolean; subscription?: SubscriptionInfo }> => {
-        console.warn('Update plan not implemented in backend');
-        return { success: false };
-    },
-
-    // Toggle auto-renew
-    // Note: Backend doesn't have this endpoint
-    toggleAutoRenew: async (_enabled: boolean): Promise<void> => {
-        console.warn('Toggle auto-renew not implemented in backend');
-        return Promise.resolve();
-    },
-
-    // Get payment history
-    // Note: Backend doesn't have this endpoint
-    getPaymentHistory: async (_page = 1, _limit = 20): Promise<{
-        payments: Array<{
-            id: string;
-            date: number;
-            amount: number;
-            currency: string;
-            status: string;
-            planId: MembershipSKU;
-        }>;
-        total: number;
-        page: number;
-        limit: number;
+    // Get membership usage
+    getUsage: async (): Promise<{
+        aiUsedThisMonth: number;
+        aiLimit: number;
+        isUnlimited: boolean;
+        remainingQuota: number;
+        storyboardsCreated: number;
+        storyboardsLimit: number;
+        charactersCreated: number;
+        charactersLimit: number;
     }> => {
-        console.warn('Payment history not implemented in backend');
-        return {
-            payments: [],
-            total: 0,
-            page: 1,
-            limit: 20,
-        };
+        return request('/api/membership/usage');
     },
 
     // Redeem promo code

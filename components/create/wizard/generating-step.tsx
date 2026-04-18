@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { Loader2, CheckCircle, XCircle, RotateCcw, X } from "lucide-react";
 import { PipelineDetail } from "./pipeline-detail";
 import type { StoryboardGenerationProgress } from "@/lib/types";
@@ -26,11 +27,16 @@ export function GeneratingStep({
     const workflowStatus = progress?.workflowStatus;
     const isDone = workflowStatus === "images_ready" || workflowStatus === "video_ready" || workflowStatus === "published";
     const hasFailed = progress?.suggestedResumeAction && progress.suggestedResumeAction !== "none";
+    const completedRef = useRef(false);
 
-    // Auto-advance when done
-    if (isDone && onComplete) {
-        setTimeout(onComplete, 500);
-    }
+    // Auto-advance when done (useEffect to prevent infinite re-renders)
+    useEffect(() => {
+        if (isDone && onComplete && !completedRef.current) {
+            completedRef.current = true;
+            const timer = setTimeout(onComplete, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [isDone, onComplete]);
 
     const getStepLabel = () => {
         switch (workflowStatus) {

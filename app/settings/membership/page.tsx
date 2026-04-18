@@ -46,15 +46,27 @@ export default function MembershipSettingsPage() {
     const onSubscribe = async (plan: MembershipPlan) => {
         setSubscribing(plan.id);
         try {
-            // Mock subscription flow - replace with actual API call
-            await new Promise(r => setTimeout(r, 2000));
+            await vip.subscribe(plan.id);
             showSuccess(`Successfully subscribed to ${plan.name.en}!`);
-            router.push('/settings/membership');
-        } catch (e) {
+            // Refresh subscription data
+            const subscriptionData = await vip.getSubscription().catch(() => null);
+            setSubscription(subscriptionData);
+        } catch (e: any) {
             console.error(e);
-            showError("Subscription failed.");
+            showError(e.message || "Subscription failed.");
         } finally {
             setSubscribing(null);
+        }
+    };
+
+    const onCancelSubscription = async () => {
+        try {
+            await vip.cancelSubscription();
+            showSuccess("Subscription cancelled.");
+            const subscriptionData = await vip.getSubscription().catch(() => null);
+            setSubscription(subscriptionData);
+        } catch (e: any) {
+            showError(e.message || "Failed to cancel subscription.");
         }
     };
 
@@ -224,10 +236,10 @@ export default function MembershipSettingsPage() {
             {/* Manage Subscription Buttons */}
             {subscription && subscription.status === 'active' && (
                 <div className="mt-8 flex gap-4 justify-center">
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={onCancelSubscription}>
                         {language === 'zh-Hans' ? '取消订阅' : language === 'ja' ? '購読をキャンセル' : 'Cancel Subscription'}
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => router.push('/vip')}>
                         {language === 'zh-Hans' ? '更改计划' : language === 'ja' ? 'プランを変更' : 'Change Plan'}
                     </Button>
                 </div>

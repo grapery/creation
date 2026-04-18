@@ -1,11 +1,41 @@
-import { request } from './client';
+import { request, apiClient, AI_TIMEOUT } from './client';
 import { Storyboard } from '../types';
 
 export const storyboards = {
+    // Create
+    create: async (data: {
+        storyId: string;
+        rawInput: string;
+        parentId?: string;
+        title?: string;
+        characterRefs?: string[];
+        sceneRefs?: string[];
+        tags?: string[];
+    }): Promise<Storyboard> => {
+        return request('/api/storyboards', 'POST', data);
+    },
+
+    // Update
+    update: async (id: string, data: {
+        title?: string;
+        content?: string;
+        rawInput?: string;
+        sceneRefs?: string[];
+        characterRefs?: string[];
+    }): Promise<Storyboard> => {
+        return request(`/api/storyboards/${id}`, 'PUT', data);
+    },
+
+    // Delete
+    delete: async (id: string): Promise<void> => {
+        return request(`/api/storyboards/${id}`, 'DELETE');
+    },
+
     // Feed (Public/Community)
-    getFeed: async (page = 1, limit = 20): Promise<{ storyboards: Storyboard[], total: number }> => {
+    getFeed: async (page = 1, limit = 20, tab?: string): Promise<{ storyboards: Storyboard[], total: number }> => {
         const offset = (page - 1) * limit;
-        return request(`/api/storyboards/feed?limit=${limit}&offset=${offset}`);
+        const tabParam = tab ? `&tab=${tab}` : '';
+        return request(`/api/storyboards/feed?limit=${limit}&offset=${offset}${tabParam}`);
     },
 
     // Dashboard: Storyboards (Authenticated)
@@ -14,10 +44,10 @@ export const storyboards = {
         return request(`/api/dashboard/storyboards?limit=${limit}&offset=${offset}`);
     },
 
-    // Dashboard: Trending (Public/Auth)
+    // Trending (Public endpoint)
     getTrending: async (page = 1, limit = 20): Promise<{ storyboards: Storyboard[], total: number }> => {
         const offset = (page - 1) * limit;
-        return request(`/api/dashboard/trending/storyboards?limit=${limit}&offset=${offset}`);
+        return request(`/api/public/trending/storyboards?limit=${limit}&offset=${offset}`);
     },
 
     // Dashboard: Character Storyboards
@@ -44,8 +74,9 @@ export const storyboards = {
     },
 
     // Get child storyboards (forks)
-    getChildren: async (id: string): Promise<Storyboard[]> => {
-        return request(`/api/storyboards/${id}/children`);
+    getChildren: async (id: string, page = 1, limit = 20): Promise<Storyboard[]> => {
+        const offset = (page - 1) * limit;
+        return request(`/api/storyboards/${id}/children?limit=${limit}&offset=${offset}`);
     },
 
     // Get parent storyboard
@@ -69,4 +100,104 @@ export const storyboards = {
             likeableIds: storyboardIds
         });
     },
+
+    // ==================== Tree & Branching ====================
+
+    getTree: async (id: string): Promise<{ tree: Storyboard[] }> =>
+        request(`/api/storyboards/${id}/tree`),
+
+    fork: async (id: string, data: {
+        title: string;
+        rawInput: string;
+        content?: string;
+        isStandalone?: boolean;
+        sceneCount?: number;
+    }): Promise<Storyboard> =>
+        request(`/api/storyboards/${id}/fork`, 'POST', data),
+
+    continue_: async (id: string, data: {
+        rawInput: string;
+        sceneCount?: number;
+        characters?: string[];
+        generateVideo?: boolean;
+        comicStyle?: string;
+    }): Promise<{
+        newStoryboard: Storyboard;
+        generatedScenes: any[];
+        tokensUsed?: number;
+    }> =>
+        request(`/api/storyboards/${id}/continue`, 'POST', data),
+
+    publish: async (id: string): Promise<Storyboard> =>
+        request(`/api/storyboards/${id}/publish`, 'POST'),
+
+    // ==================== Panels ====================
+
+    getPanels: async (id: string, page = 1, limit = 20): Promise<{ panels: any[] }> => {
+        const offset = (page - 1) * limit;
+        return request(`/api/storyboards/${id}/panels?limit=${limit}&offset=${offset}`);
+    },
+
+    createPanel: async (id: string, data: {
+        sequence: number;
+        imageUrl?: string;
+        text?: string;
+    }): Promise<any> =>
+        request(`/api/storyboards/${id}/panels`, 'POST', data),
+
+    // ==================== Generation ====================
+
+    retryFailedImages: async (id: string): Promise<{ message: string }> =>
+        request(`/api/storyboards/${id}/retry-failed-images`, 'POST'),
+
+    cancelGeneration: async (id: string): Promise<{ message: string }> =>
+        request(`/api/storyboards/${id}/cancel-generation`, 'POST'),
+
+    getGenerationProgress: async (id: string): Promise<{
+        status: string;
+        currentStep: string;
+        totalSteps: number;
+        completedSteps: number;
+        progress: number;
+    }> =>
+        request(`/api/storyboards/${id}/generation-progress`),
+
+    // ==================== AI Generation ====================
+
+    generateContent: async (id: string, data?: {
+        rawInput?: string;
+        characterRefs?: string[];
+        sceneRefs?: string[];
+    }): Promise<{ message: string; content?: string }> =>
+        request(`/api/storyboards/${id}/generate/content`, 'POST', data || {}, apiClient, AI_TIMEOUT),
+
+    generateSceneDetails: async (id: string, data?: {
+        sceneIndex?: number;
+        prompt?: string;
+    }): Promise<{ message: string }> =>
+        request(`/api/storyboards/${id}/generate/scene-details`, 'POST', data || {}, apiClient, AI_TIMEOUT),
+
+    generateImage: async (id: string, data: {
+        sceneIndex: number;
+        style?: string;
+    }): Promise<{ message: string }> =>
+        request(`/api/storyboards/${id}/generate/image`, 'POST', data, apiClient, AI_TIMEOUT),
+
+    generateAllImages: async (id: string, data?: {
+        style?: string;
+    }): Promise<{ message: string }> =>
+        request(`/api/storyboards/${id}/generate/images`, 'POST', data || {}, apiClient, AI_TIMEOUT),
+
+    generateVideo: async (id: string, data?: {
+        sceneIndex?: number;
+    }): Promise<{ message: string }> =>
+        request(`/api/storyboards/${id}/generate/video`, 'POST', data || {}, apiClient, AI_TIMEOUT),
+
+    // ==================== Video Streaming ====================
+
+    getVideoPlaylist: (id: string): string =>
+        `/api/storyboards/${id}/playlist.m3u8`,
+
+    getScenePlaylist: (id: string, sceneId: string): string =>
+        `/api/storyboards/${id}/scenes/${sceneId}/playlist.m3u8`,
 };

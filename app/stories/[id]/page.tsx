@@ -287,8 +287,7 @@ export default function StoryPage() {
                             isLoading={loadingCharacters}
                             error={charactersError}
                             onAddCharacter={() => {
-                                // TODO: Navigate to create character
-                                console.log("Add character clicked");
+                                router.push(`/characters/create`);
                             }}
                         />
                     )}
@@ -301,8 +300,7 @@ export default function StoryPage() {
                             isLoading={loadingScenes}
                             error={scenesError}
                             onAddScene={() => {
-                                // TODO: Navigate to create scene
-                                console.log("Add scene clicked");
+                                router.push(`/stories/${story.id}/scenes/new`);
                             }}
                         />
                     )}
@@ -315,8 +313,10 @@ export default function StoryPage() {
                             isLoading={loadingTeam}
                             error={teamError}
                             onInvite={() => {
-                                // TODO: Show invite modal
-                                console.log("Invite clicked");
+                                const userId = prompt("Enter contributor's user ID:");
+                                if (userId) {
+                                    stories.inviteContributor(story.id, userId, 'collaborator').catch(e => console.error(e));
+                                }
                             }}
                         />
                     )}

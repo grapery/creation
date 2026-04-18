@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { stories } from "@/lib/api/stories";
+import { showSuccess, showError } from "@/lib/toast-utils";
 import { Save, Share2, Users } from "lucide-react";
 
 interface StoryEditorProps {
@@ -31,20 +33,48 @@ export function StoryEditor({ storyId, story, onSave }: StoryEditorProps) {
 
     const handleSave = async () => {
         setIsSaving(true);
-        // Simulate save
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        setIsSaving(false);
-        onSave?.();
+        try {
+            if (storyId) {
+                await stories.update(storyId, {
+                    title: formData.title,
+                    description: formData.description,
+                    genre: formData.genre,
+                });
+            }
+            showSuccess("Story saved successfully");
+            onSave?.();
+        } catch (e: any) {
+            showError(e.message || "Failed to save story");
+        } finally {
+            setIsSaving(false);
+        }
     };
 
-    const handleShare = () => {
-        // Implement share functionality
-        console.log("Share story");
+    const handleShare = async () => {
+        const url = storyId ? `${window.location.origin}/stories/${storyId}` : window.location.href;
+        const shareData = { title: formData.title || "Story", url };
+        if (typeof navigator !== "undefined" && navigator.share) {
+            try {
+                await navigator.share(shareData);
+            } catch {
+                // User cancelled or share failed — fall through to clipboard
+            }
+        }
+        try {
+            await navigator.clipboard.writeText(url);
+            showSuccess("Link copied to clipboard");
+        } catch {
+            showError("Failed to copy link");
+        }
     };
 
     const handleCollaborate = () => {
-        // Implement collaborate functionality
-        console.log("Collaborate on story");
+        if (!storyId) {
+            showError("Save the story first before inviting collaborators");
+            return;
+        }
+        window.location.hash = `#collaborate-${storyId}`;
+        showSuccess("Opening collaborator settings...");
     };
 
     return (

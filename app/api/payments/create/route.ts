@@ -39,9 +39,11 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // Route to appropriate payment processor
-        // For now, we'll use a placeholder userId. In production, get from auth token
-        const userId = 'user_' + Date.now(); // Placeholder
+        // Extract userId from JWT token
+        const userId = extractUserIdFromToken(authHeader);
+        if (!userId) {
+            return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+        }
 
         switch (method) {
             case PaymentMethod.STRIPE:
@@ -283,5 +285,17 @@ async function handleApplePayPayment(
             { success: false, error: error.message },
             { status: 500 }
         );
+    }
+}
+
+function extractUserIdFromToken(authHeader: string): string | null {
+    try {
+        const token = authHeader.replace('Bearer ', '');
+        const parts = token.split('.');
+        if (parts.length !== 3) return null;
+        const payload = JSON.parse(atob(parts[1]));
+        return payload.sub || payload.userId || payload.id || null;
+    } catch {
+        return null;
     }
 }

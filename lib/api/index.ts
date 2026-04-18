@@ -57,3 +57,14 @@ export { fragments } from './fragments';
 export { creation } from './creation';
 export { plaza } from './plaza';
 export { devices } from './devices';
+
+// New services
+export { interactions, follows, likes, bookmarks } from './interactions';
+export { search } from './search';
+export { badges } from './badges';
+export { tokenUsage } from './token-usage';
+export { feedback } from './feedback';
+export { referrals } from './referrals';
+export { ai } from './ai';
+export { upload } from './upload';
+export { styles } from './styles';

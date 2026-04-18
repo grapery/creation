@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PenTool, Target, TrendingUp, BookOpen, Lightbulb, Compass, Sparkles } from "lucide-react";
+import { PenTool, Target, TrendingUp, BookOpen, Lightbulb, Compass, Sparkles, Bookmark } from "lucide-react";
 import { useTranslation } from "@/providers/language-provider";
 
 export function Sidebar({ className }: { className?: string }) {
+    const { t } = useTranslation();
+
     return (
         <div className={`space-y-4 ${className}`}>
             {/* Creator Center */}
@@ -14,7 +16,7 @@ export function Sidebar({ className }: { className?: string }) {
                 <CardHeader className="pb-3">
                     <CardTitle className="flex items-center gap-2 text-base">
                         <PenTool className="h-4 w-4" />
-                        Creator Center
+                        {t("sidebar.creator_center")}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -22,13 +24,13 @@ export function Sidebar({ className }: { className?: string }) {
                         <Button variant="outline" className="h-20 flex-col gap-2" asChild>
                             <Link href="/create">
                                 <BookOpen className="h-5 w-5 text-primary" />
-                                <span>Write Story</span>
+                                <span>{t("sidebar.write_story")}</span>
                             </Link>
                         </Button>
                         <Button variant="outline" className="h-20 flex-col gap-2" asChild>
                             <Link href="/fragments/create">
                                 <Sparkles className="h-5 w-5 text-purple-500" />
-                                <span>Fragment</span>
+                                <span>{t("sidebar.fragment")}</span>
                             </Link>
                         </Button>
                     </div>
@@ -36,13 +38,33 @@ export function Sidebar({ className }: { className?: string }) {
                         <Button variant="outline" className="h-16 flex-col gap-1" asChild>
                             <Link href="/create/wizard">
                                 <Target className="h-4 w-4 text-orange-500" />
-                                <span className="text-xs">Storyboard</span>
+                                <span className="text-xs">{t("sidebar.storyboard")}</span>
                             </Link>
                         </Button>
                         <Button variant="outline" className="h-16 flex-col gap-1" asChild>
                             <Link href="/plaza">
                                 <Compass className="h-4 w-4 text-blue-500" />
-                                <span className="text-xs">Discover</span>
+                                <span className="text-xs">{t("sidebar.discover")}</span>
+                            </Link>
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* Quick Links */}
+            <Card>
+                <CardContent className="pt-4 pb-4">
+                    <div className="space-y-1">
+                        <Button variant="ghost" className="w-full justify-start gap-2 text-sm" asChild>
+                            <Link href="/bookmarks">
+                                <Bookmark className="h-4 w-4 text-amber-500" />
+                                {t("sidebar.bookmarks")}
+                            </Link>
+                        </Button>
+                        <Button variant="ghost" className="w-full justify-start gap-2 text-sm" asChild>
+                            <Link href="/search">
+                                <Compass className="h-4 w-4 text-blue-500" />
+                                {t("sidebar.search")}
                             </Link>
                         </Button>
                     </div>
@@ -79,22 +101,12 @@ export function Sidebar({ className }: { className?: string }) {
             {/* Footer Links */}
             <div className="space-y-2 px-1">
                 <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground">
-                    <Link href="/privacy" className="hover:text-foreground">隐私政策</Link>
-                    <Link href="/terms" className="hover:text-foreground">服务协议</Link>
-                    <Link href="/api/v1" className="hover:text-foreground">API 文档</Link>
+                    <Link href="/privacy" className="hover:text-foreground">{t("footer.privacy")}</Link>
+                    <Link href="/terms" className="hover:text-foreground">{t("footer.terms")}</Link>
+                    <Link href="/api/v1" className="hover:text-foreground">{t("footer.api_docs")}</Link>
                 </div>
                 <div className="text-xs text-muted-foreground">
-                    <div>© 2025 未择 Voyager Platform. All rights reserved.</div>
-                    <div className="mt-1">
-                        <a 
-                            href="https://beian.miit.gov.cn/" 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="hover:text-foreground"
-                        >
-                            沪ICP备2025137210号-1
-                        </a>
-                    </div>
+                    <div>© 2025 Voyager Platform. All rights reserved.</div>
                 </div>
             </div>
         </div>

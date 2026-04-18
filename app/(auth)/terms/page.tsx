@@ -388,11 +388,14 @@ function parseInlineMarkdown(text: string) {
     // Simple inline markdown parsing for bold and links
     let result = text;
 
+    // Sanitize HTML entities first
+    result = result.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
     // Bold: **text**
     result = result.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
 
-    // Links: [text](url)
-    result = result.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-primary hover:underline" target="_blank" rel="noopener noreferrer">$1</a>');
+    // Links: [text](url) — only allow http/https/mailto URLs
+    result = result.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+|mailto:[^\s)]+)\)/g, '<a href="$2" class="text-primary hover:underline" target="_blank" rel="noopener noreferrer">$1</a>');
 
     return <span dangerouslySetInnerHTML={{ __html: result }} />;
 }

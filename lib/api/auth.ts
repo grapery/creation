@@ -6,16 +6,7 @@ export const auth = {
         try {
             const response = await request<AuthResponse>('/api/auth/login', 'POST', { email, password });
 
-            // Debug: Log the response structure
-            console.log('[Auth] Login response:', response);
-
-            // Check if response has the expected structure
             if (response && 'accessToken' in response && typeof response.accessToken === 'string') {
-                console.log('[Auth] Saving tokens:', {
-                    hasAccessToken: !!response.accessToken,
-                    accessTokenLength: response.accessToken.length,
-                    hasRefreshToken: !!response.refreshToken
-                });
                 setTokens(response.accessToken, response.refreshToken);
             } else {
                 console.error('[Auth] Invalid login response structure:', response);
@@ -43,13 +34,8 @@ export const auth = {
     }): Promise<AuthResponse> => {
         const response = await request<AuthResponse>('/api/auth/register', 'POST', data);
 
-        console.log('[Auth] Register response:', response);
-
         if (response && 'accessToken' in response && typeof response.accessToken === 'string') {
-            console.log('[Auth] Saving tokens from registration');
             setTokens(response.accessToken, response.refreshToken);
-        } else {
-            console.error('[Auth] Invalid register response structure:', response);
         }
 
         return response;
@@ -62,7 +48,7 @@ export const auth = {
     },
 
     me: async (): Promise<User> => {
-        return request<User>('/api/auth/me');
+        return request<User>('/api/v1/auth/me');
     },
 
     requestPasswordReset: async (email: string): Promise<void> => {
@@ -93,8 +79,6 @@ export const auth = {
             refreshToken: data.refreshToken,
         }, paymentClient);
 
-        console.log('[Auth] Google OAuth response:', response);
-
         // Handle vippay API response format
         if (response && response.success && response.data) {
             const { token, refreshToken, user } = response.data;
@@ -110,13 +94,10 @@ export const auth = {
             // Save tokens
             if (token && typeof token === 'string') {
                 setTokens(token, refreshToken);
-            } else {
-                console.error('[Auth] Invalid Google OAuth token in response');
             }
 
             return authResponse;
         } else {
-            console.error('[Auth] Google OAuth failed:', response);
             throw new Error(response?.msg || response?.message || 'Google OAuth login failed');
         }
     },
@@ -127,23 +108,35 @@ export const auth = {
         user?: string;
         nonce?: string;
     }): Promise<AuthResponse> => {
-        const response = await request<AuthResponse>('/api/auth/oauth/apple', 'POST', data);
+        const raw = await request<any>('/api/vippay/apple-oauth/signin', 'POST', data, paymentClient);
 
-        // Check if response has expected structure
-        if (response && 'accessToken' in response && typeof response.accessToken === 'string') {
-            setTokens(response.accessToken, response.refreshToken);
-        } else {
-            console.error('[Auth] Invalid Apple OAuth response structure:', response);
+        const payload =
+            raw && typeof raw === 'object' && raw.success === true && raw.data != null
+                ? raw.data
+                : raw;
+
+        if (!payload || typeof payload.token !== 'string') {
+            throw new Error(raw?.msg || raw?.message || 'Apple OAuth login failed');
         }
 
-        return response;
+        const { token, refreshToken, user, expiresIn } = payload;
+        const authResponse: AuthResponse = {
+            accessToken: token,
+            refreshToken: refreshToken,
+            user: user,
+            expiresIn: expiresIn,
+        };
+
+        if (token) {
+            setTokens(token, refreshToken);
+        }
+
+        return authResponse;
     },
 
     loginWithWeChat: async (data: {
         code: string;
     }): Promise<AuthResponse> => {
-        console.log('[Auth] WeChat OAuth login with code:', data.code ? 'received' : 'missing');
-
         const raw = await request<any>('/api/vippay/wechat-oauth/signin', 'POST', {
             code: data.code,
         }, paymentClient);
@@ -154,10 +147,7 @@ export const auth = {
                 ? raw.data
                 : raw;
 
-        console.log('[Auth] WeChat OAuth payload:', payload ? 'received' : 'missing');
-
         if (!payload || typeof payload.token !== 'string') {
-            console.error('[Auth] WeChat OAuth failed:', raw);
             throw new Error(raw?.msg || raw?.message || 'WeChat OAuth login failed');
         }
 
@@ -171,7 +161,6 @@ export const auth = {
         };
 
         if (token) {
-            console.log('[Auth] Saving WeChat OAuth tokens');
             setTokens(token, refreshToken);
         }
 
@@ -199,5 +188,9 @@ export const auth = {
 
     unlinkWeChat: async (): Promise<void> => {
         await request('/api/vippay/wechat-oauth/unlink', 'POST', undefined, paymentClient);
-    }
+    },
+
+    // Change password (for authenticated users)
+    changePassword: async (oldPassword: string, newPassword: string): Promise<{ message: string }> =>
+        request('/api/v1/auth/password/change', 'POST', { oldPassword, newPassword }),
 };

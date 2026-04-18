@@ -10,7 +10,8 @@ import { Header } from "@/components/layout/header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, MessageCircle, Share2, MoreHorizontal, Film, Image, Info } from "lucide-react";
+import { Loader2, MessageCircle, Share2, MoreHorizontal, Film, Image, Info, Sparkles } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
@@ -70,9 +71,8 @@ export default function CharacterDetailPage() {
     const loadStoryboards = async (characterId: string) => {
         setLoadingStoryboards(true);
         try {
-            // Load storyboards for this character
-            const response = await storyboards.getByStoryId(characterId, null);
-            setStoryboardsList(response.storyboards || []);
+            const response = await characters.getStoryboards(characterId);
+            setStoryboardsList(Array.isArray(response) ? response : response.storyboards || []);
         } catch (e) {
             console.error(e);
             setStoryboardsList([]);
@@ -154,9 +154,40 @@ export default function CharacterDetailPage() {
                                 <Button variant="outline" size="icon">
                                     <Share2 className="h-4 w-4" />
                                 </Button>
-                                <Button variant="outline" size="icon">
-                                    <MoreHorizontal className="h-4 w-4" />
-                                </Button>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="outline" size="icon">
+                                            <MoreHorizontal className="h-4 w-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuItem onClick={async () => {
+                                            try {
+                                                const result = await characters.generateAvatar(id as string);
+                                                if (result.avatarUrl) setCharacter(prev => prev ? { ...prev, avatar: result.avatarUrl } : prev);
+                                            } catch (e) { console.error(e); }
+                                        }}>
+                                            <Sparkles className="h-4 w-4 mr-2" />
+                                            Generate Avatar
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={async () => {
+                                            try {
+                                                await characters.generatePortrait(id as string);
+                                            } catch (e) { console.error(e); }
+                                        }}>
+                                            <Sparkles className="h-4 w-4 mr-2" />
+                                            Generate Portrait
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={async () => {
+                                            try {
+                                                await characters.generateThreeViews(id as string);
+                                            } catch (e) { console.error(e); }
+                                        }}>
+                                            <Sparkles className="h-4 w-4 mr-2" />
+                                            Generate Three Views
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                             </div>
                         </div>
                     </div>

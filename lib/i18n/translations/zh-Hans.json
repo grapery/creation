@@ -614,5 +614,19 @@
     "no_fragments": "暂无碎片",
     "no_notifications": "暂无通知",
     "no_messages": "暂无消息"
+  },
+  "sidebar": {
+    "creator_center": "创作中心",
+    "write_story": "写故事",
+    "fragment": "碎片",
+    "storyboard": "故事板",
+    "discover": "发现",
+    "bookmarks": "收藏",
+    "search": "搜索"
+  },
+  "footer": {
+    "privacy": "隐私政策",
+    "terms": "服务协议",
+    "api_docs": "API 文档"
   }
 }

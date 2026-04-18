@@ -1,4 +1,4 @@
-import { request } from './client';
+import { request, apiClient, AI_TIMEOUT } from './client';
 import { Story } from '../types';
 
 export const stories = {
@@ -24,6 +24,10 @@ export const stories = {
 
     update: async (id: string, data: any): Promise<Story> => {
         return request(`/api/stories/${id}`, 'PUT', data);
+    },
+
+    delete: async (id: string): Promise<void> => {
+        return request(`/api/stories/${id}`, 'DELETE');
     },
 
     // Like/Unlike story
@@ -76,12 +80,10 @@ export const stories = {
         });
     },
 
-    // Following Feed (Dashboard)
-    // Note: Backend doesn't have a dedicated endpoint for following stories.
-    // Use dashboard storyboards or fetch user's following list then fetch their stories.
-    getFollowingStories: async (_page = 1, _limit = 20): Promise<{ stories: Story[], total: number }> => {
-        console.warn('Following stories endpoint not implemented in backend');
-        return { stories: [], total: 0 };
+    // Following Feed — uses storyboard feed with tab=following
+    getFollowingStories: async (page = 1, limit = 20): Promise<{ stories: Story[], total: number }> => {
+        const offset = (page - 1) * limit;
+        return request(`/api/storyboards/feed?tab=following&limit=${limit}&offset=${offset}`);
     },
     // AI Styles
     uploadCover: async (file: File): Promise<{ url: string }> => {
@@ -150,7 +152,7 @@ export const stories = {
 
     // AI generate scene image
     generateSceneImage: async (storyId: string, sceneId?: string, prompt?: string): Promise<{ success: boolean; url: string; filename: string }> => {
-        return request(`/api/stories/${storyId}/scenes/ai-generate-image${sceneId ? `?sceneId=${sceneId}` : ''}`, 'POST', { prompt });
+        return request(`/api/stories/${storyId}/scenes/ai-generate-image${sceneId ? `?sceneId=${sceneId}` : ''}`, 'POST', { prompt }, apiClient, AI_TIMEOUT);
     },
 
     // ==================== Contributors Management ====================
@@ -168,5 +170,91 @@ export const stories = {
     // Remove contributor
     removeContributor: async (storyId: string, userId: string): Promise<{ message: string }> => {
         return request(`/api/stories/${storyId}/contributors/${userId}`, 'DELETE');
-    }
+    },
+
+    // ==================== Panels Management ====================
+
+    getPanels: async (storyId: string): Promise<{ panels: any[] }> =>
+        request(`/api/stories/${storyId}/panels`),
+
+    createPanel: async (storyId: string, data: {
+        title?: string;
+        imageUrl?: string;
+        text?: string;
+        textPosition?: string;
+        sequence?: number;
+    }): Promise<any> =>
+        request(`/api/stories/${storyId}/panels`, 'POST', data),
+
+    updatePanel: async (storyId: string, panelId: string, data: {
+        title?: string;
+        imageUrl?: string;
+        text?: string;
+        textPosition?: string;
+        sequence?: number;
+    }): Promise<any> =>
+        request(`/api/stories/${storyId}/panels/${panelId}`, 'PUT', data),
+
+    deletePanel: async (storyId: string, panelId: string): Promise<{ message: string }> =>
+        request(`/api/stories/${storyId}/panels/${panelId}`, 'DELETE'),
+
+    reorderPanels: async (storyId: string, panelIds: string[]): Promise<{ message: string }> =>
+        request(`/api/stories/${storyId}/panels/reorder`, 'POST', { panelIds }),
+
+    // ==================== Default Path ====================
+
+    setDefaultPath: async (storyId: string, nodeIds: string[]): Promise<{ message: string }> =>
+        request(`/api/stories/${storyId}/default-path`, 'POST', { nodeIds }),
+
+    autoCalculatePath: async (storyId: string): Promise<{ nodeIds: string[]; count: number }> =>
+        request(`/api/stories/${storyId}/default-path/auto`, 'POST'),
+
+    getDefaultPath: async (storyId: string): Promise<{ nodeIds: string[]; count: number }> =>
+        request(`/api/stories/${storyId}/default-path`),
+
+    // ==================== Render & Publish ====================
+
+    renderStory: async (storyId: string, params?: {
+        enrichDescription?: boolean;
+        generateBackground?: boolean;
+        generateCover?: boolean;
+        style?: string;
+        aspectRatio?: string;
+    }): Promise<any> =>
+        request(`/api/stories/${storyId}/render`, 'POST', params || {}),
+
+    renderMedia: async (storyId: string, params: {
+        type: string;
+        resolution?: string;
+        quality?: string;
+    }): Promise<{ taskId: string }> =>
+        request(`/api/stories/${storyId}/render-media`, 'POST', params),
+
+    getRenderStatus: async (storyId: string): Promise<{
+        tasks: any[];
+        overallStatus: string;
+    }> =>
+        request(`/api/stories/${storyId}/render-status`),
+
+    publish: async (storyId: string): Promise<Story> =>
+        request(`/api/stories/${storyId}/publish`, 'POST'),
+
+    unpublish: async (storyId: string): Promise<Story> =>
+        request(`/api/stories/${storyId}/unpublish`, 'POST'),
+
+    // ==================== Story Tags ====================
+
+    getTags: async (storyId: string): Promise<{ tags: string[] }> =>
+        request(`/api/stories/${storyId}/tags`),
+
+    addTags: async (storyId: string, tags: string[]): Promise<{ message: string }> =>
+        request(`/api/stories/${storyId}/tags`, 'POST', { tags }),
+
+    getStats: async (storyId: string): Promise<{
+        viewCount: number;
+        likeCount: number;
+        commentCount: number;
+        followerCount: number;
+    }> =>
+        request(`/api/stories/${storyId}/stats`),
 };

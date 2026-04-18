@@ -6,11 +6,6 @@ export async function GET(request: NextRequest) {
     try {
         const authHeader = request.headers.get('authorization');
 
-        console.log('[API /auth/me] Request:', {
-            hasAuth: !!authHeader,
-            authPrefix: authHeader?.substring(0, 20) + '...',
-        });
-
         if (!authHeader) {
             return NextResponse.json(
                 { code: -1, message: 'Missing authorization header' },
@@ -42,8 +37,6 @@ export async function GET(request: NextRequest) {
         }
 
         const data = await response.json();
-        console.log('[API /auth/me] Success response');
-
         // Return the backend response as-is (auth/me already returns user data directly)
         return NextResponse.json(data);
     } catch (error) {

@@ -11,16 +11,9 @@ export default function WeChatCallbackPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        console.log('[WeChat Callback] Page loaded, parsing URL parameters');
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get('code');
         const state = urlParams.get('state');
-
-        console.log('[WeChat Callback] URL parameters:', {
-            hasCode: !!code,
-            hasState: !!state,
-            allParams: Array.from(urlParams.entries())
-        });
 
         if (!code || !state) {
             console.error('[WeChat Callback] Missing required parameters');
@@ -37,7 +30,6 @@ export default function WeChatCallbackPage() {
 
         handleCallback(code, state)
             .then(() => {
-                console.log('[WeChat Callback] Callback handled successfully');
                 setLoading(false);
                 // Successfully logged in, will be redirected by handleCallback
             })

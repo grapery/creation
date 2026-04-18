@@ -73,7 +73,6 @@ export function useGoogleOAuth({
       const checkGoogle = setInterval(() => {
         if (window.google && window.google.accounts) {
           setIsLoaded(true);
-          console.log('[Google OAuth] Script loaded successfully');
           clearInterval(checkGoogle);
         }
       }, 100);
@@ -113,8 +112,6 @@ export function useGoogleOAuth({
 
     try {
       setIsLoading(true);
-      console.log('[Google OAuth] Initializing sign-in...');
-
       // Use Google's ID token flow (recommended for server-side verification)
       // This returns an ID token that can be verified by the backend
       const client = window.google.accounts.oauth2.initCodeClient({
@@ -122,7 +119,6 @@ export function useGoogleOAuth({
         scope: 'openid email profile',
         callback: (response: any) => {
           if (response.code) {
-            console.log('[Google OAuth] Authorization code received (use backend to exchange for tokens)');
             // Note: Backend would need to exchange this code for tokens
             // For now, we'll use the implicit flow with ID token instead
             setIsLoading(false);
@@ -144,7 +140,6 @@ export function useGoogleOAuth({
       window.google.accounts.id.initialize({
         client_id: clientId,
         callback: (response: GoogleCredentialResponse) => {
-          console.log('[Google OAuth] ID token received');
           setIsLoading(false);
           onSuccess?.(response);
         },
@@ -160,7 +155,6 @@ export function useGoogleOAuth({
           setIsLoading(false);
         } else {
           // Successfully prompted
-          console.log('[Google OAuth] Prompt displayed successfully');
         }
       });
     } catch (error) {

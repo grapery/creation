@@ -25,9 +25,9 @@ export function PlanCard({ plan, isCurrent, onSubscribe, loading }: PlanCardProp
 
     // Get cycle text
     const cycleText = {
-        month: language === 'zh-Hans' ? '月' : language === 'ja' ? '月' : 'month',
-        quarter: language === 'zh-Hans' ? '季' : language === 'ja' ? '3ヶ月' : 'quarter',
-        year: language === 'zh-Hans' ? '年' : language === 'ja' ? '年' : 'year',
+        monthly: language === 'zh-Hans' ? '月' : language === 'ja' ? '月' : 'month',
+        quarterly: language === 'zh-Hans' ? '季' : language === 'ja' ? '3ヶ月' : 'quarter',
+        yearly: language === 'zh-Hans' ? '年' : language === 'ja' ? '年' : 'year',
     }[plan.cycle];
 
     return (

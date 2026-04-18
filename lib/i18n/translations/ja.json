@@ -586,5 +586,19 @@
     "no_fragments": "断片はまだありません",
     "no_notifications": "通知はありません",
     "no_messages": "メッセージはありません"
+  },
+  "sidebar": {
+    "creator_center": "クリエイターセンター",
+    "write_story": "ストーリーを作成",
+    "fragment": "断片",
+    "storyboard": "ストーリーボード",
+    "discover": "発見",
+    "bookmarks": "ブックマーク",
+    "search": "検索"
+  },
+  "footer": {
+    "privacy": "プライバシーポリシー",
+    "terms": "利用規約",
+    "api_docs": "API ドキュメント"
   }
 }

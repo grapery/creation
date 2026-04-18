@@ -5,14 +5,18 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Header } from "@/components/layout/header";
 import { storyboards } from "@/lib/api/storyboards";
+import { likes, bookmarks } from "@/lib/api/interactions";
 import { Storyboard } from "@/lib/types";
-import { Loader2, ArrowLeft, Sparkles, Users, Heart, MessageSquare, GitFork, Share2, Info, Workflow, Play, X, ChevronLeft, ChevronRight, LayoutList, Grid3x3, ArrowUp, ArrowDown, AlertCircle, Plus } from "lucide-react";
+import { Loader2, ArrowLeft, Sparkles, Users, Heart, MessageSquare, GitFork, Share2, Info, Workflow, Play, X, ChevronLeft, ChevronRight, LayoutList, Grid3x3, ArrowUp, ArrowDown, AlertCircle, Plus, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CommentList } from "@/components/comments/comment-list";
 import { StoryboardRoadmap } from "@/components/storyboard/roadmap";
 import { DetailMetadata } from "@/components/storyboard/detail-metadata";
+import { ForkDialog } from "@/components/storyboard/fork-dialog";
+import { ContinueDialog } from "@/components/storyboard/continue-dialog";
 import { useTranslation } from "@/providers/language-provider";
+import { useAuth } from "@/providers/auth-provider";
 
 export default function StoryboardPage() {
     const { t } = useTranslation();
@@ -30,7 +34,13 @@ export default function StoryboardPage() {
     const [childStoryboards, setChildStoryboards] = useState<Storyboard[]>([]);
     const [showChildrenList, setShowChildrenList] = useState(false);
     const [showNoChildrenDialog, setShowNoChildrenDialog] = useState(false);
+    const [showForkDialog, setShowForkDialog] = useState(false);
+    const [showContinueDialog, setShowContinueDialog] = useState(false);
+    const [isLiked, setIsLiked] = useState(false);
+    const [likeCount, setLikeCount] = useState(0);
+    const [isBookmarked, setIsBookmarked] = useState(false);
     const hasLoadedRef = useRef(false);
+    const { user } = useAuth();
     const videoRefs = useRef<Map<string, HTMLVideoElement>>(new Map());
 
     useEffect(() => {
@@ -51,14 +61,60 @@ export default function StoryboardPage() {
                 if (!isMounted) return;
 
                 setItem(data);
-                // Mock workflow data - in real implementation, fetch from API
-                if (data.storyboardScenes) {
+                setLikeCount(data.likes || 0);
+
+                // Check interaction status
+                if (user) {
+                    try {
+                        const [likeStatus, bookmarkStatus] = await Promise.all([
+                            likes.checkStatus('storyboard_node', id as string).catch(() => ({ isLiked: false })),
+                            bookmarks.checkStatus('storyboard', id as string).catch(() => ({ isBookmarked: false })),
+                        ]);
+                        if (isMounted) {
+                            setIsLiked(likeStatus.isLiked);
+                            setIsBookmarked(bookmarkStatus.isBookmarked);
+                        }
+                    } catch (e) {
+                        // Silently ignore interaction check failures
+                    }
+                }
+
+                // Fetch generation progress
+                if (data.workflowStatus && data.workflowStatus !== 'draft' && data.workflowStatus !== 'completed') {
+                    try {
+                        const progress = await storyboards.getGenerationProgress(id as string);
+                        if (isMounted) {
+                            setWorkflow({
+                                rawInput: data.content,
+                                content: data.content,
+                                scenes: data.storyboardScenes,
+                                workflowStatus: progress.status || data.workflowStatus,
+                                currentStep: progress.currentStep,
+                                totalSteps: progress.totalSteps,
+                                completedSteps: progress.completedSteps,
+                                progress: progress.progress,
+                                isAIGenerated: data.isAIGenerated || false,
+                            });
+                        }
+                    } catch (e) {
+                        // Generation progress not available, use storyboard data
+                        if (isMounted && data.storyboardScenes) {
+                            setWorkflow({
+                                rawInput: data.content,
+                                content: data.content,
+                                scenes: data.storyboardScenes,
+                                workflowStatus: data.workflowStatus,
+                                isAIGenerated: data.isAIGenerated || false,
+                            });
+                        }
+                    }
+                } else if (data.storyboardScenes) {
                     setWorkflow({
                         rawInput: data.content,
                         content: data.content,
                         scenes: data.storyboardScenes,
-                        workflowStatus: "completed",
-                        tokenConsumption: 1250,
+                        workflowStatus: data.workflowStatus || 'completed',
+                        tokenConsumption: data.tokenConsumption,
                         isAIGenerated: data.isAIGenerated || false,
                     });
                 }
@@ -237,17 +293,42 @@ export default function StoryboardPage() {
 
                                 {/* Action Buttons in Dashed Border */}
                                 <div className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-dashed border-border bg-secondary/20">
-                                    <Button variant="ghost" size="sm" className="gap-1.5 h-7 px-2 text-xs">
-                                        <Heart className="h-3.5 w-3.5" />
-                                        <span className="hidden sm:inline">{item.likes || 0}</span>
+                                    <Button variant="ghost" size="sm" className="gap-1.5 h-7 px-2 text-xs" onClick={async () => {
+                                        if (!user) return;
+                                        try {
+                                            if (isLiked) {
+                                                await likes.unlike('storyboard_node', id as string);
+                                                setIsLiked(false);
+                                                setLikeCount(c => c - 1);
+                                            } else {
+                                                await likes.like('storyboard_node', id as string);
+                                                setIsLiked(true);
+                                                setLikeCount(c => c + 1);
+                                            }
+                                        } catch (e) { console.error(e); }
+                                    }}>
+                                        <Heart className={`h-3.5 w-3.5 ${isLiked ? "fill-red-500 text-red-500" : ""}`} />
+                                        <span className="hidden sm:inline">{likeCount}</span>
                                     </Button>
                                     <div className="w-px h-4 bg-border" />
-                                    <Button variant="ghost" size="sm" className="gap-1.5 h-7 px-2 text-xs">
+                                    <Button variant="ghost" size="sm" className="gap-1.5 h-7 px-2 text-xs" onClick={() => {
+                                        document.getElementById('comments-section')?.scrollIntoView({ behavior: 'smooth' });
+                                    }}>
                                         <MessageSquare className="h-3.5 w-3.5" />
                                         <span className="hidden sm:inline">{item.comments || 0}</span>
                                     </Button>
                                     <div className="w-px h-4 bg-border" />
-                                    <Button variant="ghost" size="sm" className="gap-1.5 h-7 px-2 text-xs">
+                                    <Button variant="ghost" size="sm" className="gap-1.5 h-7 px-2 text-xs" onClick={async () => {
+                                        if (!user) return;
+                                        try {
+                                            const result = await bookmarks.toggleBookmark('storyboard', id as string);
+                                            setIsBookmarked(result.isBookmarked);
+                                        } catch (e) { console.error(e); }
+                                    }}>
+                                        <Bookmark className={`h-3.5 w-3.5 ${isBookmarked ? "fill-amber-500 text-amber-500" : ""}`} />
+                                    </Button>
+                                    <div className="w-px h-4 bg-border" />
+                                    <Button variant="ghost" size="sm" className="gap-1.5 h-7 px-2 text-xs" onClick={() => setShowForkDialog(true)}>
                                         <GitFork className="h-3.5 w-3.5" />
                                         <span className="hidden sm:inline">{t("storyboard_detail.fork")}</span>
                                     </Button>
@@ -697,7 +778,7 @@ export default function StoryboardPage() {
                 </div>
 
                 {/* Comments Section - Aligned with Content */}
-                <div className="bg-card border border-border rounded-xl p-6 md:p-8">
+                <div id="comments-section" className="bg-card border border-border rounded-xl p-6 md:p-8">
                     <CommentList targetId={id as string} targetType="storyboard" />
                 </div>
             </main>
@@ -854,28 +935,66 @@ export default function StoryboardPage() {
                                 <p className="text-sm font-medium">您可以：</p>
                                 <ul className="text-sm text-muted-foreground space-y-2 ml-4">
                                     <li>• 点击"复刻"按钮创建新的故事分支</li>
-                                    <li>• 返回上级故事板查看其他分支</li>
+                                    <li>• 点击"续写"按钮继续当前故事线</li>
                                 </ul>
                             </div>
                             <div className="flex justify-end gap-2">
-                                <Button
-                                    variant="outline"
-                                    onClick={() => setShowNoChildrenDialog(false)}
-                                >
+                                <Button variant="outline" onClick={() => setShowNoChildrenDialog(false)}>
                                     知道了
                                 </Button>
                                 <Button
                                     onClick={() => {
                                         setShowNoChildrenDialog(false);
-                                        // Open fork/creation flow
-                                        // TODO: Implement fork/continue story functionality
+                                        setShowContinueDialog(true);
+                                    }}
+                                    variant="outline"
+                                    className="gap-2"
+                                >
+                                    <ArrowDown className="h-4 w-4" />
+                                    续写
+                                </Button>
+                                <Button
+                                    onClick={() => {
+                                        setShowNoChildrenDialog(false);
+                                        setShowForkDialog(true);
                                     }}
                                     className="gap-2"
                                 >
-                                    <Plus className="h-4 w-4" />
-                                    创建新的分支
+                                    <GitFork className="h-4 w-4" />
+                                    创建分支
                                 </Button>
                             </div>
+                        </div>
+                    </Card>
+                </div>
+            )}
+
+            {/* Fork Dialog */}
+            {showForkDialog && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <Card className="w-full max-w-lg">
+                        <div className="p-6">
+                            <ForkDialog
+                                storyboardId={id as string}
+                                currentTitle={item.title}
+                                open={showForkDialog}
+                                onClose={() => setShowForkDialog(false)}
+                            />
+                        </div>
+                    </Card>
+                </div>
+            )}
+
+            {/* Continue Dialog */}
+            {showContinueDialog && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <Card className="w-full max-w-lg">
+                        <div className="p-6">
+                            <ContinueDialog
+                                storyboardId={id as string}
+                                open={showContinueDialog}
+                                onClose={() => setShowContinueDialog(false)}
+                            />
                         </div>
                     </Card>
                 </div>

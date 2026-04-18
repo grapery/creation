@@ -14,16 +14,8 @@ export async function GET(
         // Get the authorization header from the incoming request
         const authHeader = request.headers.get('authorization');
 
-        console.log('[API /users/[id]] Request:', {
-            userId,
-            hasAuth: !!authHeader,
-            authPrefix: authHeader?.substring(0, 20) + '...',
-        });
-
         // Forward the request to the backend service
         const backendUrl = `${BACKEND_URL}/api/users/${userId}`;
-
-        console.log('[API /users/[id]] Fetching from backend:', backendUrl);
 
         const response = await fetch(backendUrl, {
             method: 'GET',
@@ -33,21 +25,13 @@ export async function GET(
             },
         });
 
-        console.log('[API /users/[id]] Backend response:', {
-            status: response.status,
-            ok: response.ok,
-            statusText: response.statusText,
-        });
-
         if (!response.ok) {
             // Try to parse error response
             let errorMessage = 'Failed to fetch user profile';
             try {
                 const errorData = await response.json();
                 errorMessage = errorData.message || errorData.msg || errorMessage;
-                console.log('[API /users/[id]] Error response:', errorData);
             } catch (e) {
-                console.log('[API /users/[id]] Could not parse error response');
             }
 
             return NextResponse.json(
@@ -57,8 +41,6 @@ export async function GET(
         }
 
         const data = await response.json();
-        console.log('[API /users/[id]] Success response data keys:', Object.keys(data));
-
         // Backend returns: { code: 1, message: "success", data: { user data } }
         // We need to extract the user data and return it in the expected format
         const userData = data.data || data;
@@ -73,12 +55,31 @@ export async function GET(
             following: undefined,
         };
 
+        // Check follow status if user is authenticated
+        let isFollowing = false;
+        if (authHeader) {
+            try {
+                const followRes = await fetch(`${BACKEND_URL}/api/v1/follows/check?type=user&id=${userId}`, {
+                    headers: {
+                        'Authorization': authHeader,
+                        'Content-Type': 'application/json',
+                    },
+                });
+                if (followRes.ok) {
+                    const followData = await followRes.json();
+                    isFollowing = followData.data?.isFollowing ?? followData.isFollowing ?? false;
+                }
+            } catch (e) {
+                // Silently ignore follow status check failures
+            }
+        }
+
         // Return success response with user data
         return NextResponse.json({
             code: 0,
             message: 'success',
             user: mappedUserData,
-            isFollowing: false, // TODO: Fetch actual follow status from backend
+            isFollowing,
         });
     } catch (error) {
         console.error('[API /users/[id]] Exception caught:', error);

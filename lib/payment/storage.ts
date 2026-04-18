@@ -25,7 +25,7 @@ export async function createPaymentRecord(data: CreatePaymentData): Promise<Paym
     const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8080';
 
     try {
-        const response = await fetch(`${BACKEND_URL}/api/payments`, {
+        const response = await fetch(`${BACKEND_URL}/api/vippay/web/payments`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -40,19 +40,7 @@ export async function createPaymentRecord(data: CreatePaymentData): Promise<Paym
         return await response.json();
     } catch (error) {
         console.error('[Payment Storage] Error creating record:', error);
-        // Fallback: return a mock record
-        return {
-            id: `pay_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            userId: data.userId,
-            planId: data.planId,
-            amount: data.amount,
-            currency: data.currency,
-            status: data.status,
-            method: data.method,
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-            metadata: data.metadata,
-        };
+        throw new Error('Failed to create payment record. Please try again.');
     }
 }
 
@@ -67,7 +55,7 @@ export async function updatePaymentStatus(
     const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8080';
 
     try {
-        const response = await fetch(`${BACKEND_URL}/api/payments/${paymentId}`, {
+        const response = await fetch(`${BACKEND_URL}/api/vippay/web/payments/${paymentId}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -97,7 +85,7 @@ export async function getPaymentById(paymentId: string): Promise<PaymentRecord |
     const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8080';
 
     try {
-        const response = await fetch(`${BACKEND_URL}/api/payments/${paymentId}`);
+        const response = await fetch(`${BACKEND_URL}/api/vippay/web/payments/${paymentId}`);
 
         if (!response.ok) {
             if (response.status === 404) {
@@ -138,7 +126,7 @@ export async function getUserPaymentHistory(
         if (method) params.append('method', method);
 
         const response = await fetch(
-            `${BACKEND_URL}/api/users/${userId}/payments?${params.toString()}`
+            `${BACKEND_URL}/api/vippay/web/payments/user/${userId}?${params.toString()}`
         );
 
         if (!response.ok) {

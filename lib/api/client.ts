@@ -135,7 +135,6 @@ const attemptRefreshToken = async (): Promise<string | null> => {
 export const setupAuthListeners = () => {
     if (typeof window !== 'undefined') {
         window.addEventListener('auth:logout', ((event: CustomEvent) => {
-            console.log('[API] Auth logout event:', event.detail);
             // 可以在这里触发全局的登录提示
             window.dispatchEvent(new CustomEvent('auth:showLogin', {
                 detail: { reason: event.detail?.reason || 'session_expired' }
@@ -175,14 +174,6 @@ const createClient = (serviceType: ServiceType = ServiceType.MAIN): AxiosInstanc
             const token = getAuthToken();
             if (token && config.headers) {
                 config.headers.Authorization = `Bearer ${token}`;
-                // Debug: Log token presence (not the token itself for security)
-                console.log('[API] Sending request with token:', {
-                    url: config.url,
-                    hasToken: !!token,
-                    tokenLength: token?.length
-                });
-            } else {
-                console.log('[API] Sending request without token:', config.url);
             }
             return config;
         },
@@ -192,25 +183,18 @@ const createClient = (serviceType: ServiceType = ServiceType.MAIN): AxiosInstanc
     // Response Interceptor
     client.interceptors.response.use(
         (response: AxiosResponse<APIResponse>) => {
-            const { data, status } = response;
-
-            // Debug: Log response structure for login endpoint
-            if (response.config.url?.includes('/auth/login')) {
-                console.log('[API] Login response:', {
-                    status,
-                    data,
-                    hasData: 'data' in data,
-                    dataValue: (data as any).data
-                });
-            }
+            const { data } = response;
 
             // Handle standard envelope
             if (data && typeof data.code === 'number') {
-                if (data.code === 0 || data.code === 1) {
-                    // Success
-                    return data.data ?? data; // Return data unwrapped, or raw if data is null but success
+                const isPaymentService = serviceType === ServiceType.PAYMENT;
+                const isSuccess = isPaymentService
+                    ? (data.code === 0 && (data as any).success === true) || data.code === 1
+                    : data.code === 1;
+
+                if (isSuccess) {
+                    return data.data ?? data;
                 } else {
-                    // Business Error
                     return Promise.reject(new APIError(data.message || data.msg || 'Unknown error', data.code));
                 }
             }
@@ -258,7 +242,6 @@ const createClient = (serviceType: ServiceType = ServiceType.MAIN): AxiosInstanc
                             isRefreshing = true;
                             attemptRefreshToken()
                                 .then((newToken) => {
-                                    isRefreshing = false;
                                     if (newToken) {
                                         onTokenRefreshed(newToken);
                                     } else {
@@ -266,8 +249,10 @@ const createClient = (serviceType: ServiceType = ServiceType.MAIN): AxiosInstanc
                                     }
                                 })
                                 .catch(() => {
-                                    isRefreshing = false;
                                     onRefreshError();
+                                })
+                                .finally(() => {
+                                    isRefreshing = false;
                                 });
                         }
 
@@ -293,36 +278,24 @@ const createClient = (serviceType: ServiceType = ServiceType.MAIN): AxiosInstanc
                                 detail: { reason: 'unauthorized', code: errorCode }
                             }));
                         }
-                        // 返回空数据，避免页面报错
-                        return Promise.resolve({ data: [], stories: [], storyboards: [], total: 0 } as any);
+                        return Promise.reject(new APIError(errorMessage, errorCode || status, error));
                     }
                 }
 
                 const message = errorMessage;
 
                 // For authentication endpoints, always throw errors
-                const isAuthEndpoint = error.config?.url?.includes('/api/auth/') ||
+                const isAuthEndpoint2 = error.config?.url?.includes('/api/auth/') ||
                                       error.config?.url?.includes('/api/oauth/');
 
-                if (isAuthEndpoint) {
+                if (isAuthEndpoint2) {
                     return Promise.reject(new APIError(message, status, error));
                 }
 
                 // For navigation endpoints (children, parent), 404 is expected when no data exists
-                // Return empty array instead of throwing error
                 const isNavigationEndpoint = error.config?.url?.includes('/children');
                 if (status === 404 && isNavigationEndpoint) {
-                    if (process.env.NODE_ENV === 'development') {
-                        console.log('[API] No navigation data found (404) - returning empty array');
-                    }
                     return Promise.resolve([]);
-                }
-
-                // For 500, 503, and connection errors on non-auth endpoints, return a safe empty response
-                // This prevents console errors when backend is down
-                if (status >= 500 || status === 0) {
-                    // Return a safe empty object that matches common response formats
-                    return Promise.resolve({ data: [], stories: [], storyboards: [], total: 0 } as any);
                 }
 
                 return Promise.reject(new APIError(message, status, error));
@@ -335,24 +308,7 @@ const createClient = (serviceType: ServiceType = ServiceType.MAIN): AxiosInstanc
                                     error.message?.includes('ECONNREFUSED');
 
             if (isConnectionError) {
-                // Check if this is an authentication endpoint
-                const isAuthEndpoint = error.config?.url?.includes('/api/auth/') ||
-                                      error.config?.url?.includes('/api/oauth/');
-
-                if (isAuthEndpoint) {
-                    // For auth endpoints, throw an error with a clear message
-                    if (process.env.NODE_ENV === 'development') {
-                        console.warn('[API] Backend not available for auth request');
-                    }
-                    return Promise.reject(new APIError('Unable to connect to server. Please check your connection.', 0, error));
-                }
-
-                // Only log in development for non-auth endpoints
-                if (process.env.NODE_ENV === 'development') {
-                    console.warn('[API] Backend not available - returning empty data');
-                }
-                // Return empty data instead of throwing error for data endpoints
-                return Promise.resolve({ data: [], stories: [], storyboards: [], total: 0 } as any);
+                return Promise.reject(new APIError('Unable to connect to server. Please check your connection.', 0, error));
             }
 
             // For other errors, still throw
@@ -368,17 +324,24 @@ export const apiClient = createClient(ServiceType.MAIN);
 export const paymentClient = createClient(ServiceType.PAYMENT);
 export const chatClient = createClient(ServiceType.CHAT);
 
+// Default timeout for regular requests
+export const DEFAULT_TIMEOUT = 30000;
+// Extended timeout for AI generation endpoints
+export const AI_TIMEOUT = 120000;
+
 // Helper for changing service on the fly if needed, or just use specific clients
 export const request = async <T>(
     endpoint: string,
     method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET',
     body?: any,
-    client: AxiosInstance = apiClient
+    client: AxiosInstance = apiClient,
+    timeout?: number
 ): Promise<T> => {
     const response = await client.request<any, T>({
         url: endpoint,
         method,
         data: body,
+        timeout: timeout,
     });
     return response;
 };

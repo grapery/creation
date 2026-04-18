@@ -614,5 +614,19 @@
     "no_fragments": "No fragments yet",
     "no_notifications": "No notifications",
     "no_messages": "No messages"
+  },
+  "sidebar": {
+    "creator_center": "Creator Center",
+    "write_story": "Write Story",
+    "fragment": "Fragment",
+    "storyboard": "Storyboard",
+    "discover": "Discover",
+    "bookmarks": "Bookmarks",
+    "search": "Search"
+  },
+  "footer": {
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "api_docs": "API Docs"
   }
 }

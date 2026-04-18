@@ -8,11 +8,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription } from "@/components/ui/card";
 import { Loader2, User, Mail, Lock, Calendar, ArrowLeft, BookOpen } from "lucide-react";
-import { AuthBackground, LanguageSelector, Language, OAuthProviderButton, OAuthProvider } from "@/components/auth";
+import { AuthBackground, LanguageSelector, OAuthProviderButton, OAuthProvider } from "@/components/auth";
+import { useGoogleOAuth } from "@/lib/hooks/use-google-oauth";
+import { useWeChatOAuth } from "@/lib/hooks/use-wechat-oauth";
+import { auth } from "@/lib/api/auth";
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
     const { register } = useAuth();
     const { t } = useTranslation();
+    const router = useRouter();
     const [formData, setFormData] = useState({
         username: "",
         displayName: "",
@@ -26,7 +31,27 @@ export default function RegisterPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
     const [oauthLoading, setOAuthLoading] = useState<OAuthProvider | null>(null);
-    const [currentLanguage, setCurrentLanguage] = useState<Language>("en");
+    const [oauthError, setOAuthError] = useState("");
+
+    const { isLoaded: googleLoaded, signIn: googleSignIn } = useGoogleOAuth({
+        clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+        onSuccess: async (credentialResponse) => {
+            try {
+                await auth.loginWithGoogle({ idToken: credentialResponse.credential });
+                router.push('/');
+            } catch (err: any) {
+                setOAuthError(err.message || 'Google sign-in failed');
+            } finally {
+                setOAuthLoading(null);
+            }
+        },
+        onError: () => {
+            setOAuthError('Google sign-in failed');
+            setOAuthLoading(null);
+        },
+    });
+
+    const { signIn: weChatSignIn } = useWeChatOAuth();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = e.target;
@@ -62,11 +87,32 @@ export default function RegisterPage() {
     };
 
     function handleOAuthLogin(provider: OAuthProvider) {
-        // Placeholder for OAuth integration
         setOAuthLoading(provider);
-        setTimeout(() => {
+        setOAuthError("");
+
+        if (provider === "google") {
+            if (!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
+                setOAuthError("Google OAuth is not configured.");
+                setOAuthLoading(null);
+                return;
+            }
+            try {
+                googleSignIn();
+            } catch (e: any) {
+                setOAuthError(e.message || "Failed to initiate Google sign-in.");
+                setOAuthLoading(null);
+            }
+        } else if (provider === "apple") {
+            setOAuthError("Apple Sign In coming soon");
             setOAuthLoading(null);
-        }, 1000);
+        } else if (provider === "wechat") {
+            try {
+                weChatSignIn();
+            } catch (e: any) {
+                setOAuthError(e.message || "Failed to initiate WeChat sign-in.");
+                setOAuthLoading(null);
+            }
+        }
     }
 
     async function onSubmit(e: React.FormEvent) {
@@ -146,6 +192,10 @@ export default function RegisterPage() {
                                 disabled={oauthLoading !== null}
                                 onClick={() => handleOAuthLogin("apple")}
                             />
+
+                            {oauthError && (
+                                <div className="text-center text-sm text-destructive">{oauthError}</div>
+                            )}
                         </CardContent>
                     </Card>
 

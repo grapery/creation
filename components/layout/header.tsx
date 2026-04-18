@@ -5,7 +5,6 @@ import { useAuth } from "@/providers/auth-provider";
 import { Button } from "@/components/ui/button";
 import { UserCircle, LogOut, Loader2, Crown, Search, Bell, MessageSquare, Info } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
 import { LanguageSelector } from "@/components/auth/language-selector";
 import { useTranslation } from "@/providers/language-provider";
 import { useLoginPrompt } from "@/components/auth/login-prompt";
@@ -45,14 +44,14 @@ export function Header() {
                         <Info className="h-4 w-4" />
                         {t("navigation.about")}
                     </Link>
-                    <div className="relative flex-1">
+                    <Link href="/search" className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            type="search"
-                            placeholder="Search stories, people..."
-                            className="w-full bg-secondary border-0 rounded-full focus-visible:ring-1 focus-visible:ring-primary/30 pl-10 h-10 text-sm transition-all"
-                        />
-                    </div>
+                        <div
+                            className="w-full bg-secondary border-0 rounded-full pl-10 h-10 text-sm text-muted-foreground flex items-center cursor-pointer hover:bg-secondary/80 transition-colors"
+                        >
+                            Search stories, people...
+                        </div>
+                    </Link>
                     <nav className="flex items-center space-x-3 text-sm font-medium">
                         <Link 
                             href="/notifications" 

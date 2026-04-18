@@ -8,85 +8,67 @@ import { Header } from "@/components/layout/header";
 import { Loader2, GitBranch, GitCommit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useTranslation } from "@/providers/language-provider";
 
-// Mock Tree Data
-interface BranchNode {
+interface TreeNode {
     id: string;
     title: string;
     author: string;
-    children?: BranchNode[];
+    children: TreeNode[];
     isCurrent?: boolean;
+}
+
+function buildTree(items: Storyboard[], currentId: string): TreeNode | null {
+    if (!items.length) return null;
+    const map = new Map<string, TreeNode>();
+    const roots: TreeNode[] = [];
+
+    for (const item of items) {
+        map.set(item.id, {
+            id: item.id,
+            title: item.title,
+            author: item.creatorName || "Unknown",
+            children: [],
+            isCurrent: item.id === currentId,
+        });
+    }
+
+    for (const item of items) {
+        const node = map.get(item.id)!;
+        if (item.parentId && item.parentId !== "root" && map.has(item.parentId)) {
+            map.get(item.parentId)!.children.push(node);
+        } else {
+            roots.push(node);
+        }
+    }
+
+    return roots[0] || null;
 }
 
 export default function BranchingPage() {
     const { id } = useParams();
+    const { t } = useTranslation();
     const [loading, setLoading] = useState(true);
-
-    // In real app, we fetch tree structure.
-    // Mocking for UI dev
-    const mockTree: BranchNode = {
-        id: "root",
-        title: "The Beginning",
-        author: "Alice",
-        children: [
-            {
-                id: "b1",
-                title: "Enter the Cave",
-                author: "Bob",
-                children: [
-                    { id: "b1-1", title: "Fight the Bear", author: "Charlie" },
-                    { id: "b1-2", title: "Run Away", author: "Bob" }
-                ]
-            },
-            {
-                id: "b2",
-                title: "Climb the Mountain",
-                author: "Alice",
-                isCurrent: true,
-                children: []
-            }
-        ]
-    };
+    const [tree, setTree] = useState<TreeNode | null>(null);
 
     useEffect(() => {
-        // Fetch logic here
-        setTimeout(() => setLoading(false), 1000);
+        if (!id) return;
+        let isMounted = true;
+        async function load() {
+            try {
+                const data = await storyboards.getTree(id as string);
+                const nodes = (data as any).storyboards || (data as any).nodes || (Array.isArray(data) ? data : []);
+                const built = buildTree(nodes as Storyboard[], id as string);
+                if (isMounted) setTree(built);
+            } catch (e) {
+                console.error("Failed to load tree:", e);
+            } finally {
+                if (isMounted) setLoading(false);
+            }
+        }
+        load();
+        return () => { isMounted = false; };
     }, [id]);
-
-    const renderTree = (node: BranchNode, depth = 0) => {
-        return (
-            <div key={node.id} className="relative pl-8">
-                {/* Connector line */}
-                {depth > 0 && (
-                    <div className="absolute left-0 top-4 w-8 h-0.5 bg-border" />
-                )}
-                {/* Vertical line helper if needed for siblings, simplified here */}
-
-                <div className="mb-4">
-                    <div className={`p-4 rounded-lg border bg-card hover:border-primary transition-colors w-64 ${node.isCurrent ? 'ring-2 ring-primary' : ''}`}>
-                        <div className="font-semibold text-sm flex items-center gap-2">
-                            <GitCommit className="h-4 w-4 text-muted-foreground" />
-                            {node.title}
-                        </div>
-                        <div className="text-xs text-muted-foreground mt-1">by {node.author}</div>
-                        <div className="mt-2 flex gap-2">
-                            <Button size="sm" variant="outline" className="h-7 text-xs" asChild>
-                                <Link href={`/storyboards/${node.id}`}>Read</Link>
-                            </Button>
-                            <Button size="sm" variant="ghost" className="h-7 text-xs" asChild>
-                                <Link href={`/storyboards/${node.id}/editor`}>Branch</Link>
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="border-l-2 border-border ml-[-2rem] pl-8 space-y-4">
-                    {/* Requires complex CSS for proper tree lines. MVP: Nested steps. */}
-                    {node.children?.map(child => renderTree(child, depth + 1))}
-                </div>
-            </div>
-        );
-    };
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
@@ -98,17 +80,12 @@ export default function BranchingPage() {
                 </div>
 
                 {loading ? (
-                    <div className="flex justify-center"><Loader2 className="animate-spin" /></div>
+                    <div className="flex justify-center py-20"><Loader2 className="animate-spin h-8 w-8" /></div>
+                ) : !tree ? (
+                    <div className="text-center py-20 text-muted-foreground">No branching data available.</div>
                 ) : (
-                    <div className="p-8 min-w-max">
-                        {/* Recursive Tree Renderer */}
-                        <div className="flex flex-col gap-4">
-                            {/* Custom simple recursive view */}
-                            <div className="relative">
-                                {/* Simplistic visual for now */}
-                                <TreeNode node={mockTree} />
-                            </div>
-                        </div>
+                    <div className="p-8 overflow-x-auto">
+                        <TreeNodeComponent node={tree} />
                     </div>
                 )}
             </main>
@@ -116,7 +93,7 @@ export default function BranchingPage() {
     );
 }
 
-function TreeNode({ node }: { node: BranchNode }) {
+function TreeNodeComponent({ node }: { node: TreeNode }) {
     return (
         <div className="flex flex-col items-center">
             <div className={`z-10 p-4 rounded-lg border bg-card hover:border-primary transition-colors w-64 mb-8 relative ${node.isCurrent ? 'ring-2 ring-primary' : ''}`}>
@@ -129,30 +106,23 @@ function TreeNode({ node }: { node: BranchNode }) {
                     <Button size="sm" variant="outline" className="h-7 text-xs" asChild>
                         <Link href={`/storyboards/${node.id}`}>Read</Link>
                     </Button>
-                    <Button size="sm" variant="ghost" className="h-7 text-xs" asChild>
-                        <Link href={`/storyboards/${node.id}/editor`}>Branch</Link>
-                    </Button>
                 </div>
-
-                {node.children && node.children.length > 0 && <div className="absolute bottom-[-2rem] left-1/2 w-0.5 h-8 bg-border"></div>}
+                {node.children.length > 0 && <div className="absolute bottom-[-2rem] left-1/2 w-0.5 h-8 bg-border" />}
             </div>
 
-            {node.children && node.children.length > 0 && (
+            {node.children.length > 0 && (
                 <div className="flex gap-8 relative">
                     {node.children.length > 1 && (
                         <div className="absolute top-0 left-0 right-0 h-0.5 bg-border -translate-y-[1px]" />
                     )}
-                    {node.children.map((child, i) => (
+                    {node.children.map((child) => (
                         <div key={child.id} className="flex flex-col items-center">
-                            {/* Connector from horizontal bar to child */}
-                            <div className="w-0.5 h-8 bg-border -mt-8 mb-0"></div>
-                            {/* Wait, simple flex gap approach needs careful line drawing. */}
-                            {/* For MVP, let's just show boxes. Tree lines are hard in pure CSS flex. */}
-                            <TreeNode node={child} />
+                            <div className="w-0.5 h-8 bg-border -mt-8" />
+                            <TreeNodeComponent node={child} />
                         </div>
                     ))}
                 </div>
             )}
         </div>
-    )
+    );
 }

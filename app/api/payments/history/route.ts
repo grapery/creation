@@ -73,7 +73,13 @@ export async function GET(req: NextRequest) {
 }
 
 function extractUserIdFromToken(authHeader: string): string | null {
-    // TODO: Implement proper JWT decoding
-    // For now, return a placeholder - this should be implemented properly
-    return 'user_placeholder';
+    try {
+        const token = authHeader.replace('Bearer ', '');
+        const parts = token.split('.');
+        if (parts.length !== 3) return null;
+        const payload = JSON.parse(atob(parts[1]));
+        return payload.sub || payload.userId || payload.id || null;
+    } catch {
+        return null;
+    }
 }

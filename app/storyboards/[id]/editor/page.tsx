@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, Save } from "lucide-react";
-import { showSuccess } from "@/lib/toast-utils";
+import { showSuccess, showError } from "@/lib/toast-utils";
 
 // Inline components if not created
 function SimpleLabel({ children, htmlFor }: { children: React.ReactNode, htmlFor?: string }) {
@@ -32,6 +32,7 @@ export default function EditorPage() {
         content: "",
         type: "scene"
     });
+    const [generating, setGenerating] = useState(false);
 
     useEffect(() => {
         if (!id) return;
@@ -59,13 +60,15 @@ export default function EditorPage() {
         if (!parent) return;
         setSaving(true);
         try {
-            // Mock create API call
-            // await storyboards.create({ ...formData, parentId: parent.id, storyId: parent.storyId });
-            console.log("Creating branch from", parent.id, formData);
-            // router.push(`/storyboards/${newId}`);
+            const result = await storyboards.fork(parent.id, {
+                title: formData.title,
+                rawInput: formData.content,
+            });
             showSuccess("Branch saved successfully");
-        } catch (e) {
+            router.push(`/storyboards/${result.id}`);
+        } catch (e: any) {
             console.error(e);
+            showError(e.message || "Failed to save branch");
         } finally {
             setSaving(false);
         }
@@ -116,11 +119,32 @@ export default function EditorPage() {
                             />
                         </div>
 
-                        {/* Image Generation AI placeholder */}
-                        <div className="p-4 border border-dashed rounded-lg text-center cursor-pointer hover:bg-muted/50 transition-colors">
-                            <div className="text-sm font-medium">Generate Image (AI)</div>
-                            <div className="text-xs text-muted-foreground mt-1">Click to generate scene visualization</div>
-                        </div>
+                        {/* Image Generation */}
+                        <button
+                            onClick={async () => {
+                                if (!parent) return;
+                                setGenerating(true);
+                                try {
+                                    await storyboards.generateImage(parent.id, { sceneIndex: 0 });
+                                    showSuccess("Image generation started");
+                                } catch (e: any) {
+                                    showError(e.message || "Failed to generate image");
+                                } finally {
+                                    setGenerating(false);
+                                }
+                            }}
+                            disabled={generating || !formData.content}
+                            className="w-full p-4 border border-dashed rounded-lg text-center cursor-pointer hover:bg-muted/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {generating ? (
+                                <><Loader2 className="inline w-4 h-4 mr-2 animate-spin" /><span className="text-sm font-medium">Generating...</span></>
+                            ) : (
+                                <>
+                                    <div className="text-sm font-medium">Generate Image (AI)</div>
+                                    <div className="text-xs text-muted-foreground mt-1">Click to generate scene visualization</div>
+                                </>
+                            )}
+                        </button>
                     </CardContent>
                 </Card>
             </main>

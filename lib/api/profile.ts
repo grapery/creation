@@ -147,23 +147,21 @@ export const profile = {
     },
 
     // Block/Unblock User
-    // Note: Backend does not have block/unblock endpoints yet
-    blockUser: async (_userId: string): Promise<void> => {
-        console.warn('Block user not implemented');
-        return Promise.resolve();
-    },
+    blockUser: async (userId: string): Promise<void> =>
+        request(`/api/users/${userId}/block`, 'POST'),
 
-    unblockUser: async (_userId: string): Promise<void> => {
-        console.warn('Unblock user not implemented');
-        return Promise.resolve();
+    unblockUser: async (userId: string): Promise<void> =>
+        request(`/api/users/${userId}/block`, 'DELETE'),
+
+    // Get blocked users
+    getBlockedUsers: async (page = 1, limit = 20): Promise<{ users: any[], total: number }> => {
+        const offset = (page - 1) * limit;
+        return request(`/api/users/blocked?limit=${limit}&offset=${offset}`);
     },
 
     // Report User
-    // Note: Backend does not have report endpoint yet
-    reportUser: async (_userId: string, _reason: string): Promise<void> => {
-        console.warn('Report user not implemented');
-        return Promise.resolve();
-    },
+    reportUser: async (userId: string, reason: string): Promise<void> =>
+        request(`/api/users/${userId}/report`, 'POST', { reason }),
 
     // Share profile
     getShareURL: (userId: string): string => {
@@ -174,5 +172,54 @@ export const profile = {
     // Note: Using /api/auth/me endpoint
     getMyProfile: async (): Promise<User> => {
         return request('/api/auth/me');
+    },
+
+    // ==================== Stats & Points ====================
+
+    getStats: async (userId: string): Promise<{
+        storyCount: number;
+        storyboardCount: number;
+        characterCount: number;
+        fragmentCount: number;
+        followerCount: number;
+        followingCount: number;
+        totalLikes: number;
+        totalViews: number;
+    }> =>
+        request(`/api/users/${userId}/stats`),
+
+    getPoints: async (userId: string): Promise<{ points: number }> =>
+        request(`/api/users/${userId}/points`),
+
+    // ==================== Liked Content ====================
+
+    getLikedStories: async (userId: string, page = 1, limit = 20): Promise<{ stories: Story[], count: number }> => {
+        const offset = (page - 1) * limit;
+        return request(`/api/users/${userId}/liked-stories?limit=${limit}&offset=${offset}`);
+    },
+
+    getLikedCharacters: async (userId: string, page = 1, limit = 20): Promise<{ characters: any[], count: number }> => {
+        const offset = (page - 1) * limit;
+        return request(`/api/users/${userId}/liked-characters?limit=${limit}&offset=${offset}`);
+    },
+
+    getLikedStoryboards: async (userId: string, page = 1, limit = 20): Promise<{ storyboards: Storyboard[], count: number }> => {
+        const offset = (page - 1) * limit;
+        return request(`/api/users/${userId}/liked-storyboards?limit=${limit}&offset=${offset}`);
+    },
+
+    // ==================== Creator Analytics ====================
+
+    getCreatorAnalytics: async (range?: string): Promise<{
+        totalStories: number;
+        totalStoryboards: number;
+        totalCharacters: number;
+        totalFragments: number;
+        viewsThisWeek: number;
+        likesThisWeek: number;
+        newFollowersThisWeek: number;
+    }> => {
+        const params = range ? `?range=${range}` : '';
+        return request(`/api/me/creator-analytics${params}`);
     },
 };

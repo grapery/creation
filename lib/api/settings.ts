@@ -104,5 +104,16 @@ export const settings = {
     // Update notification settings
     updateNotifications: async (notificationSettings: UserSettings['notificationSettings']): Promise<void> => {
         return request('/api/settings/notifications', 'PUT', notificationSettings);
-    }
+    },
+
+    // ==================== Genre Preferences ====================
+
+    getGenrePreferences: async (): Promise<{ preferredGenres: string[]; allowedGenres: string[] }> =>
+        request('/api/settings/preferences/genres'),
+
+    getGenreCatalog: async (): Promise<{ genres: { key: string; label: string }[]; total: number }> =>
+        request('/api/settings/preferences/genres/catalog'),
+
+    updateGenrePreferences: async (preferredGenres: string[]): Promise<{ message: string }> =>
+        request('/api/settings/preferences/genres', 'PUT', { preferredGenres }),
 };

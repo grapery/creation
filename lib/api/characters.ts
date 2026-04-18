@@ -1,4 +1,4 @@
-import { request } from './client';
+import { request, apiClient, AI_TIMEOUT } from './client';
 import { Character, CharacterMessage } from '../types/character';
 
 export const characters = {
@@ -96,5 +96,52 @@ export const characters = {
             followableType: 'character',
             followableIds: characterIds
         });
+    },
+
+    // ==================== AI Generation ====================
+
+    generate: async (data: {
+        prompt: string;
+        name?: string;
+    }): Promise<Character> =>
+        request('/api/characters/generate', 'POST', data, apiClient, AI_TIMEOUT),
+
+    generateAvatar: async (id: string, params?: { style?: string }): Promise<{ avatarUrl: string }> =>
+        request(`/api/characters/${id}/generate-avatar`, 'POST', params || {}, apiClient, AI_TIMEOUT),
+
+    generatePortrait: async (id: string, params?: { style?: string; prompt?: string }): Promise<{ portraitUrl: string }> =>
+        request(`/api/characters/${id}/generate-portrait`, 'POST', params || {}, apiClient, AI_TIMEOUT),
+
+    generateThreeViews: async (id: string, params?: { regenerateAll?: boolean }): Promise<{ viewsUrl: string }> =>
+        request(`/api/characters/${id}/generate-three-views`, 'POST', params || {}, apiClient, AI_TIMEOUT),
+
+    cropAvatar: async (id: string): Promise<{ avatarUrl: string }> =>
+        request(`/api/characters/${id}/crop-avatar`, 'POST'),
+
+    usePortraitAsAvatar: async (id: string, portraitUrl: string): Promise<{ avatarUrl: string }> =>
+        request(`/api/characters/${id}/use-portrait-as-avatar`, 'PUT', { portraitUrl }),
+
+    getPortraitPrompt: async (id: string): Promise<{ prompt: string }> =>
+        request(`/api/characters/${id}/portrait-prompt`),
+
+    updateAvatar: async (id: string, avatarUrl: string): Promise<Character> =>
+        request(`/api/characters/${id}/avatar`, 'PUT', { avatarUrl }),
+
+    // ==================== Analytics & Relations ====================
+
+    getAnalytics: async (id: string): Promise<{
+        totalStoryboards: number;
+        totalLikes: number;
+        totalForks: number;
+        totalViews: number;
+    }> =>
+        request(`/api/characters/${id}/analytics`),
+
+    getStoryboards: async (id: string, page = 1, limit = 20): Promise<{
+        storyboards: any[];
+        total: number;
+    }> => {
+        const offset = (page - 1) * limit;
+        return request(`/api/characters/${id}/storyboards?limit=${limit}&offset=${offset}`);
     },
 };

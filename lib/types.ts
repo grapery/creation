@@ -59,28 +59,29 @@ export interface VIPInfo {
     subscriptionId?: string;
 }
 
-// Membership Tier Types
+// Membership Tier Types — must match backend MembershipTierType enum
 export enum MembershipTier {
-    BASIC = 'basic',         // 普通付费会员
-    PRO = 'pro',             // Pro 付费会员
-    ULTRA = 'ultra'          // Ultra 付费会员
+    FREE = 'free',
+    PRO = 'pro',
+    PRIME = 'prime',
+    ULTRA = 'ultra',
 }
 
 export enum BillingCycle {
-    MONTHLY = 'month',       // 按月
-    QUARTERLY = 'quarter',   // 按季度
-    YEARLY = 'year'          // 按年
+    MONTHLY = 'monthly',
+    QUARTERLY = 'quarterly',
+    YEARLY = 'yearly',
 }
 
 // Product SKU Definition
 // Format: {tier}_{cycle}
-// Examples: basic_month, pro_quarter, ultra_year
+// Examples: free_monthly, pro_quarterly, ultra_yearly
 export type MembershipSKU = `${MembershipTier}_${BillingCycle}`;
 
 export interface MembershipPlan {
-    id: MembershipSKU;                    // e.g., "basic_month"
-    tier: MembershipTier;                 // basic, pro, ultra
-    cycle: BillingCycle;                 // month, quarter, year
+    id: MembershipSKU;                    // e.g., "pro_monthly"
+    tier: MembershipTier;                 // free, pro, prime, ultra
+    cycle: BillingCycle;                 // monthly, quarterly, yearly
     name: {
         en: string;
         zh: string;
@@ -815,3 +816,488 @@ export const GENRES = [
 ] as const;
 
 export type GenreKey = typeof GENRES[number]['key'];
+
+// ============================================================
+// Bookmark Types
+// ============================================================
+
+export type BookmarkType = 'story' | 'fragment' | 'storyboard' | 'character';
+
+export interface Bookmark {
+    id: string;
+    userId: string;
+    bookmarkType: BookmarkType;
+    bookmarkId: string;
+    collectionName?: string;
+    createdAt?: number;
+    updatedAt?: number;
+    // Expanded references
+    story?: Story;
+    fragment?: StoryFragment;
+    storyboard?: Storyboard;
+    character?: Character;
+}
+
+export interface PagedBookmarks {
+    bookmarks: Bookmark[];
+    total: number;
+    page: number;
+    limit: number;
+    hasMore: boolean;
+}
+
+// ============================================================
+// Search Types
+// ============================================================
+
+export type SearchType = 'story' | 'character' | 'user' | 'storyboard' | 'fragment' | 'all';
+
+export interface SearchFilters {
+    genre?: string;
+    status?: string;
+    sortBy?: string;
+    tags?: string[];
+}
+
+export interface SearchResults {
+    stories?: Story[];
+    characters?: Character[];
+    users?: User[];
+    storyboards?: Storyboard[];
+    fragments?: StoryFragment[];
+    total: number;
+    query: string;
+}
+
+// ============================================================
+// Badge Types
+// ============================================================
+
+export type BadgeTier = 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond';
+export type BadgeCategory = 'creation' | 'social' | 'engagement' | 'milestone' | 'special';
+
+export interface BadgeDefinition {
+    id: string;
+    code: string;
+    name: string;
+    nameZh?: string;
+    description: string;
+    descriptionZh?: string;
+    category: BadgeCategory;
+    tier: BadgeTier;
+    iconUrl?: string;
+    iconEmoji?: string;
+    colorHex?: string;
+    threshold: number;
+    points: number;
+    displayOrder: number;
+}
+
+export interface UserBadge {
+    id: string;
+    userId: string;
+    badgeId: string;
+    badge?: BadgeDefinition;
+    awardedAt: number;
+    pinnedAt?: number;
+    progress?: BadgeProgress;
+    isViewed?: boolean;
+}
+
+export interface BadgeProgress {
+    badgeId: string;
+    current: number;
+    target: number;
+    percentage: number;
+}
+
+// ============================================================
+// Token Usage Types
+// ============================================================
+
+export interface TokenUsageStats {
+    totalUsed: number;
+    totalLimit: number;
+    byType: Record<string, number>;
+    period: string;
+}
+
+export interface TokenUsageLog {
+    id: string;
+    userId: string;
+    entityType: string;
+    entityId: string;
+    tokensUsed: number;
+    model?: string;
+    createdAt: number;
+}
+
+export interface TokenUsageLimits {
+    dailyLimit: number;
+    monthlyLimit: number;
+    dailyUsed: number;
+    monthlyUsed: number;
+}
+
+export interface TokenUsageByType {
+    type: string;
+    used: number;
+    limit: number;
+}
+
+export interface UsageBillingSummary {
+    period: string;
+    totalTokens: number;
+    totalCost: number;
+    byType: Record<string, { tokens: number; cost: number }>;
+}
+
+// ============================================================
+// Membership Backend Types
+// ============================================================
+
+export interface MembershipPlanBackend {
+    id: string;
+    tier: string;
+    period: string;
+    name: string;
+    description: string;
+    price: number;
+    currency: string;
+    features: string[];
+    limits: Record<string, number | string | boolean>;
+}
+
+export interface UserMembership {
+    tier: string;
+    status: string;
+    startDate: number;
+    endDate: number;
+    autoRenew: boolean;
+    planId: string;
+}
+
+export interface MembershipUsage {
+    aiUsedThisMonth: number;
+    aiLimit: number;
+    isUnlimited: boolean;
+    remainingQuota: number;
+    storyboardsCreated: number;
+    storyboardsLimit: number;
+    charactersCreated: number;
+    charactersLimit: number;
+}
+
+export interface SubscribeRequest {
+    tier: string;
+    period: string;
+    paymentMethod?: string;
+}
+
+export interface SubscribeResponse {
+    orderId: string;
+    paymentUrl?: string;
+    clientSecret?: string;
+}
+
+// ============================================================
+// Feedback & Referral Types
+// ============================================================
+
+export type FeedbackCategory = 'bug' | 'feature' | 'improvement' | 'other';
+
+export interface Feedback {
+    id: string;
+    category: FeedbackCategory;
+    content: string;
+    contactInfo?: string;
+    status: 'pending' | 'reviewing' | 'resolved' | 'closed';
+    createdAt: number;
+    updatedAt?: number;
+}
+
+export interface ReferralInfo {
+    referralCode: string;
+    shareContent?: string;
+    shareUrl?: string;
+    stats: {
+        totalReferrals: number;
+        activeReferrals: number;
+        earnedPoints: number;
+    };
+}
+
+export interface ReferralStats {
+    totalReferrals: number;
+    activeReferrals: number;
+    earnedPoints: number;
+    referralCode: string;
+}
+
+// ============================================================
+// Story Panel Types
+// ============================================================
+
+export interface StoryPanel {
+    id: string;
+    storyId: string;
+    title?: string;
+    imageUrl?: string;
+    text?: string;
+    textPosition?: string;
+    sequence: number;
+    storyboardId?: string;
+    isAIGenerated?: boolean;
+    createdAt?: number;
+    updatedAt?: number;
+}
+
+export interface ReorderPanelsRequest {
+    panelIds: string[];
+}
+
+export interface StoryDefaultPath {
+    nodeIds: string[];
+    count: number;
+}
+
+// ============================================================
+// Character Extended Types
+// ============================================================
+
+export interface CharacterAnalytics {
+    totalStoryboards: number;
+    totalLikes: number;
+    totalForks: number;
+    totalViews: number;
+}
+
+export interface CharacterStoryboardRef {
+    storyboardId: string;
+    title: string;
+    role?: string;
+    coverImage?: string;
+}
+
+export interface GenerateCharacterRequest {
+    name?: string;
+    description?: string;
+    personality?: string;
+    appearance?: string;
+    style?: string;
+}
+
+export interface GenerateAvatarRequest {
+    style?: string;
+}
+
+export interface CropAvatarRequest {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    portraitUrl?: string;
+}
+
+// ============================================================
+// User Extended Types
+// ============================================================
+
+export interface UserStats {
+    storyCount: number;
+    storyboardCount: number;
+    characterCount: number;
+    fragmentCount: number;
+    followerCount: number;
+    followingCount: number;
+    totalLikes: number;
+    totalViews: number;
+}
+
+export interface UserPoints {
+    points: number;
+}
+
+export interface PointsHistory {
+    id: string;
+    amount: number;
+    reason: string;
+    createdAt: number;
+}
+
+export interface LikedContent {
+    stories?: Story[];
+    characters?: Character[];
+    storyboards?: Storyboard[];
+}
+
+export interface CreatorAnalytics {
+    totalStories: number;
+    totalStoryboards: number;
+    totalCharacters: number;
+    totalFragments: number;
+    viewsThisWeek: number;
+    likesThisWeek: number;
+    newFollowersThisWeek: number;
+}
+
+// ============================================================
+// Genre Preference Types
+// ============================================================
+
+export interface GenrePreference {
+    key: string;
+    label: string;
+    selected: boolean;
+}
+
+export interface GenreCatalogPage {
+    genres: GenrePreference[];
+    total: number;
+}
+
+// ============================================================
+// File Upload Types
+// ============================================================
+
+export interface STSToken {
+    accessKeyId: string;
+    accessKeySecret: string;
+    securityToken: string;
+    expiration: string;
+    endpoint: string;
+    bucket: string;
+    region: string;
+}
+
+export interface ImageLevels {
+    original?: string;
+    content?: string;
+    preview?: string;
+    thumbnail?: string;
+    small?: string;
+}
+
+export interface UploadResult {
+    url: string;
+    filename?: string;
+    levels?: ImageLevels;
+}
+
+// ============================================================
+// AI Standalone Types
+// ============================================================
+
+export type AIEntityType = 'story' | 'character' | 'image' | 'video' | 'prompt';
+
+export interface AIGenerateStoryRequest {
+    prompt: string;
+    genre?: string;
+    style?: string;
+    sceneCount?: number;
+}
+
+export interface AIEnhancePromptRequest {
+    prompt: string;
+    context?: string;
+}
+
+export interface AIGenerateImageRequest {
+    prompt: string;
+    style?: string;
+    aspectRatio?: string;
+    count?: number;
+}
+
+export interface AIGenerateVideoRequest {
+    imageUrl?: string;
+    prompt?: string;
+    duration?: number;
+    style?: string;
+}
+
+export interface AITask {
+    id: string;
+    type: AIEntityType;
+    status: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled';
+    progress?: number;
+    result?: any;
+    error?: string;
+    createdAt: number;
+    updatedAt: number;
+}
+
+// ============================================================
+// Interaction Types (Unified)
+// ============================================================
+
+export type InteractionTargetType = 'story' | 'character' | 'storyboard_node' | 'fragment' | 'user';
+
+export interface InteractionCheckResult {
+    isFollowing?: boolean;
+    isLiked?: boolean;
+    isBookmarked?: boolean;
+}
+
+export interface BatchCheckRequest {
+    type: InteractionTargetType;
+    ids: string[];
+}
+
+export interface BatchCheckResult {
+    [id: string]: boolean;
+}
+
+export interface FollowCount {
+    count: number;
+}
+
+export interface LikeCount {
+    count: number;
+}
+
+export interface BookmarkCount {
+    count: number;
+}
+
+// ============================================================
+// Invitation Code Types
+// ============================================================
+
+export interface InvitationCode {
+    id: string;
+    code: string;
+    maxUses: number;
+    usedCount: number;
+    isActive: boolean;
+    expiresAt?: number;
+    createdAt: number;
+}
+
+// ============================================================
+// Webhook / Payment Types
+// ============================================================
+
+export interface WebPayment {
+    id: string;
+    userId: string;
+    amount: number;
+    currency: string;
+    status: 'pending' | 'completed' | 'failed' | 'refunded';
+    paymentMethod: string;
+    planId?: string;
+    createdAt: number;
+    updatedAt?: number;
+}
+
+export interface CreateWebPaymentRequest {
+    planId: string;
+    paymentMethod: 'stripe' | 'alipay';
+    returnUrl?: string;
+}
+
+export interface CreateWebPaymentResponse {
+    paymentId: string;
+    clientSecret?: string;
+    paymentUrl?: string;
+}

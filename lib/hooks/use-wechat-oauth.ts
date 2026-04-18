@@ -30,13 +30,10 @@ export function useWeChatOAuth() {
     // 跳转到微信授权页面（使用QRConnect扫码登录）
     const authUrl = `https://open.weixin.qq.com/connect/qrconnect?appid=${appId}&redirect_uri=${redirectUri}&response_type=code&scope=snsapi_login&state=${state}#wechat_redirect`;
 
-    console.log('[WeChat OAuth] Redirecting to WeChat authorization page:', authUrl);
     window.location.href = authUrl;
   };
 
   const handleCallback = async (code: string, state: string) => {
-    console.log('[WeChat OAuth] Handling callback with code:', code ? 'received' : 'missing');
-
     // 验证state防止CSRF攻击
     const savedState = sessionStorage.getItem('wechat_oauth_state');
     if (state !== savedState) {
@@ -46,10 +43,8 @@ export function useWeChatOAuth() {
 
     try {
       // 调用后端API进行登录
-      console.log('[WeChat OAuth] Calling backend API with code');
       await auth.loginWithWeChat({ code });
       sessionStorage.removeItem('wechat_oauth_state');
-      console.log('[WeChat OAuth] Login successful, redirecting to home');
       router.push('/');
     } catch (error) {
       console.error('[WeChat OAuth] Login failed:', error);

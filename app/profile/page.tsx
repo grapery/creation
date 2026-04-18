@@ -120,9 +120,7 @@ export default function ProfilePage() {
         async function fetchProfile() {
             setLoading(true);
             try {
-                console.log('[Profile] Fetching user profile for userId:', userId);
                 const token = getAuthToken();
-                console.log('[Profile] Token exists:', !!token, 'Token length:', token?.length);
 
                 const headers: Record<string, string> = {};
                 if (token) {
@@ -133,15 +131,11 @@ export default function ProfilePage() {
                     headers,
                 });
 
-                console.log('[Profile] Response status:', response.status, 'ok:', response.ok);
-
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
                 const data = await response.json();
-                console.log('[Profile] Response data:', data);
-
                 if (!isMounted) return;
 
                 setProfileUser(data.user);

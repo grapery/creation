@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/providers/auth-provider";
 import { useTranslation } from "@/providers/language-provider";
 import { profile } from "@/lib/api/profile";
+import { upload } from "@/lib/api/upload";
 
 export default function ProfileSettingsPage() {
     const router = useRouter();
@@ -59,9 +60,10 @@ export default function ProfileSettingsPage() {
 
             // Handle avatar upload
             if (avatar) {
-                const formData = new FormData();
-                formData.append("avatar", avatar);
-                // Call avatar upload API
+                const uploadResult = await upload.uploadImage(avatar);
+                if (uploadResult.url) {
+                    await profile.updateProfile({ avatar: uploadResult.url });
+                }
             }
 
             setShowSuccess(true);

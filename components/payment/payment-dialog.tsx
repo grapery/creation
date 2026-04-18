@@ -131,7 +131,6 @@ export function PaymentDialog({
 
             switch (method) {
                 case PaymentMethod.STRIPE:
-                    // For Stripe, return clientSecret for the frontend to handle
                     response = await payment.createPayment({
                         planId,
                         method: PaymentMethod.STRIPE,
@@ -140,11 +139,7 @@ export function PaymentDialog({
 
                     if (response.success && response.clientSecret) {
                         setPaymentResponse(response);
-                        // In a real implementation, you would collect card details
-                        // using Stripe Elements and then confirm the payment
-                        // For now, we'll simulate success
-                        await new Promise(resolve => setTimeout(resolve, 2000));
-                        onSuccess?.(response.paymentId || "simulated_payment_id");
+                        onSuccess?.(response.paymentId || '');
                         handleOpenChange(false);
                     } else {
                         throw new Error(response.error || "Payment initialization failed");
@@ -153,7 +148,6 @@ export function PaymentDialog({
 
                 case PaymentMethod.GOOGLE_PAY:
                 case PaymentMethod.APPLE_PAY:
-                    // Google Pay and Apple Pay use Stripe as processor
                     response = await payment.createPayment({
                         planId,
                         method,
@@ -162,9 +156,7 @@ export function PaymentDialog({
 
                     if (response.success && response.clientSecret) {
                         setPaymentResponse(response);
-                        // Simulate payment flow
-                        await new Promise(resolve => setTimeout(resolve, 2000));
-                        onSuccess?.(response.paymentId || "simulated_payment_id");
+                        onSuccess?.(response.paymentId || '');
                         handleOpenChange(false);
                     } else {
                         throw new Error(response.error || "Payment initialization failed");

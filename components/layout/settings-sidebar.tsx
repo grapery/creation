@@ -11,7 +11,11 @@ import {
     Languages,
     Shield,
     HelpCircle,
-    FileText
+    FileText,
+    Lock,
+    MessageSquare,
+    Gift,
+    BarChart3,
 } from "lucide-react";
 
 const sidebarNavItems = [
@@ -41,9 +45,44 @@ const sidebarNavItems = [
         icon: Languages,
     },
     {
+        title: "Genre Preferences",
+        href: "/settings/preferences",
+        icon: Palette,
+    },
+    {
         title: "Privacy & Safety",
         href: "/settings/privacy",
         icon: Shield,
+    },
+    {
+        title: "Blocked Users",
+        href: "/settings/blocked",
+        icon: Shield,
+    },
+    {
+        title: "Security",
+        href: "/settings/security",
+        icon: Lock,
+    },
+    {
+        title: "Token Usage",
+        href: "/settings/usage",
+        icon: BarChart3,
+    },
+    {
+        title: "Creator Analytics",
+        href: "/settings/analytics",
+        icon: BarChart3,
+    },
+    {
+        title: "Invite Friends",
+        href: "/settings/referrals",
+        icon: Gift,
+    },
+    {
+        title: "Feedback",
+        href: "/settings/feedback",
+        icon: MessageSquare,
     },
     {
         title: "Terms of Service",

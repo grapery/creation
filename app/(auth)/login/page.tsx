@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Loader2, BookOpen } from "lucide-react";
-import { AuthTopBar, OAuthProviderButton, Language, LanguageSelector, OAuthProvider } from "@/components/auth";
+import { OAuthProviderButton, LanguageSelector, OAuthProvider } from "@/components/auth";
 import { useRouter } from "next/navigation";
 import { useGoogleOAuth } from "@/lib/hooks/use-google-oauth";
 import { useWeChatOAuth } from "@/lib/hooks/use-wechat-oauth";
@@ -31,16 +31,11 @@ export default function LoginPage() {
         clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
         onSuccess: async (credentialResponse) => {
             try {
-                console.log('[Login] Google credential received:', {
-                    hasCredential: !!credentialResponse.credential,
-                });
-
                 // Call backend API with Google credential
                 await auth.loginWithGoogle({
                     idToken: credentialResponse.credential,
                 });
 
-                console.log('[Login] Google login successful');
                 router.push('/');
             } catch (err: any) {
                 console.error('[Login] Google login error:', err);
@@ -108,7 +103,6 @@ export default function LoginPage() {
         } else if (provider === "wechat") {
             // WeChat OAuth integration
             try {
-                console.log('[Login] Initiating WeChat sign-in');
                 weChatSignIn();
                 // Note: WeChat OAuth will redirect the browser, so we don't need to set loading to false here
             } catch (error: any) {

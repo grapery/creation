@@ -8,6 +8,14 @@ export default function DebugAuthPage() {
   const [tokenInfo, setTokenInfo] = useState<any>(null);
   const [checkResult, setCheckResult] = useState<string>("");
 
+  if (process.env.NODE_ENV === 'production') {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Not available in production.</p>
+      </div>
+    );
+  }
+
   useEffect(() => {
     const token = getAuthToken();
     if (token) {

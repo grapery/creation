@@ -3,7 +3,7 @@ import { request } from './client';
 export interface Notification {
     id: string;
     userId: string;
-    type: 'like' | 'comment' | 'follow' | 'mention' | 'system' | 'update' | 'ai_complete';
+    type: 'like' | 'comment' | 'follow' | 'mention' | 'system' | 'update' | 'ai_complete' | 'story_update' | 'announcement';
     title: string;
     content?: string;
     link?: string;
@@ -13,6 +13,16 @@ export interface Notification {
     actorAvatar?: string;
     targetId?: string;
     targetType?: string;
+    relatedStoryId?: string;
+    relatedStoryCover?: string;
+    relatedCharacterId?: string;
+    relatedCommentId?: string;
+    relatedUser?: {
+        id: string;
+        username: string;
+        displayName: string;
+        avatar?: string;
+    };
     createdAt: number;
 }
 

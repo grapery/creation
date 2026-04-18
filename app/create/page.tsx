@@ -107,16 +107,13 @@ function CreateStory({ storyId }: CreateStoryProps) {
         }
     };
 
+    const styleSearchTimer = useRef<NodeJS.Timeout | null>(null);
+
     const handleStyleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         const query = e.target.value;
         setStyleSearchQuery(query);
-        // Debounce would be better here, but for now direct call with small delay or just wait for enter? 
-        // Let's just debounce manually or relying on user stopping typing if we had a hook.
-        // For simplicity, we'll search on enter or immediate (api might handle it).
-        // Let's implement a simple timeout based debounce effectively inside the component if needed, 
-        // or just call loadStyles(0, query) after a timeout.
-        const timeoutId = setTimeout(() => loadStyles(0, query), 500);
-        return () => clearTimeout(timeoutId);
+        if (styleSearchTimer.current) clearTimeout(styleSearchTimer.current);
+        styleSearchTimer.current = setTimeout(() => loadStyles(0, query), 500);
     };
 
     const genreOptions = GENRES;
