@@ -50,10 +50,10 @@ export const storyboards = {
         return request(`/api/public/trending/storyboards?limit=${limit}&offset=${offset}`);
     },
 
-    // Dashboard: Character Storyboards
-    getCharacterStoryboards: async (page = 1, limit = 20): Promise<{ storyboards: Storyboard[], total: number }> => {
+    // Dashboard: Character Storyboards - Backend endpoint removed, use characters/:id/storyboards instead
+    getCharacterStoryboards: async (characterId: string, page = 1, limit = 20): Promise<{ storyboards: Storyboard[], total: number }> => {
         const offset = (page - 1) * limit;
-        return request(`/api/dashboard/characters/storyboards?limit=${limit}&offset=${offset}`);
+        return request(`/api/characters/${characterId}/storyboards?limit=${limit}&offset=${offset}`);
     },
 
     // Story: Get storyboards for a specific story
@@ -163,35 +163,15 @@ export const storyboards = {
         request(`/api/storyboards/${id}/generation-progress`),
 
     // ==================== AI Generation ====================
+    // NOTE: generateContent, generateSceneDetails, generateImage, generateAllImages, generateVideo
+    // are now in lib/api/creation.ts which is the authoritative module for AI generation.
 
-    generateContent: async (id: string, data?: {
-        rawInput?: string;
-        characterRefs?: string[];
-        sceneRefs?: string[];
-    }): Promise<{ message: string; content?: string }> =>
-        request(`/api/storyboards/${id}/generate/content`, 'POST', data || {}, apiClient, AI_TIMEOUT),
+    /** Multi-panel comic page (single output image); separate from generateImage. */
+    generateComicPage: async (id: string, data: Record<string, unknown>): Promise<{ message: string }> =>
+        request(`/api/storyboards/${id}/generate/comic-page`, 'POST', data, apiClient, AI_TIMEOUT),
 
-    generateSceneDetails: async (id: string, data?: {
-        sceneIndex?: number;
-        prompt?: string;
-    }): Promise<{ message: string }> =>
-        request(`/api/storyboards/${id}/generate/scene-details`, 'POST', data || {}, apiClient, AI_TIMEOUT),
-
-    generateImage: async (id: string, data: {
-        sceneIndex: number;
-        style?: string;
-    }): Promise<{ message: string }> =>
-        request(`/api/storyboards/${id}/generate/image`, 'POST', data, apiClient, AI_TIMEOUT),
-
-    generateAllImages: async (id: string, data?: {
-        style?: string;
-    }): Promise<{ message: string }> =>
-        request(`/api/storyboards/${id}/generate/images`, 'POST', data || {}, apiClient, AI_TIMEOUT),
-
-    generateVideo: async (id: string, data?: {
-        sceneIndex?: number;
-    }): Promise<{ message: string }> =>
-        request(`/api/storyboards/${id}/generate/video`, 'POST', data || {}, apiClient, AI_TIMEOUT),
+    generateAllComicPages: async (id: string, data?: Record<string, unknown>): Promise<{ message: string }> =>
+        request(`/api/storyboards/${id}/generate/comic-pages`, 'POST', data || {}, apiClient, AI_TIMEOUT),
 
     // ==================== Video Streaming ====================
 

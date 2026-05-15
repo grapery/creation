@@ -127,12 +127,17 @@ export default function ProfileDraftsPage() {
 
                 setProfileUser(userData.user);
 
-                // Fetch user's drafts
+                // Fetch user's drafts (dashboard storyboards with draft status)
                 const draftsData = await profile.getDrafts(1, 50);
 
                 if (!isMounted) return;
 
-                setDrafts(draftsData.drafts || []);
+                // Filter for draft status if backend returns all statuses
+                const allStoryboards = draftsData.storyboards || [];
+                const draftItems = allStoryboards.filter(
+                    (sb: any) => sb.status === 'draft' || sb.publishedAt === 0 || !sb.publishedAt
+                );
+                setDrafts(draftItems.length > 0 ? draftItems : allStoryboards);
             } catch (e) {
                 console.error(e);
                 if (isMounted) {

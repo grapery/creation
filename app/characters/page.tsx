@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Header } from "@/components/layout/header";
 import { characters } from "@/lib/api/characters";
 import { Character } from "@/lib/types/character";
 import { CharacterCard } from "@/components/character/character-card";
@@ -35,18 +34,16 @@ export default function CharactersPage() {
     const filteredItems = items.filter(c => c.name.toLowerCase().includes(search.toLowerCase()));
 
     return (
-        <div className="min-h-screen bg-background flex flex-col">
-            <Header />
-            <main className="flex-1 container max-w-6xl px-4 py-6 md:px-6 mx-auto">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-                    <div>
-                        <h1 className="text-3xl font-bold">{t("characters.title")}</h1>
-                        <p className="text-muted-foreground mt-1">{t("characters.subtitle")}</p>
-                    </div>
-                    <Button asChild>
-                        <Link href="/characters/create">
-                            <Plus className="mr-2 h-4 w-4" />
-                            {t("characters.create_button")}
+        <main className="flex-1 container max-w-6xl px-4 py-6 md:px-6 mx-auto">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold">{t("characters.title")}</h1>
+                    <p className="text-muted-foreground mt-1">{t("characters.subtitle")}</p>
+                </div>
+                <Button asChild>
+                    <Link href="/characters/create">
+                        <Plus className="mr-2 h-4 w-4" />
+                        {t("characters.create_button")}
                         </Link>
                     </Button>
                 </div>
@@ -73,6 +70,5 @@ export default function CharactersPage() {
                     </div>
                 )}
             </main>
-        </div>
     );
 }

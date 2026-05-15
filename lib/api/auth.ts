@@ -193,4 +193,15 @@ export const auth = {
     // Change password (for authenticated users)
     changePassword: async (oldPassword: string, newPassword: string): Promise<{ message: string }> =>
         request('/api/v1/auth/password/change', 'POST', { oldPassword, newPassword }),
+
+    // Phone verification
+    sendPhoneSMSCode: async (phone: string): Promise<void> =>
+        request('/api/v1/auth/phone/send-sms-code', 'POST', { phone }),
+
+    verifyPhoneSMSCode: async (phone: string, code: string): Promise<void> =>
+        request('/api/v1/auth/phone/verify-sms-code', 'POST', { phone, code }),
+
+    // Account deletion
+    deleteAccount: async (): Promise<{ message: string }> =>
+        request('/api/v1/auth/account', 'DELETE'),
 };

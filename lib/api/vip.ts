@@ -293,6 +293,11 @@ export const vip = {
         return request('/api/membership/usage');
     },
 
+    // Get current membership status
+    getCurrentMembership: async (): Promise<any> => {
+        return request('/api/membership/current');
+    },
+
     // Redeem promo code
     // Note: Backend doesn't have this endpoint
     redeemPromoCode: async (_code: string): Promise<{

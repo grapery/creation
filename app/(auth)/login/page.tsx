@@ -204,7 +204,7 @@ export default function LoginPage() {
 
             {/* Email Login Form (Modal-like overlay) */}
             {showEmailLogin && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
                     <Card className="w-full max-w-sm">
                         <div className="flex items-center justify-between border-b p-4">
                             <h2 className="text-lg font-semibold">{t('auth.sign_in')}</h2>

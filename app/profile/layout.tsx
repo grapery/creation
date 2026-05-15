@@ -12,7 +12,7 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
                         {children}
                     </main>
                     <aside className="hidden md:block md:col-span-4 space-y-6">
-                        <div className="sticky top-20">
+                        <div className="sticky top-[72px]">
                             <Sidebar />
                         </div>
                     </aside>

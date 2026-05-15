@@ -6,7 +6,6 @@ import { characters } from "@/lib/api/characters";
 import { storyboards } from "@/lib/api/storyboards";
 import { Character } from "@/lib/types/character";
 import { Storyboard } from "@/lib/types";
-import { Header } from "@/components/layout/header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -113,8 +112,7 @@ export default function CharacterDetailPage() {
     if (!character) return <div className="min-h-screen flex items-center justify-center bg-background">Character not found</div>;
 
     return (
-        <div className="min-h-screen bg-background flex flex-col">
-            <Header />
+        <>
 
             {/* Hero / Cover */}
             <div className="h-64 md:h-80 bg-muted relative">
@@ -464,6 +462,6 @@ export default function CharacterDetailPage() {
                     </div>
                 </div>
             </main>
-        </div>
+        </>
     );
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Header } from "@/components/layout/header";
 import { vip, VIPPlan, MembershipPlan } from "@/lib/api/vip";
 import { PlanCard } from "@/components/vip/plan-card";
 import { PaymentDialog } from "@/components/payment/payment-dialog";
@@ -64,33 +63,30 @@ export default function VIPPage() {
     };
 
     return (
-        <div className="min-h-screen bg-background flex flex-col">
-            <Header />
-            <main className="flex-1 container max-w-6xl px-4 py-6 md:px-6 mx-auto">
-                <div className="text-center max-w-2xl mx-auto mb-12 space-y-4">
-                    <div className="mx-auto h-16 w-16 rounded-full bg-yellow-500/10 flex items-center justify-center mb-6">
-                        <Crown className="h-8 w-8 text-yellow-500" />
-                    </div>
-                    <h1 className="text-4xl font-bold">{t("vip.upgrade_title")}</h1>
-                    <p className="text-xl text-muted-foreground">{t("vip.upgrade_subtitle")}</p>
+        <main className="flex-1 container max-w-6xl px-4 py-6 md:px-6 mx-auto">
+            <div className="text-center max-w-2xl mx-auto mb-12 space-y-4">
+                <div className="mx-auto h-16 w-16 rounded-full bg-yellow-500/10 flex items-center justify-center mb-6">
+                    <Crown className="h-8 w-8 text-yellow-500" />
                 </div>
+                <h1 className="text-4xl font-bold">{t("vip.upgrade_title")}</h1>
+                <p className="text-xl text-muted-foreground">{t("vip.upgrade_subtitle")}</p>
+            </div>
 
-                {loading ? (
-                    <div className="flex justify-center py-20"><Loader2 className="animate-spin" /></div>
-                ) : (
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                        {plans.map(plan => (
-                            <PlanCard
-                                key={plan.id}
-                                plan={plan}
-                                isCurrent={false} // Would check user.vipLevel/planId here
-                                onSubscribe={onSubscribe}
-                                loading={false}
-                            />
-                        ))}
-                    </div>
-                )}
-            </main>
+            {loading ? (
+                <div className="flex justify-center py-20"><Loader2 className="animate-spin" /></div>
+            ) : (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                    {plans.map(plan => (
+                        <PlanCard
+                            key={plan.id}
+                            plan={plan}
+                            isCurrent={false} // Would check user.vipLevel/planId here
+                            onSubscribe={onSubscribe}
+                            loading={false}
+                        />
+                    ))}
+                </div>
+            )}
 
             {/* Payment Dialog */}
             {selectedPlan && (
@@ -105,6 +101,6 @@ export default function VIPPage() {
                     onError={handlePaymentError}
                 />
             )}
-        </div>
+        </main>
     );
 }

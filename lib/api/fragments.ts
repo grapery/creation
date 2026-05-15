@@ -135,13 +135,13 @@ export const fragments = {
         return request('/api/v1/fragments/styles/next', 'POST', body, apiClient, AI_TIMEOUT);
     },
 
-    // Search fragments
+    // Search fragments - Uses unified search endpoint with type filter
     search: async (query: string, limit = 20, offset = 0): Promise<FragmentListResponse> => {
-        return request(`/api/v1/fragments/search?q=${encodeURIComponent(query)}&limit=${limit}&offset=${offset}`);
+        return request(`/api/search?type=fragment&q=${encodeURIComponent(query)}&limit=${limit}&offset=${offset}`);
     },
 
     // Get fragment likes list
-    getLikes: async (id: string, page = 1, limit = 20): Promise<{ users: any[]; total: number }> => {
+    getLikes: async (id: string, page = 1, limit = 20): Promise<{ likes: any[]; total: number; page?: number; limit?: number }> => {
         const offset = (page - 1) * limit;
         return request(`/api/v1/fragments/${id}/likes?limit=${limit}&offset=${offset}`);
     },
@@ -165,4 +165,12 @@ export const fragments = {
     // Cancel generation task
     cancelGeneration: async (taskId: string): Promise<{ message: string }> =>
         request(`/api/v1/fragments/generate/${taskId}`, 'DELETE'),
+
+    // Get fragment generation assets
+    getGenerationAssets: async (id: string, params?: {
+        type?: string;
+    }): Promise<{ assets: any[] }> => {
+        const query = params?.type ? `?type=${params.type}` : '';
+        return request(`/api/v1/fragments/${id}/assets${query}`);
+    },
 };

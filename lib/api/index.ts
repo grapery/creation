@@ -68,3 +68,4 @@ export { referrals } from './referrals';
 export { ai } from './ai';
 export { upload } from './upload';
 export { styles } from './styles';
+export { legal } from './legal';

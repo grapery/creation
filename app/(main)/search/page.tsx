@@ -73,7 +73,7 @@ function SearchPageContent() {
     ];
 
     return (
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="container max-w-6xl mx-auto px-4 py-6 md:px-6 space-y-6">
             <div className="flex gap-2">
                 <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

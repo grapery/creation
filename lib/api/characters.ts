@@ -144,4 +144,39 @@ export const characters = {
         const offset = (page - 1) * limit;
         return request(`/api/characters/${id}/storyboards?limit=${limit}&offset=${offset}`);
     },
+
+    // ==================== Character Generation Tasks ====================
+
+    startGenerationTask: async (data: {
+        prompt: string;
+        storyId?: string;
+        name?: string;
+        gender?: string;
+        style?: string;
+    }): Promise<{ taskId: string; status: string }> =>
+        request('/api/character-generation-tasks', 'POST', data, apiClient, AI_TIMEOUT),
+
+    listGenerationTasks: async (params?: {
+        limit?: number;
+        offset?: number;
+        status?: string;
+    }): Promise<{ tasks: any[]; total: number }> => {
+        const query = new URLSearchParams();
+        if (params?.limit) query.set('limit', params.limit.toString());
+        if (params?.offset) query.set('offset', params.offset.toString());
+        if (params?.status) query.set('status', params.status);
+        return request(`/api/character-generation-tasks?${query.toString()}`);
+    },
+
+    getGenerationTask: async (taskId: string): Promise<any> =>
+        request(`/api/character-generation-tasks/${taskId}`),
+
+    retryGenerationTask: async (taskId: string): Promise<any> =>
+        request(`/api/character-generation-tasks/${taskId}/retry`, 'POST'),
+
+    dismissFromDrafts: async (taskId: string): Promise<void> =>
+        request(`/api/character-generation-tasks/${taskId}/dismiss-from-drafts`, 'POST'),
+
+    getFragmentCharacterSuggestions: async (storyId: string): Promise<any> =>
+        request(`/api/stories/${storyId}/fragment-character-suggestions`),
 };

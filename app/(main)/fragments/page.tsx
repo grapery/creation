@@ -14,7 +14,7 @@ type FeedTab = "discover" | "following";
 export default function FragmentsPage() {
     const router = useRouter();
     const { user } = useAuth();
-    const { LoginPromptModal, show: showLoginPrompt } = useLoginPrompt();
+    const { show: showLoginPrompt } = useLoginPrompt();
 
     const [activeTab, setActiveTab] = useState<FeedTab>("discover");
     const [fragmentsList, setFragmentsList] = useState<StoryFragment[]>([]);
@@ -61,9 +61,7 @@ export default function FragmentsPage() {
     ];
 
     return (
-        <div className="container max-w-6xl mx-auto px-4 py-6 space-y-6">
-            <LoginPromptModal />
-
+        <div className="container max-w-6xl mx-auto px-4 py-6 md:px-6 space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>

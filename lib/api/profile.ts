@@ -1,5 +1,5 @@
 import { request, getUserIdFromToken } from './client';
-import { User, Story, Storyboard, ActivityHeatmapData, ActivityTimeRange, ActivityHeatmapResponse } from '../types';
+import { User, Story, Storyboard } from '../types';
 
 export interface UserActivity {
     id: string;
@@ -22,20 +22,10 @@ export interface UserActivity {
 }
 
 export const profile = {
-    // Drafts - Note: Backend returns Storyboard[], not Story[]
-    getDrafts: async (page = 1, limit = 20): Promise<{ drafts: Storyboard[], count: number }> => {
-        const userId = getUserIdFromToken();
-        if (!userId) {
-            throw new Error('User not authenticated');
-        }
+    // Drafts - Uses dashboard storyboards endpoint filtered by status
+    getDrafts: async (page = 1, limit = 20): Promise<{ storyboards: Storyboard[], count: number }> => {
         const offset = (page - 1) * limit;
-        return request(`/api/users/${userId}/drafts?limit=${limit}&offset=${offset}`);
-    },
-
-    // Get user's published drafts (for viewing another user's profile)
-    getUserDrafts: async (userId: string, page = 1, limit = 20): Promise<{ drafts: Storyboard[], count: number }> => {
-        const offset = (page - 1) * limit;
-        return request(`/api/users/${userId}/drafts?limit=${limit}&offset=${offset}`);
+        return request(`/api/dashboard/storyboards?limit=${limit}&offset=${offset}&status=draft`);
     },
 
     deleteDraft: async (id: string): Promise<void> => {
@@ -84,25 +74,21 @@ export const profile = {
         });
     },
 
-    // Activity
+    // Activity - Backend endpoint not available yet, returns empty data
     getActivity: async (
-        userId: string,
-        page = 1,
-        limit = 20,
-        timeRange: ActivityTimeRange = ActivityTimeRange.WEEK
+        _userId: string,
+        _page = 1,
+        _limit = 20,
     ): Promise<{ activities: UserActivity[], count: number }> => {
-        const offset = (page - 1) * limit;
-        return request(
-            `/api/users/${userId}/activities?limit=${limit}&offset=${offset}&time_range=${timeRange}`
-        );
+        return { activities: [], count: 0 };
     },
 
-    // Activity Heatmap
+    // Activity Heatmap - Backend endpoint not available yet, returns empty data
     getHeatmap: async (
-        userId: string,
-        timeRange: ActivityTimeRange = ActivityTimeRange.MONTH
-    ): Promise<ActivityHeatmapResponse> => {
-        return request(`/api/users/${userId}/activities/heatmap?time_range=${timeRange}`);
+        _userId: string,
+        _timeRange?: string,
+    ): Promise<{ data: { date: string; count: number }[]; totalCount?: number }> => {
+        return { data: [], totalCount: 0 };
     },
 
     // Stories
@@ -153,11 +139,8 @@ export const profile = {
     unblockUser: async (userId: string): Promise<void> =>
         request(`/api/users/${userId}/block`, 'DELETE'),
 
-    // Get blocked users
-    getBlockedUsers: async (page = 1, limit = 20): Promise<{ users: any[], total: number }> => {
-        const offset = (page - 1) * limit;
-        return request(`/api/users/blocked?limit=${limit}&offset=${offset}`);
-    },
+    // Get blocked users - Backend endpoint not available yet
+    // getBlockedUsers removed: backend only has block/unblock, no list endpoint
 
     // Report User
     reportUser: async (userId: string, reason: string): Promise<void> =>
@@ -221,5 +204,27 @@ export const profile = {
     }> => {
         const params = range ? `?range=${range}` : '';
         return request(`/api/me/creator-analytics${params}`);
+    },
+
+    // ==================== Quota & Dashboard ====================
+
+    getQuota: async (): Promise<{
+        aiQuota: { used: number; limit: number };
+        storyboardQuota: { used: number; limit: number };
+        characterQuota: { used: number; limit: number };
+    }> => request('/api/me/quota'),
+
+    getMeDashboard: async (): Promise<{
+        recentStoryboards: Storyboard[];
+        recentCharacters: any[];
+        stats: Record<string, number>;
+    }> => request('/api/me/dashboard'),
+
+    getMeMembership: async (): Promise<any> =>
+        request('/api/me/membership'),
+
+    getMeUsage: async (period?: string): Promise<any> => {
+        const params = period ? `?period=${period}` : '';
+        return request(`/api/me/usage${params}`);
     },
 };

@@ -533,6 +533,11 @@ export interface GenerateFragmentPanelsRequest {
     panelCount?: number;
     visibility?: FragmentVisibility;
     topic?: string;
+    aspectRatio?: string;
+    layoutPreset?: string;
+    gutterStyle?: string;
+    dialogueMode?: string;
+    outputMode?: string;
 }
 
 export interface FragmentPanelItem {

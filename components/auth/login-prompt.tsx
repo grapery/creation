@@ -3,7 +3,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { Lock, LogIn, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import Link from "next/link";
 import { useTranslation } from "@/providers/language-provider";
 import { DialogManager, DialogType, DialogPriority, hideDialog } from "@/lib/dialog-manager";
@@ -50,28 +56,26 @@ export function LoginPrompt({
     onClose();
   }, [onClose]);
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <Card className="w-full max-w-md p-8 relative">
-        <div className="flex flex-col items-center text-center space-y-6">
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) handleClose(); }}>
+      <DialogContent className="z-[70] max-w-md">
+        <div className="flex flex-col items-center text-center space-y-6 pt-4">
           {/* Icon */}
           <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
             <Lock className="h-8 w-8 text-primary" />
           </div>
 
           {/* Title and Description */}
-          <div className="space-y-2">
-            <h3 className="text-2xl font-bold">
+          <DialogHeader className="items-center">
+            <DialogTitle className="text-2xl font-bold">
               {title || t("auth.join_community") || "Join Community"}
-            </h3>
-            <p className="text-muted-foreground">
+            </DialogTitle>
+            <DialogDescription>
               {description ||
                 t("auth.login_prompt_description") ||
                 "Sign in to access exclusive content, create your own stories, and connect with other creators."}
-            </p>
-          </div>
+            </DialogDescription>
+          </DialogHeader>
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 w-full">
@@ -107,8 +111,8 @@ export function LoginPrompt({
             {t("auth.maybe_later") || "Maybe Later"}
           </Button>
         </div>
-      </Card>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 

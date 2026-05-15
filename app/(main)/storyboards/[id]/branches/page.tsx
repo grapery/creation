@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { storyboards } from "@/lib/api/storyboards";
 import { Storyboard } from "@/lib/types";
-import { Header } from "@/components/layout/header";
 import { Loader2, GitBranch, GitCommit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -71,25 +70,22 @@ export default function BranchingPage() {
     }, [id]);
 
     return (
-        <div className="min-h-screen bg-background flex flex-col">
-            <Header />
-            <main className="flex-1 container px-4 py-8 overflow-auto">
-                <div className="flex items-center gap-2 mb-8">
-                    <GitBranch className="h-6 w-6" />
-                    <h1 className="text-2xl font-bold">Story Tree</h1>
-                </div>
+        <main className="flex-1 container max-w-6xl mx-auto px-4 py-6 md:px-6">
+            <div className="flex items-center gap-2 mb-8">
+                <GitBranch className="h-6 w-6" />
+                <h1 className="text-2xl font-bold">Story Tree</h1>
+            </div>
 
-                {loading ? (
-                    <div className="flex justify-center py-20"><Loader2 className="animate-spin h-8 w-8" /></div>
-                ) : !tree ? (
-                    <div className="text-center py-20 text-muted-foreground">No branching data available.</div>
-                ) : (
-                    <div className="p-8 overflow-x-auto">
-                        <TreeNodeComponent node={tree} />
-                    </div>
-                )}
-            </main>
-        </div>
+            {loading ? (
+                <div className="flex justify-center py-20"><Loader2 className="animate-spin h-8 w-8" /></div>
+            ) : !tree ? (
+                <div className="text-center py-20 text-muted-foreground">No branching data available.</div>
+            ) : (
+                <div className="p-8 overflow-x-auto">
+                    <TreeNodeComponent node={tree} />
+                </div>
+            )}
+        </main>
     );
 }
 

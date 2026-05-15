@@ -4,12 +4,12 @@ import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Header } from "@/components/layout/header";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { storyboards } from "@/lib/api/storyboards";
 import { likes, bookmarks } from "@/lib/api/interactions";
 import { Storyboard } from "@/lib/types";
 import { Loader2, ArrowLeft, Sparkles, Users, Heart, MessageSquare, GitFork, Share2, Info, Workflow, Play, X, ChevronLeft, ChevronRight, LayoutList, Grid3x3, ArrowUp, ArrowDown, AlertCircle, Plus, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { CommentList } from "@/components/comments/comment-list";
 import { StoryboardRoadmap } from "@/components/storyboard/roadmap";
 import { DetailMetadata } from "@/components/storyboard/detail-metadata";
@@ -784,20 +784,13 @@ export default function StoryboardPage() {
             </main>
 
             {/* Details Modal */}
-            {showDetailsModal && item && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                    <Card className="w-full max-w-2xl max-h-[80vh] overflow-y-auto">
-                        <div className="flex items-center justify-between border-b p-6">
-                            <h2 className="text-xl font-semibold">{t("storyboard_detail.additional_details")}</h2>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setShowDetailsModal(false)}
-                            >
-                                ✕
-                            </Button>
-                        </div>
-                        <div className="p-6 space-y-6">
+            <Dialog open={showDetailsModal} onOpenChange={setShowDetailsModal}>
+                <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle>{t("storyboard_detail.additional_details")}</DialogTitle>
+                    </DialogHeader>
+                    {showDetailsModal && item && (
+                    <div className="space-y-6">
                             {/* Basic Info */}
                             <div className="space-y-3">
                                 <h3 className="font-semibold text-lg">基本信息</h3>
@@ -893,112 +886,108 @@ export default function StoryboardPage() {
                                     </div>
                                 </div>
                             )}
-                        </div>
-                    </Card>
-                </div>
-            )}
-
+                    </div>
+                    )}
+                </DialogContent>
+            </Dialog>
             {/* Process Modal */}
-            {showProcessModal && item && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                    <Card className="w-full max-w-4xl max-h-[80vh] overflow-y-auto">
-                        <div className="flex items-center justify-between border-b p-6">
-                            <h2 className="text-xl font-semibold">{t("storyboard_detail.generation_process")}</h2>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setShowProcessModal(false)}
-                            >
-                                ✕
-                            </Button>
-                        </div>
-                        <div className="p-6">
-                            <StoryboardRoadmap storyboard={item} />
-                        </div>
-                    </Card>
-                </div>
-            )}
+            <Dialog open={showProcessModal} onOpenChange={setShowProcessModal}>
+                <DialogContent className="max-w-4xl">
+                    <DialogHeader>
+                        <DialogTitle>{t("storyboard_detail.generation_process")}</DialogTitle>
+                    </DialogHeader>
+                    {showProcessModal && item && (
+                        <StoryboardRoadmap storyboard={item} />
+                    )}
+                </DialogContent>
+            </Dialog>
 
             {/* No Children Dialog */}
-            {showNoChildrenDialog && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                    <Card className="w-full max-w-md">
-                        <div className="p-6">
-                            <div className="flex items-center gap-3 mb-4">
-                                <AlertCircle className="h-6 w-6 text-yellow-500 flex-shrink-0" />
-                                <h3 className="text-xl font-bold">已到故事线终点</h3>
-                            </div>
-                            <p className="text-muted-foreground mb-6">
-                                当前故事板还没有下一级分支，您已经是这个故事的最新节点了。
-                            </p>
-                            <div className="flex flex-col gap-3 mb-6 p-4 bg-secondary/30 rounded-lg">
-                                <p className="text-sm font-medium">您可以：</p>
-                                <ul className="text-sm text-muted-foreground space-y-2 ml-4">
-                                    <li>• 点击"复刻"按钮创建新的故事分支</li>
-                                    <li>• 点击"续写"按钮继续当前故事线</li>
-                                </ul>
-                            </div>
-                            <div className="flex justify-end gap-2">
-                                <Button variant="outline" onClick={() => setShowNoChildrenDialog(false)}>
-                                    知道了
-                                </Button>
-                                <Button
-                                    onClick={() => {
-                                        setShowNoChildrenDialog(false);
-                                        setShowContinueDialog(true);
-                                    }}
-                                    variant="outline"
-                                    className="gap-2"
-                                >
-                                    <ArrowDown className="h-4 w-4" />
-                                    续写
-                                </Button>
-                                <Button
-                                    onClick={() => {
-                                        setShowNoChildrenDialog(false);
-                                        setShowForkDialog(true);
-                                    }}
-                                    className="gap-2"
-                                >
-                                    <GitFork className="h-4 w-4" />
-                                    创建分支
-                                </Button>
-                            </div>
-                        </div>
-                    </Card>
-                </div>
-            )}
+            <Dialog open={showNoChildrenDialog} onOpenChange={setShowNoChildrenDialog}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-3">
+                            <AlertCircle className="h-6 w-6 text-yellow-500 flex-shrink-0" />
+                            已到故事线终点
+                        </DialogTitle>
+                        <DialogDescription>
+                            当前故事板还没有下一级分支，您已经是这个故事的最新节点了。
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex flex-col gap-3 p-4 bg-secondary/30 rounded-lg">
+                        <p className="text-sm font-medium">您可以：</p>
+                        <ul className="text-sm text-muted-foreground space-y-2 ml-4">
+                            <li>• 点击"复刻"按钮创建新的故事分支</li>
+                            <li>• 点击"续写"按钮继续当前故事线</li>
+                        </ul>
+                    </div>
+                    <div className="flex justify-end gap-2">
+                        <Button variant="outline" onClick={() => setShowNoChildrenDialog(false)}>
+                            知道了
+                        </Button>
+                        <Button
+                            onClick={() => {
+                                setShowNoChildrenDialog(false);
+                                setShowContinueDialog(true);
+                            }}
+                            variant="outline"
+                            className="gap-2"
+                        >
+                            <ArrowDown className="h-4 w-4" />
+                            续写
+                        </Button>
+                        <Button
+                            onClick={() => {
+                                setShowNoChildrenDialog(false);
+                                setShowForkDialog(true);
+                            }}
+                            className="gap-2"
+                        >
+                            <GitFork className="h-4 w-4" />
+                            创建分支
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
 
             {/* Fork Dialog */}
-            {showForkDialog && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                    <Card className="w-full max-w-lg">
-                        <div className="p-6">
-                            <ForkDialog
-                                storyboardId={id as string}
-                                currentTitle={item.title}
-                                open={showForkDialog}
-                                onClose={() => setShowForkDialog(false)}
-                            />
-                        </div>
-                    </Card>
-                </div>
-            )}
+            <Dialog open={showForkDialog} onOpenChange={setShowForkDialog}>
+                <DialogContent className="max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle>Fork Storyboard</DialogTitle>
+                        <DialogDescription>
+                            Create a new branch from this storyboard.
+                        </DialogDescription>
+                    </DialogHeader>
+                    {showForkDialog && (
+                        <ForkDialog
+                            storyboardId={id as string}
+                            currentTitle={item.title}
+                            open={showForkDialog}
+                            onClose={() => setShowForkDialog(false)}
+                        />
+                    )}
+                </DialogContent>
+            </Dialog>
 
             {/* Continue Dialog */}
-            {showContinueDialog && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                    <Card className="w-full max-w-lg">
-                        <div className="p-6">
-                            <ContinueDialog
-                                storyboardId={id as string}
-                                open={showContinueDialog}
-                                onClose={() => setShowContinueDialog(false)}
-                            />
-                        </div>
-                    </Card>
-                </div>
-            )}
+            <Dialog open={showContinueDialog} onOpenChange={setShowContinueDialog}>
+                <DialogContent className="max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle>Continue Story</DialogTitle>
+                        <DialogDescription>
+                            Create a continuation of this storyboard.
+                        </DialogDescription>
+                    </DialogHeader>
+                    {showContinueDialog && (
+                        <ContinueDialog
+                            storyboardId={id as string}
+                            open={showContinueDialog}
+                            onClose={() => setShowContinueDialog(false)}
+                        />
+                    )}
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

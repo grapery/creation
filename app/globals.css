@@ -288,3 +288,22 @@ body {
 .animate-pulse-soft {
   animation: pulse-soft 2s ease-in-out infinite;
 }
+
+/* Scrollbar Hide Utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/*
+ * Z-Index Layer Scale (reference):
+ *   z-10  : local sticky elements
+ *   z-20  : auth layout elements
+ *   z-40  : profile tabs (sticky below header)
+ *   z-50  : header, dialogs, dropdowns, modals
+ *   z-60  : toast notifications
+ *   z-70  : critical overlays (login prompt)
+ */

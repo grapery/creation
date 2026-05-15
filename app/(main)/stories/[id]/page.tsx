@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Header } from "@/components/layout/header";
 import { stories } from "@/lib/api/stories";
 import { storyboards } from "@/lib/api/storyboards";
 import { characters as charactersApi } from "@/lib/api/characters";
@@ -239,13 +238,13 @@ export default function StoryPage() {
     };
 
     if (loading) return (
-        <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex items-center justify-center py-20">
             <Loader2 className="h-8 w-8 animate-spin" />
         </div>
     );
 
     if (!story) return (
-        <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex items-center justify-center py-20">
             <div className="text-center">
                 <h1 className="text-2xl font-bold mb-4">{t("story_detail.story_not_found", "Story Not Found")}</h1>
                 <p className="text-muted-foreground mb-4">{t("story_detail.story_not_found_message", "The story you're looking for doesn't exist.")}</p>
@@ -255,75 +254,72 @@ export default function StoryPage() {
     );
 
     return (
-        <div className="min-h-screen bg-background flex flex-col">
-            <Header />
-            <main className="flex-1">
-                {/* Immersive Header */}
-                <StoryDetailHeader story={story} />
+        <main className="flex-1">
+            {/* Immersive Header */}
+            <StoryDetailHeader story={story} />
 
-                {/* Tab Navigation */}
-                <div className="border-b border-border/50 bg-background sticky top-14 z-20">
-                    <div className="container max-w-6xl px-4 md:px-6 mx-auto py-3">
-                        <StoryTabs onTabChange={setActiveTab} />
-                    </div>
+            {/* Tab Navigation */}
+            <div className="border-b border-border/50 bg-background sticky top-14 z-20">
+                <div className="container max-w-6xl px-4 md:px-6 mx-auto py-3">
+                    <StoryTabs onTabChange={setActiveTab} />
                 </div>
+            </div>
 
-                {/* Tab Content */}
-                <div className="container max-w-6xl px-4 py-6 md:px-6 mx-auto">
-                    {activeTab === "story" && (
-                        <StoryBranchesSection
-                            storyId={story.id}
-                            storyTitle={story.title}
-                            storyboards={storyboardsList}
-                            isLoading={loadingStoryboards}
-                            onStoryboardTap={handleStoryboardTap}
-                        />
-                    )}
+            {/* Tab Content */}
+            <div className="container max-w-6xl px-4 py-6 md:px-6 mx-auto">
+                {activeTab === "story" && (
+                    <StoryBranchesSection
+                        storyId={story.id}
+                        storyTitle={story.title}
+                        storyboards={storyboardsList}
+                        isLoading={loadingStoryboards}
+                        onStoryboardTap={handleStoryboardTap}
+                    />
+                )}
 
-                    {activeTab === "characters" && (
-                        <StoryCastSection
-                            title={t("story_detail.header.characters", "Characters")}
-                            characters={characters}
-                            isLoading={loadingCharacters}
-                            error={charactersError}
-                            onAddCharacter={() => {
-                                router.push(`/characters/create`);
-                            }}
-                        />
-                    )}
+                {activeTab === "characters" && (
+                    <StoryCastSection
+                        title={t("story_detail.header.characters", "Characters")}
+                        characters={characters}
+                        isLoading={loadingCharacters}
+                        error={charactersError}
+                        onAddCharacter={() => {
+                            router.push(`/characters/create`);
+                        }}
+                    />
+                )}
 
-                    {activeTab === "scenes" && (
-                        <StoryScenesSection
-                            title={t("story_detail.tabs.scenes", "Scenes")}
-                            scenes={scenes}
-                            storyId={story.id}
-                            isLoading={loadingScenes}
-                            error={scenesError}
-                            onAddScene={() => {
-                                router.push(`/stories/${story.id}/scenes/new`);
-                            }}
-                        />
-                    )}
+                {activeTab === "scenes" && (
+                    <StoryScenesSection
+                        title={t("story_detail.tabs.scenes", "Scenes")}
+                        scenes={scenes}
+                        storyId={story.id}
+                        isLoading={loadingScenes}
+                        error={scenesError}
+                        onAddScene={() => {
+                            router.push(`/stories/${story.id}/scenes/new`);
+                        }}
+                    />
+                )}
 
-                    {activeTab === "team" && (
-                        <StoryTeamSection
-                            title={t("story_detail.contributors", "Contributors")}
-                            creators={creators}
-                            contributors={contributors}
-                            isLoading={loadingTeam}
-                            error={teamError}
-                            onInvite={() => {
-                                const userId = prompt("Enter contributor's user ID:");
-                                if (userId) {
-                                    stories.inviteContributor(story.id, userId, 'collaborator').catch(e => console.error(e));
-                                }
-                            }}
-                        />
-                    )}
-                </div>
+                {activeTab === "team" && (
+                    <StoryTeamSection
+                        title={t("story_detail.contributors", "Contributors")}
+                        creators={creators}
+                        contributors={contributors}
+                        isLoading={loadingTeam}
+                        error={teamError}
+                        onInvite={() => {
+                            const userId = prompt("Enter contributor's user ID:");
+                            if (userId) {
+                                stories.inviteContributor(story.id, userId, 'collaborator').catch(e => console.error(e));
+                            }
+                        }}
+                    />
+                )}
+            </div>
 
 
-            </main>
-        </div>
+        </main>
     );
 }

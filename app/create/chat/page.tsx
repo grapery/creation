@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Send, Bot, User, Sparkles } from "lucide-react";
@@ -45,9 +44,8 @@ export default function CreationChatPage() {
     };
 
     return (
-        <div className="min-h-screen bg-background flex flex-col">
-            <Header />
-            <main className="flex-1 container max-w-2xl px-4 py-8 mx-auto flex flex-col">
+        <div className="flex-1 flex flex-col">
+            <main className="flex-1 container max-w-2xl px-4 py-6 mx-auto flex flex-col">
                 <div className="flex-1 space-y-4 mb-4">
                     {messages.map(msg => (
                         <div key={msg.id} className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
