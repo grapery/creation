@@ -9,9 +9,15 @@ import type {
     ContinueStoryboardResponse,
     ForkStoryboardRequest,
     Storyboard,
+    StoryboardStructureGenerationResponse,
 } from '@/lib/types';
 
 export const creation = {
+    // Regenerate storyboard structure (bible + scene plan) when scenes are empty
+    generateStructure: async (storyboardId: string): Promise<StoryboardStructureGenerationResponse> => {
+        return request(`/api/v1/storyboards/${storyboardId}/generate/structure`, 'POST', {}, apiClient, AI_TIMEOUT);
+    },
+
     // Step 1: Generate AI narrative content
     generateContent: async (
         storyboardId: string,

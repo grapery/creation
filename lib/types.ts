@@ -59,29 +59,27 @@ export interface VIPInfo {
     subscriptionId?: string;
 }
 
-// Membership Tier Types — must match backend MembershipTierType enum
+// Membership Tier Types — must match backend canonical tiers
 export enum MembershipTier {
     FREE = 'free',
-    PRO = 'pro',
-    PRIME = 'prime',
-    ULTRA = 'ultra',
+    BASIC = 'basic',
+    PREMIUM = 'premium',
 }
 
 export enum BillingCycle {
     MONTHLY = 'monthly',
-    QUARTERLY = 'quarterly',
     YEARLY = 'yearly',
 }
 
 // Product SKU Definition
 // Format: {tier}_{cycle}
-// Examples: free_monthly, pro_quarterly, ultra_yearly
+// Examples: basic_monthly, premium_yearly
 export type MembershipSKU = `${MembershipTier}_${BillingCycle}`;
 
 export interface MembershipPlan {
-    id: MembershipSKU;                    // e.g., "pro_monthly"
-    tier: MembershipTier;                 // free, pro, prime, ultra
-    cycle: BillingCycle;                 // monthly, quarterly, yearly
+    id: MembershipSKU;                    // e.g., "basic_monthly"
+    tier: MembershipTier;                 // free, basic, premium
+    cycle: BillingCycle;                 // monthly | yearly
     name: {
         en: string;
         zh: string;
@@ -371,6 +369,7 @@ export interface StoryboardCharacterRef {
 export interface StoryboardScene {
     id: string;
     storyboardId: string;
+    storySceneId?: string;
     sequence: number;
     title: string;
     description?: string;
@@ -380,18 +379,46 @@ export interface StoryboardScene {
     mood?: string;
     videoUrl?: string;
     videoSegments?: VideoSegment[];
+    middleFrameUrls?: string[];
     totalVideoDuration?: number;
     isSubdivided?: boolean;
     isAIGenerated?: boolean;
     characters?: string[];
     createdAt?: number;
     updatedAt?: number;
+    // Parallel universe context
+    contextSnapshot?: string;
+    // Comic layout metadata (server-driven)
+    panelShape?: string; // full | diagonal_left | diagonal_right | trapezoid_leading | trapezoid_trailing | triangle_tl | triangle_tr | triangle_bl | triangle_br | wide_panorama
+    layoutIntent?: string;
+    compositionPlan?: string;
+    shotType?: string;
+    visualHierarchy?: string;
+    comicTexts?: StoryboardComicText[];
+    visualState?: string;
+    // Redesign metadata
+    beatIndex?: number;
+    beatPurpose?: string;
+    continuityNote?: string;
+    referenceKeys?: string[];
+    imagePrompt?: string;
+    generationRunId?: string;
+}
+
+export interface StoryboardComicText {
+    type: string;      // dialogue | thought | sfx | narration
+    text: string;
+    speaker?: string;
+    position?: string;
+    panelIndex?: number;
 }
 
 export interface VideoSegment {
-    startTime: number;
-    endTime: number;
-    url: string;
+    index: number;
+    videoUrl: string;
+    startFrame?: string;
+    endFrame?: string;
+    durationSecs: number;
 }
 
 export interface StoryboardWorkflow {
@@ -691,8 +718,8 @@ export interface GenerationPipelineSceneItem {
 }
 
 export interface GenerationPipelineStep {
-    phase: 'content' | 'scenes' | 'images';
-    status: GenerationStatus | 'running';
+    phase: 'content' | 'scenes' | 'images' | 'audit';
+    status: GenerationStatus | 'running' | 'skipped';
     order: number;
     title: string;
     summary?: string;
@@ -713,7 +740,23 @@ export interface StoryboardGenerationProgress {
     imageGenerations?: StoryboardImageGeneration[];
     videoGenerations?: StoryboardVideoGeneration[];
     pipelineSteps: GenerationPipelineStep[];
+    latestRun?: StoryboardGenerationRun;
     suggestedResumeAction?: 'none' | 'retry_failed_images' | 'regenerate_content' | 'regenerate_scenes';
+}
+
+export interface StoryboardGenerationRun {
+    id: string;
+    storyboardId: string;
+    status: string;
+    startedAt?: number;
+    completedAt?: number;
+    errorMessage?: string;
+}
+
+export interface StoryboardStructureGenerationResponse {
+    asyncAccepted: boolean;
+    storyboard?: Storyboard;
+    generationProgress?: StoryboardGenerationProgress;
 }
 
 export interface BatchImageResponse {

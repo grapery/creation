@@ -72,8 +72,7 @@ export default function MembershipSettingsPage() {
 
     const getTierBadgeColor = (tier: string) => {
         switch (tier) {
-            case 'ultra': return 'bg-yellow-500 text-white';
-            case 'pro': return 'bg-purple-500 text-white';
+            case 'premium': return 'bg-yellow-500 text-white';
             case 'basic': return 'bg-blue-500 text-white';
             default: return 'bg-gray-500 text-white';
         }

@@ -24,11 +24,18 @@ export function PlanCard({ plan, isCurrent, onSubscribe, loading }: PlanCardProp
     const formattedPrice = formatPrice(plan.price, plan.currency);
 
     // Get cycle text
-    const cycleText = {
-        monthly: language === 'zh-Hans' ? '月' : language === 'ja' ? '月' : 'month',
-        quarterly: language === 'zh-Hans' ? '季' : language === 'ja' ? '3ヶ月' : 'quarter',
-        yearly: language === 'zh-Hans' ? '年' : language === 'ja' ? '年' : 'year',
-    }[plan.cycle];
+    const cycleText =
+        plan.cycle === 'monthly'
+            ? language === 'zh-Hans'
+                ? '月'
+                : language === 'ja'
+                  ? '月'
+                  : 'month'
+            : language === 'zh-Hans'
+              ? '年'
+              : language === 'ja'
+                ? '年'
+                : 'year';
 
     return (
         <Card className={`relative flex flex-col ${
