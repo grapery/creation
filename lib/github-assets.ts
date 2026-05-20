@@ -1,13 +1,14 @@
 /**
  * Assets Configuration
  *
- * Images are served from the Next.js public/ directory by default.
- * To use an external CDN, set NEXT_PUBLIC_ASSETS_URL in your .env.local:
- *   NEXT_PUBLIC_ASSETS_URL=https://your-cdn.example.com/path
+ * Images are served via jsDelivr CDN from the public GitHub repo:
+ * https://github.com/grapery/creation/tree/develop/public
  *
- * Local files in public/ are deployed as static assets by Next.js.
+ * To use a different CDN, set NEXT_PUBLIC_ASSETS_URL in .env.local.
+ * Fallback to local public/ paths when no CDN is configured.
  */
-const ASSETS_BASE_URL = process.env.NEXT_PUBLIC_ASSETS_URL || "";
+const ASSETS_BASE_URL = process.env.NEXT_PUBLIC_ASSETS_URL ||
+  "https://cdn.jsdelivr.net/gh/grapery/creation@develop/public";
 
 // Individual image URLs - can be customized per image
 // Fallback to local paths if GitHub URLs are not set
