@@ -4,6 +4,7 @@ import { useState } from "react";
 import { stories } from "@/lib/api/stories";
 import { showSuccess, showError } from "@/lib/toast-utils";
 import { Save, Share2, Users } from "lucide-react";
+import { useTranslation } from "@/providers/language-provider";
 
 interface StoryEditorProps {
     storyId?: string;
@@ -17,6 +18,7 @@ interface StoryEditorProps {
 }
 
 export function StoryEditor({ storyId, story, onSave }: StoryEditorProps) {
+    const { t } = useTranslation();
     const [activeTab, setActiveTab] = useState("details");
     const [isSaving, setIsSaving] = useState(false);
     const [formData, setFormData] = useState({
@@ -26,9 +28,9 @@ export function StoryEditor({ storyId, story, onSave }: StoryEditorProps) {
     });
 
     const tabs = [
-        { id: "details", label: "Details" },
-        { id: "panels", label: "Panels" },
-        { id: "cast", label: "Cast" }
+        { id: "details", label: t("editor.tab_details") },
+        { id: "panels", label: t("editor.tab_panels") },
+        { id: "cast", label: t("editor.tab_cast") }
     ];
 
     const handleSave = async () => {
@@ -41,10 +43,10 @@ export function StoryEditor({ storyId, story, onSave }: StoryEditorProps) {
                     genre: formData.genre,
                 });
             }
-            showSuccess("Story saved successfully");
+            showSuccess(t("editor.save_success"));
             onSave?.();
         } catch (e: any) {
-            showError(e.message || "Failed to save story");
+            showError(e.message || t("editor.save_failed"));
         } finally {
             setIsSaving(false);
         }
@@ -62,19 +64,19 @@ export function StoryEditor({ storyId, story, onSave }: StoryEditorProps) {
         }
         try {
             await navigator.clipboard.writeText(url);
-            showSuccess("Link copied to clipboard");
+            showSuccess(t("editor.link_copied"));
         } catch {
-            showError("Failed to copy link");
+            showError(t("editor.copy_failed"));
         }
     };
 
     const handleCollaborate = () => {
         if (!storyId) {
-            showError("Save the story first before inviting collaborators");
+            showError(t("editor.save_before_collab"));
             return;
         }
         window.location.hash = `#collaborate-${storyId}`;
-        showSuccess("Opening collaborator settings...");
+        showSuccess(t("editor.opening_collab"));
     };
 
     return (
@@ -92,23 +94,23 @@ export function StoryEditor({ storyId, story, onSave }: StoryEditorProps) {
                         ) : (
                             <Save className="w-4 h-4" />
                         )}
-                        <span className="text-sm font-medium">Save</span>
+                        <span className="text-sm font-medium">{t("editor.save")}</span>
                     </button>
-                    
+
                     <button
                         onClick={handleShare}
                         className="flex items-center gap-2 px-4 py-2 border border-border bg-background hover:bg-muted rounded-lg transition-colors"
                     >
                         <Share2 className="w-4 h-4" />
-                        <span className="text-sm font-medium">Share</span>
+                        <span className="text-sm font-medium">{t("editor.share")}</span>
                     </button>
-                    
+
                     <button
                         onClick={handleCollaborate}
                         className="flex items-center gap-2 px-4 py-2 border border-border bg-background hover:bg-muted rounded-lg transition-colors"
                     >
                         <Users className="w-4 h-4" />
-                        <span className="text-sm font-medium">Collaborate</span>
+                        <span className="text-sm font-medium">{t("editor.collaborate")}</span>
                     </button>
                 </div>
             </div>
@@ -142,11 +144,11 @@ export function StoryEditor({ storyId, story, onSave }: StoryEditorProps) {
                 {activeTab === "details" && (
                     <DetailsTab formData={formData} onChange={setFormData} />
                 )}
-                
+
                 {activeTab === "panels" && (
                     <PanelsTab />
                 )}
-                
+
                 {activeTab === "cast" && (
                     <CastTab />
                 )}
@@ -156,29 +158,31 @@ export function StoryEditor({ storyId, story, onSave }: StoryEditorProps) {
 }
 
 function DetailsTab({ formData, onChange }: { formData: any; onChange: (data: any) => void }) {
+    const { t } = useTranslation();
+
     return (
         <div className="max-w-2xl mx-auto space-y-6">
-            <h2 className="text-xl font-semibold text-foreground">Story Information</h2>
-            
+            <h2 className="text-xl font-semibold text-foreground">{t("editor.story_information")}</h2>
+
             {/* Title */}
             <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Title</label>
+                <label className="text-sm font-medium text-foreground">{t("editor.title_label")}</label>
                 <input
                     type="text"
                     value={formData.title}
                     onChange={(e) => onChange({ ...formData, title: e.target.value })}
-                    placeholder="Enter story title"
+                    placeholder={t("editor.title_placeholder")}
                     className="w-full px-4 py-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
                 />
             </div>
 
             {/* Description */}
             <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Description</label>
+                <label className="text-sm font-medium text-foreground">{t("editor.description_label")}</label>
                 <textarea
                     value={formData.description}
                     onChange={(e) => onChange({ ...formData, description: e.target.value })}
-                    placeholder="Describe your story..."
+                    placeholder={t("editor.description_placeholder")}
                     rows={6}
                     className="w-full px-4 py-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary resize-none"
                 />
@@ -186,56 +190,56 @@ function DetailsTab({ formData, onChange }: { formData: any; onChange: (data: an
 
             {/* Genre */}
             <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Genre</label>
+                <label className="text-sm font-medium text-foreground">{t("editor.genre_label")}</label>
                 <select
                     value={formData.genre}
                     onChange={(e) => onChange({ ...formData, genre: e.target.value })}
                     className="w-full px-4 py-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
                 >
-                    <option value="">Select a genre</option>
-                    <option value="Fantasy">Fantasy</option>
-                    <option value="Sci-Fi">Sci-Fi</option>
-                    <option value="Romance">Romance</option>
-                    <option value="Mystery">Mystery</option>
-                    <option value="Horror">Horror</option>
-                    <option value="Adventure">Adventure</option>
-                    <option value="Drama">Drama</option>
+                    <option value="">{t("editor.genre_placeholder")}</option>
+                    <option value="fantasy">{t("genre.fantasy")}</option>
+                    <option value="scifi">{t("genre.scifi")}</option>
+                    <option value="romance">{t("genre.romance")}</option>
+                    <option value="mystery">{t("genre.mystery")}</option>
+                    <option value="horror">{t("genre.horror")}</option>
+                    <option value="adventure">{t("genre.adventure")}</option>
+                    <option value="youth">{t("genre.youth")}</option>
                 </select>
             </div>
 
             {/* Cover Image */}
             <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Cover Image</label>
+                <label className="text-sm font-medium text-foreground">{t("editor.cover_image")}</label>
                 <div className="w-full h-[200px] border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center bg-muted/30">
                     <div className="text-muted-foreground mb-2">
                         <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                     </div>
-                    <p className="text-sm text-muted-foreground">Click to upload cover image</p>
-                    <p className="text-xs text-muted-foreground">Recommended: 16:9 aspect ratio</p>
+                    <p className="text-sm text-muted-foreground">{t("editor.cover_upload_hint")}</p>
+                    <p className="text-xs text-muted-foreground">{t("editor.cover_ratio_hint")}</p>
                 </div>
             </div>
 
             {/* AI Enrichment Options */}
             <div className="p-4 bg-purple-50/10 border border-purple-500/20 rounded-lg">
-                <h3 className="text-sm font-semibold text-purple-900 mb-3">AI Enrichment Options</h3>
+                <h3 className="text-sm font-semibold text-purple-900 mb-3">{t("editor.ai_enrichment_title")}</h3>
                 <div className="space-y-3">
                     <label className="flex items-center gap-3 cursor-pointer">
                         <input type="checkbox" className="w-4 h-4 rounded border-purple-300 text-purple-600 focus:ring-purple-500" />
-                        <span className="text-sm text-foreground">Enrich description with AI</span>
+                        <span className="text-sm text-foreground">{t("editor.ai_enrich_description")}</span>
                     </label>
                     <label className="flex items-center gap-3 cursor-pointer">
                         <input type="checkbox" className="w-4 h-4 rounded border-purple-300 text-purple-600 focus:ring-purple-500" />
-                        <span className="text-sm text-foreground">Generate cover image with AI</span>
+                        <span className="text-sm text-foreground">{t("editor.ai_generate_cover")}</span>
                     </label>
                     <label className="flex items-center gap-3 cursor-pointer">
                         <input type="checkbox" className="w-4 h-4 rounded border-purple-300 text-purple-600 focus:ring-purple-500" />
-                        <span className="text-sm text-foreground">Generate background with AI</span>
+                        <span className="text-sm text-foreground">{t("editor.ai_generate_background")}</span>
                     </label>
                     <label className="flex items-center gap-3 cursor-pointer">
                         <input type="checkbox" className="w-4 h-4 rounded border-purple-300 text-purple-600 focus:ring-purple-500" />
-                        <span className="text-sm text-foreground">Generate poster with AI</span>
+                        <span className="text-sm text-foreground">{t("editor.ai_generate_poster")}</span>
                     </label>
                 </div>
             </div>
@@ -244,6 +248,7 @@ function DetailsTab({ formData, onChange }: { formData: any; onChange: (data: an
 }
 
 function PanelsTab() {
+    const { t } = useTranslation();
     const [panels, setPanels] = useState<any[]>([]);
 
     return (
@@ -251,14 +256,14 @@ function PanelsTab() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-xl font-semibold text-foreground">Panels</h2>
-                    <p className="text-sm text-muted-foreground">Manage story panels</p>
+                    <h2 className="text-xl font-semibold text-foreground">{t("editor.panels_title")}</h2>
+                    <p className="text-sm text-muted-foreground">{t("editor.panels_subtitle")}</p>
                 </div>
                 <button className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
-                    <span className="text-sm font-medium">Add Panel</span>
+                    <span className="text-sm font-medium">{t("editor.add_panel")}</span>
                 </button>
             </div>
 
@@ -268,13 +273,13 @@ function PanelsTab() {
                     <svg className="w-16 h-16 text-muted-foreground mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 5a1 1 0 011-1V4a1 1 0 011-1V3a1 1 0 00-1-1H3a1 1 0 00-1 1v1a1 1 0 00-1 1v1a1 1 0 011 1v1a1 1 0 011-1h16a1 1 0 001 1v-1a1 1 0 011-1V7a1 1 0 00-1-1V4a1 1 0 00-1-1H3z" />
                     </svg>
-                    <p className="text-lg font-semibold text-foreground mb-2">No Panels Yet</p>
-                    <p className="text-sm text-muted-foreground mb-4">Create your first panel to begin visualizing your story</p>
+                    <p className="text-lg font-semibold text-foreground mb-2">{t("editor.no_panels")}</p>
+                    <p className="text-sm text-muted-foreground mb-4">{t("editor.no_panels_message")}</p>
                     <button className="flex items-center gap-2 px-4 py-2 bg-purple-500 text-white rounded-lg">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                         </svg>
-                        <span className="text-sm font-medium">Create First Panel with AI</span>
+                        <span className="text-sm font-medium">{t("editor.create_first_panel")}</span>
                     </button>
                 </div>
             )}
@@ -290,8 +295,8 @@ function PanelsTab() {
                                 </svg>
                             </div>
                             <div className="p-4">
-                                <h4 className="text-sm font-medium text-foreground">Panel {index + 1}</h4>
-                                <p className="text-xs text-muted-foreground">Order: {panel.order || index + 1}</p>
+                                <h4 className="text-sm font-medium text-foreground">{t("editor.panel_label")} {index + 1}</h4>
+                                <p className="text-xs text-muted-foreground">{t("editor.order_label")}: {panel.order || index + 1}</p>
                             </div>
                         </div>
                     ))}
@@ -302,6 +307,7 @@ function PanelsTab() {
 }
 
 function CastTab() {
+    const { t } = useTranslation();
     const [characters, setCharacters] = useState<any[]>([]);
 
     return (
@@ -309,14 +315,14 @@ function CastTab() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-xl font-semibold text-foreground">Cast</h2>
-                    <p className="text-sm text-muted-foreground">Manage story characters</p>
+                    <h2 className="text-xl font-semibold text-foreground">{t("editor.cast_title")}</h2>
+                    <p className="text-sm text-muted-foreground">{t("editor.cast_subtitle")}</p>
                 </div>
                 <button className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
-                    <span className="text-sm font-medium">Add Character</span>
+                    <span className="text-sm font-medium">{t("editor.add_character")}</span>
                 </button>
             </div>
 
@@ -326,13 +332,13 @@ function CastTab() {
                     <svg className="w-16 h-16 text-muted-foreground mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5 5 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
-                    <p className="text-lg font-semibold text-foreground mb-2">No Characters Yet</p>
-                    <p className="text-sm text-muted-foreground mb-4">Add characters to bring your story to life</p>
+                    <p className="text-lg font-semibold text-foreground mb-2">{t("editor.no_characters")}</p>
+                    <p className="text-sm text-muted-foreground mb-4">{t("editor.no_characters_message")}</p>
                     <button className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                         </svg>
-                        <span className="text-sm font-medium">Add First Character</span>
+                        <span className="text-sm font-medium">{t("editor.add_first_character")}</span>
                     </button>
                 </div>
             )}
@@ -352,7 +358,7 @@ function CastTab() {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <h4 className="text-sm font-medium text-foreground truncate">{character.name}</h4>
-                                    <p className="text-xs text-muted-foreground">{character.description || "No description"}</p>
+                                    <p className="text-xs text-muted-foreground">{character.description || t("editor.no_description")}</p>
                                 </div>
                             </div>
                         </div>

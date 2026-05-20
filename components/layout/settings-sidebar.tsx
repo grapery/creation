@@ -17,91 +17,33 @@ import {
     Gift,
     BarChart3,
 } from "lucide-react";
+import { useTranslation } from "@/providers/language-provider";
 
-const sidebarNavItems = [
-    {
-        title: "Profile",
-        href: "/settings/profile",
-        icon: User,
-    },
-    {
-        title: "Membership",
-        href: "/settings/membership",
-        icon: CreditCard,
-    },
-    {
-        title: "Appearance",
-        href: "/settings/appearance",
-        icon: Palette,
-    },
-    {
-        title: "Notifications",
-        href: "/settings/notifications",
-        icon: Bell,
-    },
-    {
-        title: "Language",
-        href: "/settings/language",
-        icon: Languages,
-    },
-    {
-        title: "Genre Preferences",
-        href: "/settings/preferences",
-        icon: Palette,
-    },
-    {
-        title: "Privacy & Safety",
-        href: "/settings/privacy",
-        icon: Shield,
-    },
-    {
-        title: "Blocked Users",
-        href: "/settings/blocked",
-        icon: Shield,
-    },
-    {
-        title: "Security",
-        href: "/settings/security",
-        icon: Lock,
-    },
-    {
-        title: "Token Usage",
-        href: "/settings/usage",
-        icon: BarChart3,
-    },
-    {
-        title: "Creator Analytics",
-        href: "/settings/analytics",
-        icon: BarChart3,
-    },
-    {
-        title: "Invite Friends",
-        href: "/settings/referrals",
-        icon: Gift,
-    },
-    {
-        title: "Feedback",
-        href: "/settings/feedback",
-        icon: MessageSquare,
-    },
-    {
-        title: "Terms of Service",
-        href: "/settings/terms",
-        icon: FileText,
-    },
-    {
-        title: "About",
-        href: "/settings/about",
-        icon: HelpCircle,
-    },
+const sidebarNavConfig = [
+    { titleKey: "settings_nav.profile", href: "/settings/profile", icon: User },
+    { titleKey: "settings_nav.membership", href: "/settings/membership", icon: CreditCard },
+    { titleKey: "settings_nav.appearance", href: "/settings/appearance", icon: Palette },
+    { titleKey: "settings_nav.notifications", href: "/settings/notifications", icon: Bell },
+    { titleKey: "settings_nav.language", href: "/settings/language", icon: Languages },
+    { titleKey: "settings_nav.genre_preferences", href: "/settings/preferences", icon: Palette },
+    { titleKey: "settings_nav.privacy_safety", href: "/settings/privacy", icon: Shield },
+    { titleKey: "settings_nav.blocked_users", href: "/settings/blocked", icon: Shield },
+    { titleKey: "settings_nav.security", href: "/settings/security", icon: Lock },
+    { titleKey: "settings_nav.token_usage", href: "/settings/usage", icon: BarChart3 },
+    { titleKey: "settings_nav.creator_analytics", href: "/settings/analytics", icon: BarChart3 },
+    { titleKey: "settings_nav.invite_friends", href: "/settings/referrals", icon: Gift },
+    { titleKey: "settings_nav.feedback", href: "/settings/feedback", icon: MessageSquare },
+    { titleKey: "settings_nav.terms_of_service", href: "/settings/terms", icon: FileText },
+    { titleKey: "settings_nav.about", href: "/settings/about", icon: HelpCircle },
 ];
 
 export function SettingsSidebar() {
     const pathname = usePathname();
+    const { t } = useTranslation();
 
     return (
         <nav className="flex space-x-2 md:flex-col md:space-x-0 md:space-y-1 overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
-            {sidebarNavItems.map((item) => {
+            {sidebarNavConfig.map((item) => {
                 const isActive = pathname === item.href;
                 return (
                     <Link
@@ -115,7 +57,7 @@ export function SettingsSidebar() {
                         )}
                     >
                         <item.icon className={cn("h-4 w-4", isActive ? "text-primary" : "text-muted-foreground")} />
-                        {item.title}
+                        {t(item.titleKey)}
                     </Link>
                 )
             })}

@@ -207,7 +207,7 @@ export function PaymentDialog({
                             <div className="flex justify-between items-center">
                                 <div>
                                     <p className="font-semibold">{planName}</p>
-                                    <p className="text-sm text-muted-foreground">Voyager Membership</p>
+                                    <p className="text-sm text-muted-foreground">{t("common.app_name")} Membership</p>
                                 </div>
                                 <div className="text-right">
                                     <p className="text-2xl font-bold">

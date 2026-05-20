@@ -2,10 +2,12 @@
 
 import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Share2, Users, Search, ChevronLeft, ChevronRight, Eye, MessageSquare, Sparkles, Save } from "lucide-react";
+import { Share2, Users, Search, ChevronLeft, ChevronRight, Eye, MessageSquare, Sparkles, Save, AlertTriangle, Trash2, Plus, X } from "lucide-react";
 import { stories } from "@/lib/api/stories";
+import { characters } from "@/lib/api/characters";
 import { showSuccess, showError } from "@/lib/toast-utils";
 import { StyleConfig, CreateStoryRequest, FragmentStoryCreationPrefill, GENRES, FragmentVisibility } from "@/lib/types";
+import type { Character } from "@/lib/types/character";
 
 interface CreateStoryProps {
     storyId?: string;
@@ -61,6 +63,15 @@ function CreateStory({ storyId }: CreateStoryProps) {
     const [styleSearchQuery, setStyleSearchQuery] = useState("");
     const [stylesPage, setStylesPage] = useState(0);
     const [stylesTotal, setStylesTotal] = useState(0);
+
+    // Cover ratio
+    const [coverRatio, setCoverRatio] = useState<"3:4" | "16:9" | "1:1">("3:4");
+
+    // Cast management
+    const [selectedCharacters, setSelectedCharacters] = useState<Character[]>([]);
+    const [characterSearch, setCharacterSearch] = useState("");
+    const [searchResults, setSearchResults] = useState<Character[]>([]);
+    const [isSearching, setIsSearching] = useState(false);
 
     useEffect(() => {
         loadStyles();
@@ -318,8 +329,25 @@ function CreateStory({ storyId }: CreateStoryProps) {
 
                         {/* Cover Image Upload */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-foreground">Cover Image</label>
-                            <div className="w-full h-[200px] border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center bg-muted/30 overflow-hidden relative">
+                            <div className="flex items-center justify-between">
+                                <label className="text-sm font-medium text-foreground">Cover Image</label>
+                                <div className="flex items-center gap-1">
+                                    {(["3:4", "1:1", "16:9"] as const).map((r) => (
+                                        <button
+                                            key={r}
+                                            onClick={() => setCoverRatio(r)}
+                                            className={`px-2 py-1 text-xs rounded transition-colors ${
+                                                coverRatio === r ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"
+                                            }`}
+                                        >
+                                            {r}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className={`w-full border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center bg-muted/30 overflow-hidden relative ${
+                                coverRatio === "3:4" ? "h-[260px]" : coverRatio === "16:9" ? "h-[180px]" : "h-[220px]"
+                            }`}>
                                 <input
                                     type="file"
                                     ref={fileInputRef}
@@ -615,35 +643,111 @@ function CreateStory({ storyId }: CreateStoryProps) {
                     <div className="space-y-4">
                         <h3 className="text-xl font-semibold text-foreground">Cast</h3>
 
-                        {/* Header with Add Button */}
-                        <div className="flex items-center justify-between">
-                            <p className="text-sm text-muted-foreground">
-                                0 characters
-                            </p>
-                            <button className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m0 0-6-6h24l-6 6h24l-6 6V4z" />
-                                </svg>
-                                <span className="text-sm font-medium">Add Character</span>
-                            </button>
+                        {/* Selected Characters */}
+                        {selectedCharacters.length > 0 && (
+                            <div className="space-y-2">
+                                <p className="text-sm text-muted-foreground">{selectedCharacters.length} character{selectedCharacters.length > 1 ? "s" : ""}</p>
+                                <div className="space-y-2">
+                                    {selectedCharacters.map((char) => (
+                                        <div key={char.id} className="flex items-center gap-3 p-3 bg-card rounded-lg border border-border">
+                                            {char.avatar ? (
+                                                <img src={char.avatar} alt="" className="w-10 h-10 rounded-full object-cover" />
+                                            ) : (
+                                                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-medium">
+                                                    {char.name[0]}
+                                                </div>
+                                            )}
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-medium truncate">{char.name}</p>
+                                                {char.description && (
+                                                    <p className="text-xs text-muted-foreground truncate">{char.description}</p>
+                                                )}
+                                            </div>
+                                            <button
+                                                onClick={() => setSelectedCharacters(prev => prev.filter(c => c.id !== char.id))}
+                                                className="p-1 hover:bg-muted rounded"
+                                            >
+                                                <X className="w-4 h-4 text-muted-foreground" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Search Characters */}
+                        <div className="space-y-2">
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                <input
+                                    type="text"
+                                    value={characterSearch}
+                                    onChange={async (e) => {
+                                        setCharacterSearch(e.target.value);
+                                        if (e.target.value.trim().length >= 2) {
+                                            setIsSearching(true);
+                                            try {
+                                                const res = await characters.list({ search: e.target.value, limit: 10 });
+                                                setSearchResults(res.characters.filter(c => !selectedCharacters.find(sc => sc.id === c.id)));
+                                            } catch { setSearchResults([]); }
+                                            finally { setIsSearching(false); }
+                                        } else {
+                                            setSearchResults([]);
+                                        }
+                                    }}
+                                    placeholder="Search characters..."
+                                    className="w-full pl-9 pr-4 py-2.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                                />
+                            </div>
+
+                            {isSearching && (
+                                <div className="flex justify-center py-4">
+                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary" />
+                                </div>
+                            )}
+
+                            {searchResults.length > 0 && (
+                                <div className="border border-border rounded-lg overflow-hidden max-h-60 overflow-y-auto">
+                                    {searchResults.map((char) => (
+                                        <button
+                                            key={char.id}
+                                            onClick={() => {
+                                                setSelectedCharacters(prev => [...prev, char]);
+                                                setSearchResults(prev => prev.filter(c => c.id !== char.id));
+                                                setCharacterSearch("");
+                                            }}
+                                            className="w-full flex items-center gap-3 p-3 hover:bg-muted transition-colors text-left border-b border-border last:border-b-0"
+                                        >
+                                            {char.avatar ? (
+                                                <img src={char.avatar} alt="" className="w-8 h-8 rounded-full object-cover" />
+                                            ) : (
+                                                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium">
+                                                    {char.name[0]}
+                                                </div>
+                                            )}
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-medium truncate">{char.name}</p>
+                                            </div>
+                                            <Plus className="w-4 h-4 text-muted-foreground" />
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+
+                            {characterSearch.trim().length >= 2 && !isSearching && searchResults.length === 0 && (
+                                <p className="text-sm text-muted-foreground text-center py-4">No characters found</p>
+                            )}
                         </div>
 
                         {/* Empty State */}
-                        <div className="flex flex-col items-center justify-center py-16 border-2 border-dashed border-border rounded-lg">
-                            <svg className="w-16 h-16 text-muted-foreground mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M17 20h5v-2a3 3 0 006 1.061l-.431.431.061-3.061L16 16m-6.064 0a3 3 0 010-10l-6-6 6h24l-6-6 6h24l-6-6V5a1 1 0 01-1-1.061-3 0-001-1-1-061-3z" />
-                            </svg>
-                            <p className="text-lg font-semibold text-foreground mb-2">No Characters Yet</p>
-                            <p className="text-sm text-muted-foreground mb-4">
-                                Add characters to bring your story to life
-                            </p>
-                            <button className="flex items-center gap-2 px-4 py-2 bg-card text-foreground border border-border rounded-lg">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m0 0-6-6h24l-6 6h24l-6 6V4z" />
-                                </svg>
-                                <span className="text-sm font-medium">Add First Character</span>
-                            </button>
-                        </div>
+                        {selectedCharacters.length === 0 && (
+                            <div className="flex flex-col items-center justify-center py-12 border-2 border-dashed border-border rounded-lg">
+                                <Users className="w-12 h-12 text-muted-foreground mb-3" />
+                                <p className="text-sm text-muted-foreground">
+                                    Search and add characters to bring your story to life
+                                </p>
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -724,6 +828,30 @@ function CreateStory({ storyId }: CreateStoryProps) {
                             >
                                 <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${showAILabel ? "translate-x-5" : "translate-x-1"}`} />
                             </button>
+                        </div>
+
+                        {/* Danger Zone */}
+                        <div className="pt-4 border-t border-border">
+                            <div className="flex items-center gap-2 mb-3">
+                                <AlertTriangle className="w-4 h-4 text-destructive" />
+                                <h4 className="text-sm font-medium text-destructive">Danger Zone</h4>
+                            </div>
+                            <div className="space-y-2">
+                                <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:border-destructive/50 transition-colors text-left group">
+                                    <div>
+                                        <p className="text-sm font-medium">Archive Story</p>
+                                        <p className="text-xs text-muted-foreground">Hide this story from public view</p>
+                                    </div>
+                                    <AlertTriangle className="w-4 h-4 text-muted-foreground group-hover:text-destructive" />
+                                </button>
+                                <button className="w-full flex items-center justify-between p-3 rounded-lg border border-destructive/30 hover:border-destructive transition-colors text-left group">
+                                    <div>
+                                        <p className="text-sm font-medium text-destructive">Delete Story</p>
+                                        <p className="text-xs text-muted-foreground">Permanently remove this story</p>
+                                    </div>
+                                    <Trash2 className="w-4 h-4 text-destructive/50 group-hover:text-destructive" />
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}

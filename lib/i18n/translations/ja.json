@@ -12,7 +12,7 @@
     "loading": "読み込み中...",
     "vip": {
       "upgrade_title": "メンバーシップアップグレード",
-      "upgrade_subtitle": "Voyagerの全機能をロック解除。制限なく創作しましょう。",
+      "upgrade_subtitle": "未择の全機能をロック解除。制限なく創作しましょう。",
       "plan_free": "無料",
       "plan_pro": "Pro",
       "subscribe": "購読する",
@@ -52,7 +52,11 @@
     "next": "次へ",
     "skip": "スキップ",
     "close": "閉じる",
-    "and": "と"
+    "views": "閲覧数",
+    "forks": "フォーク",
+    "and": "と",
+    "saving": "保存中...",
+    "app_name": "未择"
   },
   "auth": {
     "sign_in": "ログイン",
@@ -123,12 +127,24 @@
     "chat": "チャット",
     "profile": "プロフィール",
     "settings": "設定",
+    "sidebar": {
+      "creator_center": "クリエイターセンター",
+      "write_story": "ストーリーを作成",
+      "storyboard": "ストーリーボード",
+      "my_drafts": "マイ下書き",
+      "analytics": "分析",
+      "about": "未择について",
+      "guidelines": "ガイドライン",
+      "privacy": "プライバシー",
+      "terms": "利用規約"
+    },
     "about": "概要",
     "notify": "通知",
     "messages": "メッセージ"
   },
   "settings": {
     "title": "設定",
+    "subtitle": "アカウント設定を管理",
     "account": "アカウント",
     "profile_info": "プロフィール情報",
     "membership_billing": "メンバーシップと課金",
@@ -167,7 +183,9 @@
     "no_stories_yet": "まだストーリーがありません",
     "start_creating_first_story": "最初のストーリーを作成し始める",
     "discover": "発見",
-    "invites": "招待"
+    "invites": "招待",
+    "start_here": "ここから始める",
+    "trending_topics": "トレンドトピック"
   },
   "stories": {
     "create_story": "ストーリーを作成",
@@ -221,7 +239,18 @@
     "character_editor_avatar": "アバター",
     "character_editor_upload_avatar": "アバターをアップロード",
     "no_characters_available": "利用可能なキャラクターがありません",
-    "create_characters_first": "まずストーリーでキャラクターを作成してから、ここに追加してください。"
+    "create_characters_first": "まずストーリーでキャラクターを作成してから、ここに追加してください。",
+    "title": "キャラクター",
+    "subtitle": "AIとチャットするか、オリジナルを作成しましょう。",
+    "search_placeholder": "キャラクターを検索...",
+    "create_button": "キャラクターを作成",
+    "edit_character": "キャラクターを編集",
+    "create_character_subtitle": "キャラクター設定と外見を完成",
+    "basic_info": "基本情報",
+    "basic_info_desc": "基本情報を入力してください",
+    "describe_your_character": "キャラクターを説明",
+    "ai_generate": "AI 生成",
+    "generated_character": "生成されたキャラクター"
   },
   "chat": {
     "new_chat": "新しいチャット",
@@ -243,7 +272,11 @@
     "select_ai_agent": "AIエージェントを選択",
     "messages": "メッセージ",
     "messages_per_day": "件/日",
-    "chat_message_placeholder": "メッセージ..."
+    "chat_message_placeholder": "メッセージ...",
+    "title": "メッセージ",
+    "no_messages": "メッセージはまだありません",
+    "start_chatting": "キャラクターとチャットを始めましょう。",
+    "explore_characters": "キャラクターを探す"
   },
   "profile": {
     "edit_profile": "プロフィールを編集",
@@ -288,7 +321,13 @@
     "less": "少なく",
     "more": "もっと",
     "today": "今日",
-    "no_activity_on_this_day": "この日のアクティビティはありません"
+    "no_activity_on_this_day": "この日のアクティビティはありません",
+    "week": "週",
+    "month": "月",
+    "no_data": "データなし",
+    "no_data_for_month": "今月のデータはありません",
+    "activities_count": "{count} 件のアクティビティ",
+    "follow": "フォロー"
   },
   "notifications": {
     "mark_all_read": "すべて既読にする",
@@ -298,7 +337,12 @@
     "all_caught_up": "すべて既読",
     "no_unread_notifications": "未読の通知はありません",
     "no_notifications_yet": "通知はまだありません",
-    "notifications_will_appear": "通知はここに表示されます"
+    "notifications_will_appear": "通知はここに表示されます",
+    "title": "通知",
+    "tab_all": "すべて",
+    "tab_likes": "いいね",
+    "tab_mentions": "メンション",
+    "tab_system": "システム"
   },
   "errors": {
     "network_error": "ネットワークエラーです。接続を確認してください。",
@@ -311,6 +355,23 @@
   },
   "loading": "読み込み中...",
   "empty": "データなし",
+  "comments": {
+    "unknown": "不明",
+    "reply": "返信",
+    "like": "いいね",
+    "likes": "いいね"
+  },
+  "storyboard": {
+    "fork_title": "ストーリーボードをフォーク",
+    "fork_description": "このストーリーボードから新しいブランチを作成",
+    "fork_title_label": "タイトル",
+    "fork_direction": "新しい方向性（任意）",
+    "fork": "フォーク",
+    "continue_title": "ストーリーを続ける",
+    "continue_description": "次に何が起こるか説明してください",
+    "continue_what_next": "次に何が起こる？",
+    "continue_scene_count": "シーン数"
+  },
   "storyboard_detail": {
     "back": "戻る",
     "ai_generated": "AI 生成",
@@ -533,6 +594,50 @@
     "generation_steps_detail": "ステップ詳細",
     "pipeline_resume_hint": "推奨される次の操作"
   },
+  "editor": {
+    "save": "保存",
+    "share": "共有",
+    "collaborate": "コラボ",
+    "tab_details": "詳細",
+    "tab_panels": "パネル",
+    "tab_cast": "キャスト",
+    "story_information": "ストーリー情報",
+    "title_label": "タイトル",
+    "title_placeholder": "ストーリータイトルを入力",
+    "description_label": "説明",
+    "description_placeholder": "ストーリーを説明...",
+    "genre_label": "ジャンル",
+    "genre_placeholder": "ジャンルを選択",
+    "cover_image": "カバー画像",
+    "cover_upload_hint": "クリックしてカバー画像をアップロード",
+    "cover_ratio_hint": "推奨：16:9 の比率",
+    "ai_enrichment_title": "AI 拡張オプション",
+    "ai_enrich_description": "AI で説明を強化",
+    "ai_generate_cover": "AI でカバー画像を生成",
+    "ai_generate_background": "AI で背景を生成",
+    "ai_generate_poster": "AI でポスターを生成",
+    "panels_title": "パネル",
+    "panels_subtitle": "ストーリーパネルを管理",
+    "add_panel": "パネルを追加",
+    "no_panels": "パネルはまだありません",
+    "no_panels_message": "最初のパネルを作成してストーリーを可視化しましょう",
+    "create_first_panel": "AI で最初のパネルを作成",
+    "panel_label": "パネル",
+    "order_label": "順序",
+    "cast_title": "キャスト",
+    "cast_subtitle": "ストーリーキャラクターを管理",
+    "add_character": "キャラクターを追加",
+    "no_characters": "キャラクターはまだいません",
+    "no_characters_message": "キャラクターを追加してストーリーに命を吹き込みましょう",
+    "add_first_character": "最初のキャラクターを追加",
+    "no_description": "説明なし",
+    "save_success": "ストーリーを保存しました",
+    "save_failed": "ストーリーの保存に失敗しました",
+    "link_copied": "リンクをクリップボードにコピーしました",
+    "copy_failed": "リンクのコピーに失敗しました",
+    "save_before_collab": "协作者を招待する前にストーリーを保存してください",
+    "opening_collab": "协作者設定を開いています..."
+  },
   "story_settings": {
     "visibility": "公開範囲",
     "public": "公開",
@@ -599,6 +704,25 @@
   "footer": {
     "privacy": "プライバシーポリシー",
     "terms": "利用規約",
-    "api_docs": "API ドキュメント"
+    "api_docs": "API ドキュメント",
+    "copyright": "© 2025 未择。全著作権所有。",
+    "icp": ""
+  },
+  "settings_nav": {
+    "profile": "プロフィール",
+    "membership": "メンバーシップ",
+    "appearance": "外観",
+    "notifications": "通知",
+    "language": "言語",
+    "genre_preferences": "ジャンル設定",
+    "privacy_safety": "プライバシーと安全",
+    "blocked_users": "ブロック済みユーザー",
+    "security": "セキュリティ",
+    "token_usage": "トークン使用量",
+    "creator_analytics": "クリエイター分析",
+    "invite_friends": "友達を招待",
+    "feedback": "フィードバック",
+    "terms_of_service": "利用規約",
+    "about": "アプリについて"
   }
 }

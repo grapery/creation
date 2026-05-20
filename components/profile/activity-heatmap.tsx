@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ActivityHeatmapData, ActivityTimeRange } from "@/lib/types";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/providers/language-provider";
 import { cn } from "@/lib/utils";
 
 interface ActivityHeatmapProps {
@@ -24,6 +25,7 @@ export function ActivityHeatmap({
     onTimeRangeChange,
     onDateSelect,
 }: ActivityHeatmapProps) {
+    const { t } = useTranslation();
     const gridConfig = {
         today: { rows:1, columns: 1 },
         week: { rows: 1, columns: 7 },
@@ -84,7 +86,7 @@ export function ActivityHeatmap({
                         }}
                     />
                 )}
-                <span className="text-xs text-muted-foreground">Today</span>
+                <span className="text-xs text-muted-foreground">{t("profile.today")}</span>
             </div>
         );
     };
@@ -157,7 +159,7 @@ export function ActivityHeatmap({
         if (!heatmapData || heatmapData.length === 0) {
             return (
                 <div className="text-center py-8 text-muted-foreground">
-                    No data for this month
+                    {t("profile.no_data_for_month")}
                 </div>
             );
         }
@@ -264,25 +266,25 @@ export function ActivityHeatmap({
     };
 
     const activityColors = [
-        { color: "bg-secondary", label: "Less" },
+        { color: "bg-secondary", label: t("profile.less") },
         { color: "bg-green-400", label: "" },
         { color: "bg-green-500", label: "" },
         { color: "bg-green-600", label: "" },
-        { color: "bg-green-700", label: "More" },
+        { color: "bg-green-700", label: t("profile.more") },
     ];
 
     return (
         <div className="space-y-4">
             {/* Header with title and time range selector */}
             <div className="flex items-center justify-between">
-                <h2 className="text-base font-semibold text-foreground">Activity Overview</h2>
+                <h2 className="text-base font-semibold text-foreground">{t("profile.activity_overview")}</h2>
 
                 {/* Time Range Picker */}
                 <div className="bg-secondary rounded-full p-1 border border-border inline-flex">
                     {[
-                        { value: ActivityTimeRange.TODAY, label: "Today" },
-                        { value: ActivityTimeRange.WEEK, label: "Week" },
-                        { value: ActivityTimeRange.MONTH, label: "Month" },
+                        { value: ActivityTimeRange.TODAY, label: t("profile.today") },
+                        { value: ActivityTimeRange.WEEK, label: t("profile.week") },
+                        { value: ActivityTimeRange.MONTH, label: t("profile.month") },
                     ].map((range) => (
                         <button
                             key={range.value}
@@ -302,7 +304,7 @@ export function ActivityHeatmap({
 
             {/* Legend */}
             <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">Less</span>
+                <span className="text-xs text-muted-foreground">{t("profile.less")}</span>
                 <div className="flex gap-[3px]">
                     {activityColors.slice(1, 5).map((item, index) => (
                         <div
@@ -315,13 +317,13 @@ export function ActivityHeatmap({
                         />
                     ))}
                 </div>
-                <span className="text-xs text-muted-foreground">More</span>
+                <span className="text-xs text-muted-foreground">{t("profile.more")}</span>
 
                 <div className="flex-1" />
 
                 {/* Total count badge */}
                 <span className="text-xs font-medium text-muted-foreground">
-                    {totalCount} activities
+                    {t("profile.activities_count", { count: totalCount })}
                 </span>
             </div>
 
@@ -333,7 +335,7 @@ export function ActivityHeatmap({
             ) : (
                 <div>
                     {selectedTimeRange === ActivityTimeRange.TODAY ? (
-                        data.length > 0 ? singleDayView(data[0]) : <div className="text-center py-8 text-muted-foreground">No data</div>
+                        data.length > 0 ? singleDayView(data[0]) : <div className="text-center py-8 text-muted-foreground">{t("profile.no_data")}</div>
                     ) : selectedTimeRange === ActivityTimeRange.WEEK ? (
                         weekView(data)
                     ) : (

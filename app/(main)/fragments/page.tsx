@@ -2,14 +2,16 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Sparkles, TrendingUp, Users } from "lucide-react";
+import { Plus, Sparkles, TrendingUp, Users, LayoutGrid, Rows3, Search, X } from "lucide-react";
 import { fragments } from "@/lib/api/fragments";
 import { FragmentCard } from "@/components/fragment/fragment-card";
+import { FragmentVerticalFeed } from "@/components/fragment/fragment-vertical-feed";
 import { StoryFragment, FragmentListResponse } from "@/lib/types";
 import { useAuth } from "@/providers/auth-provider";
 import { useLoginPrompt } from "@/components/auth/login-prompt";
 
 type FeedTab = "discover" | "following";
+type ViewMode = "grid" | "vertical";
 
 export default function FragmentsPage() {
     const router = useRouter();
@@ -17,6 +19,11 @@ export default function FragmentsPage() {
     const { show: showLoginPrompt } = useLoginPrompt();
 
     const [activeTab, setActiveTab] = useState<FeedTab>("discover");
+    const [viewMode, setViewMode] = useState<ViewMode>("grid");
+    const [showSearch, setShowSearch] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [searchResults, setSearchResults] = useState<StoryFragment[]>([]);
+    const [searching, setSearching] = useState(false);
     const [fragmentsList, setFragmentsList] = useState<StoryFragment[]>([]);
     const [loading, setLoading] = useState(true);
     const [hasMore, setHasMore] = useState(false);
@@ -64,17 +71,73 @@ export default function FragmentsPage() {
         <div className="container max-w-6xl mx-auto px-4 py-6 md:px-6 space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Fragments</h1>
-                    <p className="text-muted-foreground text-sm">Discover creative fragments from the community</p>
-                </div>
-                <button
-                    onClick={handleCreateClick}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
-                >
-                    <Plus className="w-4 h-4" />
-                    Create
-                </button>
+                {showSearch ? (
+                    <div className="flex-1 flex items-center gap-2">
+                        <Search className="w-4 h-4 text-muted-foreground shrink-0" />
+                        <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={async (e) => {
+                                setSearchQuery(e.target.value);
+                                if (e.target.value.trim().length >= 2) {
+                                    setSearching(true);
+                                    try {
+                                        const res = await fragments.search(e.target.value);
+                                        setSearchResults(res.fragments);
+                                    } catch { setSearchResults([]); }
+                                    finally { setSearching(false); }
+                                } else {
+                                    setSearchResults([]);
+                                }
+                            }}
+                            placeholder="Search fragments..."
+                            className="flex-1 py-1 text-sm bg-transparent focus:outline-none"
+                            autoFocus
+                        />
+                        <button onClick={() => { setShowSearch(false); setSearchQuery(""); setSearchResults([]); }} className="p-1 hover:bg-muted rounded">
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
+                ) : (
+                    <>
+                        <div>
+                            <h1 className="text-2xl font-bold tracking-tight">Fragments</h1>
+                            <p className="text-muted-foreground text-sm">Discover creative fragments from the community</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setShowSearch(true)}
+                                className="p-2 hover:bg-muted rounded-lg transition-colors"
+                                title="Search"
+                            >
+                                <Search className="w-4 h-4" />
+                            </button>
+                            <div className="flex items-center border border-border rounded-lg overflow-hidden">
+                                <button
+                                    onClick={() => setViewMode("grid")}
+                                    className={`p-2 transition-colors ${viewMode === "grid" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                                    title="Grid view"
+                                >
+                                    <LayoutGrid className="w-4 h-4" />
+                                </button>
+                                <button
+                                    onClick={() => setViewMode("vertical")}
+                                    className={`p-2 transition-colors ${viewMode === "vertical" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                                    title="Vertical feed"
+                                >
+                                    <Rows3 className="w-4 h-4" />
+                                </button>
+                            </div>
+                            <button
+                                onClick={handleCreateClick}
+                                className="flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
+                            >
+                                <Plus className="w-4 h-4" />
+                                Create
+                            </button>
+                        </div>
+                    </>
+                )}
             </div>
 
             {/* Tabs */}
@@ -101,8 +164,26 @@ export default function FragmentsPage() {
                 </div>
             </div>
 
-            {/* Grid */}
-            {loading && fragmentsList.length === 0 ? (
+            {/* Content */}
+            {searchQuery.trim().length >= 2 ? (
+                searching ? (
+                    <div className="flex items-center justify-center py-20">
+                        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                    </div>
+                ) : searchResults.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-20 text-center">
+                        <p className="text-muted-foreground">No fragments found for &ldquo;{searchQuery}&rdquo;</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        {searchResults.map((fragment) => (
+                            <FragmentCard key={fragment.id} fragment={fragment} compact />
+                        ))}
+                    </div>
+                )
+            ) : viewMode === "vertical" ? (
+                <FragmentVerticalFeed tab={activeTab} />
+            ) : loading && fragmentsList.length === 0 ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                     {Array.from({ length: 10 }).map((_, i) => (
                         <div key={i} className="rounded-xl bg-muted animate-pulse h-[280px]" />

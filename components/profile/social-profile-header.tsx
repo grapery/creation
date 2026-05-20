@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Settings, Share2, Bell, MoreHorizontal, MessageSquare, Crown, Calendar, Users, User as UserIcon, FileText, Drama, Heart } from "lucide-react";
 import Link from "next/link";
+import { useTranslation } from "@/providers/language-provider";
 
 interface SocialProfileHeaderProps {
     userId: string;
@@ -37,6 +38,7 @@ export function SocialProfileHeader({
     onFollow,
     onMessage,
 }: SocialProfileHeaderProps) {
+    const { t } = useTranslation();
     const formatJoinedDate = (timestamp?: number) => {
         if (!timestamp) return "";
         const date = new Date(timestamp * 1000);
@@ -123,7 +125,7 @@ export function SocialProfileHeader({
                                 onClick={onEditProfile}
                                 className="px-4 py-2.5 bg-card shadow-[0_4px_2px_rgba(0,0,0,0.1)] rounded-full text-sm font-medium text-foreground border border-border"
                             >
-                                Edit Profile
+                                {t("profile.edit_profile")}
                             </button>
                         ) : (
                             <>
@@ -146,12 +148,12 @@ export function SocialProfileHeader({
                                     >
                                         {isFollowing ? (
                                             <>
-                                                <span>Following</span>
+                                                <span>{t("profile.following")}</span>
                                             </>
                                         ) : (
                                             <>
                                                 <span className="w-3.5 h-3.5">+</span>
-                                                <span>Follow</span>
+                                                <span>{t("profile.follow")}</span>
                                             </>
                                         )}
                                     </button>
@@ -180,7 +182,7 @@ export function SocialProfileHeader({
                 {user.createdAt && (
                     <div className="flex items-center gap-1 text-[12px] text-muted-foreground pt-0.5">
                         <Calendar className="w-3 h-3" />
-                        <span>Joined {formatJoinedDate(user.createdAt)}</span>
+                        <span>{t("profile.joined")} {formatJoinedDate(user.createdAt)}</span>
                     </div>
                 )}
             </div>
@@ -205,7 +207,7 @@ export function SocialProfileHeader({
                                 <span className="text-[16px] font-bold text-foreground">
                                     {user.followingCount || user.following || 0}
                                 </span>
-                                <span className="text-[11px] text-muted-foreground uppercase tracking-wide">Following</span>
+                                <span className="text-[11px] text-muted-foreground uppercase tracking-wide">{t("profile.following")}</span>
                             </div>
                         </div>
                     </Link>
@@ -218,7 +220,7 @@ export function SocialProfileHeader({
                                 <span className="text-[16px] font-bold text-foreground">
                                     {user.followerCount || user.followers || 0}
                                 </span>
-                                <span className="text-[11px] text-muted-foreground uppercase tracking-wide">Followers</span>
+                                <span className="text-[11px] text-muted-foreground uppercase tracking-wide">{t("profile.followers")}</span>
                             </div>
                         </div>
                     </Link>
@@ -231,7 +233,7 @@ export function SocialProfileHeader({
                                 <span className="text-[16px] font-bold text-foreground">
                                     {user.storyCount || 0}
                                 </span>
-                                <span className="text-[11px] text-muted-foreground uppercase tracking-wide">Stories</span>
+                                <span className="text-[11px] text-muted-foreground uppercase tracking-wide">{t("profile.stories")}</span>
                             </div>
                         </div>
                     </div>
@@ -244,7 +246,7 @@ export function SocialProfileHeader({
                                 <span className="text-[16px] font-bold text-foreground">
                                     {user.characterCount || 0}
                                 </span>
-                                <span className="text-[11px] text-muted-foreground uppercase tracking-wide">Characters</span>
+                                <span className="text-[11px] text-muted-foreground uppercase tracking-wide">{t("profile.characters")}</span>
                             </div>
                         </div>
                     </div>
@@ -257,7 +259,7 @@ export function SocialProfileHeader({
                                 <span className="text-[16px] font-bold text-foreground">
                                     {user.totalLikes || likesCount}
                                 </span>
-                                <span className="text-[11px] text-muted-foreground uppercase tracking-wide">Likes</span>
+                                <span className="text-[11px] text-muted-foreground uppercase tracking-wide">{t("profile.likes_short")}</span>
                             </div>
                         </div>
                     </div>

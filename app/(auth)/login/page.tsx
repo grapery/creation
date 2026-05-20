@@ -125,7 +125,7 @@ export default function LoginPage() {
                 <div className="h-20 w-20 rounded-2xl bg-primary flex items-center justify-center shadow-lg">
                     <BookOpen className="h-10 w-10 text-white" />
                 </div>
-                <h1 className="text-3xl font-bold tracking-tight">Voyager</h1>
+                <h1 className="text-3xl font-bold tracking-tight">{t("common.app_name")}</h1>
                 <p className="text-muted-foreground text-center">
                     {t('auth.app_tagline')}
                 </p>

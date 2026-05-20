@@ -28,13 +28,13 @@ export function Header() {
             <div className="container max-w-6xl flex h-14 items-center px-4 md:px-6 mx-auto">
                 <Link href="/about" className="mr-6 flex items-center space-x-2">
                     <div className="h-6 w-6 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold">V</div>
-                    <span className="hidden font-bold sm:inline-block">Voyager</span>
+                    <span className="hidden font-bold sm:inline-block">{t("common.app_name")}</span>
                 </Link>
                 <div className="mr-4 hidden md:flex">
                     <nav className="flex items-center space-x-6 text-sm font-medium">
                         <Link href="/" className="transition-colors hover:text-foreground/80 text-foreground">{t("navigation.home")}</Link>
-                        <Link href="/plaza" className="transition-colors hover:text-foreground/80 text-foreground/60">Discover</Link>
-                        <Link href="/fragments" className="transition-colors hover:text-foreground/80 text-foreground/60">Fragments</Link>
+                        <Link href="/plaza" className="transition-colors hover:text-foreground/80 text-foreground/60">{t("discover.title")}</Link>
+                        <Link href="/fragments" className="transition-colors hover:text-foreground/80 text-foreground/60">{t("sidebar.fragment")}</Link>
                     </nav>
                 </div>
 
@@ -49,7 +49,7 @@ export function Header() {
                         <div
                             className="w-full bg-secondary border-0 rounded-full pl-10 h-10 text-sm text-muted-foreground flex items-center cursor-pointer hover:bg-secondary/80 transition-colors"
                         >
-                            Search stories, people...
+                            {t("discover.search_placeholder")}
                         </div>
                     </Link>
                     <nav className="flex items-center space-x-3 text-sm font-medium">
@@ -80,7 +80,7 @@ export function Header() {
                             {!user.isVip && (
                                 <Button variant="capsule" size="ios-sm" className="hidden md:flex bg-gradient-to-r from-amber-500 to-yellow-400 text-white border-0 hover:opacity-90" asChild>
                                     <Link href="/vip">
-                                        <Crown className="w-3.5 h-3.5 fill-current mr-1.5" /> Pro
+                                        <Crown className="w-3.5 h-3.5 fill-current mr-1.5" /> {t("common.vip.plan_pro")}
                                     </Link>
                                 </Button>
                             )}

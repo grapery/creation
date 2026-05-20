@@ -2,13 +2,25 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ImagePlus, Wand2, X, Loader2, Send } from "lucide-react";
+import { ImagePlus, Wand2, X, Loader2, Send, Sparkles, Image as ImageIcon } from "lucide-react";
 import { fragments } from "@/lib/api/fragments";
 import { FragmentStylePicker } from "@/components/fragment/fragment-style-picker";
 import { FragmentVisibilityPicker } from "@/components/fragment/fragment-visibility-picker";
 import { FragmentGenerationOverlay } from "@/components/fragment/fragment-generation-overlay";
 import { showSuccess, showError } from "@/lib/toast-utils";
 import type { FragmentStyle, FragmentVisibility, GenerateFragmentPanelsTaskResponse } from "@/lib/types";
+
+type CreationMode = "ai-text" | "ref-image";
+
+const ASPECT_RATIOS = [
+    { value: "1:1", label: "1:1", desc: "Square" },
+    { value: "3:4", label: "3:4", desc: "Portrait" },
+    { value: "4:3", label: "4:3", desc: "Landscape" },
+    { value: "9:16", label: "9:16", desc: "Tall" },
+    { value: "16:9", label: "16:9", desc: "Wide" },
+] as const;
+
+const PANEL_COUNTS = [1, 2, 3, 4, 5, 6, 7, 8] as const;
 
 export default function CreateFragmentPage() {
     const router = useRouter();
@@ -21,6 +33,10 @@ export default function CreateFragmentPage() {
     const [imageUrls, setImageUrls] = useState<string[]>([]);
     const [selectedStyle, setSelectedStyle] = useState<string>("");
     const [visibility, setVisibility] = useState<FragmentVisibility>("public");
+    const [creationMode, setCreationMode] = useState<CreationMode>("ai-text");
+    const [aspectRatio, setAspectRatio] = useState<string>("3:4");
+    const [panelCount, setPanelCount] = useState<number>(1);
+    const [draftLoaded, setDraftLoaded] = useState(false);
 
     // Styles
     const [styles, setStyles] = useState<FragmentStyle[]>([]);
@@ -37,7 +53,28 @@ export default function CreateFragmentPage() {
 
     useEffect(() => {
         loadStyles();
+        loadDraft();
     }, []);
+
+    const loadDraft = async () => {
+        try {
+            const params = new URLSearchParams(window.location.search);
+            const draftId = params.get("draftId");
+            if (!draftId) return;
+            const frag = await fragments.get(draftId);
+            if (frag && frag.isDraft) {
+                setContent(frag.content);
+                setCaption(frag.caption || "");
+                setTopic(frag.topic || "");
+                setImageUrls(frag.imageUrls || []);
+                setSelectedStyle(frag.style || "");
+                setDraftFragmentId(frag.id);
+                setDraftLoaded(true);
+            }
+        } catch {
+            // Draft not found or not a draft, continue with empty form
+        }
+    };
 
     const loadStyles = async () => {
         setLoadingStyles(true);
@@ -138,6 +175,8 @@ export default function CreateFragmentPage() {
                 userInput: content,
                 referenceImageUrl: imageUrls[0],
                 style: selectedStyle || undefined,
+                panelCount: panelCount > 1 ? panelCount : undefined,
+                aspectRatio: aspectRatio !== "3:4" ? aspectRatio : undefined,
                 visibility,
                 topic: topic || undefined,
             });
@@ -265,6 +304,87 @@ export default function CreateFragmentPage() {
                 />
             </div>
 
+            {/* Creation Mode */}
+            <div className="space-y-2">
+                <label className="text-sm font-medium">Creation Mode</label>
+                <div className="grid grid-cols-2 gap-3">
+                    <button
+                        onClick={() => setCreationMode("ai-text")}
+                        className={`flex items-center gap-3 p-3 rounded-lg border-2 transition-colors ${
+                            creationMode === "ai-text"
+                                ? "border-primary bg-primary/5"
+                                : "border-border hover:border-primary/30"
+                        }`}
+                    >
+                        <Sparkles className={`w-5 h-5 ${creationMode === "ai-text" ? "text-primary" : "text-muted-foreground"}`} />
+                        <div className="text-left">
+                            <p className="text-sm font-medium">AI Text</p>
+                            <p className="text-xs text-muted-foreground">Describe → AI generates</p>
+                        </div>
+                    </button>
+                    <button
+                        onClick={() => setCreationMode("ref-image")}
+                        className={`flex items-center gap-3 p-3 rounded-lg border-2 transition-colors ${
+                            creationMode === "ref-image"
+                                ? "border-primary bg-primary/5"
+                                : "border-border hover:border-primary/30"
+                        }`}
+                    >
+                        <ImageIcon className={`w-5 h-5 ${creationMode === "ref-image" ? "text-primary" : "text-muted-foreground"}`} />
+                        <div className="text-left">
+                            <p className="text-sm font-medium">Reference Image</p>
+                            <p className="text-xs text-muted-foreground">Upload ref → AI panels</p>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            {/* Aspect Ratio */}
+            <div className="space-y-2">
+                <label className="text-sm font-medium">Aspect Ratio</label>
+                <div className="flex gap-2">
+                    {ASPECT_RATIOS.map((ar) => (
+                        <button
+                            key={ar.value}
+                            onClick={() => setAspectRatio(ar.value)}
+                            className={`flex flex-col items-center px-3 py-2 rounded-lg border text-xs transition-colors ${
+                                aspectRatio === ar.value
+                                    ? "border-primary bg-primary/5 text-primary"
+                                    : "border-border text-muted-foreground hover:border-primary/30"
+                            }`}
+                        >
+                            <span className="font-medium">{ar.label}</span>
+                            <span className="text-[10px]">{ar.desc}</span>
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Panel Count */}
+            <div className="space-y-2">
+                <label className="text-sm font-medium">Panels</label>
+                <div className="flex gap-2">
+                    {PANEL_COUNTS.map((n) => (
+                        <button
+                            key={n}
+                            onClick={() => setPanelCount(n)}
+                            className={`w-9 h-9 rounded-lg border text-sm font-medium transition-colors ${
+                                panelCount === n
+                                    ? "border-primary bg-primary/5 text-primary"
+                                    : "border-border text-muted-foreground hover:border-primary/30"
+                            }`}
+                        >
+                            {n}
+                        </button>
+                    ))}
+                </div>
+                {panelCount > 1 && (
+                    <p className="text-xs text-muted-foreground">
+                        AI will generate {panelCount} connected panels in sequence
+                    </p>
+                )}
+            </div>
+
             {/* Content */}
             <div className="space-y-2">
                 <label className="text-sm font-medium">Content</label>
@@ -323,22 +443,31 @@ export default function CreateFragmentPage() {
 
             {/* AI Actions */}
             <div className="flex gap-3">
-                <button
-                    onClick={handleAIGenerate}
-                    disabled={genStatus === "generating" || genStatus === "polling" || !content.trim()}
-                    className="flex-1 flex items-center justify-center gap-2 py-3 bg-purple-500 hover:bg-purple-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors text-sm"
-                >
-                    <Wand2 className="w-4 h-4" />
-                    AI Generate
-                </button>
-                {imageUrls.length > 0 && (
+                {creationMode === "ai-text" ? (
+                    <button
+                        onClick={handleAIGenerate}
+                        disabled={genStatus === "generating" || genStatus === "polling" || !content.trim()}
+                        className="flex-1 flex items-center justify-center gap-2 py-3 bg-purple-500 hover:bg-purple-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors text-sm"
+                    >
+                        {genStatus === "generating" || genStatus === "polling" ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                            <Wand2 className="w-4 h-4" />
+                        )}
+                        AI Generate
+                    </button>
+                ) : (
                     <button
                         onClick={handlePanelGenerate}
-                        disabled={genStatus === "generating" || genStatus === "polling"}
+                        disabled={genStatus === "generating" || genStatus === "polling" || imageUrls.length === 0 || !content.trim()}
                         className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors text-sm"
                     >
-                        <Wand2 className="w-4 h-4" />
-                        Panel Gen
+                        {genStatus === "generating" || genStatus === "polling" ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                            <Wand2 className="w-4 h-4" />
+                        )}
+                        Generate {panelCount > 1 ? `${panelCount} Panels` : "Image"}
                     </button>
                 )}
             </div>

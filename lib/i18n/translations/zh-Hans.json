@@ -12,7 +12,7 @@
     "loading": "加载中...",
     "vip": {
       "upgrade_title": "升级会员",
-      "upgrade_subtitle": "解锁 Voyager 的全部潜力。创作无极限。",
+      "upgrade_subtitle": "解锁未择的全部潜力。创作无极限。",
       "plan_free": "免费版",
       "plan_pro": "Pro 版",
       "subscribe": "订阅",
@@ -54,7 +54,9 @@
     "close": "关闭",
     "views": "浏览",
     "forks": "复刻",
-    "and": "和"
+    "and": "和",
+    "saving": "保存中...",
+    "app_name": "未择"
   },
   "auth": {
     "sign_in": "登录",
@@ -131,7 +133,7 @@
       "storyboard": "故事板",
       "my_drafts": "我的草稿",
       "analytics": "分析",
-      "about": "关于 Voyager",
+      "about": "关于未择",
       "guidelines": "社区指南",
       "privacy": "隐私政策",
       "terms": "服务条款"
@@ -142,6 +144,7 @@
   },
   "settings": {
     "title": "设置",
+    "subtitle": "管理你的账户偏好",
     "account": "账户",
     "profile_info": "个人资料",
     "membership_billing": "会员与账单",
@@ -266,7 +269,14 @@
     "title": "角色",
     "subtitle": "与 AI 角色聊天或创建属于你自己的角色。",
     "search_placeholder": "搜索角色...",
-    "create_button": "创建角色"
+    "create_button": "创建角色",
+    "edit_character": "编辑角色",
+    "create_character_subtitle": "定义角色设定与外观",
+    "basic_info": "基本信息",
+    "basic_info_desc": "输入角色的基本资料",
+    "describe_your_character": "描述你的角色",
+    "ai_generate": "AI 生成",
+    "generated_character": "已生成角色"
   },
   "chat": {
     "new_chat": "新聊天",
@@ -337,7 +347,13 @@
     "less": "更少",
     "more": "更多",
     "today": "今天",
-    "no_activity_on_this_day": "当天没有活动"
+    "no_activity_on_this_day": "当天没有活动",
+    "week": "周",
+    "month": "月",
+    "no_data": "暂无数据",
+    "no_data_for_month": "本月暂无数据",
+    "activities_count": "{count} 条动态",
+    "follow": "关注"
   },
   "notifications": {
     "mark_all_read": "全部标为已读",
@@ -365,6 +381,23 @@
   },
   "loading": "加载中...",
   "empty": "暂无数据",
+  "comments": {
+    "unknown": "未知",
+    "reply": "回复",
+    "like": "点赞",
+    "likes": "获赞"
+  },
+  "storyboard": {
+    "fork_title": "复刻故事板",
+    "fork_description": "从当前故事板创建新的分支",
+    "fork_title_label": "标题",
+    "fork_direction": "新方向（可选）",
+    "fork": "复刻",
+    "continue_title": "续写故事",
+    "continue_description": "描述接下来会发生什么",
+    "continue_what_next": "接下来发生什么？",
+    "continue_scene_count": "场景数量"
+  },
   "story_detail": {
     "tabs": {
       "story": "故事",
@@ -561,6 +594,50 @@
     "generation_steps_detail": "查看步骤详情",
     "pipeline_resume_hint": "建议下一步"
   },
+  "editor": {
+    "save": "保存",
+    "share": "分享",
+    "collaborate": "协作",
+    "tab_details": "详情",
+    "tab_panels": "面板",
+    "tab_cast": "角色",
+    "story_information": "故事信息",
+    "title_label": "标题",
+    "title_placeholder": "输入故事标题",
+    "description_label": "描述",
+    "description_placeholder": "描述你的故事...",
+    "genre_label": "类型",
+    "genre_placeholder": "选择类型",
+    "cover_image": "封面图片",
+    "cover_upload_hint": "点击上传封面图片",
+    "cover_ratio_hint": "建议：16:9 比例",
+    "ai_enrichment_title": "AI 增强选项",
+    "ai_enrich_description": "用 AI 丰富描述",
+    "ai_generate_cover": "用 AI 生成封面",
+    "ai_generate_background": "用 AI 生成背景",
+    "ai_generate_poster": "用 AI 生成海报",
+    "panels_title": "面板",
+    "panels_subtitle": "管理故事面板",
+    "add_panel": "添加面板",
+    "no_panels": "暂无面板",
+    "no_panels_message": "创建第一个面板来可视化你的故事",
+    "create_first_panel": "用 AI 创建第一个面板",
+    "panel_label": "面板",
+    "order_label": "顺序",
+    "cast_title": "角色",
+    "cast_subtitle": "管理故事角色",
+    "add_character": "添加角色",
+    "no_characters": "暂无角色",
+    "no_characters_message": "添加角色让故事更生动",
+    "add_first_character": "添加第一个角色",
+    "no_description": "暂无描述",
+    "save_success": "故事保存成功",
+    "save_failed": "保存故事失败",
+    "link_copied": "链接已复制到剪贴板",
+    "copy_failed": "复制链接失败",
+    "save_before_collab": "请先保存故事再邀请协作者",
+    "opening_collab": "正在打开协作者设置..."
+  },
   "story_settings": {
     "visibility": "可见范围",
     "public": "公开",
@@ -627,6 +704,25 @@
   "footer": {
     "privacy": "隐私政策",
     "terms": "服务协议",
-    "api_docs": "API 文档"
+    "api_docs": "API 文档",
+    "copyright": "© 2025 未择。保留所有权利。",
+    "icp": "沪ICP备2025137210号"
+  },
+  "settings_nav": {
+    "profile": "个人资料",
+    "membership": "会员订阅",
+    "appearance": "外观",
+    "notifications": "通知",
+    "language": "语言",
+    "genre_preferences": "类型偏好",
+    "privacy_safety": "隐私与安全",
+    "blocked_users": "已屏蔽用户",
+    "security": "安全",
+    "token_usage": "Token 用量",
+    "creator_analytics": "创作者分析",
+    "invite_friends": "邀请好友",
+    "feedback": "反馈",
+    "terms_of_service": "服务条款",
+    "about": "关于"
   }
 }

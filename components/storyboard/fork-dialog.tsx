@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2, GitFork } from "lucide-react";
 import { storyboards } from "@/lib/api/storyboards";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "@/providers/language-provider";
 
 function Textarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
     return <textarea {...props} className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50" />;
@@ -21,6 +22,7 @@ interface ForkDialogProps {
 
 export function ForkDialog({ storyboardId, currentTitle, open, onClose }: ForkDialogProps) {
     const router = useRouter();
+    const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
     const [title, setTitle] = useState(`Fork of ${currentTitle || ""}`);
     const [rawInput, setRawInput] = useState("");
@@ -47,13 +49,13 @@ export function ForkDialog({ storyboardId, currentTitle, open, onClose }: ForkDi
         <div className="space-y-4">
             <div className="flex items-center gap-2 text-lg font-semibold">
                 <GitFork className="h-5 w-5" />
-                Fork Storyboard
+                {t("storyboard.fork_title")}
             </div>
             <p className="text-sm text-muted-foreground">
-                Create a new branch from this storyboard. Your changes won&apos;t affect the original.
+                {t("storyboard.fork_description")}
             </p>
             <div className="space-y-2">
-                <Label htmlFor="fork-title">Title</Label>
+                <Label htmlFor="fork-title">{t("storyboard.fork_title_label")}</Label>
                 <Input
                     id="fork-title"
                     value={title}
@@ -62,7 +64,7 @@ export function ForkDialog({ storyboardId, currentTitle, open, onClose }: ForkDi
                 />
             </div>
             <div className="space-y-2">
-                <Label htmlFor="fork-input">New Direction (optional)</Label>
+                <Label htmlFor="fork-input">{t("storyboard.fork_direction")}</Label>
                 <Textarea
                     id="fork-input"
                     value={rawInput}
@@ -71,10 +73,10 @@ export function ForkDialog({ storyboardId, currentTitle, open, onClose }: ForkDi
                 />
             </div>
             <div className="flex justify-end gap-2">
-                <Button variant="ghost" onClick={onClose}>Cancel</Button>
+                <Button variant="ghost" onClick={onClose}>{t("common.cancel")}</Button>
                 <Button onClick={handleFork} disabled={loading || !title.trim()}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Fork
+                    {t("storyboard.fork")}
                 </Button>
             </div>
         </div>

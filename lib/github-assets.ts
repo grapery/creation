@@ -41,9 +41,35 @@ export const githubImages = {
     ? `${GITHUB_ASSETS_BASE_URL}/roles.jpeg`
     : "/roles.jpeg",
     
-  collaboration: GITHUB_ASSETS_BASE_URL 
+  collaboration: GITHUB_ASSETS_BASE_URL
     ? `${GITHUB_ASSETS_BASE_URL}/collaboration.jpeg`
     : "/collaboration.jpeg",
+
+  // App screenshots for about page
+  screenshotFragmentFeed: GITHUB_ASSETS_BASE_URL
+    ? `${GITHUB_ASSETS_BASE_URL}/screenshot-fragment-feed.jpeg`
+    : "/screenshot-fragment-feed.jpeg",
+  screenshotStoryboardList: GITHUB_ASSETS_BASE_URL
+    ? `${GITHUB_ASSETS_BASE_URL}/screenshot-storyboard-list.jpeg`
+    : "/screenshot-storyboard-list.jpeg",
+  screenshotStoryboardReader: GITHUB_ASSETS_BASE_URL
+    ? `${GITHUB_ASSETS_BASE_URL}/screenshot-storyboard-reader.jpeg`
+    : "/screenshot-storyboard-reader.jpeg",
+  screenshotCreateStoryboard: GITHUB_ASSETS_BASE_URL
+    ? `${GITHUB_ASSETS_BASE_URL}/screenshot-create-storyboard.png`
+    : "/screenshot-create-storyboard.png",
+  screenshotStoryDetail: GITHUB_ASSETS_BASE_URL
+    ? `${GITHUB_ASSETS_BASE_URL}/screenshot-story-detail.jpeg`
+    : "/screenshot-story-detail.jpeg",
+  screenshotContributors: GITHUB_ASSETS_BASE_URL
+    ? `${GITHUB_ASSETS_BASE_URL}/screenshot-contributors.jpeg`
+    : "/screenshot-contributors.jpeg",
+  screenshotNotifications: GITHUB_ASSETS_BASE_URL
+    ? `${GITHUB_ASSETS_BASE_URL}/screenshot-notifications.jpeg`
+    : "/screenshot-notifications.jpeg",
+  screenshotUserProfile: GITHUB_ASSETS_BASE_URL
+    ? `${GITHUB_ASSETS_BASE_URL}/screenshot-user-profile.jpeg`
+    : "/screenshot-user-profile.jpeg",
 };
 
 // Helper function to get image URL with fallback

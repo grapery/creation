@@ -260,7 +260,7 @@ export default function AuthLayout({
                     <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3">
                         <span className="text-background font-bold">V</span>
                     </div>
-                    <span style={{ fontFamily: '"ZCOOL KuaiLe", cursive' }}>未择 Voyager</span>
+                    <span style={{ fontFamily: '"ZCOOL KuaiLe", cursive' }}>未择</span>
                 </div>
 
                 {/* Content - Scrollable Area */}
@@ -359,7 +359,7 @@ export default function AuthLayout({
                                     fontFamily: '"Ma Shan Zheng", cursive'
                                 }}
                             >
-                                加入未择 Voyager，在这个无限可能的黑板上，画出属于你的世界。
+                                加入未择，在这个无限可能的黑板上，画出属于你的世界。
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
                                 <Button 
@@ -397,7 +397,7 @@ export default function AuthLayout({
                                         fontFamily: '"ZCOOL KuaiLe", cursive'
                                     }}
                                 >
-                                    未择 Voyager
+                                    未择
                                 </span>
                             </div>
                             <div 

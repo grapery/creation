@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PenTool, Target, TrendingUp, BookOpen, Lightbulb, Compass, Sparkles, Bookmark } from "lucide-react";
+import { PenTool, Target, TrendingUp, BookOpen, Compass, Sparkles, Bookmark } from "lucide-react";
 import { useTranslation } from "@/providers/language-provider";
 
 export function Sidebar({ className }: { className?: string }) {
@@ -76,7 +76,7 @@ export function Sidebar({ className }: { className?: string }) {
                 <CardHeader className="pb-3">
                     <CardTitle className="flex items-center gap-2 text-base">
                         <TrendingUp className="h-4 w-4 text-orange-500" />
-                        Trending Topics
+                        {t("dashboard.trending_topics")}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -106,7 +106,14 @@ export function Sidebar({ className }: { className?: string }) {
                     <Link href="/api/v1" className="hover:text-foreground">{t("footer.api_docs")}</Link>
                 </div>
                 <div className="text-xs text-muted-foreground">
-                    <div>© 2025 Voyager Platform. All rights reserved.</div>
+                    <div>{t("footer.copyright")}</div>
+                    {t("footer.icp") && (
+                        <div>
+                            <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
+                                {t("footer.icp")}
+                            </a>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

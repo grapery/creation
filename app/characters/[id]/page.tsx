@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { characters } from "@/lib/api/characters";
 import { storyboards } from "@/lib/api/storyboards";
 import { Character } from "@/lib/types/character";
@@ -9,7 +9,7 @@ import { Storyboard } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, MessageCircle, Share2, MoreHorizontal, Film, Image, Info, Sparkles } from "lucide-react";
+import { Loader2, MessageCircle, Share2, MoreHorizontal, Film, Image, Info, Sparkles, User as UserIcon } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -22,6 +22,7 @@ interface CharacterPoster {
 
 export default function CharacterDetailPage() {
     const { id } = useParams();
+    const router = useRouter();
     const [character, setCharacter] = useState<Character | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -159,6 +160,10 @@ export default function CharacterDetailPage() {
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
+                                        <DropdownMenuItem onClick={() => router.push(`/characters/${id}/edit`)}>
+                                            <UserIcon className="h-4 w-4 mr-2" />
+                                            Edit Character
+                                        </DropdownMenuItem>
                                         <DropdownMenuItem onClick={async () => {
                                             try {
                                                 const result = await characters.generateAvatar(id as string);

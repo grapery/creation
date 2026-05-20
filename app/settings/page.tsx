@@ -122,8 +122,8 @@ export default function SettingsPage() {
 
             <div className="text-center py-8">
                 <p className="text-sm text-muted-foreground">
-                    {language === 'zh-Hans' ? '未择 Voyager v1.0.0 (网页版)' :
-                     language === 'ja' ? 'Voyager v1.0.0 (Web)' :
+                    {language === 'zh-Hans' ? '未择 v1.0.0 (网页版)' :
+                     language === 'ja' ? '未择 v1.0.0 (Web)' :
                      'Voyager v1.0.0 (Web)'}
                 </p>
             </div>

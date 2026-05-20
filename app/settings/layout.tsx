@@ -1,9 +1,13 @@
 "use client";
 
 import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
 import { SettingsSidebar } from "@/components/layout/settings-sidebar";
+import { useTranslation } from "@/providers/language-provider";
 
 export default function SettingsLayout({ children }: { children: React.ReactNode }) {
+    const { t } = useTranslation();
+
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <Header />
@@ -11,8 +15,8 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
                 <div className="flex flex-col md:grid md:grid-cols-[240px_1fr] gap-8">
                     <aside className="w-full md:sticky md:top-[72px] md:h-fit">
                         <div className="mb-4 px-2">
-                            <h2 className="text-lg font-bold tracking-tight">Settings</h2>
-                            <p className="text-sm text-muted-foreground">Manage your account preferences</p>
+                            <h2 className="text-lg font-bold tracking-tight">{t("settings.title")}</h2>
+                            <p className="text-sm text-muted-foreground">{t("settings.subtitle")}</p>
                         </div>
                         <SettingsSidebar />
                     </aside>
@@ -21,6 +25,7 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
                     </main>
                 </div>
             </div>
+            <Footer />
         </div>
     );
 }

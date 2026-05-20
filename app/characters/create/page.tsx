@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { characters } from "@/lib/api/characters";
 import { upload } from "@/lib/api/upload";
 import { CharacterGenerator } from "@/components/character/character-generator";
+import { useTranslation } from "@/providers/language-provider";
 
 function Textarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
     return <textarea {...props} className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50" />;
@@ -18,6 +19,7 @@ function Textarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
 
 export default function CreateCharacterPage() {
     const router = useRouter();
+    const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
     const [avatarUploading, setAvatarUploading] = useState(false);
     const [createMode, setCreateMode] = useState<"manual" | "ai">("manual");
@@ -68,14 +70,14 @@ export default function CreateCharacterPage() {
     return (
         <div className="max-w-lg mx-auto">
             <div className="mb-8 text-center">
-                <h1 className="text-2xl font-bold">Create Character</h1>
-                <p className="text-muted-foreground">Bring a new personality to life</p>
+                <h1 className="text-2xl font-bold">{t("characters.create_character")}</h1>
+                <p className="text-muted-foreground">{t("characters.create_character_subtitle")}</p>
             </div>
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Basic Information</CardTitle>
-                    <CardDescription>Define who your character is.</CardDescription>
+                    <CardTitle>{t("characters.basic_info")}</CardTitle>
+                    <CardDescription>{t("characters.basic_info_desc")}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <Tabs value={createMode} onValueChange={(v) => setCreateMode(v as "manual" | "ai")}>
@@ -93,7 +95,7 @@ export default function CreateCharacterPage() {
                     </Tabs>
 
                     <div className="space-y-2">
-                        <Label htmlFor="name">Name</Label>
+                        <Label htmlFor="name">{t("characters.character_editor_name")}</Label>
                         <Input
                             id="name"
                             placeholder="e.g. Sherlock Holmes"
@@ -103,7 +105,7 @@ export default function CreateCharacterPage() {
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="desc">Description</Label>
+                        <Label htmlFor="desc">{t("characters.character_editor_description")}</Label>
                         <Textarea
                             id="desc"
                             placeholder="A brief description visible to others..."
@@ -151,10 +153,10 @@ export default function CreateCharacterPage() {
                     </div>
                 </CardContent>
                 <CardFooter className="flex justify-between">
-                    <Button variant="ghost" onClick={() => router.back()}>Cancel</Button>
+                    <Button variant="ghost" onClick={() => router.back()}>{t("common.cancel")}</Button>
                     <Button onClick={onSubmit} disabled={loading || !formData.name.trim()}>
                         {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Create Character
+                        {t("characters.create_character")}
                     </Button>
                 </CardFooter>
             </Card>

@@ -54,7 +54,9 @@
     "close": "Close",
     "views": "Views",
     "forks": "Forks",
-    "and": "and"
+    "and": "and",
+    "saving": "Saving...",
+    "app_name": "Voyager"
   },
   "auth": {
     "sign_in": "Sign In",
@@ -142,6 +144,7 @@
   },
   "settings": {
     "title": "Settings",
+    "subtitle": "Manage your account preferences",
     "account": "Account",
     "profile_info": "Profile Information",
     "membership_billing": "Membership & Billing",
@@ -266,7 +269,14 @@
     "title": "Characters",
     "subtitle": "Chat with AI personalities or create your own.",
     "search_placeholder": "Search characters...",
-    "create_button": "Create Character"
+    "create_button": "Create Character",
+    "edit_character": "Edit Character",
+    "create_character_subtitle": "Define character and appearance",
+    "basic_info": "Basic Information",
+    "basic_info_desc": "Enter basic character details",
+    "describe_your_character": "Describe Your Character",
+    "ai_generate": "AI Generate",
+    "generated_character": "Generated Character"
   },
   "chat": {
     "new_chat": "New Chat",
@@ -337,7 +347,13 @@
     "less": "Less",
     "more": "More",
     "today": "Today",
-    "no_activity_on_this_day": "No activity on this day"
+    "no_activity_on_this_day": "No activity on this day",
+    "week": "Week",
+    "month": "Month",
+    "no_data": "No data",
+    "no_data_for_month": "No data for this month",
+    "activities_count": "{count} activities",
+    "follow": "Follow"
   },
   "notifications": {
     "mark_all_read": "Mark all read",
@@ -365,6 +381,23 @@
   },
   "loading": "Loading...",
   "empty": "No Data",
+  "comments": {
+    "unknown": "Unknown",
+    "reply": "Reply",
+    "like": "Like",
+    "likes": "Likes"
+  },
+  "storyboard": {
+    "fork_title": "Fork Storyboard",
+    "fork_description": "Create a new branch from this storyboard",
+    "fork_title_label": "Title",
+    "fork_direction": "New Direction (optional)",
+    "fork": "Fork",
+    "continue_title": "Continue Story",
+    "continue_description": "Describe what happens next in the story",
+    "continue_what_next": "What happens next?",
+    "continue_scene_count": "Number of Scenes"
+  },
   "story_detail": {
     "tabs": {
       "story": "Story",
@@ -561,6 +594,50 @@
     "generation_steps_detail": "View step details",
     "pipeline_resume_hint": "Suggested next step"
   },
+  "editor": {
+    "save": "Save",
+    "share": "Share",
+    "collaborate": "Collaborate",
+    "tab_details": "Details",
+    "tab_panels": "Panels",
+    "tab_cast": "Cast",
+    "story_information": "Story Information",
+    "title_label": "Title",
+    "title_placeholder": "Enter story title",
+    "description_label": "Description",
+    "description_placeholder": "Describe your story...",
+    "genre_label": "Genre",
+    "genre_placeholder": "Select a genre",
+    "cover_image": "Cover Image",
+    "cover_upload_hint": "Click to upload cover image",
+    "cover_ratio_hint": "Recommended: 16:9 aspect ratio",
+    "ai_enrichment_title": "AI Enrichment Options",
+    "ai_enrich_description": "Enrich description with AI",
+    "ai_generate_cover": "Generate cover image with AI",
+    "ai_generate_background": "Generate background with AI",
+    "ai_generate_poster": "Generate poster with AI",
+    "panels_title": "Panels",
+    "panels_subtitle": "Manage story panels",
+    "add_panel": "Add Panel",
+    "no_panels": "No Panels Yet",
+    "no_panels_message": "Create your first panel to begin visualizing your story",
+    "create_first_panel": "Create First Panel with AI",
+    "panel_label": "Panel",
+    "order_label": "Order",
+    "cast_title": "Cast",
+    "cast_subtitle": "Manage story characters",
+    "add_character": "Add Character",
+    "no_characters": "No Characters Yet",
+    "no_characters_message": "Add characters to bring your story to life",
+    "add_first_character": "Add First Character",
+    "no_description": "No description",
+    "save_success": "Story saved successfully",
+    "save_failed": "Failed to save story",
+    "link_copied": "Link copied to clipboard",
+    "copy_failed": "Failed to copy link",
+    "save_before_collab": "Save the story first before inviting collaborators",
+    "opening_collab": "Opening collaborator settings..."
+  },
   "story_settings": {
     "visibility": "Visibility",
     "public": "Public",
@@ -627,6 +704,25 @@
   "footer": {
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
-    "api_docs": "API Docs"
+    "api_docs": "API Docs",
+    "copyright": "© 2025 Voyager. All rights reserved.",
+    "icp": ""
+  },
+  "settings_nav": {
+    "profile": "Profile",
+    "membership": "Membership",
+    "appearance": "Appearance",
+    "notifications": "Notifications",
+    "language": "Language",
+    "genre_preferences": "Genre Preferences",
+    "privacy_safety": "Privacy & Safety",
+    "blocked_users": "Blocked Users",
+    "security": "Security",
+    "token_usage": "Token Usage",
+    "creator_analytics": "Creator Analytics",
+    "invite_friends": "Invite Friends",
+    "feedback": "Feedback",
+    "terms_of_service": "Terms of Service",
+    "about": "About"
   }
 }
