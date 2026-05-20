@@ -70,6 +70,17 @@ export const githubImages = {
   screenshotUserProfile: GITHUB_ASSETS_BASE_URL
     ? `${GITHUB_ASSETS_BASE_URL}/screenshot-user-profile.jpeg`
     : "/screenshot-user-profile.jpeg",
+
+  // App icon
+  appIcon: GITHUB_ASSETS_BASE_URL
+    ? `${GITHUB_ASSETS_BASE_URL}/app-icon.png`
+    : "/app-icon.png",
+  appIcon256: GITHUB_ASSETS_BASE_URL
+    ? `${GITHUB_ASSETS_BASE_URL}/app-icon-256.png`
+    : "/app-icon-256.png",
+  appIcon64: GITHUB_ASSETS_BASE_URL
+    ? `${GITHUB_ASSETS_BASE_URL}/app-icon-64.png`
+    : "/app-icon-64.png",
 };
 
 // Helper function to get image URL with fallback

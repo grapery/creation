@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Loader2, BookOpen } from "lucide-react";
+import { githubImages } from "@/lib/github-assets";
 import { OAuthProviderButton, LanguageSelector, OAuthProvider } from "@/components/auth";
 import { useRouter } from "next/navigation";
 import { useGoogleOAuth } from "@/lib/hooks/use-google-oauth";
@@ -122,9 +123,8 @@ export default function LoginPage() {
 
             {/* App Icon and Title */}
             <div className="mb-8 flex flex-col items-center space-y-4">
-                <div className="h-20 w-20 rounded-2xl bg-primary flex items-center justify-center shadow-lg">
-                    <BookOpen className="h-10 w-10 text-white" />
-                </div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={githubImages.appIcon256} alt="" className="h-20 w-20 rounded-2xl shadow-lg" />
                 <h1 className="text-3xl font-bold tracking-tight">{t("common.app_name")}</h1>
                 <p className="text-muted-foreground text-center">
                     {t('auth.app_tagline')}

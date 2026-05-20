@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription } from "@/components/ui/card";
 import { Loader2, User, Mail, Lock, Calendar, ArrowLeft, BookOpen } from "lucide-react";
+import { githubImages } from "@/lib/github-assets";
 import { AuthBackground, LanguageSelector, OAuthProviderButton, OAuthProvider } from "@/components/auth";
 import { useGoogleOAuth } from "@/lib/hooks/use-google-oauth";
 import { useWeChatOAuth } from "@/lib/hooks/use-wechat-oauth";
@@ -165,9 +166,8 @@ export default function RegisterPage() {
 
                     {/* App Icon and Title */}
                     <div className="mb-6 flex flex-col items-center space-y-3">
-                        <div className="h-16 w-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg">
-                            <BookOpen className="h-8 w-8 text-white" />
-                        </div>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={githubImages.appIcon256} alt="" className="h-16 w-16 rounded-2xl shadow-lg" />
                         <h1 className="text-3xl font-bold tracking-tight">{t("common.app_name")}</h1>
                         <p className="text-muted-foreground text-center">
                             {t('auth.register_tagline')}

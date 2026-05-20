@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Voyager",
-  description: "Create and explore interactive stories",
+  title: "未择 Voyager",
+  description: "AI 驱动的分支故事创作平台 — 用 AI 描述你想象中的故事，创造你的故事世界",
 };
 
 export default function RootLayout({

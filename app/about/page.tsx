@@ -58,11 +58,19 @@ export default function AboutPage() {
                 <div className="absolute inset-0 bg-grid-pattern opacity-5" />
                 <div className="container max-w-6xl mx-auto px-4 py-20 md:py-32 relative z-10">
                     <div className="max-w-4xl mx-auto text-center">
+                        <div className="mb-8">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                                src={githubImages.appIcon}
+                                alt="未择"
+                                className="w-24 h-24 md:w-32 md:h-32 rounded-3xl mx-auto shadow-lg shadow-primary/20"
+                            />
+                        </div>
                         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary mb-6">
                             <Sparkles className="w-4 h-4" />
                             <span className="text-sm font-medium">AI 驱动的分支故事创作平台</span>
                         </div>
-                        <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">
+                        <h1 className="text-4xl md:text-6xl font-bold mb-6">
                             未择
                         </h1>
                         <p className="text-xl md:text-2xl text-muted-foreground mb-4">
@@ -486,6 +494,11 @@ export default function AboutPage() {
                         </div>
                     </div>
                     <div className="pt-8 border-t text-center text-sm text-muted-foreground">
+                        <div className="flex items-center justify-center gap-2 mb-2">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={githubImages.appIcon64} alt="未择" className="w-6 h-6 rounded-md" />
+                            <span className="font-semibold">未择</span>
+                        </div>
                         <p>&copy; 2025 未择. All rights reserved.</p>
                         <a
                             href="https://beian.miit.gov.cn/"

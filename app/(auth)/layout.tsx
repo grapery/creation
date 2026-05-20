@@ -257,9 +257,8 @@ export default function AuthLayout({
 
                 {/* Header */}
                 <div className="relative z-20 flex items-center p-6 text-lg font-medium border-b border-white/10">
-                    <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3">
-                        <span className="text-background font-bold">V</span>
-                    </div>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={githubImages.appIcon64} alt="未择" className="w-8 h-8 rounded-lg mr-3" />
                     <span style={{ fontFamily: '"ZCOOL KuaiLe", cursive' }}>未择</span>
                 </div>
 
@@ -387,8 +386,9 @@ export default function AuthLayout({
                     <div className="p-6 border-t border-white/10" style={{ backgroundColor: 'oklch(0.25 0.05 145)' }}>
                         <div className="flex flex-col gap-4 items-center">
                             <div className="flex items-center gap-2">
-                                <div className="w-6 h-6 rounded-full flex items-center justify-center border" style={{ backgroundColor: 'oklch(0.95 0.02 95 / 10%)', borderColor: 'oklch(0.95 0.02 95 / 20%)' }}>
-                                    <span className="text-white font-bold text-sm">V</span>
+                                <div className="w-6 h-6 rounded-lg overflow-hidden flex items-center justify-center">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img src={githubImages.appIcon64} alt="未择" className="w-full h-full object-cover" />
                                 </div>
                                 <span 
                                     className="text-lg"
