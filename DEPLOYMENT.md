@@ -54,8 +54,9 @@ docker run -d \
 Nginx 配置位于 `ngx/conf/default.conf`，主要配置：
 
 1. **前端代理**: `/` 路径代理到 `creation:3000`
-2. **API 代理**: `/api/*` 路径代理到相应的后端服务
-3. **错误页面**: 保留在 nginx 中，用于代理失败时的降级处理
+2. **法律文档 API**: `/api/legal/*` 必须代理到 `creation:3000`（Next.js Route Handler），不能走 Go 主服务
+3. **API 代理**: 其余 `/api/*` 路径代理到相应的后端服务（`/api/agent/`、`/api/vippay/` 等见 `ngx/conf/default.conf`）
+4. **错误页面**: 保留在 nginx 中，用于代理失败时的降级处理
 
 ## 健康检查
 
