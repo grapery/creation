@@ -13,6 +13,8 @@ const nextConfig: NextConfig = {
       // === DO NOT proxy these — handled by Next.js BFF routes ===
       // /api/auth/me → app/api/auth/me/route.ts
       // /api/users/:id (exact) → app/api/users/[id]/route.ts
+      // /api/legal/terms → app/api/legal/terms/route.ts
+      // /api/legal/privacy → app/api/legal/privacy/route.ts
 
       // === Auth routes (public, /api/auth/* — no /v1/) ===
       {
@@ -38,9 +40,10 @@ const nextConfig: NextConfig = {
 
       // === Catch-all: frontend /api/xxx → backend /api/v1/xxx ===
       // Transforms old paths (/api/stories) to backend's authenticated routes (/api/v1/stories)
+      // Excludes /api/legal/* (served by Next.js legal document routes above)
       {
-        source: '/api/:path*',
-        destination: 'http://127.0.0.1:8080/api/v1/:path*',
+        source: '/api/:path((?!legal).*)',
+        destination: 'http://127.0.0.1:8080/api/v1/:path',
       },
     ];
   },
