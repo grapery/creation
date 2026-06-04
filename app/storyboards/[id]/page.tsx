@@ -330,7 +330,7 @@ export default function StoryboardPage() {
                                 {parentStoryboard ? (
                                     <span className="hidden sm:inline">{parentStoryboard.title.length > 10 ? parentStoryboard.title.substring(0, 10) + '...' : parentStoryboard.title}</span>
                                 ) : (
-                                    <span className="hidden sm:inline">无上级故事板</span>
+                                    <span className="hidden sm:inline">{t("storyboard_detail.no_parent", "No parent storyboard")}</span>
                                 )}
                             </Button>
 
@@ -343,7 +343,7 @@ export default function StoryboardPage() {
                             >
                                 <ArrowDown className="h-4 w-4" />
                                 <span className="hidden sm:inline">
-                                    {childStoryboards.length > 0 ? `下一级 (${childStoryboards.length})` : '下一级'}
+                                    {childStoryboards.length > 0 ? `${t("storyboard_detail.children", "Children")} (${childStoryboards.length})` : t("storyboard_detail.children", "Children")}
                                 </span>
                             </Button>
                         </div>
@@ -351,7 +351,7 @@ export default function StoryboardPage() {
                         {/* Children Storyboards List (Horizontal Scroll) */}
                         {showChildrenList && childStoryboards.length > 1 && (
                             <div className="border border-border rounded-lg p-4 bg-secondary/20">
-                                <p className="text-sm text-muted-foreground mb-3">选择下一级故事板:</p>
+                                <p className="text-sm text-muted-foreground mb-3">{t("storyboard_detail.select_child", "Select a child storyboard:")}</p>
                                 <div className="flex gap-3 overflow-x-auto pb-2">
                                     {childStoryboards.map((child) => (
                                         <button
@@ -400,7 +400,7 @@ export default function StoryboardPage() {
                                                 ? "bg-background shadow-sm text-foreground"
                                                 : "text-muted-foreground hover:text-foreground"
                                         }`}
-                                        title="轮播视图"
+                                        title={t("storyboard_detail.carousel_view", "Carousel view")}
                                     >
                                         <Grid3x3 className="h-4 w-4" />
                                     </button>
@@ -411,7 +411,7 @@ export default function StoryboardPage() {
                                                 ? "bg-background shadow-sm text-foreground"
                                                 : "text-muted-foreground hover:text-foreground"
                                         }`}
-                                        title="列表视图"
+                                        title={t("storyboard_detail.list_view", "List view")}
                                     >
                                         <LayoutList className="h-4 w-4" />
                                     </button>
@@ -705,19 +705,19 @@ export default function StoryboardPage() {
                             <div className="flex items-center gap-4 flex-1">
                                 <div className="flex items-center gap-2 text-sm">
                                     <div className="text-muted-foreground">
-                                        <span className="font-bold text-foreground text-lg mr-1">{item.likes || 0}</span> 点赞
+                                        <span className="font-bold text-foreground text-lg mr-1">{item.likes || 0}</span> {t("storyboard_detail.likes", "Likes")}
                                     </div>
                                     <span className="text-border">•</span>
                                     <div className="text-muted-foreground">
-                                        <span className="font-bold text-foreground text-lg mr-1">{item.comments || 0}</span> 评论
+                                        <span className="font-bold text-foreground text-lg mr-1">{item.comments || 0}</span> {t("storyboard_detail.comments", "Comments")}
                                     </div>
                                     <span className="text-border">•</span>
                                     <div className="text-muted-foreground">
-                                        <span className="font-bold text-foreground text-lg mr-1">{item.views || 0}</span> 浏览
+                                        <span className="font-bold text-foreground text-lg mr-1">{item.views || 0}</span> {t("storyboard_detail.views", "Views")}
                                     </div>
                                     <span className="text-border">•</span>
                                     <div className="text-muted-foreground">
-                                        <span className="font-bold text-foreground text-lg mr-1">{item.forkCount || 0}</span> 分支
+                                        <span className="font-bold text-foreground text-lg mr-1">{item.forkCount || 0}</span> {t("storyboard_detail.forks", "Forks")}
                                     </div>
                                 </div>
                             </div>
@@ -852,7 +852,7 @@ export default function StoryboardPage() {
                     <div className="space-y-6">
                             {/* Basic Info */}
                             <div className="space-y-3">
-                                <h3 className="font-semibold text-lg">基本信息</h3>
+                                <h3 className="font-semibold text-lg">{t("storyboard_detail.basic_info", "Basic Info")}</h3>
                                 <div className="grid grid-cols-2 gap-4 text-sm">
                                     <div>
                                         <div className="text-muted-foreground">Storyboard ID</div>
@@ -863,11 +863,11 @@ export default function StoryboardPage() {
                                         <div className="font-mono text-xs">{item.storyId || "N/A"}</div>
                                     </div>
                                     <div>
-                                        <div className="text-muted-foreground">创作者</div>
+                                        <div className="text-muted-foreground">{t("storyboard_detail.creator", "Creator")}</div>
                                         <div>{item.creatorName || "Unknown"}</div>
                                     </div>
                                     <div>
-                                        <div className="text-muted-foreground">创作者 ID</div>
+                                        <div className="text-muted-foreground">{t("storyboard_detail.creator_id", "Creator ID")}</div>
                                         <div className="font-mono text-xs">{item.creatorId || "N/A"}</div>
                                     </div>
                                 </div>
@@ -875,14 +875,14 @@ export default function StoryboardPage() {
 
                             {/* Time Info */}
                             <div className="space-y-3">
-                                <h3 className="font-semibold text-lg">时间信息</h3>
+                                <h3 className="font-semibold text-lg">{t("storyboard_detail.time_info", "Time Info")}</h3>
                                 <div className="grid grid-cols-2 gap-4 text-sm">
                                     <div>
-                                        <div className="text-muted-foreground">创建时间</div>
+                                        <div className="text-muted-foreground">{t("storyboard_detail.created_at", "Created")}</div>
                                         <div>{item.createdAt ? new Date(item.createdAt * 1000).toLocaleString() : "Unknown"}</div>
                                     </div>
                                     <div>
-                                        <div className="text-muted-foreground">更新时间</div>
+                                        <div className="text-muted-foreground">{t("storyboard_detail.updated_at", "Updated")}</div>
                                         <div>{item.updatedAt ? new Date(item.updatedAt * 1000).toLocaleString() : "Unknown"}</div>
                                     </div>
                                 </div>
@@ -890,22 +890,22 @@ export default function StoryboardPage() {
 
                             {/* AI & Workflow Info */}
                             <div className="space-y-3">
-                                <h3 className="font-semibold text-lg">生成信息</h3>
+                                <h3 className="font-semibold text-lg">{t("storyboard_detail.generation_info", "Generation Info")}</h3>
                                 <div className="grid grid-cols-2 gap-4 text-sm">
                                     <div>
-                                        <div className="text-muted-foreground">AI 生成</div>
-                                        <div>{item.isAIGenerated ? "是" : "否"}</div>
+                                        <div className="text-muted-foreground">{t("storyboard_detail.ai_generated", "AI Generated")}</div>
+                                        <div>{item.isAIGenerated ? t("common.yes", "Yes") : t("common.no", "No")}</div>
                                     </div>
                                     <div>
-                                        <div className="text-muted-foreground">场景数量</div>
+                                        <div className="text-muted-foreground">{t("storyboard_detail.scene_count", "Scene Count")}</div>
                                         <div>{item.sceneCount || item.storyboardScenes?.length || 0}</div>
                                     </div>
                                     <div>
-                                        <div className="text-muted-foreground">工作流状态</div>
+                                        <div className="text-muted-foreground">{t("storyboard_detail.workflow_status", "Workflow Status")}</div>
                                         <div className="capitalize">{item.workflowStatus || "N/A"}</div>
                                     </div>
                                     <div>
-                                        <div className="text-muted-foreground">当前步骤</div>
+                                        <div className="text-muted-foreground">{t("storyboard_detail.current_step", "Current Step")}</div>
                                         <div>{item.currentStep || "N/A"}</div>
                                     </div>
                                 </div>
@@ -914,13 +914,13 @@ export default function StoryboardPage() {
                             {/* Token Consumption */}
                             {item.tokenConsumption && (
                                 <div className="space-y-3">
-                                    <h3 className="font-semibold text-lg">资源消耗</h3>
+                                    <h3 className="font-semibold text-lg">{t("storyboard_detail.resource_usage", "Resource Usage")}</h3>
                                     <div className="bg-secondary/30 rounded-lg p-4">
                                         <div className="text-center">
                                             <div className="text-3xl font-bold text-primary mb-1">
                                                 {item.tokenConsumption.toLocaleString()}
                                             </div>
-                                            <div className="text-sm text-muted-foreground">Tokens 消耗</div>
+                                            <div className="text-sm text-muted-foreground">{t("storyboard_detail.tokens_consumed", "Tokens consumed")}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -929,7 +929,7 @@ export default function StoryboardPage() {
                             {/* Raw Input */}
                             {item.rawInput && (
                                 <div className="space-y-3">
-                                    <h3 className="font-semibold text-lg">原始输入</h3>
+                                    <h3 className="font-semibold text-lg">{t("storyboard_detail.raw_input", "Raw Input")}</h3>
                                     <div className="bg-secondary/30 rounded-lg p-4">
                                         <p className="text-sm text-muted-foreground whitespace-pre-wrap">{item.rawInput}</p>
                                     </div>
@@ -939,7 +939,7 @@ export default function StoryboardPage() {
                             {/* Parent Info */}
                             {item.parentId && (
                                 <div className="space-y-3">
-                                    <h3 className="font-semibold text-lg">父节点</h3>
+                                    <h3 className="font-semibold text-lg">{t("storyboard_detail.parent_node", "Parent Node")}</h3>
                                     <div className="bg-secondary/30 rounded-lg p-4">
                                         <div className="font-mono text-xs">{item.parentId}</div>
                                     </div>
@@ -967,22 +967,22 @@ export default function StoryboardPage() {
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-3">
                             <AlertCircle className="h-6 w-6 text-yellow-500 flex-shrink-0" />
-                            已到故事线终点
+                            {t("storyboard_detail.end_of_storyline", "End of Storyline")}
                         </DialogTitle>
                         <DialogDescription>
-                            当前故事板还没有下一级分支，您已经是这个故事的最新节点了。
+                            {t("storyboard_detail.no_children_desc", "This storyboard has no child branches yet. You are at the latest node.")}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="flex flex-col gap-3 p-4 bg-secondary/30 rounded-lg">
-                        <p className="text-sm font-medium">您可以：</p>
+                        <p className="text-sm font-medium">{t("storyboard_detail.you_can", "You can:")}</p>
                         <ul className="text-sm text-muted-foreground space-y-2 ml-4">
-                            <li>• 点击"复刻"按钮创建新的故事分支</li>
-                            <li>• 点击"续写"按钮继续当前故事线</li>
+                            <li>• {t("storyboard_detail.fork_hint", 'Click "Fork" to create a new branch')}</li>
+                            <li>• {t("storyboard_detail.continue_hint", 'Click "Continue" to extend this storyline')}</li>
                         </ul>
                     </div>
                     <div className="flex justify-end gap-2">
                         <Button variant="outline" onClick={() => setShowNoChildrenDialog(false)}>
-                            知道了
+                            {t("common.ok", "OK")}
                         </Button>
                         <Button
                             onClick={() => {
@@ -993,7 +993,7 @@ export default function StoryboardPage() {
                             className="gap-2"
                         >
                             <ArrowDown className="h-4 w-4" />
-                            续写
+                            {t("storyboard_detail.continue", "Continue")}
                         </Button>
                         <Button
                             onClick={() => {
@@ -1003,7 +1003,7 @@ export default function StoryboardPage() {
                             className="gap-2"
                         >
                             <GitFork className="h-4 w-4" />
-                            创建分支
+                            {t("storyboard_detail.create_branch", "Create Branch")}
                         </Button>
                     </div>
                 </DialogContent>

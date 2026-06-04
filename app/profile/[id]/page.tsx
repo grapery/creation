@@ -5,7 +5,7 @@ import { useParams, useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/providers/auth-provider";
 import { ActivityFeed } from "@/components/profile/activity-feed";
 import { ActivityHeatmap } from "@/components/profile/activity-heatmap";
-import { Loader2, Sparkles, Drama, BookOpen, FileText, Layers } from "lucide-react";
+import { Loader2, Sparkles, Drama, BookOpen, FileText, Layers, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { User, ActivityHeatmapData, ActivityTimeRange } from "@/lib/types";
@@ -63,6 +63,11 @@ function ProfileTabs({
             label: t("profile.drafts", "Drafts"),
             href: `${basePath}/drafts`,
             icon: FileText,
+            exact: false
+        }, {
+            label: t("profile.bookmarks", "Bookmarks"),
+            href: `${basePath}/bookmarks`,
+            icon: Bookmark,
             exact: false
         }] : []),
     ];
