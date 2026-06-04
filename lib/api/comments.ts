@@ -6,7 +6,7 @@ export interface Comment {
     content: string;
     userId: string;
     targetId: string; // StoryId or StoryboardId
-    targetType: 'story' | 'storyboard';
+    targetType: 'story' | 'storyboard' | 'fragment';
     createdAt: number;
     user?: User;
     likes?: number;

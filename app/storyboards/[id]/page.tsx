@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { storyboards } from "@/lib/api/storyboards";
 import { likes, bookmarks } from "@/lib/api/interactions";
 import { Storyboard } from "@/lib/types";
-import { Loader2, ArrowLeft, Sparkles, Users, Heart, MessageSquare, GitFork, Share2, Info, Workflow, Play, X, ChevronLeft, ChevronRight, LayoutList, Grid3x3, ArrowUp, ArrowDown, AlertCircle, Plus, Bookmark } from "lucide-react";
+import { Loader2, ArrowLeft, Sparkles, Users, Heart, MessageSquare, GitFork, Share2, Info, Workflow, Play, X, ChevronLeft, ChevronRight, LayoutList, Grid3x3, ArrowUp, ArrowDown, AlertCircle, Plus, Bookmark, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CommentList } from "@/components/comments/comment-list";
 import { StoryboardRoadmap } from "@/components/storyboard/roadmap";
@@ -17,6 +17,7 @@ import { ForkDialog } from "@/components/storyboard/fork-dialog";
 import { ContinueDialog } from "@/components/storyboard/continue-dialog";
 import { useTranslation } from "@/providers/language-provider";
 import { useAuth } from "@/providers/auth-provider";
+import { showSuccess } from "@/lib/toast-utils";
 
 export default function StoryboardPage() {
     const { t } = useTranslation();
@@ -39,6 +40,7 @@ export default function StoryboardPage() {
     const [isLiked, setIsLiked] = useState(false);
     const [likeCount, setLikeCount] = useState(0);
     const [isBookmarked, setIsBookmarked] = useState(false);
+    const [shareCount, setShareCount] = useState(0);
     const hasLoadedRef = useRef<string | null>(null);
     const { user } = useAuth();
     const videoRefs = useRef<Map<string, HTMLVideoElement>>(new Map());
@@ -62,6 +64,7 @@ export default function StoryboardPage() {
 
                 setItem(data);
                 setLikeCount(data.likes || 0);
+                setShareCount(data.shares || 0);
 
                 // Check interaction status
                 if (user) {
@@ -293,42 +296,9 @@ export default function StoryboardPage() {
 
                                 {/* Action Buttons in Dashed Border */}
                                 <div className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-dashed border-border bg-secondary/20">
-                                    <Button variant="ghost" size="sm" className="gap-1.5 h-7 px-2 text-xs" onClick={async () => {
-                                        if (!user) return;
-                                        try {
-                                            if (isLiked) {
-                                                await likes.unlike('storyboard_node', id as string);
-                                                setIsLiked(false);
-                                                setLikeCount(c => c - 1);
-                                            } else {
-                                                await likes.like('storyboard_node', id as string);
-                                                setIsLiked(true);
-                                                setLikeCount(c => c + 1);
-                                            }
-                                        } catch (e) { console.error(e); }
-                                    }}>
-                                        <Heart className={`h-3.5 w-3.5 ${isLiked ? "fill-red-500 text-red-500" : ""}`} />
-                                        <span className="hidden sm:inline">{likeCount}</span>
-                                    </Button>
-                                    <div className="w-px h-4 bg-border" />
                                     <Button variant="ghost" size="sm" className="gap-1.5 h-7 px-2 text-xs" onClick={() => {
-                                        document.getElementById('comments-section')?.scrollIntoView({ behavior: 'smooth' });
+                                        setShowForkDialog(true);
                                     }}>
-                                        <MessageSquare className="h-3.5 w-3.5" />
-                                        <span className="hidden sm:inline">{item.comments || 0}</span>
-                                    </Button>
-                                    <div className="w-px h-4 bg-border" />
-                                    <Button variant="ghost" size="sm" className="gap-1.5 h-7 px-2 text-xs" onClick={async () => {
-                                        if (!user) return;
-                                        try {
-                                            const result = await bookmarks.toggleBookmark('storyboard', id as string);
-                                            setIsBookmarked(result.isBookmarked);
-                                        } catch (e) { console.error(e); }
-                                    }}>
-                                        <Bookmark className={`h-3.5 w-3.5 ${isBookmarked ? "fill-amber-500 text-amber-500" : ""}`} />
-                                    </Button>
-                                    <div className="w-px h-4 bg-border" />
-                                    <Button variant="ghost" size="sm" className="gap-1.5 h-7 px-2 text-xs" onClick={() => setShowForkDialog(true)}>
                                         <GitFork className="h-3.5 w-3.5" />
                                         <span className="hidden sm:inline">{t("storyboard_detail.fork")}</span>
                                     </Button>
@@ -782,6 +752,95 @@ export default function StoryboardPage() {
                     <CommentList targetId={id as string} targetType="storyboard" />
                 </div>
             </main>
+
+            {/* Bottom Sticky Action Bar */}
+            <div className="sticky bottom-0 z-40 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+                <div className="container max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                        {/* Like */}
+                        <button
+                            onClick={async () => {
+                                if (!user) return;
+                                const prev = isLiked;
+                                const prevCount = likeCount;
+                                setIsLiked(!prev);
+                                setLikeCount(prev ? prevCount - 1 : prevCount + 1);
+                                try {
+                                    if (prev) {
+                                        await likes.unlike('storyboard_node', id as string);
+                                    } else {
+                                        await likes.like('storyboard_node', id as string);
+                                    }
+                                } catch (e) {
+                                    console.error(e);
+                                    setIsLiked(prev);
+                                    setLikeCount(prevCount);
+                                }
+                            }}
+                            className="flex items-center gap-1.5 text-sm transition-colors"
+                        >
+                            <Heart className={`h-5 w-5 ${isLiked ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
+                            <span className={isLiked ? "text-red-500" : "text-muted-foreground"}>{likeCount}</span>
+                        </button>
+
+                        {/* Comment */}
+                        <button
+                            onClick={() => document.getElementById('comments-section')?.scrollIntoView({ behavior: 'smooth' })}
+                            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                            <MessageSquare className="h-5 w-5" />
+                            <span>{item?.comments || 0}</span>
+                        </button>
+
+                        {/* Share */}
+                        <button
+                            onClick={async () => {
+                                try {
+                                    if (navigator.share) {
+                                        await navigator.share({
+                                            title: item?.title || "Storyboard",
+                                            url: window.location.href,
+                                        });
+                                    } else {
+                                        await navigator.clipboard.writeText(window.location.href);
+                                        showSuccess("Link copied to clipboard");
+                                    }
+                                } catch (e) {
+                                    if ((e as Error).name !== "AbortError") {
+                                        console.error(e);
+                                    }
+                                }
+                            }}
+                            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                            <Share2 className="h-5 w-5" />
+                            <span>{shareCount}</span>
+                        </button>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        {/* Bookmark */}
+                        <button
+                            onClick={async () => {
+                                if (!user) return;
+                                try {
+                                    const result = await bookmarks.toggleBookmark('storyboard', id as string);
+                                    setIsBookmarked(result.isBookmarked);
+                                } catch (e) { console.error(e); }
+                            }}
+                            className="p-2 transition-colors"
+                        >
+                            <Bookmark className={`h-5 w-5 ${isBookmarked ? "fill-amber-500 text-amber-500" : "text-muted-foreground"}`} />
+                        </button>
+
+                        {/* Fork */}
+                        <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setShowForkDialog(true)}>
+                            <GitFork className="h-4 w-4" />
+                            <span className="hidden sm:inline">{t("storyboard_detail.fork")}</span>
+                        </Button>
+                    </div>
+                </div>
+            </div>
 
             {/* Details Modal */}
             <Dialog open={showDetailsModal} onOpenChange={setShowDetailsModal}>

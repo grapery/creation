@@ -1,12 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Heart, MessageCircle, Share2, Bookmark, BookOpen, Loader2 } from "lucide-react";
+import { ArrowLeft, Heart, MessageCircle, Share2, Bookmark, BookOpen, Loader2, UserPlus } from "lucide-react";
 import { fragments } from "@/lib/api/fragments";
+import { bookmarks } from "@/lib/api/interactions";
+import { profile } from "@/lib/api/profile";
 import { useAuth } from "@/providers/auth-provider";
 import { useLoginPrompt } from "@/components/auth/login-prompt";
 import { showSuccess, showError } from "@/lib/toast-utils";
+import { CommentList } from "@/components/comments/comment-list";
 import type { StoryFragment, FragmentStoryPrefillAIResponse, FragmentStoryCreationPrefill } from "@/lib/types";
 
 export default function FragmentDetailPage() {
@@ -21,7 +24,11 @@ export default function FragmentDetailPage() {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [isLiked, setIsLiked] = useState(false);
     const [likeCount, setLikeCount] = useState(0);
+    const [isBookmarked, setIsBookmarked] = useState(false);
+    const [isFollowing, setIsFollowing] = useState(false);
+    const [shareCount, setShareCount] = useState(0);
     const [converting, setConverting] = useState(false);
+    const commentsRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         loadFragment();
@@ -33,6 +40,18 @@ export default function FragmentDetailPage() {
             setFragment(data);
             setIsLiked(data.isLiked || false);
             setLikeCount(data.likes || 0);
+            setShareCount(data.shares || 0);
+
+            if (user) {
+                const [bookmarkStatus, followStatus] = await Promise.all([
+                    bookmarks.checkStatus('fragment', fragmentId).catch(() => ({ isBookmarked: false })),
+                    data.creatorId && data.creatorId !== user.id
+                        ? profile.isFollowing(data.creatorId).then(r => r.isFollowing).catch(() => false)
+                        : Promise.resolve(false),
+                ]);
+                setIsBookmarked(bookmarkStatus.isBookmarked);
+                setIsFollowing(!!followStatus);
+            }
         } catch (err) {
             console.error("Failed to load fragment:", err);
         } finally {
@@ -42,17 +61,66 @@ export default function FragmentDetailPage() {
 
     const handleLike = async () => {
         if (!user) { showLoginPrompt(); return; }
+        const prevLiked = isLiked;
+        const prevCount = likeCount;
+        setIsLiked(!prevLiked);
+        setLikeCount(prev => prevLiked ? prev - 1 : prev + 1);
         try {
-            if (isLiked) {
+            if (prevLiked) {
                 await fragments.unlike(fragmentId);
-                setLikeCount(prev => prev - 1);
             } else {
                 await fragments.like(fragmentId);
-                setLikeCount(prev => prev + 1);
             }
-            setIsLiked(!isLiked);
         } catch (err) {
             console.error("Failed to toggle like:", err);
+            setIsLiked(prevLiked);
+            setLikeCount(prevCount);
+        }
+    };
+
+    const handleBookmark = async () => {
+        if (!user) { showLoginPrompt(); return; }
+        try {
+            const result = await bookmarks.toggleBookmark('fragment', fragmentId);
+            setIsBookmarked(result.isBookmarked);
+        } catch (err) {
+            console.error("Failed to toggle bookmark:", err);
+        }
+    };
+
+    const handleShare = async () => {
+        try {
+            await fragments.share(fragmentId);
+            setShareCount(prev => prev + 1);
+            if (navigator.share) {
+                await navigator.share({
+                    title: fragment?.content?.slice(0, 50) || "Fragment",
+                    url: window.location.href,
+                });
+            } else {
+                await navigator.clipboard.writeText(window.location.href);
+                showSuccess("Link copied to clipboard");
+            }
+        } catch (err) {
+            if ((err as Error).name !== "AbortError") {
+                console.error("Failed to share:", err);
+            }
+        }
+    };
+
+    const handleFollow = async () => {
+        if (!user || !fragment?.creatorId) { showLoginPrompt(); return; }
+        const prev = isFollowing;
+        setIsFollowing(!prev);
+        try {
+            if (prev) {
+                await profile.unfollowUser(fragment.creatorId);
+            } else {
+                await profile.followUser(fragment.creatorId);
+            }
+        } catch (err) {
+            console.error("Failed to toggle follow:", err);
+            setIsFollowing(prev);
         }
     };
 
@@ -187,6 +255,19 @@ export default function FragmentDetailPage() {
                         {fragment.createdAt ? new Date(fragment.createdAt * 1000).toLocaleDateString() : ""}
                     </p>
                 </div>
+                {user && fragment.creatorId && fragment.creatorId !== user.id && (
+                    <button
+                        onClick={handleFollow}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                            isFollowing
+                                ? "bg-muted text-muted-foreground hover:bg-muted/80"
+                                : "bg-primary text-primary-foreground hover:bg-primary/90"
+                        }`}
+                    >
+                        <UserPlus className="w-3.5 h-3.5" />
+                        {isFollowing ? "Following" : "Follow"}
+                    </button>
+                )}
                 {fragment.style && (
                     <span className="px-2 py-1 bg-muted rounded-full text-xs">{fragment.style}</span>
                 )}
@@ -195,16 +276,22 @@ export default function FragmentDetailPage() {
             {/* Actions */}
             <div className="flex items-center gap-6">
                 <button onClick={handleLike} className="flex items-center gap-2 text-sm">
-                    <Heart className={`w-5 h-5 ${isLiked ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
+                    <Heart className={`w-5 h-5 transition-all ${isLiked ? "fill-red-500 text-red-500 scale-110" : "text-muted-foreground"}`} />
                     <span className={isLiked ? "text-red-500" : "text-muted-foreground"}>{likeCount}</span>
                 </button>
-                <button className="flex items-center gap-2 text-sm text-muted-foreground">
+                <button
+                    onClick={() => commentsRef.current?.scrollIntoView({ behavior: 'smooth' })}
+                    className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
                     <MessageCircle className="w-5 h-5" />
                     <span>{fragment.comments || 0}</span>
                 </button>
-                <button className="flex items-center gap-2 text-sm text-muted-foreground">
+                <button onClick={handleShare} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
                     <Share2 className="w-5 h-5" />
-                    <span>{fragment.shares || 0}</span>
+                    <span>{shareCount}</span>
+                </button>
+                <button onClick={handleBookmark} className="flex items-center gap-2 text-sm transition-colors">
+                    <Bookmark className={`w-5 h-5 ${isBookmarked ? "fill-amber-500 text-amber-500" : "text-muted-foreground"}`} />
                 </button>
                 <div className="flex-1" />
                 <button
@@ -219,6 +306,11 @@ export default function FragmentDetailPage() {
                     )}
                     {converting ? "Converting..." : fragment.isConverted ? "Converted" : "Convert to Story"}
                 </button>
+            </div>
+
+            {/* Comments */}
+            <div ref={commentsRef}>
+                <CommentList targetId={fragmentId} targetType="fragment" />
             </div>
         </div>
     );

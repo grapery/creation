@@ -19,7 +19,7 @@ function SimpleTextarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>
 
 interface CommentListProps {
     targetId: string;
-    targetType: 'story' | 'storyboard';
+    targetType: 'story' | 'storyboard' | 'fragment';
 }
 
 export function CommentList({ targetId, targetType }: CommentListProps) {

@@ -1,20 +1,59 @@
 "use client";
 
+import { useState } from "react";
 import { Storyboard } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
-import { Layers, Heart, MessageSquare, Calendar, FileText } from "lucide-react";
-import Link from "next/link";
+import { Layers, Heart, MessageSquare, Calendar, FileText, Bookmark } from "lucide-react";
+import { likes, bookmarks } from "@/lib/api/interactions";
 
 interface StoryboardCardProps {
     storyboard: Storyboard;
     href?: string;
+    onLikeChange?: (id: string, isLiked: boolean, likes: number) => void;
+    onBookmarkChange?: (id: string, isBookmarked: boolean) => void;
 }
 
-export default function StoryboardCard({ storyboard, href }: StoryboardCardProps) {
+export default function StoryboardCard({ storyboard, href, onLikeChange, onBookmarkChange }: StoryboardCardProps) {
     const linkHref = href || `/storyboards/${storyboard.id}`;
+    const [isLiked, setIsLiked] = useState(storyboard.isLiked || false);
+    const [likeCount, setLikeCount] = useState(storyboard.likes || 0);
+    const [isBookmarked, setIsBookmarked] = useState(false);
+
+    const handleLike = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const prev = isLiked;
+        const prevCount = likeCount;
+        setIsLiked(!prev);
+        setLikeCount(prev ? prevCount - 1 : prevCount + 1);
+        try {
+            if (prev) {
+                await likes.unlike('storyboard_node', storyboard.id);
+            } else {
+                await likes.like('storyboard_node', storyboard.id);
+            }
+            onLikeChange?.(storyboard.id, !prev, prev ? prevCount - 1 : prevCount + 1);
+        } catch (err) {
+            console.error("Failed to toggle like:", err);
+            setIsLiked(prev);
+            setLikeCount(prevCount);
+        }
+    };
+
+    const handleBookmark = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        try {
+            const result = await bookmarks.toggleBookmark('storyboard', storyboard.id);
+            setIsBookmarked(result.isBookmarked);
+            onBookmarkChange?.(storyboard.id, result.isBookmarked);
+        } catch (err) {
+            console.error("Failed to toggle bookmark:", err);
+        }
+    };
 
     return (
-        <Link href={linkHref}>
+        <a href={linkHref}>
             <Card className="group cursor-pointer border-border/50 hover:border-primary/30 transition-all hover:shadow-lg hover:-translate-y-1">
                 <CardContent className="p-4 sm:p-5">
                     {/* Cover Image */}
@@ -74,19 +113,28 @@ export default function StoryboardCard({ storyboard, href }: StoryboardCardProps
                             </div>
 
                             <div className="flex items-center gap-3">
-                                <div className="flex items-center gap-1 text-muted-foreground">
-                                    <Heart className="h-3.5 w-3.5" />
-                                    <span className="font-medium tabular-nums">{storyboard.likes || 0}</span>
-                                </div>
-                                <div className="flex items-center gap-1 text-muted-foreground">
+                                <button
+                                    onClick={handleLike}
+                                    className="flex items-center gap-1 text-muted-foreground hover:text-red-500 transition-colors"
+                                >
+                                    <Heart className={`h-3.5 w-3.5 ${isLiked ? "fill-red-500 text-red-500" : ""}`} />
+                                    <span className="font-medium tabular-nums">{likeCount}</span>
+                                </button>
+                                <span className="flex items-center gap-1 text-muted-foreground">
                                     <MessageSquare className="h-3.5 w-3.5" />
                                     <span className="font-medium tabular-nums">{storyboard.comments || 0}</span>
-                                </div>
+                                </span>
+                                <button
+                                    onClick={handleBookmark}
+                                    className="text-muted-foreground hover:text-amber-500 transition-colors"
+                                >
+                                    <Bookmark className={`h-3.5 w-3.5 ${isBookmarked ? "fill-amber-500 text-amber-500" : ""}`} />
+                                </button>
                             </div>
                         </div>
                     </div>
                 </CardContent>
             </Card>
-        </Link>
+        </a>
     );
 }

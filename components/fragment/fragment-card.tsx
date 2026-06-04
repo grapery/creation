@@ -1,17 +1,43 @@
 "use client";
 
-import Link from "next/link";
-import { Heart, MessageCircle, Share2, Bookmark } from "lucide-react";
+import { useState } from "react";
+import { Heart, MessageCircle } from "lucide-react";
+import { fragments } from "@/lib/api/fragments";
 import type { StoryFragment } from "@/lib/types";
 
 interface FragmentCardProps {
     fragment: StoryFragment;
     compact?: boolean;
+    onLikeChange?: (id: string, isLiked: boolean, likes: number) => void;
 }
 
-export function FragmentCard({ fragment, compact = false }: FragmentCardProps) {
+export function FragmentCard({ fragment, compact = false, onLikeChange }: FragmentCardProps) {
+    const [isLiked, setIsLiked] = useState(fragment.isLiked || false);
+    const [likeCount, setLikeCount] = useState(fragment.likes || 0);
+
+    const handleLike = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const prev = isLiked;
+        const prevCount = likeCount;
+        setIsLiked(!prev);
+        setLikeCount(prev ? prevCount - 1 : prevCount + 1);
+        try {
+            if (prev) {
+                await fragments.unlike(fragment.id);
+            } else {
+                await fragments.like(fragment.id);
+            }
+            onLikeChange?.(fragment.id, !prev, prev ? prevCount - 1 : prevCount + 1);
+        } catch (err) {
+            console.error("Failed to toggle like:", err);
+            setIsLiked(prev);
+            setLikeCount(prevCount);
+        }
+    };
+
     return (
-        <Link href={`/fragments/${fragment.id}`} className="block group">
+        <a href={`/fragments/${fragment.id}`} className="block group">
             <div className={`relative rounded-xl overflow-hidden border border-border bg-card transition-all hover:shadow-lg hover:border-primary/30 ${compact ? "w-[120px]" : "w-full"}`}>
                 {/* Image */}
                 {fragment.imageUrls && fragment.imageUrls.length > 0 ? (
@@ -61,10 +87,13 @@ export function FragmentCard({ fragment, compact = false }: FragmentCardProps) {
 
                     {/* Stats */}
                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                            <Heart className={`w-3.5 h-3.5 ${fragment.isLiked ? "fill-red-500 text-red-500" : ""}`} />
-                            {fragment.likes || 0}
-                        </span>
+                        <button
+                            onClick={handleLike}
+                            className="flex items-center gap-1 hover:text-red-500 transition-colors"
+                        >
+                            <Heart className={`w-3.5 h-3.5 transition-all ${isLiked ? "fill-red-500 text-red-500" : ""}`} />
+                            {likeCount}
+                        </button>
                         <span className="flex items-center gap-1">
                             <MessageCircle className="w-3.5 h-3.5" />
                             {fragment.comments || 0}
@@ -72,6 +101,6 @@ export function FragmentCard({ fragment, compact = false }: FragmentCardProps) {
                     </div>
                 </div>
             </div>
-        </Link>
+        </a>
     );
 }
