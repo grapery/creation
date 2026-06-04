@@ -288,6 +288,12 @@ export interface CreateStoryRequest {
 
     isCollaborationOpen?: boolean;
     sourceFragmentId?: string;
+
+    // Publish settings
+    visibility?: string;
+    allowComments?: boolean;
+    showAILabel?: boolean;
+    characterIds?: string[];
 }
 
 export interface UpdateStoryRequest {

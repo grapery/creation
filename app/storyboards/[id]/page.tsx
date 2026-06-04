@@ -39,12 +39,12 @@ export default function StoryboardPage() {
     const [isLiked, setIsLiked] = useState(false);
     const [likeCount, setLikeCount] = useState(0);
     const [isBookmarked, setIsBookmarked] = useState(false);
-    const hasLoadedRef = useRef(false);
+    const hasLoadedRef = useRef<string | null>(null);
     const { user } = useAuth();
     const videoRefs = useRef<Map<string, HTMLVideoElement>>(new Map());
 
     useEffect(() => {
-        if (!id || hasLoadedRef.current) return;
+        if (!id || hasLoadedRef.current === id) return;
 
         let isMounted = true;
 
@@ -141,7 +141,7 @@ export default function StoryboardPage() {
                     // Don't block the main content - children navigation will show appropriate UI
                 }
 
-                hasLoadedRef.current = true;
+                hasLoadedRef.current = id as string;
             } catch (e) {
                 console.error("Failed to load storyboard:", e);
                 if (isMounted) {
@@ -159,7 +159,7 @@ export default function StoryboardPage() {
         return () => {
             isMounted = false;
         };
-    }, [id]);
+    }, [id, user]);
 
     const handlePlayVideo = (sceneId: string) => {
         // Pause all other videos

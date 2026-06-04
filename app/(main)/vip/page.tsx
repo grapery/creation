@@ -18,12 +18,19 @@ export default function VIPPage() {
     const [loading, setLoading] = useState(true);
     const [selectedPlan, setSelectedPlan] = useState<MembershipPlan | null>(null);
     const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
+    const [currentPlanId, setCurrentPlanId] = useState<string | null>(null);
 
     useEffect(() => {
         async function load() {
             try {
-                const res = await vip.getPlans();
+                const [res, sub] = await Promise.all([
+                    vip.getPlans(),
+                    vip.getSubscription().catch(() => null),
+                ]);
                 setPlans(res);
+                if (sub?.planId) {
+                    setCurrentPlanId(sub.planId);
+                }
             } catch (e) {
                 console.error(e);
             } finally {
@@ -80,7 +87,7 @@ export default function VIPPage() {
                         <PlanCard
                             key={plan.id}
                             plan={plan}
-                            isCurrent={false} // Would check user.vipLevel/planId here
+                            isCurrent={currentPlanId === plan.id}
                             onSubscribe={onSubscribe}
                             loading={false}
                         />

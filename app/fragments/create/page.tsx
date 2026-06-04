@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ImagePlus, Wand2, X, Loader2, Send, Sparkles, Image as ImageIcon } from "lucide-react";
 import { fragments } from "@/lib/api/fragments";
+import { upload } from "@/lib/api/upload";
 import { FragmentStylePicker } from "@/components/fragment/fragment-style-picker";
 import { FragmentVisibilityPicker } from "@/components/fragment/fragment-visibility-picker";
 import { FragmentGenerationOverlay } from "@/components/fragment/fragment-generation-overlay";
@@ -95,15 +96,16 @@ export default function CreateFragmentPage() {
         const files = e.target.files;
         if (!files) return;
 
-        // For now, convert to data URLs for preview
-        // In production, upload to server and get URLs back
         for (const file of Array.from(files)) {
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                const url = ev.target?.result as string;
-                setImageUrls(prev => [...prev, url]);
-            };
-            reader.readAsDataURL(file);
+            try {
+                const result = await upload.uploadImage(file);
+                if (result.url) {
+                    setImageUrls(prev => [...prev, result.url]);
+                }
+            } catch (err) {
+                console.error("Failed to upload image:", err);
+                showError("Image upload failed", "Please try again");
+            }
         }
     };
 
@@ -254,7 +256,7 @@ export default function CreateFragmentPage() {
                 status={genStatus}
                 progress={genProgress}
                 error={genError}
-                onRetry={genStatus === "failed" ? handleAIGenerate : undefined}
+                onRetry={genStatus === "failed" ? (creationMode === "ref-image" ? handlePanelGenerate : handleAIGenerate) : undefined}
             />
 
             {/* Header */}

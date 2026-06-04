@@ -28,12 +28,23 @@ function WizardContent() {
     const [coverImage, setCoverImage] = useState<string | null>(null);
     const [creating, setCreating] = useState(false);
 
+    // Setup form state — lifted into parent so handleSetupComplete receives actual user input
+    const [rawInput, setRawInput] = useState("");
+    const [style, setStyle] = useState("");
+    const [sceneCount, setSceneCount] = useState(3);
+
     const setupData = {
         storyId,
-        rawInput: "",
-        style: "",
-        sceneCount: 3,
+        rawInput,
+        style,
+        sceneCount,
         characters,
+    };
+
+    const handleSetupChange = (updated: typeof setupData) => {
+        if (updated.rawInput !== rawInput) setRawInput(updated.rawInput);
+        if (updated.style !== style) setStyle(updated.style);
+        if (updated.sceneCount !== sceneCount) setSceneCount(updated.sceneCount);
     };
 
     // Poll generation progress
@@ -129,7 +140,7 @@ function WizardContent() {
                 {step === "setup" && (
                     <SetupStep
                         data={setupData}
-                        onChange={() => {}}
+                        onChange={handleSetupChange}
                         onNext={() => handleSetupComplete(setupData)}
                         onBack={() => router.back()}
                     />

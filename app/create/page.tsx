@@ -6,6 +6,11 @@ import { Share2, Users, Search, ChevronLeft, ChevronRight, Eye, MessageSquare, S
 import { stories } from "@/lib/api/stories";
 import { characters } from "@/lib/api/characters";
 import { showSuccess, showError } from "@/lib/toast-utils";
+import {
+    AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+    AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay,
+    AlertDialogPortal, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { StyleConfig, CreateStoryRequest, FragmentStoryCreationPrefill, GENRES, FragmentVisibility } from "@/lib/types";
 import type { Character } from "@/lib/types/character";
 
@@ -72,6 +77,11 @@ function CreateStory({ storyId }: CreateStoryProps) {
     const [characterSearch, setCharacterSearch] = useState("");
     const [searchResults, setSearchResults] = useState<Character[]>([]);
     const [isSearching, setIsSearching] = useState(false);
+
+    // Danger Zone
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [showArchiveDialog, setShowArchiveDialog] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     useEffect(() => {
         loadStyles();
@@ -181,7 +191,12 @@ function CreateStory({ storyId }: CreateStoryProps) {
 
         setIsAIProcessing(true);
         try {
-            const request: CreateStoryRequest = {
+            const requestData: CreateStoryRequest & {
+                visibility?: string;
+                allowComments?: boolean;
+                showAILabel?: boolean;
+                characterIds?: string[];
+            } = {
                 title,
                 description,
                 coverImage: coverImage || aiGeneratedCoverURL || undefined,
@@ -197,12 +212,21 @@ function CreateStory({ storyId }: CreateStoryProps) {
                 isCollaborationOpen,
                 sourceFragmentId: sourceFragmentId || undefined,
                 tags: fragmentPrefill?.suggestedTags,
+                visibility,
+                allowComments,
+                showAILabel,
+                characterIds: selectedCharacters.length > 0 ? selectedCharacters.map(c => c.id) : undefined,
             };
 
-            const createdStory = await stories.create(request);
+            const createdStory = await stories.create(requestData);
 
             showSuccess(status === "draft" ? "草稿已保存" : "创建成功", status === "draft" ? "故事已保存为草稿" : "故事创建成功！");
-            router.push(`/stories/${createdStory.id}`);
+
+            if (status === "published") {
+                router.push(`/create/wizard?storyId=${createdStory.id}`);
+            } else {
+                router.push(`/stories/${createdStory.id}`);
+            }
 
         } catch (error) {
             console.error("Failed to create story:", error);
@@ -831,20 +855,27 @@ function CreateStory({ storyId }: CreateStoryProps) {
                         </div>
 
                         {/* Danger Zone */}
+                        {storyId && (
                         <div className="pt-4 border-t border-border">
                             <div className="flex items-center gap-2 mb-3">
                                 <AlertTriangle className="w-4 h-4 text-destructive" />
                                 <h4 className="text-sm font-medium text-destructive">Danger Zone</h4>
                             </div>
                             <div className="space-y-2">
-                                <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:border-destructive/50 transition-colors text-left group">
+                                <button
+                                    onClick={() => setShowArchiveDialog(true)}
+                                    className="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:border-destructive/50 transition-colors text-left group"
+                                >
                                     <div>
                                         <p className="text-sm font-medium">Archive Story</p>
                                         <p className="text-xs text-muted-foreground">Hide this story from public view</p>
                                     </div>
                                     <AlertTriangle className="w-4 h-4 text-muted-foreground group-hover:text-destructive" />
                                 </button>
-                                <button className="w-full flex items-center justify-between p-3 rounded-lg border border-destructive/30 hover:border-destructive transition-colors text-left group">
+                                <button
+                                    onClick={() => setShowDeleteDialog(true)}
+                                    className="w-full flex items-center justify-between p-3 rounded-lg border border-destructive/30 hover:border-destructive transition-colors text-left group"
+                                >
                                     <div>
                                         <p className="text-sm font-medium text-destructive">Delete Story</p>
                                         <p className="text-xs text-muted-foreground">Permanently remove this story</p>
@@ -853,6 +884,7 @@ function CreateStory({ storyId }: CreateStoryProps) {
                                 </button>
                             </div>
                         </div>
+                        )}
                     </div>
                 )}
                 {/* Action Buttons */}
@@ -897,6 +929,75 @@ function CreateStory({ storyId }: CreateStoryProps) {
                     </button>
                 </div>
             </div>
+
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                <AlertDialogPortal>
+                    <AlertDialogOverlay />
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Story</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete the story and all its content.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                disabled={isDeleting}
+                                onClick={async () => {
+                                    if (!storyId) return;
+                                    setIsDeleting(true);
+                                    try {
+                                        await stories.delete(storyId);
+                                        showSuccess("Story deleted");
+                                        router.push("/");
+                                    } catch (e) {
+                                        showError("Delete failed", "Failed to delete story");
+                                    } finally {
+                                        setIsDeleting(false);
+                                    }
+                                }}
+                            >
+                                {isDeleting ? "Deleting..." : "Delete"}
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialogPortal>
+            </AlertDialog>
+
+            {/* Archive Confirmation Dialog */}
+            <AlertDialog open={showArchiveDialog} onOpenChange={setShowArchiveDialog}>
+                <AlertDialogPortal>
+                    <AlertDialogOverlay />
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Archive Story</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                This will hide the story from public view. You can restore it later.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                                onClick={async () => {
+                                    if (!storyId) return;
+                                    try {
+                                        await stories.update(storyId, { status: "archived" });
+                                        showSuccess("Story archived");
+                                        router.push("/");
+                                    } catch (e) {
+                                        showError("Archive failed", "Failed to archive story");
+                                    }
+                                }}
+                            >
+                                Archive
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialogPortal>
+            </AlertDialog>
         </div>
     );
 }

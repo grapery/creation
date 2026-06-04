@@ -34,7 +34,21 @@ function SearchPageContent() {
         setLoading(true);
         try {
             const data = await search.search({ query: q, type, page: p, limit: 20 });
-            setResults(data);
+            if (p > 1) {
+                // Append mode for "Load More"
+                setResults(prev => {
+                    if (!prev) return data;
+                    return {
+                        ...data,
+                        stories: [...(prev.stories || []), ...(data.stories || [])],
+                        characters: [...(prev.characters || []), ...(data.characters || [])],
+                        users: [...(prev.users || []), ...(data.users || [])],
+                        storyboards: [...(prev.storyboards || []), ...(data.storyboards || [])],
+                    };
+                });
+            } else {
+                setResults(data);
+            }
             setHasMore(data.total > p * 20);
         } catch (err) {
             console.error("Search failed:", err);
@@ -45,6 +59,8 @@ function SearchPageContent() {
 
     useEffect(() => {
         if (initialQuery) {
+            setResults(null);
+            setPage(1);
             doSearch(initialQuery, activeTab, 1);
         }
     }, [initialQuery, activeTab, doSearch]);
