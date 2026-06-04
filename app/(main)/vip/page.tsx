@@ -19,6 +19,7 @@ export default function VIPPage() {
     const [selectedPlan, setSelectedPlan] = useState<MembershipPlan | null>(null);
     const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
     const [currentPlanId, setCurrentPlanId] = useState<string | null>(null);
+    const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("yearly");
 
     useEffect(() => {
         async function load() {
@@ -77,13 +78,40 @@ export default function VIPPage() {
                 </div>
                 <h1 className="text-4xl font-bold">{t("vip.upgrade_title")}</h1>
                 <p className="text-xl text-muted-foreground">{t("vip.upgrade_subtitle")}</p>
+
+                {/* Billing Cycle Toggle */}
+                <div className="flex items-center justify-center gap-3 mt-4">
+                    <button
+                        onClick={() => setBillingCycle("monthly")}
+                        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                            billingCycle === "monthly"
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-muted text-muted-foreground hover:text-foreground"
+                        }`}
+                    >
+                        Monthly
+                    </button>
+                    <button
+                        onClick={() => setBillingCycle("yearly")}
+                        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                            billingCycle === "yearly"
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-muted text-muted-foreground hover:text-foreground"
+                        }`}
+                    >
+                        Yearly
+                        <span className="ml-1.5 text-xs text-green-600 font-bold">Save 58%</span>
+                    </button>
+                </div>
             </div>
 
             {loading ? (
                 <div className="flex justify-center py-20"><Loader2 className="animate-spin" /></div>
             ) : (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                    {plans.map(plan => (
+                <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                    {plans
+                        .filter(plan => plan.cycle === billingCycle)
+                        .map(plan => (
                         <PlanCard
                             key={plan.id}
                             plan={plan}
