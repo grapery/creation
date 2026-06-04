@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 
 import { parseMarkdown, type MarkdownBlock } from "@/lib/legal/markdown";
 import { parseInlineMarkdown } from "@/lib/legal/markdown-inline";
+import { useTranslation } from "@/providers/language-provider";
 
 type LegalDocumentPageProps = {
     title: string;
@@ -22,6 +23,7 @@ export function LegalDocumentPage({
     fallbackLastUpdated,
     icon: Icon,
 }: LegalDocumentPageProps) {
+    const { t } = useTranslation();
     const [content, setContent] = useState<MarkdownBlock[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [lastUpdated, setLastUpdated] = useState("");
@@ -82,7 +84,7 @@ export function LegalDocumentPage({
                     {title}
                 </h1>
                 {lastUpdated && (
-                    <p className="text-muted-foreground mt-1">最后更新：{lastUpdated}</p>
+                    <p className="text-muted-foreground mt-1">{t("legal.last_updated", "Last updated")}: {lastUpdated}</p>
                 )}
             </div>
 

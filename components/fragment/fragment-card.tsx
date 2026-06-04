@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Heart, MessageCircle } from "lucide-react";
 import { fragments } from "@/lib/api/fragments";
 import type { StoryFragment } from "@/lib/types";
@@ -37,7 +38,7 @@ export function FragmentCard({ fragment, compact = false, onLikeChange }: Fragme
     };
 
     return (
-        <a href={`/fragments/${fragment.id}`} className="block group">
+        <Link href={`/fragments/${fragment.id}`} className="block group">
             <div className={`relative rounded-xl overflow-hidden border border-border bg-card transition-all hover:shadow-lg hover:border-primary/30 ${compact ? "w-[120px]" : "w-full"}`}>
                 {/* Image */}
                 {fragment.imageUrls && fragment.imageUrls.length > 0 ? (
@@ -101,6 +102,6 @@ export function FragmentCard({ fragment, compact = false, onLikeChange }: Fragme
                     </div>
                 </div>
             </div>
-        </a>
+        </Link>
     );
 }

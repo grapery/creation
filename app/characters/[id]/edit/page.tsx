@@ -13,11 +13,8 @@ import { upload } from "@/lib/api/upload";
 import { CharacterGenerator } from "@/components/character/character-generator";
 import { showSuccess, showError } from "@/lib/toast-utils";
 import { useTranslation } from "@/providers/language-provider";
+import { Textarea } from "@/components/ui/textarea";
 import type { Character } from "@/lib/types/character";
-
-function Textarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
-    return <textarea {...props} className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 resize-none" />;
-}
 
 export default function EditCharacterPage() {
     const { id } = useParams();

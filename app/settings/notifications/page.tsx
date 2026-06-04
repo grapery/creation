@@ -9,7 +9,7 @@ import { useTranslation } from "@/providers/language-provider";
 import { showSuccess } from "@/lib/toast-utils";
 
 export default function NotificationSettingsPage() {
-    const { language } = useTranslation();
+    const { t } = useTranslation();
 
     // Notification settings state
     const [emailNotifs, setEmailNotifs] = useState(true);
@@ -23,7 +23,7 @@ export default function NotificationSettingsPage() {
 
     const handleSave = () => {
         // Save notification preferences
-        showSuccess(language === 'zh-Hans' ? '通知设置已保存' : language === 'ja' ? '通知設定が保存されました' : 'Notification settings saved');
+        showSuccess(t('notification_settings.saved'));
     };
 
     return (
@@ -32,14 +32,10 @@ export default function NotificationSettingsPage() {
             <div className="mb-6">
                 <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
                     <Bell className="h-6 w-6" />
-                    {language === 'zh-Hans' ? '通知设置' : language === 'ja' ? '通知設定' : 'Notification Settings'}
+                    {t('notification_settings.title')}
                 </h1>
                 <p className="text-muted-foreground mt-1">
-                    {language === 'zh-Hans'
-                        ? '管理您希望接收的通知类型'
-                        : language === 'ja'
-                        ? '受け取る通知タイプを管理'
-                        : 'Manage the types of notifications you want to receive'}
+                    {t('notification_settings.subtitle')}
                 </p>
             </div>
 
@@ -47,14 +43,10 @@ export default function NotificationSettingsPage() {
             <Card className="mb-6">
                 <CardHeader>
                     <CardTitle>
-                        {language === 'zh-Hans' ? '通知渠道' : language === 'ja' ? '通知チャンネル' : 'Notification Channels'}
+                        {t('notification_settings.channels')}
                     </CardTitle>
                     <CardDescription>
-                        {language === 'zh-Hans'
-                            ? '选择接收通知的方式'
-                            : language === 'ja'
-                            ? '通知を受け取る方法を選択'
-                            : 'Choose how you want to receive notifications'}
+                        {t('notification_settings.channels_desc')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -65,14 +57,10 @@ export default function NotificationSettingsPage() {
                             </div>
                             <div>
                                 <p className="font-medium">
-                                    {language === 'zh-Hans' ? '邮件通知' : language === 'ja' ? 'メール通知' : 'Email Notifications'}
+                                    {t('notification_settings.email')}
                                 </p>
                                 <p className="text-sm text-muted-foreground">
-                                    {language === 'zh-Hans'
-                                        ? '通过邮件接收通知'
-                                        : language === 'ja'
-                                        ? 'メールで通知を受け取る'
-                                        : 'Receive notifications via email'}
+                                    {t('notification_settings.email_desc')}
                                 </p>
                             </div>
                         </div>
@@ -86,14 +74,10 @@ export default function NotificationSettingsPage() {
                             </div>
                             <div>
                                 <p className="font-medium">
-                                    {language === 'zh-Hans' ? '推送通知' : language === 'ja' ? 'プッシュ通知' : 'Push Notifications'}
+                                    {t('notification_settings.push')}
                                 </p>
                                 <p className="text-sm text-muted-foreground">
-                                    {language === 'zh-Hans'
-                                        ? '在浏览器中接收推送通知'
-                                        : language === 'ja'
-                                        ? 'ブラウザでプッシュ通知を受け取る'
-                                        : 'Receive push notifications in browser'}
+                                    {t('notification_settings.push_desc')}
                                 </p>
                             </div>
                         </div>
@@ -106,14 +90,10 @@ export default function NotificationSettingsPage() {
             <Card className="mb-6">
                 <CardHeader>
                     <CardTitle>
-                        {language === 'zh-Hans' ? '活动通知' : language === 'ja' ? 'アクティビティ通知' : 'Activity Notifications'}
+                        {t('notification_settings.activity')}
                     </CardTitle>
                     <CardDescription>
-                        {language === 'zh-Hans'
-                            ? '当有人在您的内容上进行互动时通知您'
-                            : language === 'ja'
-                            ? 'コンテンツへのインタラクション時に通知'
-                            : 'Get notified when others interact with your content'}
+                        {t('notification_settings.activity_desc')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -124,14 +104,10 @@ export default function NotificationSettingsPage() {
                             </div>
                             <div>
                                 <p className="font-medium">
-                                    {language === 'zh-Hans' ? '点赞通知' : language === 'ja' ? 'いいね通知' : 'Likes'}
+                                    {t('notification_settings.likes')}
                                 </p>
                                 <p className="text-sm text-muted-foreground">
-                                    {language === 'zh-Hans'
-                                        ? '当有人点赞您的故事或角色时'
-                                        : language === 'ja'
-                                        ? 'ストーリーやキャラクターがいいねされたとき'
-                                        : 'When someone likes your stories or characters'}
+                                    {t('notification_settings.likes_desc')}
                                 </p>
                             </div>
                         </div>
@@ -145,14 +121,10 @@ export default function NotificationSettingsPage() {
                             </div>
                             <div>
                                 <p className="font-medium">
-                                    {language === 'zh-Hans' ? '关注通知' : language === 'ja' ? 'フォロー通知' : 'Follows'}
+                                    {t('notification_settings.follows')}
                                 </p>
                                 <p className="text-sm text-muted-foreground">
-                                    {language === 'zh-Hans'
-                                        ? '当有人关注您时'
-                                        : language === 'ja'
-                                        ? '誰かがあなたをフォローしたとき'
-                                        : 'When someone follows you'}
+                                    {t('notification_settings.follows_desc')}
                                 </p>
                             </div>
                         </div>
@@ -166,14 +138,10 @@ export default function NotificationSettingsPage() {
                             </div>
                             <div>
                                 <p className="font-medium">
-                                    {language === 'zh-Hans' ? '评论通知' : language === 'ja' ? 'コメント通知' : 'Comments'}
+                                    {t('notification_settings.comments')}
                                 </p>
                                 <p className="text-sm text-muted-foreground">
-                                    {language === 'zh-Hans'
-                                        ? '当有人评论您的内容时'
-                                        : language === 'ja'
-                                        ? '誰かがあなたのコンテンツにコメントしたとき'
-                                        : 'When someone comments on your content'}
+                                    {t('notification_settings.comments_desc')}
                                 </p>
                             </div>
                         </div>
@@ -187,14 +155,10 @@ export default function NotificationSettingsPage() {
                             </div>
                             <div>
                                 <p className="font-medium">
-                                    {language === 'zh-Hans' ? '提及通知' : language === 'ja' ? 'メンション通知' : 'Mentions'}
+                                    {t('notification_settings.mentions')}
                                 </p>
                                 <p className="text-sm text-muted-foreground">
-                                    {language === 'zh-Hans'
-                                        ? '当有人在评论或故事中提及您时'
-                                        : language === 'ja'
-                                        ? '誰かがコメントやストーリーであなたをメンションしたとき'
-                                        : 'When someone mentions you in comments or stories'}
+                                    {t('notification_settings.mentions_desc')}
                                 </p>
                             </div>
                         </div>
@@ -207,14 +171,10 @@ export default function NotificationSettingsPage() {
             <Card className="mb-6">
                 <CardHeader>
                     <CardTitle>
-                        {language === 'zh-Hans' ? '内容与协作通知' : language === 'ja' ? 'コンテンツとコラボレーション通知' : 'Content & Collaboration'}
+                        {t('notification_settings.content_collab')}
                     </CardTitle>
                     <CardDescription>
-                        {language === 'zh-Hans'
-                            ? '关于故事协作的通知'
-                            : language === 'ja'
-                            ? 'ストーリーコラボレーションに関する通知'
-                            : 'Notifications about story collaboration'}
+                        {t('notification_settings.content_collab_desc')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -225,14 +185,10 @@ export default function NotificationSettingsPage() {
                             </div>
                             <div>
                                 <p className="font-medium">
-                                    {language === 'zh-Hans' ? '故事更新' : language === 'ja' ? 'ストーリー更新' : 'Story Updates'}
+                                    {t('notification_settings.story_updates')}
                                 </p>
                                 <p className="text-sm text-muted-foreground">
-                                    {language === 'zh-Hans'
-                                        ? '当您关注的故事有新分支时'
-                                        : language === 'ja'
-                                        ? 'フォローしているストーリーに新しいブランチが追加されたとき'
-                                        : 'When followed stories get new branches'}
+                                    {t('notification_settings.story_updates_desc')}
                                 </p>
                             </div>
                         </div>
@@ -246,14 +202,10 @@ export default function NotificationSettingsPage() {
             <Card className="mb-6">
                 <CardHeader>
                     <CardTitle>
-                        {language === 'zh-Hans' ? '营销通讯' : language === 'ja' ? 'マーケティング通信' : 'Marketing Communications'}
+                        {t('notification_settings.marketing')}
                     </CardTitle>
                     <CardDescription>
-                        {language === 'zh-Hans'
-                            ? '接收产品更新和促销信息'
-                            : language === 'ja'
-                            ? '製品アップデートやプロモーション情報を受け取る'
-                            : 'Receive product updates and promotional information'}
+                        {t('notification_settings.marketing_desc')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -264,14 +216,10 @@ export default function NotificationSettingsPage() {
                             </div>
                             <div>
                                 <p className="font-medium">
-                                    {language === 'zh-Hans' ? '营销邮件' : language === 'ja' ? 'マーケティングメール' : 'Marketing Emails'}
+                                    {t('notification_settings.marketing_email')}
                                 </p>
                                 <p className="text-sm text-muted-foreground">
-                                    {language === 'zh-Hans'
-                                        ? '接收功能更新、优惠活动等邮件'
-                                        : language === 'ja'
-                                        ? '機能更新、キャンペーンなどのメールを受け取る'
-                                        : 'Receive emails about features and offers'}
+                                    {t('notification_settings.marketing_email_desc')}
                                 </p>
                             </div>
                         </div>
@@ -283,10 +231,10 @@ export default function NotificationSettingsPage() {
             {/* Save Button */}
             <div className="flex justify-end gap-4">
                 <Button variant="outline">
-                    {language === 'zh-Hans' ? '取消' : language === 'ja' ? 'キャンセル' : 'Cancel'}
+                    {t('notification_settings.cancel')}
                 </Button>
                 <Button onClick={handleSave}>
-                    {language === 'zh-Hans' ? '保存设置' : language === 'ja' ? '設定を保存' : 'Save Settings'}
+                    {t('notification_settings.save')}
                 </Button>
             </div>
         </div>

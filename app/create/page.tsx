@@ -6,6 +6,7 @@ import { Share2, Users, Search, ChevronLeft, ChevronRight, Eye, MessageSquare, S
 import { stories } from "@/lib/api/stories";
 import { characters } from "@/lib/api/characters";
 import { showSuccess, showError } from "@/lib/toast-utils";
+import { useTranslation } from "@/providers/language-provider";
 import {
     AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
     AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay,
@@ -28,6 +29,7 @@ export default function CreateStoryPage({ storyId }: CreateStoryProps) {
 
 function CreateStory({ storyId }: CreateStoryProps) {
     const router = useRouter();
+    const { t } = useTranslation();
     const searchParams = useSearchParams();
     const [selectedTab, setSelectedTab] = useState(0);
     const [title, setTitle] = useState("");
@@ -169,7 +171,7 @@ function CreateStory({ storyId }: CreateStoryProps) {
             setAiGeneratedCoverURL("");
         } catch (error) {
             console.error("Failed to upload cover:", error);
-            showError("上传失败", "封面图片上传失败，请重试");
+            showError(t("create.upload_failed"), t("create.upload_failed_desc"));
         } finally {
             setIsUploadingCover(false);
         }
@@ -185,7 +187,7 @@ function CreateStory({ storyId }: CreateStoryProps) {
 
     const handleCreateWithStatus = async (status: "draft" | "published") => {
         if (!title.trim()) {
-            showError("请输入标题", "故事标题不能为空");
+            showError(t("create.title_required"), t("create.title_required_desc"));
             return;
         }
 
@@ -220,7 +222,7 @@ function CreateStory({ storyId }: CreateStoryProps) {
 
             const createdStory = await stories.create(requestData);
 
-            showSuccess(status === "draft" ? "草稿已保存" : "创建成功", status === "draft" ? "故事已保存为草稿" : "故事创建成功！");
+            showSuccess(status === "draft" ? t("create.draft_saved") : t("create.created"), status === "draft" ? t("create.story_saved_as_draft") : t("create.story_created"));
 
             if (status === "published") {
                 router.push(`/create/wizard?storyId=${createdStory.id}`);
@@ -230,7 +232,7 @@ function CreateStory({ storyId }: CreateStoryProps) {
 
         } catch (error) {
             console.error("Failed to create story:", error);
-            showError("创建失败", "故事创建失败，请重试");
+            showError(t("create.create_failed"), t("create.story_create_failed"));
         } finally {
             setIsAIProcessing(false);
         }

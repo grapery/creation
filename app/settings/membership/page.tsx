@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation";
 import { showSuccess, showError } from "@/lib/toast-utils";
 
 export default function MembershipSettingsPage() {
-    const { language } = useTranslation();
+    const { t } = useTranslation();
     const { user } = useAuth();
     const router = useRouter();
     const [plans, setPlans] = useState<MembershipPlan[]>([]);
@@ -101,10 +101,10 @@ export default function MembershipSettingsPage() {
             {/* Header */}
             <div className="mb-6">
                 <h1 className="text-2xl font-bold text-foreground">
-                    {language === 'zh-Hans' ? '会员设置' : language === 'ja' ? 'メンバーシップ設定' : 'Membership Settings'}
+                    {t('membership_settings.title')}
                 </h1>
                 <p className="text-muted-foreground mt-1">
-                    {language === 'zh-Hans' ? '管理您的会员订阅和使用情况' : language === 'ja' ? 'メンバーシップと使用状況を管理' : 'Manage your membership subscription and usage'}
+                    {t('membership_settings.subtitle')}
                 </p>
             </div>
 
@@ -119,7 +119,7 @@ export default function MembershipSettingsPage() {
                                 </div>
                                 <div>
                                     <CardTitle className="text-xl">
-                                        {language === 'zh-Hans' ? '当前会员' : language === 'ja' ? '現在のメンバーシップ' : 'Current Membership'}
+                                        {t('membership_settings.current_plan')}
                                     </CardTitle>
                                     <CardDescription>
                                         {subscription.planId}
@@ -140,7 +140,7 @@ export default function MembershipSettingsPage() {
                         <div className="grid md:grid-cols-3 gap-4">
                             <div>
                                 <p className="text-sm text-muted-foreground mb-1">
-                                    {language === 'zh-Hans' ? '开始日期' : language === 'ja' ? '開始日' : 'Start Date'}
+                                    {t('membership_settings.start_date')}
                                 </p>
                                 <p className="font-semibold">
                                     {new Date(subscription.currentPeriodStart * 1000).toLocaleDateString()}
@@ -148,7 +148,7 @@ export default function MembershipSettingsPage() {
                             </div>
                             <div>
                                 <p className="text-sm text-muted-foreground mb-1">
-                                    {language === 'zh-Hans' ? '到期日期' : language === 'ja' ? '有効期限' : 'End Date'}
+                                    {t('membership_settings.expiry_date')}
                                 </p>
                                 <p className="font-semibold">
                                     {new Date(subscription.currentPeriodEnd * 1000).toLocaleDateString()}
@@ -156,12 +156,12 @@ export default function MembershipSettingsPage() {
                             </div>
                             <div>
                                 <p className="text-sm text-muted-foreground mb-1">
-                                    {language === 'zh-Hans' ? '自动续费' : language === 'ja' ? '自動更新' : 'Auto Renew'}
+                                    {t('membership_settings.auto_renew')}
                                 </p>
                                 <p className="font-semibold">
                                     {subscription.autoRenew ?
-                                        (language === 'zh-Hans' ? '已开启' : language === 'ja' ? 'オン' : 'Enabled') :
-                                        (language === 'zh-Hans' ? '已关闭' : language === 'ja' ? 'オフ' : 'Disabled')
+                                        t('membership_settings.auto_renew_on') :
+                                        t('membership_settings.auto_renew_off')
                                     }
                                 </p>
                             </div>
@@ -175,7 +175,7 @@ export default function MembershipSettingsPage() {
                 <Card className="mb-8">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            {language === 'zh-Hans' ? 'AI 配额使用情况' : language === 'ja' ? 'AIクオータ使用状況' : 'AI Quota Usage'}
+                            {t('membership_settings.ai_usage')}
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -183,7 +183,7 @@ export default function MembershipSettingsPage() {
                             <div>
                                 <div className="flex justify-between mb-2">
                                     <span className="text-sm text-muted-foreground">
-                                        {language === 'zh-Hans' ? '已使用' : language === 'ja' ? '使用済み' : 'Used'}
+                                        {t('membership_settings.used')}
                                     </span>
                                     <span className="text-sm font-semibold">
                                         {tokenUsage.used.toLocaleString()} / {tokenUsage.total.toLocaleString()}
@@ -195,13 +195,13 @@ export default function MembershipSettingsPage() {
                                 <div className="flex items-center gap-2">
                                     <CheckCircle className="h-4 w-4 text-green-500" />
                                     <span className="text-sm">
-                                        {language === 'zh-Hans' ? '剩余' : language === 'ja' ? '残り' : 'Remaining'}: {tokenUsage.remaining.toLocaleString()}
+                                        {t('membership_settings.remaining')}: {tokenUsage.remaining.toLocaleString()}
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <AlertCircle className="h-4 w-4 text-yellow-500" />
                                     <span className="text-sm">
-                                        {language === 'zh-Hans' ? '重置日期' : language === 'ja' ? 'リセット日' : 'Reset Date'}: {new Date(tokenUsage.resetAt * 1000).toLocaleDateString()}
+                                        {t('membership_settings.reset_date')}: {new Date(tokenUsage.resetAt * 1000).toLocaleDateString()}
                                     </span>
                                 </div>
                             </div>
@@ -213,10 +213,10 @@ export default function MembershipSettingsPage() {
             {/* Available Plans */}
             <div className="mb-4">
                 <h2 className="text-2xl font-bold mb-2">
-                    {language === 'zh-Hans' ? '升级会员' : language === 'ja' ? 'メンバーシップアップグレード' : 'Upgrade Membership'}
+                    {t('membership_settings.upgrade_title')}
                 </h2>
                 <p className="text-muted-foreground">
-                    {language === 'zh-Hans' ? '选择最适合您的会员计划' : language === 'ja' ? '最適なプランを選択' : 'Choose the plan that works best for you'}
+                    {t('membership_settings.upgrade_desc')}
                 </p>
             </div>
 
@@ -236,10 +236,10 @@ export default function MembershipSettingsPage() {
             {subscription && subscription.status === 'active' && (
                 <div className="mt-8 flex gap-4 justify-center">
                     <Button variant="outline" onClick={onCancelSubscription}>
-                        {language === 'zh-Hans' ? '取消订阅' : language === 'ja' ? '購読をキャンセル' : 'Cancel Subscription'}
+                        {t('membership_settings.cancel_subscription')}
                     </Button>
                     <Button variant="outline" onClick={() => router.push('/vip')}>
-                        {language === 'zh-Hans' ? '更改计划' : language === 'ja' ? 'プランを変更' : 'Change Plan'}
+                        {t('membership_settings.change_plan')}
                     </Button>
                 </div>
             )}

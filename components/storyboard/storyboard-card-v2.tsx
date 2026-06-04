@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Storyboard } from "@/lib/types";
+import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Layers, Heart, MessageSquare, Calendar, FileText, Bookmark } from "lucide-react";
 import { likes, bookmarks } from "@/lib/api/interactions";
@@ -53,7 +54,7 @@ export default function StoryboardCard({ storyboard, href, onLikeChange, onBookm
     };
 
     return (
-        <a href={linkHref}>
+        <Link href={linkHref}>
             <Card className="group cursor-pointer border-border/50 hover:border-primary/30 transition-all hover:shadow-lg hover:-translate-y-1">
                 <CardContent className="p-4 sm:p-5">
                     {/* Cover Image */}
@@ -135,6 +136,6 @@ export default function StoryboardCard({ storyboard, href, onLikeChange, onBookm
                     </div>
                 </CardContent>
             </Card>
-        </a>
+        </Link>
     );
 }

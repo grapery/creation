@@ -24,18 +24,7 @@ export function PlanCard({ plan, isCurrent, onSubscribe, loading }: PlanCardProp
     const formattedPrice = formatPrice(plan.price, plan.currency);
 
     // Get cycle text
-    const cycleText =
-        plan.cycle === 'monthly'
-            ? language === 'zh-Hans'
-                ? '月'
-                : language === 'ja'
-                  ? '月'
-                  : 'month'
-            : language === 'zh-Hans'
-              ? '年'
-              : language === 'ja'
-                ? '年'
-                : 'year';
+    const cycleText = plan.cycle === 'monthly' ? t('plan_card.monthly') : t('plan_card.yearly');
 
     return (
         <Card className={`relative flex flex-col ${

@@ -50,23 +50,15 @@ export default function VIPPage() {
         // Refresh user data to get updated membership status
         await refreshUser?.();
 
-        const planName = selectedPlan?.name[language as keyof typeof selectedPlan.name] || selectedPlan?.name.en;
-        const successMessage = language === 'zh-Hans'
-            ? `成功订阅 ${planName}！`
-            : language === 'ja'
-            ? `${planName}に正常に購読されました！`
-            : `Successfully subscribed to ${planName}!`;
+        const planName = selectedPlan?.name[language as keyof typeof selectedPlan.name] || selectedPlan?.name.en || "";
+        const successMessage = t("vip_payment.subscribe_success").replace("{plan}", planName);
 
         showSuccess(successMessage);
         router.push('/profile');
     };
 
     const handlePaymentError = (error: string) => {
-        const errorMessage = language === 'zh-Hans'
-            ? `支付失败: ${error}`
-            : language === 'ja'
-            ? `支払いに失敗しました: ${error}`
-            : `Payment failed: ${error}`;
+        const errorMessage = t("vip_payment.payment_failed").replace("{error}", error);
         showError(errorMessage);
     };
 

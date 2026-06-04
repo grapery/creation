@@ -139,7 +139,6 @@ export default function ProfilePage() {
                 if (!response.ok) {
                     // Handle 401 (Unauthorized) specifically
                     if (response.status === 401) {
-                        console.log('[Profile] Unauthorized - token may be invalid or expired');
                         throw new Error('Authentication required. Please log in again.');
                     }
                     throw new Error(`HTTP error! status: ${response.status}`);
