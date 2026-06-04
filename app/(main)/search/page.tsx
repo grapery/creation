@@ -68,6 +68,14 @@ function SearchPageContent() {
     const handleSearch = () => {
         setPage(1);
         doSearch(query, activeTab, 1);
+        // Save to search history
+        if (query.trim()) {
+            try {
+                const history = JSON.parse(localStorage.getItem("searchHistory") || "[]");
+                const updated = [query.trim(), ...history.filter((q: string) => q !== query.trim())].slice(0, 10);
+                localStorage.setItem("searchHistory", JSON.stringify(updated));
+            } catch {}
+        }
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -78,6 +86,19 @@ function SearchPageContent() {
         const next = page + 1;
         setPage(next);
         doSearch(query, activeTab, next);
+    };
+
+    // Search history
+    const [searchHistory, setSearchHistory] = useState<string[]>([]);
+    useEffect(() => {
+        try {
+            setSearchHistory(JSON.parse(localStorage.getItem("searchHistory") || "[]"));
+        } catch {}
+    }, []);
+
+    const clearHistory = () => {
+        localStorage.removeItem("searchHistory");
+        setSearchHistory([]);
     };
 
     const tabs: { value: SearchType; label: string }[] = [
@@ -105,6 +126,27 @@ function SearchPageContent() {
                     {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
                 </Button>
             </div>
+
+            {/* Search History */}
+            {!results && !loading && searchHistory.length > 0 && (
+                <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-muted-foreground">Recent Searches</span>
+                        <button onClick={clearHistory} className="text-xs text-muted-foreground hover:text-foreground">Clear</button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        {searchHistory.map((q) => (
+                            <button
+                                key={q}
+                                onClick={() => { setQuery(q); doSearch(q, activeTab, 1); }}
+                                className="px-3 py-1.5 bg-muted rounded-full text-sm hover:bg-muted/80 transition-colors"
+                            >
+                                {q}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as SearchType)}>
                 <TabsList>

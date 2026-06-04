@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect, lazy, Suspense, useCallback } from "react";
 import { useAuth } from "@/providers/auth-provider";
 import { useTranslation } from "@/providers/language-provider";
 import { StoryboardCard } from "@/components/storyboard/storyboard-card";
 import { storyboards } from "@/lib/api/storyboards";
 import { Storyboard } from "@/lib/types";
-import { Loader2, Compass, Sparkles } from "lucide-react";
+import { Loader2, Compass, Sparkles, Search } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
@@ -31,6 +31,10 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<Tab>(Tab.STORYBOARDS);
   const [items, setItems] = useState<Storyboard[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const { show: showLoginPrompt } = useLoginPrompt();
 
   // Fetch data when tab changes (authenticated only)
@@ -40,13 +44,16 @@ export default function DashboardPage() {
 
     async function fetchData() {
       setLoading(true);
+      setPage(1);
       try {
         if (activeTab === Tab.STORYBOARDS) {
           const res = await storyboards.getDashboardStoryboards();
           setItems(res.storyboards || []);
+          setHasMore((res.storyboards || []).length >= 20);
         } else if (activeTab === Tab.FOLLOWING) {
           const res = await storyboards.getFeed(1, 20, 'following');
           setItems(res.storyboards || []);
+          setHasMore((res.storyboards || []).length >= 20);
         }
       } catch (e: any) {
         console.error('Failed to fetch data:', e);
@@ -82,12 +89,41 @@ export default function DashboardPage() {
     );
   }
 
+  const loadMore = async () => {
+    if (loadingMore) return;
+    const nextPage = page + 1;
+    setLoadingMore(true);
+    try {
+      let res: any;
+      if (activeTab === Tab.STORYBOARDS) {
+        res = await storyboards.getDashboardStoryboards();
+      } else {
+        res = await storyboards.getFeed(nextPage, 20, 'following');
+      }
+      setItems(prev => [...prev, ...(res.storyboards || [])]);
+      setPage(nextPage);
+      setHasMore((res.storyboards || []).length >= 20);
+    } catch (e) {
+      console.error('Failed to load more:', e);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
   // Authenticated users: full dashboard
   return (
     <main className="flex-1 container max-w-6xl px-4 py-6 md:px-6 mx-auto">
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
         {/* Main Feed Column */}
         <div className="md:col-span-8 min-w-0 space-y-6">
+          {/* Search Bar */}
+          <Link
+            href="/search"
+            className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card hover:bg-muted transition-colors"
+          >
+            <Search className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">{t("common.search", "Search")} stories, characters, users...</span>
+          </Link>
           {/* Quick Actions */}
           <div className="grid grid-cols-2 gap-3">
             <Link
@@ -139,8 +175,14 @@ export default function DashboardPage() {
           {/* Feed Content */}
           <div className="space-y-4">
             {loading ? (
-              <div className="flex justify-center py-20">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <div className="space-y-4">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="rounded-xl border border-border bg-card p-4 space-y-3 animate-pulse">
+                    <div className="aspect-video bg-muted rounded-lg" />
+                    <div className="h-5 bg-muted rounded w-3/4" />
+                    <div className="h-4 bg-muted rounded w-1/2" />
+                  </div>
+                ))}
               </div>
             ) : items.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
@@ -174,6 +216,17 @@ export default function DashboardPage() {
                     }}
                   />
                 ))}
+                {hasMore && (
+                  <div className="flex justify-center pt-4">
+                    <button
+                      onClick={loadMore}
+                      disabled={loadingMore}
+                      className="px-6 py-2 rounded-lg border border-border hover:bg-muted text-sm font-medium transition-colors disabled:opacity-50"
+                    >
+                      {loadingMore ? <Loader2 className="h-4 w-4 animate-spin" /> : "Load More"}
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
