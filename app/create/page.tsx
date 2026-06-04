@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Share2, Users, Search, ChevronLeft, ChevronRight, Eye, MessageSquare, Sparkles, Save, AlertTriangle, Trash2, Plus, X } from "lucide-react";
+import { Share2, Users, Search, ChevronLeft, ChevronRight, Eye, MessageSquare, Sparkles, Save, AlertTriangle, Trash2, Plus, X, RefreshCw, Minus } from "lucide-react";
 import { stories } from "@/lib/api/stories";
 import { characters } from "@/lib/api/characters";
 import { showSuccess, showError } from "@/lib/toast-utils";
@@ -70,7 +70,7 @@ function CreateStory({ storyId }: CreateStoryProps) {
     const [stylesTotal, setStylesTotal] = useState(0);
 
     // Cover ratio
-    const [coverRatio, setCoverRatio] = useState<"3:4" | "16:9" | "1:1">("3:4");
+    const [coverRatio, setCoverRatio] = useState<"1:1" | "3:4" | "4:3" | "9:16" | "16:9">("3:4");
 
     // Cast management
     const [selectedCharacters, setSelectedCharacters] = useState<Character[]>([]);
@@ -331,24 +331,29 @@ function CreateStory({ storyId }: CreateStoryProps) {
                             </div>
                         </div>
 
-                        {/* Default Scene Count Picker */}
+                        {/* Default Scene Count Stepper */}
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-foreground">Default Scene Count</label>
-                            <div className="flex items-center gap-2">
-                                {[2, 3, 4, 5, 6, 7, 8].map((count) => (
-                                    <button
-                                        key={count}
-                                        onClick={() => setDefaultSceneCount(count)}
-                                        className={`w-9 h-9 rounded-full border flex items-center justify-center transition-colors ${defaultSceneCount === count
-                                            ? "bg-primary text-white"
-                                            : "bg-background hover:bg-muted"
-                                            }`}
-                                    >
-                                        <span className="text-sm font-semibold">{count}</span>
-                                    </button>
-                                ))}
+                            <div className="flex items-center gap-3">
+                                <button
+                                    onClick={() => setDefaultSceneCount(prev => Math.max(2, prev - 1))}
+                                    disabled={defaultSceneCount <= 2}
+                                    className="w-9 h-9 rounded-lg border border-border flex items-center justify-center hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    <Minus className="w-4 h-4" />
+                                </button>
+                                <div className="w-14 h-9 rounded-lg border border-primary bg-primary/10 flex items-center justify-center">
+                                    <span className="text-base font-semibold text-primary">{defaultSceneCount}</span>
+                                </div>
+                                <button
+                                    onClick={() => setDefaultSceneCount(prev => Math.min(8, prev + 1))}
+                                    disabled={defaultSceneCount >= 8}
+                                    className="w-9 h-9 rounded-lg border border-border flex items-center justify-center hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    <Plus className="w-4 h-4" />
+                                </button>
+                                <span className="text-sm text-muted-foreground">scenes (2–8)</span>
                             </div>
-                            <span className="text-sm text-muted-foreground ml-2">scenes (2-8)</span>
                         </div>
 
                         {/* Cover Image Upload */}
@@ -356,7 +361,7 @@ function CreateStory({ storyId }: CreateStoryProps) {
                             <div className="flex items-center justify-between">
                                 <label className="text-sm font-medium text-foreground">Cover Image</label>
                                 <div className="flex items-center gap-1">
-                                    {(["3:4", "1:1", "16:9"] as const).map((r) => (
+                                    {(["1:1", "3:4", "4:3", "9:16", "16:9"] as const).map((r) => (
                                         <button
                                             key={r}
                                             onClick={() => setCoverRatio(r)}
@@ -370,7 +375,11 @@ function CreateStory({ storyId }: CreateStoryProps) {
                                 </div>
                             </div>
                             <div className={`w-full border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center bg-muted/30 overflow-hidden relative ${
-                                coverRatio === "3:4" ? "h-[260px]" : coverRatio === "16:9" ? "h-[180px]" : "h-[220px]"
+                                coverRatio === "9:16" ? "h-[320px]" :
+                                coverRatio === "3:4" ? "h-[260px]" :
+                                coverRatio === "16:9" ? "h-[180px]" :
+                                coverRatio === "4:3" ? "h-[220px]" :
+                                "h-[220px]"
                             }`}>
                                 <input
                                     type="file"
@@ -444,11 +453,9 @@ function CreateStory({ storyId }: CreateStoryProps) {
                                     <button
                                         onClick={() => setUseAIEnrich(!useAIEnrich)}
                                         disabled={description.length === 0}
-                                        className={`w-11 h-6 rounded-full transition-colors ${useAIEnrich
-                                            ? "bg-purple-500 text-white"
-                                            : "bg-muted"
-                                            }`}
+                                        className={`relative w-11 h-6 rounded-full transition-colors ${useAIEnrich ? "bg-purple-500" : "bg-muted"}`}
                                     >
+                                        <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${useAIEnrich ? "translate-x-5" : "translate-x-1"}`} />
                                     </button>
                                 </div>
 
@@ -463,11 +470,9 @@ function CreateStory({ storyId }: CreateStoryProps) {
                                     </div>
                                     <button
                                         onClick={() => setGenerateCover(!generateCover)}
-                                        className={`w-11 h-6 rounded-full transition-colors ${generateCover
-                                            ? "bg-purple-500 text-white"
-                                            : "bg-muted"
-                                            }`}
+                                        className={`relative w-11 h-6 rounded-full transition-colors ${generateCover ? "bg-purple-500" : "bg-muted"}`}
                                     >
+                                        <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${generateCover ? "translate-x-5" : "translate-x-1"}`} />
                                     </button>
                                 </div>
 
@@ -482,11 +487,9 @@ function CreateStory({ storyId }: CreateStoryProps) {
                                     </div>
                                     <button
                                         onClick={() => setGenerateBackground(!generateBackground)}
-                                        className={`w-11 h-6 rounded-full transition-colors ${generateBackground
-                                            ? "bg-purple-500 text-white"
-                                            : "bg-muted"
-                                            }`}
+                                        className={`relative w-11 h-6 rounded-full transition-colors ${generateBackground ? "bg-purple-500" : "bg-muted"}`}
                                     >
+                                        <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${generateBackground ? "translate-x-5" : "translate-x-1"}`} />
                                     </button>
                                 </div>
 
@@ -501,11 +504,9 @@ function CreateStory({ storyId }: CreateStoryProps) {
                                     </div>
                                     <button
                                         onClick={() => setGeneratePoster(!generatePoster)}
-                                        className={`w-11 h-6 rounded-full transition-colors ${generatePoster
-                                            ? "bg-purple-500 text-white"
-                                            : "bg-muted"
-                                            }`}
+                                        className={`relative w-11 h-6 rounded-full transition-colors ${generatePoster ? "bg-purple-500" : "bg-muted"}`}
                                     >
+                                        <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${generatePoster ? "translate-x-5" : "translate-x-1"}`} />
                                     </button>
                                 </div>
                             </div>
@@ -513,7 +514,16 @@ function CreateStory({ storyId }: CreateStoryProps) {
                             {/* Style Selection */}
                             {(generateCover || generatePoster || generateBackground) && (
                                 <div className="space-y-3 pt-3 border-t border-purple-200/50">
-                                    <h5 className="text-sm font-medium text-purple-900">Art Style</h5>
+                                    <div className="flex items-center justify-between">
+                                        <h5 className="text-sm font-medium text-purple-900">Art Style</h5>
+                                        <button
+                                            onClick={() => loadStyles(0, styleSearchQuery)}
+                                            className="p-1.5 hover:bg-muted rounded-lg transition-colors"
+                                            title="Refresh styles"
+                                        >
+                                            <RefreshCw className={`w-4 h-4 text-muted-foreground ${isLoadingStyles ? "animate-spin" : ""}`} />
+                                        </button>
+                                    </div>
 
                                     {/* Search */}
                                     <div className="relative">
