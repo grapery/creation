@@ -48,6 +48,9 @@ export default function DashboardPage() {
       try {
         if (activeTab === Tab.STORYBOARDS) {
           const res = await storyboards.getDashboardStoryboards();
+          console.log('[Dashboard] getDashboardStoryboards response:', JSON.stringify(res).slice(0, 500));
+          console.log('[Dashboard] storyboards array:', Array.isArray(res.storyboards), 'length:', res.storyboards?.length);
+          if (res.storyboards?.[0]) console.log('[Dashboard] first item keys:', Object.keys(res.storyboards[0]));
           setItems(res.storyboards || []);
           setHasMore((res.storyboards || []).length >= 20);
         } else if (activeTab === Tab.FOLLOWING) {
