@@ -729,6 +729,8 @@
     "search": "搜索"
   },
   "footer": {
+    "about": "关于我们",
+    "support": "技术支持",
     "privacy": "隐私政策",
     "terms": "服务协议",
     "api_docs": "API 文档",

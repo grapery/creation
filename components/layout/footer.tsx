@@ -11,6 +11,8 @@ export function Footer() {
             <div className="container max-w-6xl px-4 py-4 mx-auto">
                 <div className="flex flex-col items-center gap-2 text-xs text-muted-foreground">
                     <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+                        <Link href="/about" className="hover:text-foreground">{t("footer.about")}</Link>
+                        <Link href="/support" className="hover:text-foreground">{t("footer.support")}</Link>
                         <Link href="/privacy" className="hover:text-foreground">{t("footer.privacy")}</Link>
                         <Link href="/terms" className="hover:text-foreground">{t("footer.terms")}</Link>
                     </div>

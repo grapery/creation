@@ -729,6 +729,8 @@
     "search": "検索"
   },
   "footer": {
+    "about": "私たちについて",
+    "support": "サポート",
     "privacy": "プライバシーポリシー",
     "terms": "利用規約",
     "api_docs": "API ドキュメント",

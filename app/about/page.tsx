@@ -9,6 +9,8 @@ import {
     Users,
     Palette,
     MessageSquare,
+    Headphones,
+    Mail,
     Video,
     BookOpen,
     PenTool,
@@ -26,6 +28,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/providers/auth-provider";
 import { useRouter } from "next/navigation";
 import { githubImages } from "@/lib/github-assets";
+import { SUPPORT_EMAIL } from "@/lib/support";
 
 const screenshots = [
     { src: githubImages.screenshotFragmentFeed, title: "故事碎片", desc: "记录灵感碎片，AI 辅助创作图文内容" },
@@ -431,6 +434,34 @@ export default function AboutPage() {
                 </div>
             </section>
 
+            {/* Technical Support */}
+            <section className="py-20 bg-muted/30">
+                <div className="container max-w-6xl mx-auto px-4">
+                    <div className="max-w-3xl mx-auto text-center">
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 text-primary mb-4">
+                            <Headphones className="w-8 h-8" />
+                        </div>
+                        <h2 className="text-3xl md:text-4xl font-bold mb-4">技术支持</h2>
+                        <p className="text-lg text-muted-foreground mb-6">
+                            需要技术支持或反馈问题？请发送邮件至{" "}
+                            <a
+                                href={`mailto:${SUPPORT_EMAIL}`}
+                                className="text-primary font-medium hover:underline"
+                            >
+                                {SUPPORT_EMAIL}
+                            </a>
+                            ，或访问我们的技术支持页面提交在线反馈。
+                        </p>
+                        <Button size="lg" asChild>
+                            <Link href="/support">
+                                <MessageSquare className="mr-2 h-5 w-5" />
+                                前往技术支持
+                            </Link>
+                        </Button>
+                    </div>
+                </div>
+            </section>
+
             {/* CTA Section */}
             <section className="py-20 bg-gradient-to-br from-primary/10 to-primary/5">
                 <div className="container max-w-6xl mx-auto px-4">
@@ -482,6 +513,16 @@ export default function AboutPage() {
                             <h4 className="font-semibold mb-4">关于</h4>
                             <ul className="space-y-2 text-sm text-muted-foreground">
                                 <li><Link href="/about" className="hover:text-foreground transition-colors">关于我们</Link></li>
+                                <li><Link href="/support" className="hover:text-foreground transition-colors">技术支持</Link></li>
+                                <li>
+                                    <a
+                                        href={`mailto:${SUPPORT_EMAIL}`}
+                                        className="hover:text-foreground transition-colors inline-flex items-center gap-1"
+                                    >
+                                        <Mail className="h-3.5 w-3.5" />
+                                        联系支持
+                                    </a>
+                                </li>
                                 <li><Link href="/settings/about" className="hover:text-foreground transition-colors">App 信息</Link></li>
                             </ul>
                         </div>
