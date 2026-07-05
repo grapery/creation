@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, Heart, MessageCircle, Share2, Bookmark, BookOpen, Loader2, UserPlus } from "lucide-react";
 import { fragments } from "@/lib/api/fragments";
 import { bookmarks } from "@/lib/api/interactions";
@@ -15,6 +15,7 @@ import type { StoryFragment, FragmentStoryPrefillAIResponse, FragmentStoryCreati
 export default function FragmentDetailPage() {
     const params = useParams();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { user } = useAuth();
     const { LoginPromptModal, show: showLoginPrompt } = useLoginPrompt();
     const fragmentId = params.id as string;
@@ -30,13 +31,20 @@ export default function FragmentDetailPage() {
     const [converting, setConverting] = useState(false);
     const commentsRef = useRef<HTMLDivElement>(null);
 
+    const shareGrant = (() => {
+        const token = searchParams.get("t");
+        const exp = searchParams.get("exp");
+        if (token && exp) return { token, exp };
+        return undefined;
+    })();
+
     useEffect(() => {
         loadFragment();
-    }, [fragmentId]);
+    }, [fragmentId, shareGrant?.token, shareGrant?.exp]);
 
     const loadFragment = async () => {
         try {
-            const data = await fragments.get(fragmentId);
+            const data = await fragments.get(fragmentId, shareGrant);
             setFragment(data);
             setIsLiked(data.isLiked || false);
             setLikeCount(data.likes || 0);

@@ -10,7 +10,7 @@ export async function POST(
         const { id: characterId } = await params;
         const authHeader = request.headers.get('authorization');
 
-        const backendUrl = `${BACKEND_URL}/api/characters/${characterId}/follow`;
+        const backendUrl = `${BACKEND_URL}/api/v1/characters/${characterId}/follow`;
 
         const response = await fetch(backendUrl, {
             method: 'POST',
@@ -67,7 +67,7 @@ export async function DELETE(
         const { id: characterId } = await params;
         const authHeader = request.headers.get('authorization');
 
-        const backendUrl = `${BACKEND_URL}/api/characters/${characterId}/follow`;
+        const backendUrl = `${BACKEND_URL}/api/v1/characters/${characterId}/follow`;
 
         const response = await fetch(backendUrl, {
             method: 'DELETE',

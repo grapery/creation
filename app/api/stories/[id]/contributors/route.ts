@@ -15,7 +15,7 @@ export async function GET(
         const limit = searchParams.get('limit') || '20';
         const offset = searchParams.get('offset') || '0';
 
-        const backendUrl = `${BACKEND_URL}/api/stories/${storyId}/contributors?limit=${limit}&offset=${offset}`;
+        const backendUrl = `${BACKEND_URL}/api/v1/stories/${storyId}/contributors?limit=${limit}&offset=${offset}`;
 
         const response = await fetch(backendUrl, {
             method: 'GET',
@@ -73,7 +73,7 @@ export async function POST(
         const authHeader = request.headers.get('authorization');
         const body = await request.json();
 
-        const backendUrl = `${BACKEND_URL}/api/stories/${storyId}/contributors`;
+        const backendUrl = `${BACKEND_URL}/api/v1/stories/${storyId}/contributors`;
 
         const response = await fetch(backendUrl, {
             method: 'POST',

@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
         const searchParams = request.nextUrl.searchParams;
         const queryString = searchParams.toString();
 
-        const backendUrl = `${BACKEND_URL}/api/dashboard/storyboards${queryString ? `?${queryString}` : ''}`;
+        const backendUrl = `${BACKEND_URL}/api/v1/dashboard/storyboards${queryString ? `?${queryString}` : ''}`;
 
         const response = await fetch(backendUrl, {
             method: 'GET',

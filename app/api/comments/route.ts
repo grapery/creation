@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
         const searchParams = request.nextUrl.searchParams;
         const queryString = searchParams.toString();
 
-        const backendUrl = `${BACKEND_URL}/api/comments${queryString ? `?${queryString}` : ''}`;
+        const backendUrl = `${BACKEND_URL}/api/v1/comments${queryString ? `?${queryString}` : ''}`;
 
         const response = await fetch(backendUrl, {
             method: 'GET',
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
 
         const body = await request.json();
 
-        const backendUrl = `${BACKEND_URL}/api/comments`;
+        const backendUrl = `${BACKEND_URL}/api/v1/comments`;
 
         const response = await fetch(backendUrl, {
             method: 'POST',

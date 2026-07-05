@@ -10,7 +10,7 @@ export async function POST(
         const { id: storyboardId } = await params;
         const authHeader = request.headers.get('authorization');
 
-        const backendUrl = `${BACKEND_URL}/api/storyboards/${storyboardId}/like`;
+        const backendUrl = `${BACKEND_URL}/api/v1/storyboards/${storyboardId}/like`;
 
         const response = await fetch(backendUrl, {
             method: 'POST',
@@ -67,7 +67,7 @@ export async function DELETE(
         const { id: storyboardId } = await params;
         const authHeader = request.headers.get('authorization');
 
-        const backendUrl = `${BACKEND_URL}/api/storyboards/${storyboardId}/like`;
+        const backendUrl = `${BACKEND_URL}/api/v1/storyboards/${storyboardId}/like`;
 
         const response = await fetch(backendUrl, {
             method: 'DELETE',

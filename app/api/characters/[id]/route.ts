@@ -10,7 +10,7 @@ export async function GET(
         const { id: characterId } = await params;
         const authHeader = request.headers.get('authorization');
 
-        const backendUrl = `${BACKEND_URL}/api/characters/${characterId}`;
+        const backendUrl = `${BACKEND_URL}/api/v1/characters/${characterId}`;
 
         const response = await fetch(backendUrl, {
             method: 'GET',
@@ -68,7 +68,7 @@ export async function PUT(
         const authHeader = request.headers.get('authorization');
         const body = await request.json();
 
-        const backendUrl = `${BACKEND_URL}/api/characters/${characterId}`;
+        const backendUrl = `${BACKEND_URL}/api/v1/characters/${characterId}`;
 
         const response = await fetch(backendUrl, {
             method: 'PUT',
@@ -126,7 +126,7 @@ export async function DELETE(
         const { id: characterId } = await params;
         const authHeader = request.headers.get('authorization');
 
-        const backendUrl = `${BACKEND_URL}/api/characters/${characterId}`;
+        const backendUrl = `${BACKEND_URL}/api/v1/characters/${characterId}`;
 
         const response = await fetch(backendUrl, {
             method: 'DELETE',

@@ -1,6 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080';
+import { graperyV1, isConnectionError, backendUnavailableResponse } from '@/lib/bff-backend';
+
+async function proxyStory(
+    request: NextRequest,
+    storyId: string,
+    method: string
+) {
+    const authHeader = request.headers.get('authorization');
+    const init: RequestInit = {
+        method,
+        headers: {
+            Authorization: authHeader || '',
+            'Content-Type': 'application/json',
+        },
+    };
+
+    if (method === 'PUT') {
+        init.body = await request.text();
+    }
+
+    const response = await fetch(graperyV1(`/stories/${storyId}`), init);
+
+    if (!response.ok) {
+        let errorMessage = `Failed to ${method.toLowerCase()} story`;
+        try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorData.msg || errorMessage;
+        } catch {
+            // ignore
+        }
+        return NextResponse.json(
+            { code: response.status, message: errorMessage },
+            { status: response.status }
+        );
+    }
+
+    const data = await response.json().catch(() => ({ code: 1, message: 'success' }));
+    return NextResponse.json(data);
+}
 
 export async function GET(
     request: NextRequest,
@@ -8,53 +46,38 @@ export async function GET(
 ) {
     try {
         const { id: storyId } = await params;
-        const authHeader = request.headers.get('authorization');
-
-        const backendUrl = `${BACKEND_URL}/api/stories/${storyId}`;
-
-        const response = await fetch(backendUrl, {
-            method: 'GET',
-            headers: {
-                'Authorization': authHeader || '',
-                'Content-Type': 'application/json',
-            },
-        });
-
-        if (!response.ok) {
-            let errorMessage = 'Failed to fetch story';
-            try {
-                const errorData = await response.json();
-                errorMessage = errorData.message || errorData.msg || errorMessage;
-            } catch (e) {}
-            return NextResponse.json(
-                { code: response.status, message: errorMessage },
-                { status: response.status }
-            );
-        }
-
-        const data = await response.json();
-        return NextResponse.json(data);
+        return proxyStory(request, storyId, 'GET');
     } catch (error) {
-        console.error('[API /stories/[id]] Exception caught:', error);
+        console.error('[API /stories/[id]] GET failed:', error);
+        if (isConnectionError(error)) return backendUnavailableResponse();
+        return NextResponse.json({ code: 500, message: 'Internal server error' }, { status: 500 });
+    }
+}
 
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        const isConnectionError = errorMessage.includes('ECONNREFUSED') ||
-                                  errorMessage.includes('ENOTFOUND') ||
-                                  errorMessage.includes('Network Error');
+export async function PUT(
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    try {
+        const { id: storyId } = await params;
+        return proxyStory(request, storyId, 'PUT');
+    } catch (error) {
+        console.error('[API /stories/[id]] PUT failed:', error);
+        if (isConnectionError(error)) return backendUnavailableResponse();
+        return NextResponse.json({ code: 500, message: 'Internal server error' }, { status: 500 });
+    }
+}
 
-        if (isConnectionError) {
-            return NextResponse.json(
-                {
-                    code: 503,
-                    message: `Backend service not available. Please ensure the backend service is running at ${BACKEND_URL}`
-                },
-                { status: 503 }
-            );
-        }
-
-        return NextResponse.json(
-            { code: 500, message: 'Internal server error', error: errorMessage },
-            { status: 500 }
-        );
+export async function DELETE(
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    try {
+        const { id: storyId } = await params;
+        return proxyStory(request, storyId, 'DELETE');
+    } catch (error) {
+        console.error('[API /stories/[id]] DELETE failed:', error);
+        if (isConnectionError(error)) return backendUnavailableResponse();
+        return NextResponse.json({ code: 500, message: 'Internal server error' }, { status: 500 });
     }
 }

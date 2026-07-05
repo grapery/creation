@@ -11,7 +11,7 @@ export async function POST(
         const authHeader = request.headers.get('authorization');
         const body = await request.json();
 
-        const backendUrl = `${BACKEND_URL}/api/stories/${storyId}/scenes/register-image`;
+        const backendUrl = `${BACKEND_URL}/api/v1/stories/${storyId}/scenes/register-image`;
 
         const response = await fetch(backendUrl, {
             method: 'POST',

@@ -9,7 +9,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
         const body = await request.json();
 
-        const backendUrl = `${BACKEND_URL}/api/comments/${commentId}`;
+        const backendUrl = `${BACKEND_URL}/api/v1/comments/${commentId}`;
 
         const response = await fetch(backendUrl, {
             method: 'PUT',
@@ -64,7 +64,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
         const { id: commentId } = await params;
         const authHeader = request.headers.get('authorization');
 
-        const backendUrl = `${BACKEND_URL}/api/comments/${commentId}`;
+        const backendUrl = `${BACKEND_URL}/api/v1/comments/${commentId}`;
 
         const response = await fetch(backendUrl, {
             method: 'DELETE',

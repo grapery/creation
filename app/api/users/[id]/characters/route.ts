@@ -14,7 +14,7 @@ export async function GET(
         const searchParams = request.nextUrl.searchParams;
         const queryString = searchParams.toString();
 
-        const backendUrl = `${BACKEND_URL}/api/users/${userId}/characters${queryString ? `?${queryString}` : ''}`;
+        const backendUrl = `${BACKEND_URL}/api/v1/users/${userId}/characters${queryString ? `?${queryString}` : ''}`;
 
         const response = await fetch(backendUrl, {
             method: 'GET',

@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Forward the request to the backend service
-        const backendUrl = `${BACKEND_URL}/api/auth/me`;
+        const backendUrl = `${BACKEND_URL}/api/v1/auth/me`;
 
         const response = await fetch(backendUrl, {
             method: 'GET',

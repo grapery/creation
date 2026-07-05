@@ -152,9 +152,8 @@ export const profile = {
     },
 
     // Get own profile
-    // Note: Using /api/auth/me endpoint
     getMyProfile: async (): Promise<User> => {
-        return request('/api/auth/me');
+        return request('/api/v1/auth/me');
     },
 
     // ==================== Stats & Points ====================

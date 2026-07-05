@@ -104,7 +104,7 @@ export const bookmarks = {
         request(`/api/bookmarks/${bookmarkId}`, 'DELETE'),
 
     checkStatus: async (type: BookmarkType, id: string): Promise<{ isBookmarked: boolean; bookmarkId?: string }> =>
-        request(`/api/bookmarks/check?bookmarkType=${type}&bookmarkId=${id}`),
+        request(`/api/bookmarks/check?bookmarkType=${encodeURIComponent(type)}&bookmarkId=${encodeURIComponent(id)}`),
 
     getMyBookmarks: async (params: {
         type?: BookmarkType;

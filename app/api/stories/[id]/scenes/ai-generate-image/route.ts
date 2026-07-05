@@ -15,7 +15,7 @@ export async function POST(
         const { searchParams } = new URL(request.url);
         const sceneId = searchParams.get('sceneId');
 
-        const backendUrl = `${BACKEND_URL}/api/stories/${storyId}/scenes/ai-generate-image${sceneId ? `?sceneId=${sceneId}` : ''}`;
+        const backendUrl = `${BACKEND_URL}/api/v1/stories/${storyId}/scenes/ai-generate-image${sceneId ? `?sceneId=${sceneId}` : ''}`;
 
         const response = await fetch(backendUrl, {
             method: 'POST',

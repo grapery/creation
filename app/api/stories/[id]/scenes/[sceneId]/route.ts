@@ -11,7 +11,7 @@ export async function PUT(
         const authHeader = request.headers.get('authorization');
         const body = await request.json();
 
-        const backendUrl = `${BACKEND_URL}/api/stories/${storyId}/scenes/${sceneId}`;
+        const backendUrl = `${BACKEND_URL}/api/v1/stories/${storyId}/scenes/${sceneId}`;
 
         const response = await fetch(backendUrl, {
             method: 'PUT',
@@ -69,7 +69,7 @@ export async function DELETE(
         const { id: storyId, sceneId } = await params;
         const authHeader = request.headers.get('authorization');
 
-        const backendUrl = `${BACKEND_URL}/api/stories/${storyId}/scenes/${sceneId}`;
+        const backendUrl = `${BACKEND_URL}/api/v1/stories/${storyId}/scenes/${sceneId}`;
 
         const response = await fetch(backendUrl, {
             method: 'DELETE',

@@ -10,7 +10,7 @@ export async function DELETE(
         const { id: storyId, userId } = await params;
         const authHeader = request.headers.get('authorization');
 
-        const backendUrl = `${BACKEND_URL}/api/stories/${storyId}/contributors/${userId}`;
+        const backendUrl = `${BACKEND_URL}/api/v1/stories/${storyId}/contributors/${userId}`;
 
         const response = await fetch(backendUrl, {
             method: 'DELETE',

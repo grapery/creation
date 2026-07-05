@@ -15,7 +15,7 @@ export async function GET(
         const authHeader = request.headers.get('authorization');
 
         // Forward the request to the backend service
-        const backendUrl = `${BACKEND_URL}/api/users/${userId}`;
+        const backendUrl = `${BACKEND_URL}/api/v1/users/${userId}`;
 
         const response = await fetch(backendUrl, {
             method: 'GET',

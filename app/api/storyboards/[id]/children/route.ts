@@ -10,7 +10,7 @@ export async function GET(
         const { id: storyboardId } = await params;
         const authHeader = request.headers.get('authorization');
 
-        const backendUrl = `${BACKEND_URL}/api/storyboards/${storyboardId}/children`;
+        const backendUrl = `${BACKEND_URL}/api/v1/storyboards/${storyboardId}/children`;
 
         const response = await fetch(backendUrl, {
             method: 'GET',

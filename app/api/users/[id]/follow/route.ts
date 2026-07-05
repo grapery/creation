@@ -16,7 +16,7 @@ export async function POST(
         const authHeader = request.headers.get('authorization');
 
         // Forward the request to the backend service
-        const backendUrl = `${BACKEND_URL}/api/users/${userId}/follow`;
+        const backendUrl = `${BACKEND_URL}/api/v1/users/${userId}/follow`;
 
         const response = await fetch(backendUrl, {
             method: 'POST',
@@ -62,7 +62,7 @@ export async function DELETE(
         const authHeader = request.headers.get('authorization');
 
         // Forward the request to the backend service
-        const backendUrl = `${BACKEND_URL}/api/users/${userId}/follow`;
+        const backendUrl = `${BACKEND_URL}/api/v1/users/${userId}/follow`;
 
         const response = await fetch(backendUrl, {
             method: 'DELETE',

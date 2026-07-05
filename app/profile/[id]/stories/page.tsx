@@ -156,22 +156,10 @@ export default function ProfileStoriesPage() {
     const handleFollow = async () => {
         if (!profileUser) return;
         try {
-            const token = getAuthToken();
-            const headers: Record<string, string> = {};
-            if (token) {
-                headers['Authorization'] = `Bearer ${token}`;
-            }
-
             if (isFollowing) {
-                await fetch(`/api/users/${profileUser.id}/unfollow`, {
-                    method: 'DELETE',
-                    headers,
-                });
+                await profile.unfollowUser(profileUser.id);
             } else {
-                await fetch(`/api/users/${profileUser.id}/follow`, {
-                    method: 'POST',
-                    headers,
-                });
+                await profile.followUser(profileUser.id);
             }
             setIsFollowing(!isFollowing);
         } catch (e) {

@@ -1,4 +1,5 @@
 import { request, apiClient, AI_TIMEOUT } from './client';
+import { search } from './search';
 import type {
     StoryFragment,
     FragmentListResponse,
@@ -32,9 +33,17 @@ export const fragments = {
         return request(url);
     },
 
-    // Get fragment by ID
-    get: async (id: string): Promise<StoryFragment> => {
-        return request(`/api/v1/fragments/${id}`);
+    // Get fragment by ID (optional signed share grant from ?t=&exp=)
+    get: async (
+        id: string,
+        shareGrant?: { token: string; exp: string }
+    ): Promise<StoryFragment> => {
+        let url = `/api/v1/fragments/${id}`;
+        if (shareGrant?.token && shareGrant?.exp) {
+            const q = new URLSearchParams({ t: shareGrant.token, exp: shareGrant.exp });
+            url += `?${q.toString()}`;
+        }
+        return request(url);
     },
 
     // Create fragment
@@ -135,9 +144,14 @@ export const fragments = {
         return request('/api/v1/fragments/styles/next', 'POST', body, apiClient, AI_TIMEOUT);
     },
 
-    // Search fragments - Uses unified search endpoint with type filter
+    // Search fragments — backend /search has no fragment type; reuse list + filter
     search: async (query: string, limit = 20, offset = 0): Promise<FragmentListResponse> => {
-        return request(`/api/search?type=fragment&q=${encodeURIComponent(query)}&limit=${limit}&offset=${offset}`);
+        const page = Math.floor(offset / limit) + 1;
+        const results = await search.searchFragments(query, page, limit);
+        return {
+            fragments: results.fragments || [],
+            total: results.total,
+        };
     },
 
     // Get fragment likes list

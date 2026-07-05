@@ -7,7 +7,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         const { id: commentId } = await params;
         const authHeader = request.headers.get('authorization');
 
-        const backendUrl = `${BACKEND_URL}/api/comments/${commentId}/like`;
+        const backendUrl = `${BACKEND_URL}/api/v1/comments/${commentId}/like`;
 
         const response = await fetch(backendUrl, {
             method: 'POST',
@@ -61,7 +61,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
         const { id: commentId } = await params;
         const authHeader = request.headers.get('authorization');
 
-        const backendUrl = `${BACKEND_URL}/api/comments/${commentId}/like`;
+        const backendUrl = `${BACKEND_URL}/api/v1/comments/${commentId}/like`;
 
         const response = await fetch(backendUrl, {
             method: 'DELETE',

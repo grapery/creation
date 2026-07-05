@@ -112,13 +112,40 @@ interface APIResponse<T> {
 | `UserSettings.allowFollowFrom` | `everyone` \| `followers_only` \| `followers_of_followers` \| `no_one` | More granular than frontend |
 | `UserSettings.notificationSettings` | `string` (JSON) | Backend stores as JSON string, frontend uses object |
 
+## Issues Found and Fixed
+
+### 10. BFF Routes Missing `/v1` Prefix (FIXED)
+- **Issue**: `app/api/**` BFF proxies called `${BACKEND_URL}/api/...` but Grapery authenticated routes live under `/api/v1/...`
+- **Fix**: Bulk-updated BFF routes; added `lib/bff-backend.ts` helpers (`graperyV1`, `graperyPublic`)
+- **Special cases**:
+  - `dashboard/trending/storyboards` → proxies to `/api/public/trending/storyboards`
+  - `users/[id]/drafts` → proxies to `/api/v1/dashboard/storyboards?status=draft`
+  - `users/[id]/activities*` → returns empty (backend removed)
+  - `characters/[id]/chat|messages` → 501 not implemented
+  - `dashboard/characters/storyboards` → requires `characterId`, proxies to `/api/v1/characters/:id/storyboards`
+
+### 11. Bookmark Check HTTP Method (FIXED)
+- **Issue**: Frontend initially used `GET` with query params; a mistaken fix switched to `POST`, but backend route is `GET /api/v1/bookmarks/check`
+- **Fix**: Frontend uses `GET ?bookmarkType=&bookmarkId=` (aligned with iOS Voyager); backend `CheckBookmarkStatus` changed to `BindQuery`
+
+### 12. Profile Follow Inline Fetch (FIXED)
+- **Issue**: Profile subpages used raw `fetch('/api/users/:id/follow')` hitting broken BFF
+- **Fix**: Use `profile.followUser()` / `profile.unfollowUser()` → unified `/api/follows`
+
+### 13. Fragment Search (FIXED)
+- **Issue**: Backend `/api/v1/search` has no `fragment` type
+- **Fix**: `searchFragments` lists public fragments and filters client-side
+
+### 14. auth/me Path Consistency (FIXED)
+- **Issue**: `profile.getMyProfile()` used BFF `/api/auth/me`; BFF forwarded to wrong backend path
+- **Fix**: `profile.getMyProfile()` and BFF both use `/api/v1/auth/me`
+
 ## Missing/Unimplemented Features
 
-1. **Chat System** - Backend has no chat endpoints, marked as NOT_IMPLEMENTED
-2. **Following Stories Feed** - No dedicated backend endpoint, returns empty
-3. **Payment Provider Specific Endpoints** - Use unified `createPayment` instead
-4. **Block/Unblock User** - Backend endpoints not implemented
-5. **Report User** - Backend endpoint not implemented
+1. **Chat System** - Backend has no chat endpoints; BFF returns 501
+2. **Following Stories Feed** - Uses storyboard feed with `tab=following` (works for authenticated users)
+3. **User Activities** - Backend removed; frontend returns empty data
+4. **Promo Code Redemption** - Not implemented in backend
 
 ## Issues Found and Fixed
 
@@ -182,7 +209,7 @@ interface APIResponse<T> {
 |-------------|--------|--------------|---------------|
 | `auth.login()` | POST | `/api/auth/login` | No |
 | `auth.register()` | POST | `/api/auth/register` | No |
-| `auth.me()` | GET | `/api/auth/me` | Yes |
+| `auth.me()` | GET | `/api/v1/auth/me` | Yes |
 | `auth.refreshToken()` | POST | `/api/auth/refresh` | No |
 | `auth.requestPasswordReset()` | POST | `/api/auth/password/request-reset` | No |
 | `auth.resetPassword()` | POST | `/api/auth/password/reset` | No |
@@ -207,7 +234,7 @@ interface APIResponse<T> {
 |-------------|--------|--------------|---------------|
 | `storyboards.getFeed()` | GET | `/api/storyboards/feed` | Yes |
 | `storyboards.getDashboardStoryboards()` | GET | `/api/dashboard/storyboards` | Yes |
-| `storyboards.getTrending()` | GET | `/api/dashboard/trending/storyboards` | Yes |
+| `storyboards.getTrending()` | GET | `/api/public/trending/storyboards` | No |
 | `storyboards.getByStoryId()` | GET | `/api/storyboards?storyId=` | Yes |
 | `storyboards.get()` | GET | `/api/storyboards/:id` | Yes |
 | `storyboards.getChildren()` | GET | `/api/storyboards/:id/children` | Yes |
@@ -232,7 +259,7 @@ interface APIResponse<T> {
 |-------------|--------|--------------|---------------|
 | `profile.getProfile()` | GET | `/api/users/:id` | Yes |
 | `profile.updateProfile()` | PUT | `/api/users/:id` | Yes |
-| `profile.getMyProfile()` | GET | `/api/auth/me` | Yes |
+| `profile.getMyProfile()` | GET | `/api/v1/auth/me` | Yes |
 | `profile.getStories()` | GET | `/api/users/:id/stories` | Yes |
 | `profile.getCharacters()` | GET | `/api/users/:id/characters` | Yes |
 | `profile.getStoryboards()` | GET | `/api/users/:id/storyboards` | Yes |

@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
         const search = searchParams.get('search');
 
         // Build backend URL with query parameters
-        let backendUrl = `${BACKEND_URL}/api/characters?limit=${limit}&offset=${offset}`;
+        let backendUrl = `${BACKEND_URL}/api/v1/characters?limit=${limit}&offset=${offset}`;
         if (storyId) backendUrl += `&storyId=${storyId}`;
         if (authorId) backendUrl += `&authorId=${authorId}`;
         if (search) backendUrl += `&search=${encodeURIComponent(search)}`;
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
         const authHeader = request.headers.get('authorization');
         const body = await request.json();
 
-        const backendUrl = `${BACKEND_URL}/api/characters`;
+        const backendUrl = `${BACKEND_URL}/api/v1/characters`;
 
         const response = await fetch(backendUrl, {
             method: 'POST',

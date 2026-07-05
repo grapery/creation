@@ -8,6 +8,16 @@ const nextConfig: NextConfig = {
     return process.env.COMMIT_SHA || `build-${Date.now()}`;
   },
 
+  async redirects() {
+    return [
+      // iOS Universal Link share paths (singular) → web routes (plural); preserve signed query (?t=&exp=)
+      { source: '/fragment/:id', destination: '/fragments/:id', permanent: false },
+      { source: '/storyboard/:id', destination: '/storyboards/:id', permanent: false },
+      { source: '/story/:id', destination: '/stories/:id', permanent: false },
+      { source: '/character/:id', destination: '/characters/:id', permanent: false },
+    ];
+  },
+
   async rewrites() {
     return [
       // === DO NOT proxy these — handled by Next.js BFF routes ===

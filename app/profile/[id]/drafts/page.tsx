@@ -169,16 +169,7 @@ export default function ProfileDraftsPage() {
         if (!confirmed) return;
 
         try {
-            const token = getAuthToken();
-            const headers: Record<string, string> = {};
-            if (token) {
-                headers['Authorization'] = `Bearer ${token}`;
-            }
-
-            await fetch(`/api/storyboards/${draftId}`, {
-                method: 'DELETE',
-                headers,
-            });
+            await profile.deleteDraft(draftId);
 
             // Remove from local state
             setDrafts(drafts.filter(draft => draft.id !== draftId));

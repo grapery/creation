@@ -10,7 +10,7 @@ export async function POST(
         const { id: storyId } = await params;
         const authHeader = request.headers.get('authorization');
 
-        const backendUrl = `${BACKEND_URL}/api/stories/${storyId}/like`;
+        const backendUrl = `${BACKEND_URL}/api/v1/stories/${storyId}/like`;
 
         const response = await fetch(backendUrl, {
             method: 'POST',
@@ -67,7 +67,7 @@ export async function DELETE(
         const { id: storyId } = await params;
         const authHeader = request.headers.get('authorization');
 
-        const backendUrl = `${BACKEND_URL}/api/stories/${storyId}/like`;
+        const backendUrl = `${BACKEND_URL}/api/v1/stories/${storyId}/like`;
 
         const response = await fetch(backendUrl, {
             method: 'DELETE',
