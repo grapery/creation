@@ -70,7 +70,7 @@ export default function AboutPage() {
                             <Sparkles className="w-4 h-4 text-[var(--idea-accent)]" />
                             AI 驱动的分支故事创作平台
                         </div>
-                        <h1 className="text-4xl md:text-6xl font-bold mb-6 text-black tracking-tight">
+                        <h1 className="idea-display text-4xl md:text-6xl font-bold mb-6 text-black">
                             未择
                         </h1>
                         <p className="text-xl md:text-2xl text-[var(--idea-text-secondary)] mb-4">
@@ -105,7 +105,7 @@ export default function AboutPage() {
             <section className="py-20 bg-white">
                 <div className="container max-w-6xl mx-auto px-4">
                     <div className="text-center mb-16">
-                        <h2 className="text-3xl md:text-4xl font-bold mb-4 text-black">产品预览</h2>
+                        <h2 className="idea-section-title text-3xl md:text-4xl font-bold mb-4 text-black">产品预览</h2>
                         <p className="text-lg text-[var(--idea-text-secondary)] max-w-2xl mx-auto">
                             从灵感碎片到沉浸式阅读，体验完整的创作流程
                         </p>
@@ -113,12 +113,12 @@ export default function AboutPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         {screenshots.map((s, i) => (
                             <div key={i} className="group">
-                                <div className="rounded-2xl overflow-hidden bg-[var(--idea-bg)] aspect-[9/16] flex items-center justify-center mb-3 shadow-[var(--idea-shadow)]">
+                                <div className="idea-preview-card rounded-2xl overflow-hidden bg-[var(--idea-bg)] aspect-[9/16] flex items-center justify-center mb-3 shadow-[var(--idea-shadow)]">
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img
                                         src={s.src}
                                         alt={s.title}
-                                        className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
+                                        className="idea-preview-image w-full h-full object-cover object-top"
                                         loading="lazy"
                                     />
                                 </div>
@@ -137,7 +137,7 @@ export default function AboutPage() {
                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[var(--idea-card-green)] text-black mb-4">
                             <TreeDeciduous className="w-8 h-8" />
                         </div>
-                        <h2 className="text-3xl md:text-4xl font-bold mb-4 text-black">核心特色：分支故事系统</h2>
+                        <h2 className="idea-section-title text-3xl md:text-4xl font-bold mb-4 text-black">核心特色：分支故事系统</h2>
                         <p className="text-lg text-[var(--idea-text-secondary)] max-w-2xl mx-auto">
                             独创的树状分支叙事结构，让每个故事节点都能衍生出无限可能
                         </p>
@@ -198,7 +198,7 @@ export default function AboutPage() {
             <section className="py-20 bg-white">
                 <div className="container max-w-6xl mx-auto px-4">
                     <div className="text-center mb-16">
-                        <h2 className="text-3xl md:text-4xl font-bold mb-4 text-black">完整的产品功能矩阵</h2>
+                        <h2 className="idea-section-title text-3xl md:text-4xl font-bold mb-4 text-black">完整的产品功能矩阵</h2>
                         <p className="text-lg text-[var(--idea-text-secondary)] max-w-2xl mx-auto">
                             从创作到分享，提供全方位的故事创作工具和服务
                         </p>
@@ -237,7 +237,7 @@ export default function AboutPage() {
             <section className="py-20">
                 <div className="container max-w-6xl mx-auto px-4">
                     <div className="text-center mb-16">
-                        <h2 className="text-3xl md:text-4xl font-bold mb-4 text-black">适用人群</h2>
+                        <h2 className="idea-section-title text-3xl md:text-4xl font-bold mb-4 text-black">适用人群</h2>
                         <p className="text-lg text-[var(--idea-text-secondary)] max-w-2xl mx-auto">
                             无论您是创作者、教育者还是游戏开发者，未择都能为您提供强大的支持
                         </p>
@@ -250,7 +250,7 @@ export default function AboutPage() {
                             { icon: GraduationCap, color: "from-green-500 to-green-600", title: "教育工作者", desc: "教学和创意写作训练" },
                             { icon: Gamepad2, color: "from-orange-500 to-orange-600", title: "游戏开发者", desc: "需要分支剧情设计的开发者" },
                         ].map(({ icon: Icon, color, title, desc }) => (
-                            <Card key={title} className="text-center border-0 shadow-[var(--idea-shadow)] rounded-2xl bg-white hover:shadow-[var(--idea-shadow-lg)] transition-shadow">
+                            <Card key={title} className="idea-preview-card text-center border-0 shadow-[var(--idea-shadow)] rounded-2xl bg-white">
                                 <CardContent className="p-6">
                                     <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${color} text-white flex items-center justify-center mx-auto mb-4`}>
                                         <Icon className="w-8 h-8" />
@@ -268,7 +268,7 @@ export default function AboutPage() {
             <section className="py-20 bg-white">
                 <div className="container max-w-6xl mx-auto px-4">
                     <div className="text-center mb-16">
-                        <h2 className="text-3xl md:text-4xl font-bold mb-4 text-black">平台优势</h2>
+                        <h2 className="idea-section-title text-3xl md:text-4xl font-bold mb-4 text-black">平台优势</h2>
                         <p className="text-lg text-[var(--idea-text-secondary)] max-w-2xl mx-auto">
                             为什么选择未择作为您的故事创作平台
                         </p>
@@ -302,7 +302,7 @@ export default function AboutPage() {
                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[var(--idea-card-cyan)] text-black mb-4">
                             <Headphones className="w-8 h-8" />
                         </div>
-                        <h2 className="text-3xl md:text-4xl font-bold mb-4 text-black">技术支持</h2>
+                        <h2 className="idea-section-title text-3xl md:text-4xl font-bold mb-4 text-black">技术支持</h2>
                         <p className="text-lg text-[var(--idea-text-secondary)] mb-6">
                             需要技术支持或反馈问题？请发送邮件至{" "}
                             <a href={`mailto:${SUPPORT_EMAIL}`} className="text-black font-medium hover:underline">
@@ -322,7 +322,7 @@ export default function AboutPage() {
             <section className="py-20 bg-white">
                 <div className="container max-w-6xl mx-auto px-4">
                     <div className="max-w-4xl mx-auto text-center">
-                        <h2 className="text-3xl md:text-4xl font-bold mb-4 text-black">
+                        <h2 className="idea-section-title text-3xl md:text-4xl font-bold mb-4 text-black">
                             开始您的创作之旅
                         </h2>
                         <p className="text-lg text-[var(--idea-text-secondary)] mb-8">

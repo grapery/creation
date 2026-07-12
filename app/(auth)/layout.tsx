@@ -2,11 +2,13 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { githubImages } from "@/lib/github-assets";
 import { FeatureCards, OnboardingCarousel } from "@/components/marketing/feature-showcase";
 
 type Tab = "create" | "discover";
+
+const springSnappy = { type: "spring" as const, bounce: 0, duration: 0.35 };
 
 export default function AuthLayout({
     children,
@@ -14,6 +16,7 @@ export default function AuthLayout({
     children: React.ReactNode;
 }) {
     const [activeTab, setActiveTab] = useState<Tab>("create");
+    const shouldReduceMotion = useReducedMotion();
 
     return (
         <div className="min-h-screen grid lg:grid-cols-2">
@@ -34,14 +37,18 @@ export default function AuthLayout({
                         <span className="font-semibold text-base text-black">未择</span>
                     </div>
 
-                    <div className="idea-pill-tabs">
+                    <div className="idea-pill-tabs" role="tablist" aria-label="营销内容切换">
                         <button
+                            role="tab"
+                            aria-selected={activeTab === "create"}
                             className={`idea-pill-tab ${activeTab === "create" ? "active" : ""}`}
                             onClick={() => setActiveTab("create")}
                         >
                             创作
                         </button>
                         <button
+                            role="tab"
+                            aria-selected={activeTab === "discover"}
                             className={`idea-pill-tab ${activeTab === "discover" ? "active" : ""}`}
                             onClick={() => setActiveTab("discover")}
                         >
@@ -54,9 +61,13 @@ export default function AuthLayout({
                 <div className="flex-1 px-6 pb-8 space-y-10">
                     {/* Hero */}
                     <motion.div
-                        initial={{ opacity: 0, y: 16 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6 }}
+                        initial={shouldReduceMotion ? false : { opacity: 0, transform: "translateY(12px)" }}
+                        animate={{ opacity: 1, transform: "translateY(0px)" }}
+                        transition={
+                            shouldReduceMotion
+                                ? { duration: 0 }
+                                : { type: "spring", bounce: 0, duration: 0.5 }
+                        }
                         className="pt-4 space-y-4"
                     >
                         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[var(--idea-border)] text-sm text-[var(--idea-text-secondary)]">
@@ -64,7 +75,7 @@ export default function AuthLayout({
                             AI 驱动的分支故事创作平台
                         </div>
 
-                        <h1 className="text-4xl xl:text-5xl font-bold text-black leading-tight tracking-tight">
+                        <h1 className="idea-display font-bold text-black">
                             你的故事
                             <br />
                             <span className="text-[var(--idea-accent-dark)]">无限可能</span>
@@ -99,25 +110,52 @@ export default function AuthLayout({
                     </div>
 
                     {/* Feature cards or onboarding based on tab */}
-                    {activeTab === "create" ? (
-                        <FeatureCards />
-                    ) : (
-                        <OnboardingCarousel />
-                    )}
+                    <AnimatePresence mode="wait" initial={false}>
+                        <motion.div
+                            key={activeTab}
+                            initial={
+                                shouldReduceMotion
+                                    ? { opacity: 0 }
+                                    : { opacity: 0, transform: "translateY(8px)" }
+                            }
+                            animate={{ opacity: 1, transform: "translateY(0px)" }}
+                            exit={
+                                shouldReduceMotion
+                                    ? { opacity: 0 }
+                                    : { opacity: 0, transform: "translateY(-6px)" }
+                            }
+                            transition={
+                                shouldReduceMotion
+                                    ? { duration: 0.15 }
+                                    : springSnappy
+                            }
+                        >
+                            {activeTab === "create" ? (
+                                <FeatureCards />
+                            ) : (
+                                <OnboardingCarousel />
+                            )}
+                        </motion.div>
+                    </AnimatePresence>
 
                     {/* Onboarding carousel (always show below cards on create tab) */}
                     {activeTab === "create" && (
-                        <div className="pt-4">
-                            <h2 className="text-lg font-semibold text-black mb-4 text-center">
+                        <motion.div
+                            className="pt-4"
+                            initial={shouldReduceMotion ? false : { opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: shouldReduceMotion ? 0 : 0.25, delay: shouldReduceMotion ? 0 : 0.1 }}
+                        >
+                            <h2 className="idea-section-title text-lg font-semibold text-black mb-4 text-center">
                                 核心功能展示
                             </h2>
                             <OnboardingCarousel />
-                        </div>
+                        </motion.div>
                     )}
 
                     {/* CTA */}
                     <div className="text-center space-y-4 py-6">
-                        <h2 className="text-2xl font-bold text-black">准备好开始了吗？</h2>
+                        <h2 className="idea-section-title text-2xl font-bold text-black">准备好开始了吗？</h2>
                         <p className="text-[var(--idea-text-secondary)]">
                             加入未择，画出属于你的故事世界。
                         </p>

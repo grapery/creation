@@ -51,6 +51,13 @@
   --idea-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
   --idea-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
 
+  /* Motion tokens — emil-design-eng / apple-design */
+  --idea-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --idea-ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --idea-duration-fast: 140ms;
+  --idea-duration-ui: 200ms;
+  --idea-duration-enter: 280ms;
+
   /* Status Colors */
   --follow: #4d9fff;
   --like: #e54d4d;
@@ -329,16 +336,34 @@ body {
   font-size: 14px;
   font-weight: 500;
   color: var(--idea-text-muted);
-  transition: all 0.2s ease;
+  transition:
+    transform var(--idea-duration-fast) var(--idea-ease-out),
+    box-shadow var(--idea-duration-ui) var(--idea-ease-out),
+    background-color var(--idea-duration-ui) var(--idea-ease-out),
+    color var(--idea-duration-ui) var(--idea-ease-out);
   border: none;
   background: transparent;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.idea-pill-tab:active {
+  transform: scale(0.97);
 }
 
 .idea-pill-tab.active {
   background: var(--idea-surface);
   color: var(--idea-text);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 2px 8px rgba(0, 0, 0, 0.04);
+  transform: scale(1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .idea-pill-tab:not(.active):hover {
+    color: var(--idea-text-secondary);
+  }
 }
 
 .idea-btn-primary {
@@ -353,12 +378,26 @@ body {
   font-size: 15px;
   border: none;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  text-decoration: none;
+  transition:
+    transform var(--idea-duration-fast) var(--idea-ease-out),
+    box-shadow var(--idea-duration-ui) var(--idea-ease-out);
+  -webkit-tap-highlight-color: transparent;
 }
 
-.idea-btn-primary:hover {
-  transform: scale(1.02);
-  box-shadow: var(--idea-shadow);
+.idea-btn-primary:active {
+  transform: scale(0.97);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .idea-btn-primary:hover {
+    transform: scale(1.02);
+    box-shadow: var(--idea-shadow);
+  }
+
+  .idea-btn-primary:active {
+    transform: scale(0.97);
+  }
 }
 
 .idea-btn-outline {
@@ -373,12 +412,26 @@ body {
   font-size: 14px;
   border: 1px solid var(--idea-text);
   cursor: pointer;
-  transition: all 0.15s ease;
+  text-decoration: none;
+  transition:
+    transform var(--idea-duration-fast) var(--idea-ease-out),
+    background-color var(--idea-duration-ui) var(--idea-ease-out);
   gap: 6px;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.idea-btn-outline:hover {
-  background: rgba(0, 0, 0, 0.04);
+.idea-btn-outline:active {
+  transform: scale(0.97);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .idea-btn-outline:hover {
+    background: rgba(0, 0, 0, 0.04);
+  }
+
+  .idea-btn-outline:active {
+    transform: scale(0.97);
+  }
 }
 
 .idea-feature-card {
@@ -387,6 +440,26 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 420px;
+  transition:
+    transform var(--idea-duration-ui) var(--idea-ease-out),
+    box-shadow var(--idea-duration-ui) var(--idea-ease-out);
+  will-change: transform;
+}
+
+.idea-feature-card:active {
+  transform: scale(0.985);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .idea-feature-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--idea-shadow-lg);
+  }
+
+  .idea-feature-card:active {
+    transform: scale(0.985) translateY(0);
+    box-shadow: var(--idea-shadow);
+  }
 }
 
 .idea-feature-card-yellow { background: var(--idea-card-yellow); }
@@ -394,9 +467,15 @@ body {
 .idea-feature-card-cyan { background: var(--idea-card-cyan); }
 
 .idea-floating-bar {
-  background: var(--idea-surface);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-top-color: rgba(255, 255, 255, 0.8);
   border-radius: 9999px;
-  box-shadow: var(--idea-shadow-lg);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    0 8px 32px rgba(0, 0, 0, 0.08);
   padding: 8px 16px;
 }
 
@@ -410,15 +489,29 @@ body {
 .idea-dot {
   width: 8px;
   height: 8px;
-  border-radius: 50%;
+  border-radius: 9999px;
   background: #d1d1d1;
-  transition: all 0.2s ease;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition:
+    width var(--idea-duration-ui) var(--idea-ease-out),
+    background-color var(--idea-duration-ui) var(--idea-ease-out),
+    transform var(--idea-duration-fast) var(--idea-ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.idea-dot:active {
+  transform: scale(0.9);
 }
 
 .idea-dot.active {
   width: 24px;
-  border-radius: 4px;
   background: var(--idea-text);
+}
+
+.idea-dot:not(.active):hover {
+  background: #b8b8b8;
 }
 
 .idea-legal-footer {
@@ -433,6 +526,120 @@ body {
 
 .idea-legal-footer a:hover {
   color: var(--idea-text);
+}
+
+/* Marketing typography — optical sizing */
+.idea-display {
+  font-size: clamp(2.25rem, 5vw, 3rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  font-optical-sizing: auto;
+}
+
+.idea-section-title {
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+}
+
+/* Screenshot / preview cards */
+.idea-preview-card {
+  transition:
+    transform var(--idea-duration-ui) var(--idea-ease-out),
+    box-shadow var(--idea-duration-ui) var(--idea-ease-out);
+}
+
+.idea-preview-card:active {
+  transform: scale(0.985);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .idea-preview-card:hover {
+    box-shadow: var(--idea-shadow-lg);
+  }
+
+  .idea-preview-card:hover .idea-preview-image {
+    transform: scale(1.03);
+  }
+}
+
+.idea-preview-image {
+  transition: transform var(--idea-duration-enter) var(--idea-ease-out);
+}
+
+/* Subtle link press feedback (non-legal nav) */
+.idea-link {
+  transition: color var(--idea-duration-fast) var(--idea-ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .idea-link:hover {
+    color: var(--idea-text);
+  }
+}
+
+.idea-link:active {
+  opacity: 0.7;
+}
+
+/* Carousel dismiss button */
+.idea-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  transition:
+    transform var(--idea-duration-fast) var(--idea-ease-out),
+    background-color var(--idea-duration-ui) var(--idea-ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.idea-icon-btn:active {
+  transform: scale(0.92);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .idea-pill-tab,
+  .idea-btn-primary,
+  .idea-btn-outline,
+  .idea-feature-card,
+  .idea-dot,
+  .idea-preview-card,
+  .idea-preview-image,
+  .idea-icon-btn {
+    transition-duration: 0.01ms !important;
+  }
+
+  .idea-pill-tab:active,
+  .idea-btn-primary:active,
+  .idea-btn-outline:active,
+  .idea-feature-card:active,
+  .idea-dot:active,
+  .idea-preview-card:active,
+  .idea-icon-btn:active {
+    transform: none;
+  }
+
+  .idea-btn-primary:hover,
+  .idea-btn-outline:hover,
+  .idea-feature-card:hover,
+  .idea-preview-card:hover .idea-preview-image {
+    transform: none;
+  }
+
+  .animate-float,
+  .animate-pulse-soft {
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .idea-floating-bar {
+    background: var(--idea-surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
 }
 
 /*

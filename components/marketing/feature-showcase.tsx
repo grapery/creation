@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { ArrowRight, X } from "lucide-react";
 import { githubImages } from "@/lib/github-assets";
 import { imageCache, useCachedImage } from "@/lib/image-cache";
@@ -59,6 +59,9 @@ const ONBOARDING_SLIDES = [
     },
 ];
 
+const springSnappy = { type: "spring" as const, bounce: 0, duration: 0.35 };
+const fadeFast = { duration: 0.2, ease: [0.23, 1, 0.32, 1] as const };
+
 function CachedSlideImage({ src, alt }: { src: string; alt: string }) {
     const { src: cachedSrc, isLoading } = useCachedImage(src);
 
@@ -81,11 +84,24 @@ function CachedSlideImage({ src, alt }: { src: string; alt: string }) {
 }
 
 export function FeatureCards() {
+    const shouldReduceMotion = useReducedMotion();
+
     return (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {FEATURE_CARDS.map((card) => (
-                <div key={card.title} className={`idea-feature-card ${card.bgClass}`}>
-                    <h3 className="text-2xl font-bold text-black mb-3 leading-tight">
+            {FEATURE_CARDS.map((card, i) => (
+                <motion.div
+                    key={card.title}
+                    className={`idea-feature-card ${card.bgClass}`}
+                    initial={shouldReduceMotion ? false : { opacity: 0, transform: "translateY(12px)" }}
+                    whileInView={{ opacity: 1, transform: "translateY(0px)" }}
+                    viewport={{ once: true, margin: "-40px" }}
+                    transition={
+                        shouldReduceMotion
+                            ? { duration: 0 }
+                            : { ...springSnappy, delay: i * 0.05 }
+                    }
+                >
+                    <h3 className="text-2xl font-bold text-black mb-3 leading-tight tracking-tight">
                         {card.title}
                     </h3>
                     <p className="text-sm text-black/80 leading-relaxed flex-1">
@@ -98,7 +114,7 @@ export function FeatureCards() {
                         {card.cta}
                         <ArrowRight className="w-4 h-4" />
                     </Link>
-                </div>
+                </motion.div>
             ))}
         </div>
     );
@@ -107,6 +123,7 @@ export function FeatureCards() {
 export function OnboardingCarousel() {
     const [current, setCurrent] = useState(0);
     const [dismissed, setDismissed] = useState(false);
+    const shouldReduceMotion = useReducedMotion();
 
     useEffect(() => {
         const urls = ONBOARDING_SLIDES.map((s) => s.img);
@@ -118,23 +135,36 @@ export function OnboardingCarousel() {
     const slide = ONBOARDING_SLIDES[current];
     const isLast = current === ONBOARDING_SLIDES.length - 1;
 
+    const slideTransition = shouldReduceMotion ? fadeFast : springSnappy;
+    const slideVariants = shouldReduceMotion
+        ? {
+              initial: { opacity: 0 },
+              animate: { opacity: 1 },
+              exit: { opacity: 0 },
+          }
+        : {
+              initial: { opacity: 0, transform: "scale(0.98)" },
+              animate: { opacity: 1, transform: "scale(1)" },
+              exit: { opacity: 0, transform: "scale(0.98)" },
+          };
+
     return (
         <div className="idea-onboarding-card max-w-md mx-auto">
-            <div className="relative">
-                <AnimatePresence mode="wait">
+            <div className="relative overflow-hidden">
+                <AnimatePresence mode="sync" initial={false}>
                     <motion.div
                         key={current}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.3 }}
+                        initial={slideVariants.initial}
+                        animate={slideVariants.animate}
+                        exit={slideVariants.exit}
+                        transition={slideTransition}
                     >
                         <CachedSlideImage src={slide.img} alt={slide.title} />
                     </motion.div>
                 </AnimatePresence>
                 <button
                     onClick={() => setDismissed(true)}
-                    className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/80 backdrop-blur flex items-center justify-center hover:bg-white transition-colors"
+                    className="idea-icon-btn absolute top-3 right-3 w-8 h-8 rounded-full bg-white/80 backdrop-blur hover:bg-white"
                     aria-label="关闭"
                 >
                     <X className="w-4 h-4" />
@@ -142,17 +172,30 @@ export function OnboardingCarousel() {
             </div>
 
             <div className="p-6 text-center space-y-4">
-                <h3 className="text-xl font-bold text-black">{slide.title}</h3>
-                <p className="text-sm text-[var(--idea-text-secondary)] leading-relaxed">
-                    {slide.desc}
-                </p>
+                <AnimatePresence mode="sync" initial={false}>
+                    <motion.div
+                        key={`text-${current}`}
+                        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, transform: "translateY(6px)" }}
+                        animate={{ opacity: 1, transform: "translateY(0px)" }}
+                        exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, transform: "translateY(-4px)" }}
+                        transition={slideTransition}
+                        className="space-y-4"
+                    >
+                        <h3 className="text-xl font-bold text-black tracking-tight">{slide.title}</h3>
+                        <p className="text-sm text-[var(--idea-text-secondary)] leading-relaxed">
+                            {slide.desc}
+                        </p>
+                    </motion.div>
+                </AnimatePresence>
 
-                <div className="flex items-center justify-center gap-2">
+                <div className="flex items-center justify-center gap-2" role="tablist" aria-label="轮播指示器">
                     {ONBOARDING_SLIDES.map((_, idx) => (
                         <button
                             key={idx}
                             onClick={() => setCurrent(idx)}
                             className={`idea-dot ${idx === current ? "active" : ""}`}
+                            role="tab"
+                            aria-selected={idx === current}
                             aria-label={`第 ${idx + 1} 页`}
                         />
                     ))}

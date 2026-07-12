@@ -12,13 +12,13 @@ export function Footer() {
             <div className="container max-w-6xl px-4 py-6 mx-auto">
                 <div className="flex flex-col items-center gap-3">
                     <div className="idea-floating-bar flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-[var(--idea-text-muted)]">
-                        <Link href="/about" className="hover:text-black transition-colors">{t("footer.about")}</Link>
+                        <Link href="/about" className="idea-link">{t("footer.about")}</Link>
                         <span className="w-px h-3 bg-[var(--idea-border)]" />
-                        <Link href="/support" className="hover:text-black transition-colors">{t("footer.support")}</Link>
+                        <Link href="/support" className="idea-link">{t("footer.support")}</Link>
                         <span className="w-px h-3 bg-[var(--idea-border)]" />
-                        <Link href="/privacy" className="hover:text-black transition-colors">{t("footer.privacy")}</Link>
+                        <Link href="/privacy" className="idea-link">{t("footer.privacy")}</Link>
                         <span className="w-px h-3 bg-[var(--idea-border)]" />
-                        <Link href="/terms" className="hover:text-black transition-colors">{t("footer.terms")}</Link>
+                        <Link href="/terms" className="idea-link">{t("footer.terms")}</Link>
                     </div>
                     <div className="text-xs text-[var(--idea-text-muted)]">{t("footer.copyright")}</div>
                     <LegalFooter />
