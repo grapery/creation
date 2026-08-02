@@ -1,242 +1,211 @@
 "use client";
 
-import { useState } from "react";
-import { Bell, Mail, MessageSquare, Heart, UserPlus, CheckCircle } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Bell, Mail, MessageSquare, Heart, UserPlus, CheckCircle, Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/providers/language-provider";
-import { showSuccess } from "@/lib/toast-utils";
+import {
+    settings,
+    NotificationSettings,
+    defaultNotificationSettings,
+} from "@/lib/api/settings";
+import { showError, showSuccess } from "@/lib/toast-utils";
 
 export default function NotificationSettingsPage() {
     const { t } = useTranslation();
+    const [prefs, setPrefs] = useState<NotificationSettings>(defaultNotificationSettings());
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
 
-    // Notification settings state
-    const [emailNotifs, setEmailNotifs] = useState(true);
-    const [pushNotifs, setPushNotifs] = useState(true);
-    const [likeNotifs, setLikeNotifs] = useState(true);
-    const [followNotifs, setFollowNotifs] = useState(true);
-    const [commentNotifs, setCommentNotifs] = useState(true);
-    const [mentionNotifs, setMentionNotifs] = useState(true);
-    const [storyNotifs, setStoryNotifs] = useState(false);
-    const [marketingEmails, setMarketingEmails] = useState(false);
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            try {
+                const s = await settings.get();
+                if (!cancelled && s.notificationSettings) {
+                    setPrefs(s.notificationSettings);
+                }
+            } catch (e) {
+                console.error(e);
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        })();
+        return () => {
+            cancelled = true;
+        };
+    }, []);
 
-    const handleSave = () => {
-        // Save notification preferences
-        showSuccess(t('notification_settings.saved'));
+    const patchPush = (key: keyof NotificationSettings["push"], value: boolean) => {
+        setPrefs((p) => ({ ...p, push: { ...p.push, [key]: value } }));
     };
+    const patchEmail = (key: keyof NotificationSettings["email"], value: boolean) => {
+        setPrefs((p) => ({ ...p, email: { ...p.email, [key]: value } }));
+    };
+    const patchInApp = (key: keyof NotificationSettings["inApp"], value: boolean) => {
+        setPrefs((p) => ({ ...p, inApp: { ...p.inApp, [key]: value } }));
+    };
+
+    const handleSave = async () => {
+        setSaving(true);
+        try {
+            await settings.updateNotifications(prefs);
+            showSuccess(t("notification_settings.saved", "Notification preferences saved"));
+        } catch (e) {
+            showError(e instanceof Error ? e.message : "Failed to save");
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex justify-center py-20">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+            <div>
+                <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
                     <Bell className="h-6 w-6" />
-                    {t('notification_settings.title')}
-                </h1>
-                <p className="text-muted-foreground mt-1">
-                    {t('notification_settings.subtitle')}
+                    {t("notification_settings.title", "Notifications")}
+                </h2>
+                <p className="text-muted-foreground">
+                    {t(
+                        "notification_settings.subtitle",
+                        "Synced with your account. Browser push is not available; use the iOS app for APNs."
+                    )}
                 </p>
             </div>
 
-            {/* Notification Channels */}
-            <Card className="mb-6">
+            <Card>
                 <CardHeader>
-                    <CardTitle>
-                        {t('notification_settings.channels')}
-                    </CardTitle>
+                    <CardTitle className="text-base">{t("notification_settings.channels", "Channels")}</CardTitle>
                     <CardDescription>
-                        {t('notification_settings.channels_desc')}
+                        {t("notification_settings.channels_desc", "Master switches for each channel")}
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-primary/10">
-                                <Mail className="h-5 w-5 text-primary" />
-                            </div>
-                            <div>
-                                <p className="font-medium">
-                                    {t('notification_settings.email')}
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                    {t('notification_settings.email_desc')}
-                                </p>
-                            </div>
-                        </div>
-                        <Switch checked={emailNotifs} onCheckedChange={setEmailNotifs} />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-primary/10">
-                                <MessageSquare className="h-5 w-5 text-primary" />
-                            </div>
-                            <div>
-                                <p className="font-medium">
-                                    {t('notification_settings.push')}
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                    {t('notification_settings.push_desc')}
-                                </p>
-                            </div>
-                        </div>
-                        <Switch checked={pushNotifs} onCheckedChange={setPushNotifs} />
-                    </div>
+                    <Row
+                        icon={<Mail className="h-5 w-5 text-primary" />}
+                        title={t("notification_settings.email", "Email")}
+                        desc="Email digests and alerts"
+                        checked={prefs.email.enabled}
+                        onChange={(v) => patchEmail("enabled", v)}
+                    />
+                    <Row
+                        icon={<MessageSquare className="h-5 w-5 text-primary" />}
+                        title={t("notification_settings.push", "Push")}
+                        desc="Mobile push (iOS app)"
+                        checked={prefs.push.enabled}
+                        onChange={(v) => patchPush("enabled", v)}
+                    />
+                    <Row
+                        icon={<Bell className="h-5 w-5 text-primary" />}
+                        title="In-app"
+                        desc="Notification center & SSE"
+                        checked={prefs.inApp.enabled}
+                        onChange={(v) => patchInApp("enabled", v)}
+                    />
                 </CardContent>
             </Card>
 
-            {/* Activity Notifications */}
-            <Card className="mb-6">
+            <Card>
                 <CardHeader>
-                    <CardTitle>
-                        {t('notification_settings.activity')}
-                    </CardTitle>
-                    <CardDescription>
-                        {t('notification_settings.activity_desc')}
-                    </CardDescription>
+                    <CardTitle className="text-base">{t("notification_settings.activity", "Activity")}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-red-100">
-                                <Heart className="h-5 w-5 text-red-500" />
-                            </div>
-                            <div>
-                                <p className="font-medium">
-                                    {t('notification_settings.likes')}
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                    {t('notification_settings.likes_desc')}
-                                </p>
-                            </div>
-                        </div>
-                        <Switch checked={likeNotifs} onCheckedChange={setLikeNotifs} />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-blue-100">
-                                <UserPlus className="h-5 w-5 text-blue-500" />
-                            </div>
-                            <div>
-                                <p className="font-medium">
-                                    {t('notification_settings.follows')}
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                    {t('notification_settings.follows_desc')}
-                                </p>
-                            </div>
-                        </div>
-                        <Switch checked={followNotifs} onCheckedChange={setFollowNotifs} />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-green-100">
-                                <MessageSquare className="h-5 w-5 text-green-500" />
-                            </div>
-                            <div>
-                                <p className="font-medium">
-                                    {t('notification_settings.comments')}
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                    {t('notification_settings.comments_desc')}
-                                </p>
-                            </div>
-                        </div>
-                        <Switch checked={commentNotifs} onCheckedChange={setCommentNotifs} />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-purple-100">
-                                <CheckCircle className="h-5 w-5 text-purple-500" />
-                            </div>
-                            <div>
-                                <p className="font-medium">
-                                    {t('notification_settings.mentions')}
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                    {t('notification_settings.mentions_desc')}
-                                </p>
-                            </div>
-                        </div>
-                        <Switch checked={mentionNotifs} onCheckedChange={setMentionNotifs} />
-                    </div>
+                    <Row
+                        icon={<Heart className="h-5 w-5 text-primary" />}
+                        title={t("notification_settings.likes", "Likes")}
+                        checked={prefs.push.newLike}
+                        onChange={(v) => patchPush("newLike", v)}
+                    />
+                    <Row
+                        icon={<UserPlus className="h-5 w-5 text-primary" />}
+                        title={t("notification_settings.follows", "New followers")}
+                        checked={prefs.push.newFollower}
+                        onChange={(v) => patchPush("newFollower", v)}
+                    />
+                    <Row
+                        icon={<MessageSquare className="h-5 w-5 text-primary" />}
+                        title={t("notification_settings.comments", "Comments")}
+                        checked={prefs.push.newComment}
+                        onChange={(v) => patchPush("newComment", v)}
+                    />
+                    <Row
+                        icon={<CheckCircle className="h-5 w-5 text-primary" />}
+                        title="Direct messages"
+                        checked={prefs.push.directMessage}
+                        onChange={(v) => patchPush("directMessage", v)}
+                    />
+                    <Row
+                        icon={<MessageSquare className="h-5 w-5 text-primary" />}
+                        title={t("notification_settings.story_updates", "Story updates")}
+                        checked={prefs.push.storyUpdate}
+                        onChange={(v) => patchPush("storyUpdate", v)}
+                    />
                 </CardContent>
             </Card>
 
-            {/* Content & Collaboration Notifications */}
-            <Card className="mb-6">
+            <Card>
                 <CardHeader>
-                    <CardTitle>
-                        {t('notification_settings.content_collab')}
-                    </CardTitle>
-                    <CardDescription>
-                        {t('notification_settings.content_collab_desc')}
-                    </CardDescription>
+                    <CardTitle className="text-base">{t("notification_settings.marketing", "Marketing")}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-orange-100">
-                                <MessageSquare className="h-5 w-5 text-orange-500" />
-                            </div>
-                            <div>
-                                <p className="font-medium">
-                                    {t('notification_settings.story_updates')}
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                    {t('notification_settings.story_updates_desc')}
-                                </p>
-                            </div>
-                        </div>
-                        <Switch checked={storyNotifs} onCheckedChange={setStoryNotifs} />
-                    </div>
-
+                    <Row
+                        icon={<Mail className="h-5 w-5 text-primary" />}
+                        title="Email marketing"
+                        checked={prefs.email.marketing}
+                        onChange={(v) => patchEmail("marketing", v)}
+                    />
+                    <Row
+                        icon={<Bell className="h-5 w-5 text-primary" />}
+                        title="Push marketing"
+                        checked={prefs.push.marketing}
+                        onChange={(v) => patchPush("marketing", v)}
+                    />
                 </CardContent>
             </Card>
 
-            {/* Marketing Communications */}
-            <Card className="mb-6">
-                <CardHeader>
-                    <CardTitle>
-                        {t('notification_settings.marketing')}
-                    </CardTitle>
-                    <CardDescription>
-                        {t('notification_settings.marketing_desc')}
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-yellow-100">
-                                <Mail className="h-5 w-5 text-yellow-600" />
-                            </div>
-                            <div>
-                                <p className="font-medium">
-                                    {t('notification_settings.marketing_email')}
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                    {t('notification_settings.marketing_email_desc')}
-                                </p>
-                            </div>
-                        </div>
-                        <Switch checked={marketingEmails} onCheckedChange={setMarketingEmails} />
-                    </div>
-                </CardContent>
-            </Card>
-
-            {/* Save Button */}
             <div className="flex justify-end gap-4">
-                <Button variant="outline">
-                    {t('notification_settings.cancel')}
-                </Button>
-                <Button onClick={handleSave}>
-                    {t('notification_settings.save')}
+                <Button onClick={handleSave} disabled={saving}>
+                    {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                    {t("notification_settings.save", "Save")}
                 </Button>
             </div>
+        </div>
+    );
+}
+
+function Row({
+    icon,
+    title,
+    desc,
+    checked,
+    onChange,
+}: {
+    icon: React.ReactNode;
+    title: string;
+    desc?: string;
+    checked: boolean;
+    onChange: (v: boolean) => void;
+}) {
+    return (
+        <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary/10">{icon}</div>
+                <div>
+                    <p className="font-medium">{title}</p>
+                    {desc && <p className="text-sm text-muted-foreground">{desc}</p>}
+                </div>
+            </div>
+            <Switch checked={checked} onCheckedChange={onChange} />
         </div>
     );
 }

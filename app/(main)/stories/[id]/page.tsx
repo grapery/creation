@@ -27,11 +27,15 @@ export default function StoryPage() {
     const router = useRouter();
     const [story, setStory] = useState<Story | null>(null);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState("story");
+    const [activeTab, setActiveTab] = useState(() => {
+        const tab = searchParams.get("tab");
+        return tab === "characters" || tab === "scenes" || tab === "team" ? tab : "story";
+    });
 
     // Story tab data
     const [storyboardsList, setStoryboardsList] = useState<Storyboard[]>([]);
     const [loadingStoryboards, setLoadingStoryboards] = useState(true);
+    const [liking, setLiking] = useState(false);
 
     // Characters tab data
     const [characters, setCharacters] = useState<Character[]>([]);
@@ -222,6 +226,7 @@ export default function StoryPage() {
 
     const handleLike = async () => {
         if (!story) return;
+        setLiking(true);
         try {
             if (story.isLiked) {
                 await stories.unlike(story.id);
@@ -233,7 +238,18 @@ export default function StoryPage() {
             setStory(data);
         } catch (e) {
             console.error(e);
+        } finally {
+            setLiking(false);
         }
+    };
+
+    const handleRead = () => {
+        const first = storyboardsList[0];
+        if (first?.id) {
+            router.push(`/stories/${story?.id}/read?board=${first.id}`);
+            return;
+        }
+        router.push(`/stories/${id}/read`);
     };
 
     const handleStoryboardTap = (storyboard: Storyboard) => {
@@ -259,12 +275,17 @@ export default function StoryPage() {
     return (
         <main className="flex-1">
             {/* Immersive Header */}
-            <StoryDetailHeader story={story} />
+            <StoryDetailHeader
+                story={story}
+                onLike={handleLike}
+                onRead={handleRead}
+                liking={liking}
+            />
 
             {/* Tab Navigation */}
             <div className="border-b border-border/50 bg-background sticky top-14 z-20">
                 <div className="container max-w-6xl px-4 md:px-6 mx-auto py-3">
-                    <StoryTabs onTabChange={setActiveTab} />
+                    <StoryTabs initialTab={activeTab} onTabChange={setActiveTab} />
                 </div>
             </div>
 

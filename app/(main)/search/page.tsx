@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Loader2 } from "lucide-react";
 import type { SearchResults, SearchType } from "@/lib/types";
 import Link from "next/link";
+import { useAuthRequired } from "@/lib/hooks/use-auth-required";
 
 export default function SearchPage() {
     return (
@@ -28,14 +29,23 @@ function SearchPageContent() {
     const [results, setResults] = useState<SearchResults | null>(null);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(false);
+    const { isAuthenticated, isCheckingAuth, LoginPromptModal, showPrompt } = useAuthRequired();
+
+    useEffect(() => {
+        if (!isCheckingAuth && !isAuthenticated) {
+            showPrompt({
+                title: "Sign in to search",
+                description: "Search requires an account — same as the iOS app.",
+            });
+        }
+    }, [isAuthenticated, isCheckingAuth, showPrompt]);
 
     const doSearch = useCallback(async (q: string, type: SearchType, p: number) => {
-        if (!q.trim()) return;
+        if (!q.trim() || !isAuthenticated) return;
         setLoading(true);
         try {
             const data = await search.search({ query: q, type, page: p, limit: 20 });
             if (p > 1) {
-                // Append mode for "Load More"
                 setResults(prev => {
                     if (!prev) return data;
                     return {
@@ -55,15 +65,36 @@ function SearchPageContent() {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [isAuthenticated]);
 
     useEffect(() => {
+        if (!isAuthenticated) return;
         if (initialQuery) {
             setResults(null);
             setPage(1);
             doSearch(initialQuery, activeTab, 1);
         }
-    }, [initialQuery, activeTab, doSearch]);
+    }, [initialQuery, activeTab, doSearch, isAuthenticated]);
+
+    if (isCheckingAuth) {
+        return (
+            <div className="flex justify-center py-20">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        );
+    }
+
+    if (!isAuthenticated) {
+        return (
+            <div className="container max-w-6xl mx-auto px-4 py-20 flex flex-col items-center gap-4 text-center">
+                <p className="text-muted-foreground">Sign in is required to search.</p>
+                <LoginPromptModal
+                    title="Sign in to search"
+                    description="Search requires an account — same as the iOS app."
+                />
+            </div>
+        );
+    }
 
     const handleSearch = () => {
         setPage(1);

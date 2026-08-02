@@ -34,10 +34,3 @@ export function backendUnavailableResponse(): NextResponse {
         { status: 503 }
     );
 }
-
-export function notImplementedResponse(feature: string): NextResponse {
-    return NextResponse.json(
-        { code: 501, message: `${feature} is not implemented on the backend` },
-        { status: 501 }
-    );
-}

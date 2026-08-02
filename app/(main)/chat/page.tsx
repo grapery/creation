@@ -11,11 +11,32 @@ import Link from "next/link";
 
 export default function ChatListPage() {
     const { t } = useTranslation();
-    const { isAuthenticated, isCheckingAuth, LoginPromptModal, requiresAuth } = useAuthRequired();
+    const { isAuthenticated, isCheckingAuth, LoginPromptModal } = useAuthRequired();
     const [sessions, setSessions] = useState<ChatSession[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // Show login prompt if not authenticated
+    useEffect(() => {
+        if (!isAuthenticated) {
+            setLoading(false);
+            return;
+        }
+        let cancelled = false;
+        async function fetchData() {
+            setLoading(true);
+            try {
+                const res = await chat.listSessions();
+                if (!cancelled) setSessions(res);
+            } catch (e) {
+                console.error(e);
+                if (!cancelled) setSessions([]);
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        }
+        fetchData();
+        return () => { cancelled = true; };
+    }, [isAuthenticated]);
+
     if (!isAuthenticated) {
         return (
             <div className="flex-1 container max-w-6xl px-4 py-6 md:px-6 mx-auto flex items-center justify-center">
@@ -42,29 +63,6 @@ export default function ChatListPage() {
             </div>
         );
     }
-
-    useEffect(() => {
-        async function fetchData() {
-            setLoading(true);
-            try {
-                const res = await chat.listSessions() as unknown;
-                // Handle both array and object response formats
-                if (Array.isArray(res)) {
-                    setSessions(res);
-                } else if (res && typeof res === 'object' && 'sessions' in res) {
-                    setSessions((res as { sessions: ChatSession[] }).sessions || []);
-                } else {
-                    setSessions([]);
-                }
-            } catch (e) {
-                console.error(e);
-                setSessions([]);
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetchData();
-    }, []);
 
     return (
         <main className="flex-1 container max-w-6xl px-4 py-6 md:px-6 mx-auto">

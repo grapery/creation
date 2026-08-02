@@ -1,5 +1,63 @@
 import { request } from './client';
 
+export interface PushNotificationSettings {
+    enabled: boolean;
+    newFollower: boolean;
+    newLike: boolean;
+    newComment: boolean;
+    storyUpdate: boolean;
+    directMessage: boolean;
+    systemAnnouncement: boolean;
+    marketing: boolean;
+}
+
+export interface EmailNotificationSettings {
+    enabled: boolean;
+    weeklyDigest: boolean;
+    securityAlert: boolean;
+    marketing: boolean;
+    productUpdates: boolean;
+}
+
+export interface InAppNotificationSettings {
+    enabled: boolean;
+    showPreview: boolean;
+    soundEnabled: boolean;
+    vibrationEnabled: boolean;
+}
+
+export interface NotificationSettings {
+    push: PushNotificationSettings;
+    email: EmailNotificationSettings;
+    inApp: InAppNotificationSettings;
+}
+
+export const defaultNotificationSettings = (): NotificationSettings => ({
+    push: {
+        enabled: true,
+        newFollower: true,
+        newLike: true,
+        newComment: true,
+        storyUpdate: true,
+        directMessage: true,
+        systemAnnouncement: true,
+        marketing: false,
+    },
+    email: {
+        enabled: true,
+        weeklyDigest: true,
+        securityAlert: true,
+        marketing: false,
+        productUpdates: true,
+    },
+    inApp: {
+        enabled: true,
+        showPreview: true,
+        soundEnabled: true,
+        vibrationEnabled: true,
+    },
+});
+
 export interface UserSettings {
     id?: string;
     userId?: string;
@@ -8,83 +66,95 @@ export interface UserSettings {
     theme: 'light' | 'dark' | 'system';
     fontSize: 'small' | 'medium' | 'large';
     dataSaver: boolean;
-    // Backend uses: public, followers_only, private
     profileVisibility: 'public' | 'followers_only' | 'private';
-    // Backend uses: public, unlisted, private
     defaultStoryVisibility: 'public' | 'unlisted' | 'private';
-    // Backend uses: public, followers_only, private
     defaultFragmentVisibility: 'public' | 'followers_only' | 'private';
-    // Backend uses: everyone, followers_only, followers_of_followers, no_one
     allowFollowFrom: 'everyone' | 'followers_only' | 'followers_of_followers' | 'no_one';
     allowCommentsFrom: 'everyone' | 'followers_only' | 'no_one';
     allowMessagesFrom: 'everyone' | 'followers_only' | 'no_one';
     showOnlineStatus: boolean;
     showReadReceipts: boolean;
+    showPublicStories?: boolean;
+    showPublicFragments?: boolean;
+    showPublicBookmarks?: boolean;
     aiEnabled: boolean;
     aiDataSharing: boolean;
-    // Backend returns this as a JSON string, frontend should parse/stringify
     notificationSettings: NotificationSettings;
+    preferredGenres?: string[];
+    teenProtectionEnabled?: boolean;
     createdAt?: number;
     updatedAt?: number;
 }
 
-export interface NotificationSettings {
-    email?: boolean;
-    push?: boolean;
-    likes?: boolean;
-    comments?: boolean;
-    follows?: boolean;
-    mentions?: boolean;
-    updates?: boolean;
+function mergeNotificationSettings(raw: unknown): NotificationSettings {
+    const defaults = defaultNotificationSettings();
+    if (!raw || typeof raw !== 'object') return defaults;
+    const src = raw as Record<string, any>;
+
+    // Legacy flat shape → nested
+    if (typeof src.push === 'boolean' || typeof src.email === 'boolean' || typeof src.likes === 'boolean') {
+        return {
+            push: {
+                ...defaults.push,
+                enabled: src.push !== false,
+                newLike: src.likes !== false,
+                newComment: src.comments !== false,
+                newFollower: src.follows !== false,
+                storyUpdate: src.updates !== false,
+            },
+            email: {
+                ...defaults.email,
+                enabled: src.email !== false,
+            },
+            inApp: { ...defaults.inApp },
+        };
+    }
+
+    return {
+        push: { ...defaults.push, ...(src.push || {}) },
+        email: { ...defaults.email, ...(src.email || {}) },
+        inApp: { ...defaults.inApp, ...(src.inApp || {}) },
+    };
 }
 
-// Helper to parse notificationSettings from JSON string to object
 const parseSettingsResponse = (data: any): UserSettings => {
-    if (data.notificationSettings && typeof data.notificationSettings === 'string') {
-        try {
-            data.notificationSettings = JSON.parse(data.notificationSettings);
-        } catch (e) {
-            console.warn('[Settings] Failed to parse notificationSettings:', e);
-            data.notificationSettings = {};
-        }
-    }
-    return data;
+    const notificationSettings = mergeNotificationSettings(
+        typeof data.notificationSettings === 'string'
+            ? (() => {
+                  try {
+                      return JSON.parse(data.notificationSettings);
+                  } catch {
+                      return {};
+                  }
+              })()
+            : data.notificationSettings
+    );
+    return { ...data, notificationSettings };
 };
 
 export const settings = {
-    // Get user settings
-    // Note: Backend returns notificationSettings as JSON string, we parse it to object
     get: async (): Promise<UserSettings> => {
         const data = await request('/api/settings');
         return parseSettingsResponse(data);
     },
 
-    // Update settings (general)
     update: async (updates: Partial<UserSettings>): Promise<UserSettings> => {
-        return request('/api/settings', 'PUT', updates);
+        const data = await request('/api/settings', 'PUT', updates);
+        return parseSettingsResponse(data);
     },
 
-    // Update language
     updateLanguage: async (language: string): Promise<void> => {
         return request('/api/settings/language', 'PUT', { language });
     },
 
-    // Update theme
     updateTheme: async (theme: 'light' | 'dark' | 'system'): Promise<void> => {
         return request('/api/settings/theme', 'PUT', { theme });
     },
 
-    // Update font size
     updateFontSize: async (fontSize: 'small' | 'medium' | 'large'): Promise<void> => {
         return request('/api/settings/font-size', 'PUT', { fontSize });
     },
 
-    // Update privacy settings
-    // Note: Use backend enum values:
-    // - profileVisibility/defaultFragmentVisibility: 'public' | 'followers_only' | 'private'
-    // - defaultStoryVisibility: 'public' | 'unlisted' | 'private'
-    // - allowFollowFrom: 'everyone' | 'followers_only' | 'followers_of_followers' | 'no_one'
-    // - allowCommentsFrom/allowMessagesFrom: 'everyone' | 'followers_only' | 'no_one'
     updatePrivacy: async (privacy: {
         profileVisibility?: string;
         defaultStoryVisibility?: string;
@@ -92,21 +162,26 @@ export const settings = {
         allowFollowFrom?: string;
         allowCommentsFrom?: string;
         allowMessagesFrom?: string;
+        showOnlineStatus?: boolean;
+        showReadReceipts?: boolean;
+        showPublicStories?: boolean;
+        showPublicFragments?: boolean;
+        showPublicBookmarks?: boolean;
     }): Promise<void> => {
         return request('/api/settings/privacy', 'PUT', privacy);
     },
 
-    // Update AI settings
     updateAI: async (aiEnabled: boolean, aiDataSharing: boolean): Promise<void> => {
         return request('/api/settings/ai', 'PUT', { aiEnabled, aiDataSharing });
     },
 
-    // Update notification settings
-    updateNotifications: async (notificationSettings: UserSettings['notificationSettings']): Promise<void> => {
+    updateNotifications: async (notificationSettings: NotificationSettings): Promise<void> => {
         return request('/api/settings/notifications', 'PUT', notificationSettings);
     },
 
-    // ==================== Genre Preferences ====================
+    updateTeenProtection: async (teenProtectionEnabled: boolean): Promise<UserSettings> => {
+        return settings.update({ teenProtectionEnabled });
+    },
 
     getGenrePreferences: async (): Promise<{ preferredGenres: string[]; allowedGenres: string[] }> =>
         request('/api/settings/preferences/genres'),

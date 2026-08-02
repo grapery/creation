@@ -15,12 +15,6 @@ import Link from "next/link";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { parseShareGrant } from "@/lib/share-grant";
 
-interface CharacterPoster {
-    id: string;
-    image: string;
-    createdAt: number;
-}
-
 export default function CharacterDetailPage() {
     const { id } = useParams();
     const searchParams = useSearchParams();
@@ -32,10 +26,6 @@ export default function CharacterDetailPage() {
     // Timeline state
     const [storyboardsList, setStoryboardsList] = useState<Storyboard[]>([]);
     const [loadingStoryboards, setLoadingStoryboards] = useState(true);
-
-    // Gallery state
-    const [posters, setPosters] = useState<CharacterPoster[]>([]);
-    const [loadingPosters, setLoadingPosters] = useState(true);
 
     // Interaction states
     const [isFollowing, setIsFollowing] = useState(false);
@@ -64,13 +54,6 @@ export default function CharacterDetailPage() {
         }
     }, [activeTab, id]);
 
-    // Load gallery data when tab switches to gallery
-    useEffect(() => {
-        if (activeTab === "gallery" && id) {
-            loadPosters(id as string);
-        }
-    }, [activeTab, id]);
-
     const loadStoryboards = async (characterId: string) => {
         setLoadingStoryboards(true);
         try {
@@ -81,20 +64,6 @@ export default function CharacterDetailPage() {
             setStoryboardsList([]);
         } finally {
             setLoadingStoryboards(false);
-        }
-    };
-
-    const loadPosters = async (characterId: string) => {
-        setLoadingPosters(true);
-        try {
-            // TODO: Implement posters API
-            // For now, set empty array
-            setPosters([]);
-        } catch (e) {
-            console.error(e);
-            setPosters([]);
-        } finally {
-            setLoadingPosters(false);
         }
     };
 
@@ -140,7 +109,7 @@ export default function CharacterDetailPage() {
 
                         <div className="w-full space-y-2">
                             <Button className="w-full" size="lg" asChild>
-                                <Link href={`/chat/${character.id}`}>
+                                <Link href={`/chat/new?characterId=${character.id}`}>
                                     <MessageCircle className="mr-2 h-5 w-5" />
                                     Chat
                                 </Link>
@@ -153,7 +122,27 @@ export default function CharacterDetailPage() {
                                 >
                                     {isFollowing ? "Following" : "Follow"}
                                 </Button>
-                                <Button variant="outline" size="icon">
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={async () => {
+                                        if (!character?.id) return;
+                                        try {
+                                            const { shareContent } = await import("@/lib/api/share");
+                                            const { copied } = await shareContent({
+                                                kind: "character",
+                                                id: character.id,
+                                                title: character.name,
+                                            });
+                                            if (copied) {
+                                                const { showSuccess } = await import("@/lib/toast-utils");
+                                                showSuccess("Link copied to clipboard");
+                                            }
+                                        } catch (e) {
+                                            console.error(e);
+                                        }
+                                    }}
+                                >
                                     <Share2 className="h-4 w-4" />
                                 </Button>
                                 <DropdownMenu>
@@ -333,31 +322,23 @@ export default function CharacterDetailPage() {
                                 )}
                             </TabsContent>
 
-                            {/* Gallery Tab */}
+                            {/* Gallery Tab — single poster field only (multi-poster API removed) */}
                             <TabsContent value="gallery" className="mt-6">
-                                {loadingPosters ? (
-                                    <div className="flex justify-center py-20">
-                                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                                    </div>
-                                ) : posters.length === 0 ? (
-                                    <div className="flex flex-col items-center justify-center py-20 text-center">
-                                        <Image className="w-16 h-16 text-muted-foreground/50 mb-4" />
-                                        <h3 className="text-lg font-semibold text-foreground mb-2">No media yet</h3>
-                                        <p className="text-sm text-muted-foreground">
-                                            Promotional posters and media will appear here
-                                        </p>
+                                {character.poster ? (
+                                    <div className="max-w-sm mx-auto aspect-[3/4] rounded-lg overflow-hidden bg-secondary">
+                                        <img
+                                            src={character.poster}
+                                            alt={`${character.name} poster`}
+                                            className="w-full h-full object-cover"
+                                        />
                                     </div>
                                 ) : (
-                                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                                        {posters.map((poster) => (
-                                            <div key={poster.id} className="aspect-[3/4] rounded-lg overflow-hidden bg-secondary">
-                                                <img
-                                                    src={poster.image}
-                                                    alt="Poster"
-                                                    className="w-full h-full object-cover hover:scale-105 transition-transform"
-                                                />
-                                            </div>
-                                        ))}
+                                    <div className="flex flex-col items-center justify-center py-20 text-center">
+                                        <Image className="w-16 h-16 text-muted-foreground/50 mb-4" />
+                                        <h3 className="text-lg font-semibold text-foreground mb-2">No poster yet</h3>
+                                        <p className="text-sm text-muted-foreground">
+                                            A character poster will appear here when available
+                                        </p>
                                     </div>
                                 )}
                             </TabsContent>

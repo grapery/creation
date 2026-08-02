@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Share2, Users, Search, ChevronLeft, ChevronRight, Eye, MessageSquare, Sparkles, Save, AlertTriangle, Trash2, Plus, X, RefreshCw, Minus } from "lucide-react";
+import { Share2, Users, Search, ChevronLeft, ChevronRight, Eye, MessageSquare, Sparkles, Save, AlertTriangle, Trash2, Plus, X, RefreshCw, Minus, Loader2 } from "lucide-react";
 import { stories } from "@/lib/api/stories";
 import { characters } from "@/lib/api/characters";
 import { showSuccess, showError } from "@/lib/toast-utils";
 import { useTranslation } from "@/providers/language-provider";
+import { useAuthRequired } from "@/lib/hooks/use-auth-required";
 import {
     AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
     AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay,
@@ -30,7 +31,54 @@ export default function CreateStoryPage({ storyId }: CreateStoryProps) {
 function CreateStory({ storyId }: CreateStoryProps) {
     const router = useRouter();
     const { t } = useTranslation();
+    const { isAuthenticated, isCheckingAuth, LoginPromptModal, showPrompt } = useAuthRequired();
     const searchParams = useSearchParams();
+
+    useEffect(() => {
+        if (!isCheckingAuth && !isAuthenticated) {
+            showPrompt({
+                title: "Sign in to create",
+                description: "Please sign in to create and publish stories.",
+            });
+        }
+    }, [isAuthenticated, isCheckingAuth, showPrompt]);
+
+    if (isCheckingAuth) {
+        return (
+            <div className="flex items-center justify-center py-20">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        );
+    }
+
+    if (!isAuthenticated) {
+        return (
+            <div className="flex flex-col items-center justify-center py-20 space-y-4 px-4">
+                <p className="text-muted-foreground text-center">
+                    Sign in is required to create stories.
+                </p>
+                <LoginPromptModal
+                    title="Sign in to create"
+                    description="Please sign in to create and publish stories."
+                />
+            </div>
+        );
+    }
+
+    return <CreateStoryForm storyId={storyId} searchParams={searchParams} t={t} router={router} />;
+}
+
+function CreateStoryForm({
+    storyId,
+    searchParams,
+    t,
+    router,
+}: {
+    storyId?: string;
+    searchParams: ReturnType<typeof useSearchParams>;
+    t: ReturnType<typeof useTranslation>["t"];
+    router: ReturnType<typeof useRouter>;
+}) {
     const [selectedTab, setSelectedTab] = useState(0);
     const [title, setTitle] = useState("");
     const [titleMaxLength, setTitleMaxLength] = useState(200);
@@ -54,7 +102,6 @@ function CreateStory({ storyId }: CreateStoryProps) {
     // AI Enrichment states
     const [useAIEnrich, setUseAIEnrich] = useState(false);
     const [generateCover, setGenerateCover] = useState(false);
-    const [generatePoster, setGeneratePoster] = useState(false);
     const [generateBackground, setGenerateBackground] = useState(false);
     const [selectedAIStyle, setSelectedAIStyle] = useState<StyleConfig | null>(null);
     const [isAIProcessing, setIsAIProcessing] = useState(false);
@@ -207,7 +254,7 @@ function CreateStory({ storyId }: CreateStoryProps) {
                 status,
                 useAIEnrich: status === "published" ? useAIEnrich : false,
                 generateCover: status === "published" ? generateCover : false,
-                generatePoster: status === "published" ? generatePoster : false,
+                generatePoster: false,
                 generateBackground: status === "published" ? generateBackground : false,
                 aiStyle: selectedAIStyle || undefined,
                 style: selectedAIStyle?.style,
@@ -495,26 +542,12 @@ function CreateStory({ storyId }: CreateStoryProps) {
                                     </button>
                                 </div>
 
-                                {/* Generate Poster Toggle */}
-                                <div className="flex items-center justify-between p-3 bg-card rounded-lg">
-                                    <div className="flex items-center gap-3">
-                                        <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 010 10 10-10 10-10V7a2 2 0 010-10-10-10-10l-1.293-1.293a2 2 0 015-15 15-15 15-15v-6z" />
-                                        </svg>
-                                        <span className="text-sm font-medium">Generate poster image</span>
-                                        <span className="text-xs text-muted-foreground ml-2">Create promotional poster</span>
-                                    </div>
-                                    <button
-                                        onClick={() => setGeneratePoster(!generatePoster)}
-                                        className={`relative w-11 h-6 rounded-full transition-colors ${generatePoster ? "bg-purple-500" : "bg-muted"}`}
-                                    >
-                                        <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${generatePoster ? "translate-x-5" : "translate-x-1"}`} />
-                                    </button>
-                                </div>
+                                {/* Generate Poster Toggle removed — posters API not available */}
+
                             </div>
 
                             {/* Style Selection */}
-                            {(generateCover || generatePoster || generateBackground) && (
+                            {(generateCover || generateBackground) && (
                                 <div className="space-y-3 pt-3 border-t border-purple-200/50">
                                     <div className="flex items-center justify-between">
                                         <h5 className="text-sm font-medium text-purple-900">Art Style</h5>
@@ -611,7 +644,7 @@ function CreateStory({ storyId }: CreateStoryProps) {
                             )}
 
                             {/* Token Usage Info */}
-                            {(useAIEnrich || generateCover || generatePoster || generateBackground) && (
+                            {(useAIEnrich || generateCover || generateBackground) && (
                                 <div className="flex items-center gap-2 p-3 bg-orange-50/10 rounded-lg">
                                     <svg className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v8m0-6l-6-6h24l-6 6h24l-6 6V8z" />
@@ -926,7 +959,7 @@ function CreateStory({ storyId }: CreateStoryProps) {
                                 <div className="w-4 h-4 border-2 border-white/50 border-t-transparent rounded-full animate-spin mr-2" />
                                 Creating...
                             </>
-                        ) : useAIEnrich || generateCover || generatePoster || generateBackground ? (
+                        ) : useAIEnrich || generateCover || generateBackground ? (
                             <>
                                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M17 20h5v-2a3 3 0 006 1.061l-.431.431.061-3.061L16 16z" />

@@ -213,7 +213,7 @@ export default function ProfileDraftsPage() {
                 onEditProfile={() => router.push("/settings/profile")}
                 onShare={() => {}}
                 onFollow={() => {}}
-                onMessage={() => router.push(`/chat/${profileUser.id}`)}
+                onMessage={() => router.push(`/chat/new?peerUserId=${profileUser.id}`)}
             />
 
             {/* Tabs Navigation */}

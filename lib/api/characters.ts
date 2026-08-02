@@ -38,16 +38,28 @@ export const characters = {
         return request(`/api/characters/${id}`, 'DELETE');
     },
 
-    // Chat / Messages
-    // Note: Character chat endpoints not implemented in backend yet
-    getMessages: async (_characterId: string, _limit = 20): Promise<CharacterMessage[]> => {
-        console.warn('Character messages not implemented in backend');
-        return [];
+    getMessages: async (characterId: string, limit = 20): Promise<CharacterMessage[]> => {
+        const { chat } = await import('./chat');
+        const session = await chat.startSession(characterId);
+        const msgs = await chat.getMessages(session.id, undefined, limit);
+        return msgs.map((m) => ({
+            id: m.id,
+            role: (m.role === 'assistant' ? 'assistant' : 'user') as CharacterMessage['role'],
+            content: m.content,
+            timestamp: m.timestamp,
+        }));
     },
 
-    sendMessage: async (_characterId: string, _content: string): Promise<CharacterMessage> => {
-        console.warn('Character chat not implemented in backend');
-        throw new Error('Character chat not implemented');
+    sendMessage: async (characterId: string, content: string): Promise<CharacterMessage> => {
+        const { chat } = await import('./chat');
+        const session = await chat.startSession(characterId);
+        const result = await chat.sendMessage(session.id, content);
+        return {
+            id: result.userMessage.id,
+            role: 'user',
+            content: result.userMessage.content,
+            timestamp: result.userMessage.timestamp,
+        };
     },
 
     // Interaction - Follow/Unfollow

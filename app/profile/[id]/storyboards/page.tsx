@@ -199,7 +199,7 @@ export default function ProfileStoryboardsPage() {
                 onEditProfile={() => router.push("/settings/profile")}
                 onFollow={handleFollow}
                 onShare={() => {}}
-                onMessage={() => router.push(`/chat/${profileUser.id}`)}
+                onMessage={() => router.push(`/chat/new?peerUserId=${profileUser.id}`)}
             />
 
             {/* Tabs Navigation */}

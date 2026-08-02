@@ -5,11 +5,12 @@ import { cn } from "@/lib/utils";
 
 interface StoryTabsProps {
     onTabChange: (tab: string) => void;
+    initialTab?: string;
 }
 
-export function StoryTabs({ onTabChange }: StoryTabsProps) {
+export function StoryTabs({ onTabChange, initialTab = "story" }: StoryTabsProps) {
     const { t } = useTranslation();
-    const [activeTab, setActiveTab] = useState("story");
+    const [activeTab, setActiveTab] = useState(initialTab);
 
     const tabs = [
         { id: "story", label: t("story_detail.tabs.story", "Story"), icon: BookOpen },

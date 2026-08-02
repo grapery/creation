@@ -10,6 +10,7 @@ import { useAuth } from "@/providers/auth-provider";
 import { useLoginPrompt } from "@/components/auth/login-prompt";
 import { showSuccess, showError } from "@/lib/toast-utils";
 import { CommentList } from "@/components/comments/comment-list";
+import { ContentModerationMenu } from "@/components/moderation/content-moderation-menu";
 import type { StoryFragment, FragmentStoryPrefillAIResponse, FragmentStoryCreationPrefill } from "@/lib/types";
 import { parseShareGrant } from "@/lib/share-grant";
 
@@ -96,15 +97,13 @@ export default function FragmentDetailPage() {
         try {
             await fragments.share(fragmentId);
             setShareCount(prev => prev + 1);
-            if (navigator.share) {
-                await navigator.share({
-                    title: fragment?.content?.slice(0, 50) || "Fragment",
-                    url: window.location.href,
-                });
-            } else {
-                await navigator.clipboard.writeText(window.location.href);
-                showSuccess("Link copied to clipboard");
-            }
+            const { shareContent } = await import("@/lib/api/share");
+            const { copied } = await shareContent({
+                kind: "fragment",
+                id: fragmentId,
+                title: fragment?.content?.slice(0, 50) || "Fragment",
+            });
+            if (copied) showSuccess("Link copied to clipboard");
         } catch (err) {
             if ((err as Error).name !== "AbortError") {
                 console.error("Failed to share:", err);
@@ -184,10 +183,21 @@ export default function FragmentDetailPage() {
             <LoginPromptModal />
 
             {/* Back button */}
-            <button onClick={() => router.back()} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-                <ArrowLeft className="w-4 h-4" />
-                Back
-            </button>
+            <div className="flex items-center justify-between">
+                <button onClick={() => router.back()} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+                    <ArrowLeft className="w-4 h-4" />
+                    Back
+                </button>
+                <ContentModerationMenu
+                    target={{
+                        kind: "content",
+                        contentType: "fragment",
+                        contentId: fragment.id,
+                        label: "fragment",
+                        authorId: fragment.creatorId,
+                    }}
+                />
+            </div>
 
             {/* Image Gallery */}
             {fragment.imageUrls && fragment.imageUrls.length > 0 && (

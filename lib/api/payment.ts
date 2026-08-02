@@ -1,17 +1,18 @@
-import { paymentClient, request } from './client';
+import { paymentClient, request, getUserIdFromToken } from './client';
 import {
     PaymentMethod,
     PaymentRequest,
     PaymentResponse,
     PaymentRecord,
     PaymentStatus,
+    PaymentCreateData,
 } from '../types/payment';
 
 // Helper to make requests to payment service
 const paymentServiceRequest = async <T>(
     endpoint: string,
     method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET',
-    body?: any
+    body?: unknown
 ): Promise<T> => {
     return request(endpoint, method, body, paymentClient);
 };
@@ -32,37 +33,60 @@ export interface PaymentHistoryQuery {
     endDate?: number;
 }
 
-// Note: Web payment endpoints are on vippay service at /api/vippay/web/payments
-// Backend routes:
-// POST /api/vippay/web/payments - Create payment
-// GET /api/vippay/web/payments/:id - Get payment
-// GET /api/vippay/web/payments/user/:userId - Get user payments
+function normalizeCreateResponse(data: PaymentCreateData): PaymentResponse {
+    return {
+        success: true,
+        paymentId: data.id,
+        clientSecret: data.clientSecret,
+        publishableKey: data.publishableKey,
+        paymentUrl: data.qrCodeURL,
+    };
+}
 
 export const payment = {
     /**
-     * Create a payment
-     * Uses /api/vippay/web/payments on payment service
-     * Payment provider (stripe/alipay/etc.) is specified in the request data
+     * Create a payment via vippay POST /api/vippay/web/payments
+     * Requires userId, planId, amount (>0), method.
      */
     createPayment: async (data: PaymentRequest): Promise<PaymentResponse> => {
-        return paymentServiceRequest('/api/vippay/web/payments', 'POST', data);
+        const userId = data.userId || getUserIdFromToken();
+        if (!userId) {
+            throw new Error('User must be signed in to create a payment');
+        }
+        if (!data.planId || !(data.amount > 0)) {
+            throw new Error('planId and amount are required');
+        }
+
+        const payload: PaymentRequest = {
+            userId,
+            planId: data.planId,
+            amount: data.amount,
+            currency: data.currency || 'USD',
+            method: data.method,
+            metadata: data.metadata,
+        };
+
+        const raw = await paymentServiceRequest<PaymentCreateData>(
+            '/api/vippay/web/payments',
+            'POST',
+            payload
+        );
+        return normalizeCreateResponse(raw);
     },
 
-    /**
-     * Get payment status
-     * Uses /api/vippay/web/payments/:id on payment service
-     */
     getPaymentStatus: async (paymentId: string): Promise<{
         status: PaymentStatus;
         payment?: PaymentRecord;
     }> => {
-        return paymentServiceRequest(`/api/vippay/web/payments/${paymentId}`);
+        const record = await paymentServiceRequest<PaymentRecord>(
+            `/api/vippay/web/payments/${paymentId}`
+        );
+        return {
+            status: record.status,
+            payment: record,
+        };
     },
 
-    /**
-     * Get payment history
-     * Uses /api/vippay/web/payments/user/:userId on payment service
-     */
     getPaymentHistory: async (
         userId: string,
         query: PaymentHistoryQuery = {}
@@ -83,9 +107,6 @@ export const payment = {
         );
     },
 
-    /**
-     * Get payment by ID
-     */
     getPaymentById: async (paymentId: string): Promise<PaymentRecord> => {
         return paymentServiceRequest(`/api/vippay/web/payments/${paymentId}`);
     },

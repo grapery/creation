@@ -97,12 +97,10 @@ export default function PaymentHistoryPage() {
         switch (method) {
             case PaymentMethod.STRIPE:
                 return "Card";
-            case PaymentMethod.GOOGLE_PAY:
-                return "Google Pay";
-            case PaymentMethod.APPLE_PAY:
-                return "Apple Pay";
             case PaymentMethod.ALIPAY:
                 return "Alipay";
+            case PaymentMethod.WECHAT:
+                return "WeChat Pay";
             default:
                 return method;
         }
@@ -201,9 +199,7 @@ export default function PaymentHistoryPage() {
                             <SelectContent>
                                 <SelectItem value="all">All Methods</SelectItem>
                                 <SelectItem value={PaymentMethod.STRIPE}>Card</SelectItem>
-                                <SelectItem value={PaymentMethod.GOOGLE_PAY}>Google Pay</SelectItem>
-                                <SelectItem value={PaymentMethod.APPLE_PAY}>Apple Pay</SelectItem>
-                                <SelectItem value={PaymentMethod.ALIPAY}>Alipay</SelectItem>
+                                <SelectItem value={PaymentMethod.WECHAT}>WeChat Pay</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>

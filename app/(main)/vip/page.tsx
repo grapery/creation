@@ -68,8 +68,8 @@ export default function VIPPage() {
                 <div className="mx-auto h-16 w-16 rounded-full bg-yellow-500/10 flex items-center justify-center mb-6">
                     <Crown className="h-8 w-8 text-yellow-500" />
                 </div>
-                <h1 className="text-4xl font-bold">{t("vip.upgrade_title")}</h1>
-                <p className="text-xl text-muted-foreground">{t("vip.upgrade_subtitle")}</p>
+                <h1 className="text-4xl font-bold">{t("common.vip.upgrade_title")}</h1>
+                <p className="text-xl text-muted-foreground">{t("common.vip.upgrade_subtitle")}</p>
 
                 {/* Billing Cycle Toggle */}
                 <div className="flex items-center justify-center gap-3 mt-4">

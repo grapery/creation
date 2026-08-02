@@ -16,9 +16,10 @@ interface SetupStepProps {
     onChange: (data: any) => void;
     onNext: () => void;
     onBack: () => void;
+    creating?: boolean;
 }
 
-export function SetupStep({ data, onChange, onNext, onBack }: SetupStepProps) {
+export function SetupStep({ data, onChange, onNext, onBack, creating = false }: SetupStepProps) {
     const [enhancing, setEnhancing] = useState(false);
     const [styles, setStyles] = useState<FragmentStyle[]>([]);
     const [loadingStyles, setLoadingStyles] = useState(false);
@@ -67,10 +68,18 @@ export function SetupStep({ data, onChange, onNext, onBack }: SetupStepProps) {
         }
     };
 
-    const canProceed = data.rawInput.trim().length > 0;
+    const hasStoryId = Boolean(data.storyId?.trim());
+    const canProceed = hasStoryId && data.rawInput.trim().length > 0 && !creating;
 
     return (
         <div className="space-y-5">
+            {!hasStoryId && (
+                <div className="rounded-lg border border-yellow-500/40 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-800 dark:text-yellow-200">
+                    Missing story. Open this wizard from a story page (needs{" "}
+                    <code className="text-xs">?storyId=...</code>), or go back and create/select a story first.
+                </div>
+            )}
+
             {/* Story Direction */}
             <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Story Direction</label>
@@ -177,7 +186,8 @@ export function SetupStep({ data, onChange, onNext, onBack }: SetupStepProps) {
             <div className="flex gap-3 pt-4">
                 <button
                     onClick={onBack}
-                    className="flex-1 py-3 border border-border bg-background hover:bg-muted text-foreground font-medium rounded-lg transition-colors"
+                    disabled={creating}
+                    className="flex-1 py-3 border border-border bg-background hover:bg-muted text-foreground font-medium rounded-lg transition-colors disabled:opacity-50"
                 >
                     Back
                 </button>
@@ -186,8 +196,12 @@ export function SetupStep({ data, onChange, onNext, onBack }: SetupStepProps) {
                     disabled={!canProceed}
                     className="flex-1 py-3 bg-primary hover:bg-primary/90 disabled:bg-gray-300 disabled:cursor-not-allowed text-primary-foreground font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
                 >
-                    <Wand2 className="w-4 h-4" />
-                    Start Generation
+                    {creating ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                        <Wand2 className="w-4 h-4" />
+                    )}
+                    {creating ? "Starting..." : "Start Generation"}
                 </button>
             </div>
         </div>

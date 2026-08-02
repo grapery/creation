@@ -10,8 +10,9 @@ export enum ServiceType {
 
 const SERVICE_URLS = {
     [ServiceType.MAIN]: process.env.NEXT_PUBLIC_API_URL || '', // Empty string implies relative path (same origin)
-    [ServiceType.PAYMENT]: process.env.NEXT_PUBLIC_PAYMENT_API_URL || 'http://127.0.0.1:8060',
-    [ServiceType.CHAT]: process.env.NEXT_PUBLIC_CHAT_API_URL || 'http://127.0.0.1:8050',
+    // Same-origin via Next rewrite /api/vippay/* → vippay (avoids browser → :8060)
+    [ServiceType.PAYMENT]: process.env.NEXT_PUBLIC_PAYMENT_API_URL || '',
+    [ServiceType.CHAT]: process.env.NEXT_PUBLIC_CHAT_API_URL || '',
 };
 
 // API Response Wrapper
@@ -186,11 +187,12 @@ const createClient = (serviceType: ServiceType = ServiceType.MAIN): AxiosInstanc
             const { data } = response;
 
             // Handle standard envelope
+            // Grapery often uses code===1; vippay web payments use code===0 with data (no success bool)
             if (data && typeof data.code === 'number') {
                 const isPaymentService = serviceType === ServiceType.PAYMENT;
                 const isSuccess = isPaymentService
-                    ? (data.code === 0 && (data as any).success === true) || data.code === 1
-                    : data.code === 1;
+                    ? data.code === 0 || data.code === 1 || (data as { success?: boolean }).success === true
+                    : data.code === 1 || data.code === 0;
 
                 if (isSuccess) {
                     return data.data ?? data;

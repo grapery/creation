@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, lazy, Suspense, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/providers/auth-provider";
 import { useTranslation } from "@/providers/language-provider";
 import { StoryboardCard } from "@/components/storyboard/storyboard-card";
@@ -12,12 +12,7 @@ import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
 import { useLoginPrompt } from "@/components/auth/login-prompt";
-
-const PlazaFeed = lazy(() =>
-  import("@/components/plaza/plaza-feed").then((m) => ({
-    default: m.PlazaFeed,
-  }))
-);
+import { GuestDiscoverFeed } from "@/components/discover/guest-discover-feed";
 
 enum Tab {
   STORYBOARDS = "storyboards",
@@ -34,10 +29,8 @@ export default function DashboardPage() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const { show: showLoginPrompt } = useLoginPrompt();
 
-  // Fetch data when tab changes (authenticated only)
   useEffect(() => {
     if (!user) return;
     let isMounted = true;
@@ -51,12 +44,12 @@ export default function DashboardPage() {
           setItems(res.storyboards || []);
           setHasMore((res.storyboards || []).length >= 20);
         } else if (activeTab === Tab.FOLLOWING) {
-          const res = await storyboards.getFeed(1, 20, 'following');
+          const res = await storyboards.getFeed(1, 20, "following");
           setItems(res.storyboards || []);
           setHasMore((res.storyboards || []).length >= 20);
         }
-      } catch (e: any) {
-        console.error('Failed to fetch data:', e);
+      } catch (e) {
+        console.error("Failed to fetch data:", e);
         setItems([]);
       } finally {
         if (isMounted) setLoading(false);
@@ -64,7 +57,9 @@ export default function DashboardPage() {
     }
 
     fetchData();
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+    };
   }, [activeTab, user]);
 
   const tabs = [
@@ -72,19 +67,21 @@ export default function DashboardPage() {
     { value: Tab.FOLLOWING, label: t("dashboard.following") },
   ];
 
-  // Unauthenticated users: show Plaza content
-  if (!user && !authLoading) {
+  if (authLoading) {
     return (
       <main className="flex-1 container max-w-6xl px-4 py-6 md:px-6 mx-auto">
-        <Suspense
-          fallback={
-            <div className="flex justify-center py-20">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          }
-        >
-          <PlazaFeed />
-        </Suspense>
+        <div className="flex justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </main>
+    );
+  }
+
+  // Guests: Discover via public/optional-auth APIs (aligned with iOS Voyager)
+  if (!user) {
+    return (
+      <main className="flex-1 container max-w-6xl px-4 py-6 md:px-6 mx-auto">
+        <GuestDiscoverFeed />
       </main>
     );
   }
@@ -94,37 +91,43 @@ export default function DashboardPage() {
     const nextPage = page + 1;
     setLoadingMore(true);
     try {
-      let res: any;
+      let res: { storyboards?: Storyboard[] };
       if (activeTab === Tab.STORYBOARDS) {
-        res = await storyboards.getDashboardStoryboards();
+        res = await storyboards.getDashboardStoryboards(nextPage, 20);
       } else {
-        res = await storyboards.getFeed(nextPage, 20, 'following');
+        res = await storyboards.getFeed(nextPage, 20, "following");
       }
-      setItems(prev => [...prev, ...(res.storyboards || [])]);
+      setItems((prev) => [...prev, ...(res.storyboards || [])]);
       setPage(nextPage);
       setHasMore((res.storyboards || []).length >= 20);
     } catch (e) {
-      console.error('Failed to load more:', e);
+      console.error("Failed to load more:", e);
     } finally {
       setLoadingMore(false);
     }
   };
 
-  // Authenticated users: full dashboard
   return (
     <main className="flex-1 container max-w-6xl px-4 py-6 md:px-6 mx-auto">
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-        {/* Main Feed Column */}
         <div className="md:col-span-8 min-w-0 space-y-6">
-          {/* Search Bar */}
-          <Link
-            href="/search"
-            className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card hover:bg-muted transition-colors"
+          <button
+            type="button"
+            onClick={() => {
+              if (!user) {
+                showLoginPrompt();
+                return;
+              }
+              router.push("/search");
+            }}
+            className="flex w-full items-center gap-3 p-3 rounded-xl border border-border bg-card hover:bg-muted transition-colors text-left"
           >
             <Search className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">{t("common.search", "Search")} stories, characters, users...</span>
-          </Link>
-          {/* Quick Actions */}
+            <span className="text-sm text-muted-foreground">
+              {t("common.search", "Search")} stories, characters, users...
+            </span>
+          </button>
+
           <div className="grid grid-cols-2 gap-3">
             <Link
               href="/plaza"
@@ -152,13 +155,18 @@ export default function DashboardPage() {
             </Link>
           </div>
 
-          {/* Tabs */}
           <div className="flex items-center overflow-x-auto pb-2 scrollbar-hide">
             <div className="flex items-center space-x-2">
               {tabs.map((tab) => (
                 <button
                   key={tab.value}
-                  onClick={() => setActiveTab(tab.value)}
+                  onClick={() => {
+                    if (tab.value === Tab.FOLLOWING && !user) {
+                      showLoginPrompt();
+                      return;
+                    }
+                    setActiveTab(tab.value);
+                  }}
                   className={cn(
                     "px-4 py-2 rounded-full text-sm font-medium transition-all duration-200",
                     activeTab === tab.value
@@ -172,11 +180,10 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Feed Content */}
           <div className="space-y-4">
             {loading ? (
               <div className="space-y-4">
-                {[1, 2, 3].map(i => (
+                {[1, 2, 3].map((i) => (
                   <div key={i} className="rounded-xl border border-border bg-card p-4 space-y-3 animate-pulse">
                     <div className="aspect-video bg-muted rounded-lg" />
                     <div className="h-5 bg-muted rounded w-3/4" />
@@ -187,10 +194,7 @@ export default function DashboardPage() {
             ) : items.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
                 <p className="text-muted-foreground">
-                  {activeTab === Tab.FOLLOWING
-                    ? t("dashboard.no_stories_yet")
-                    : t("empty")
-                  }
+                  {activeTab === Tab.FOLLOWING ? t("dashboard.no_stories_yet") : t("empty")}
                 </p>
               </div>
             ) : (
@@ -208,7 +212,7 @@ export default function DashboardPage() {
                           await storyboards.like(board.id);
                         }
                       } catch (e) {
-                        console.error('Failed to like/unlike:', e);
+                        console.error("Failed to like/unlike:", e);
                       }
                     }}
                     onCreatorTap={(creatorId) => {
@@ -232,14 +236,12 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Right Sidebar */}
         <div className="hidden md:block md:col-span-4 lg:col-span-4">
           <div className="sticky top-20">
             <Sidebar />
           </div>
         </div>
       </div>
-
     </main>
   );
 }

@@ -160,7 +160,15 @@ export function FragmentVerticalFeed({ tab }: FragmentVerticalFeedProps) {
       e.stopPropagation();
       try {
         await fragments.share(fragment.id);
-      } catch {}
+      } catch { /* analytics only */ }
+      try {
+        const { shareContent } = await import("@/lib/api/share");
+        await shareContent({
+          kind: "fragment",
+          id: fragment.id,
+          title: fragment.content?.slice(0, 50) || "Fragment",
+        });
+      } catch { /* ignore abort */ }
     },
     []
   );

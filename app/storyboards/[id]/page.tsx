@@ -15,6 +15,7 @@ import { StoryboardRoadmap } from "@/components/storyboard/roadmap";
 import { DetailMetadata } from "@/components/storyboard/detail-metadata";
 import { ForkDialog } from "@/components/storyboard/fork-dialog";
 import { ContinueDialog } from "@/components/storyboard/continue-dialog";
+import { ContentModerationMenu } from "@/components/moderation/content-moderation-menu";
 import { useTranslation } from "@/providers/language-provider";
 import { useAuth } from "@/providers/auth-provider";
 import { showSuccess } from "@/lib/toast-utils";
@@ -307,6 +308,15 @@ export default function StoryboardPage() {
                                         <span className="hidden sm:inline">{t("storyboard_detail.fork")}</span>
                                     </Button>
                                 </div>
+                                <ContentModerationMenu
+                                    target={{
+                                        kind: "content",
+                                        contentType: "storyboard",
+                                        contentId: item.id,
+                                        label: item.title,
+                                        authorId: item.creatorId,
+                                    }}
+                                />
                             </div>
                         </div>
                     </div>
@@ -799,16 +809,15 @@ export default function StoryboardPage() {
                         {/* Share */}
                         <button
                             onClick={async () => {
+                                if (!item?.id) return;
                                 try {
-                                    if (navigator.share) {
-                                        await navigator.share({
-                                            title: item?.title || "Storyboard",
-                                            url: window.location.href,
-                                        });
-                                    } else {
-                                        await navigator.clipboard.writeText(window.location.href);
-                                        showSuccess("Link copied to clipboard");
-                                    }
+                                    const { shareContent } = await import("@/lib/api/share");
+                                    const { copied } = await shareContent({
+                                        kind: "storyboard",
+                                        id: item.id,
+                                        title: item.title || "Storyboard",
+                                    });
+                                    if (copied) showSuccess("Link copied to clipboard");
                                 } catch (e) {
                                     if ((e as Error).name !== "AbortError") {
                                         console.error(e);

@@ -37,9 +37,9 @@ export default function BlockedUsersPage() {
         setLoading(true);
         setError(null);
         try {
-            // Backend blocked users list endpoint not available yet
-            setBlockedUsers([]);
-            setTotal(0);
+            const res = await profile.getBlockedUsers(1, 100);
+            setBlockedUsers(res.users || []);
+            setTotal(res.total || 0);
         } catch (err: any) {
             console.error("Failed to fetch blocked users:", err);
             setError(err.message || "Failed to load blocked users");

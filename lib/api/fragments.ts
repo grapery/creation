@@ -59,14 +59,52 @@ export const fragments = {
         return request(`/api/v1/fragments/${id}/stats`);
     },
 
-    // AI text-only fragment generation (async task)
-    generate: async (data: {
-        content: string;
+    // Phase-one planning (Voyager agent chat uses this; also fallback when agent unavailable)
+    analyze: async (data: {
+        userInput: string;
+        language?: string;
+        aspectRatio?: string;
+        imageCount?: number;
         style?: string;
+        targetDraftFragmentId?: string;
+    }): Promise<{
+        assistantMessage: string;
+        intentType?: string;
+        generationIntent?: {
+            userInput?: string;
+            style?: string;
+            mood?: string;
+            length?: string;
+            language?: string;
+            visibility?: string;
+            aspectRatio?: string;
+            imageCount?: number;
+        };
+        recommendedOptions?: { styleCandidates?: string[]; canStart?: boolean };
+    }> => {
+        return request('/api/v1/fragments/analyze', 'POST', data, apiClient, AI_TIMEOUT);
+    },
+
+    // AI fragment generation (async task) — body matches Grapery FragmentGenerationRequest
+    generate: async (data: {
+        userInput: string;
+        imageUrls?: string[];
+        imageCount?: number;
+        style?: string;
+        mood?: string;
+        length?: string;
+        language?: string;
         visibility?: string;
-        topic?: string;
-    }): Promise<{ taskId: string }> => {
-        return request('/api/v1/fragments/generate', 'POST', data, apiClient, AI_TIMEOUT);
+        aspectRatio?: string;
+        targetDraftFragmentId?: string;
+        clientMessageId?: string;
+    }): Promise<{ taskId: string; draftFragmentId?: string }> => {
+        return request('/api/v1/fragments/generate', 'POST', {
+            language: 'zh-Hans',
+            visibility: 'private',
+            imageCount: 4,
+            ...data,
+        }, apiClient, AI_TIMEOUT);
     },
 
     // Poll text generation task status

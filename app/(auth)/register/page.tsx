@@ -12,11 +12,12 @@ import { githubImages } from "@/lib/github-assets";
 import { AuthBackground, LanguageSelector, OAuthProviderButton, OAuthProvider } from "@/components/auth";
 import { useGoogleOAuth } from "@/lib/hooks/use-google-oauth";
 import { useWeChatOAuth } from "@/lib/hooks/use-wechat-oauth";
+import { useAppleOAuth } from "@/lib/hooks/use-apple-oauth";
 import { auth } from "@/lib/api/auth";
 import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
-    const { register } = useAuth();
+    const { register, loginWithApple } = useAuth();
     const { t } = useTranslation();
     const router = useRouter();
     const [formData, setFormData] = useState({
@@ -53,6 +54,30 @@ export default function RegisterPage() {
     });
 
     const { signIn: weChatSignIn } = useWeChatOAuth();
+
+    const { isConfigured: appleConfigured, signIn: appleSignIn } = useAppleOAuth({
+        clientId: process.env.NEXT_PUBLIC_APPLE_CLIENT_ID,
+        redirectURI: typeof window !== 'undefined' ? `${window.location.origin}/register` : undefined,
+        onSuccess: async (result) => {
+            try {
+                await loginWithApple({
+                    identityToken: result.identityToken,
+                    authorizationCode: result.authorizationCode,
+                    nonce: result.nonce,
+                    givenName: result.givenName,
+                    familyName: result.familyName,
+                });
+                router.push('/');
+            } catch (err: any) {
+                setOAuthError(err.message || 'Apple sign-in failed');
+                setOAuthLoading(null);
+            }
+        },
+        onError: (message) => {
+            setOAuthError(message || 'Apple sign-in failed');
+            setOAuthLoading(null);
+        },
+    });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = e.target;
@@ -104,8 +129,15 @@ export default function RegisterPage() {
                 setOAuthLoading(null);
             }
         } else if (provider === "apple") {
-            setOAuthError("Apple Sign In coming soon");
-            setOAuthLoading(null);
+            if (!appleConfigured) {
+                setOAuthError("Apple Sign In is not configured. Please set NEXT_PUBLIC_APPLE_CLIENT_ID.");
+                setOAuthLoading(null);
+                return;
+            }
+            appleSignIn().catch((e: any) => {
+                setOAuthError(e.message || "Failed to initiate Apple sign-in.");
+                setOAuthLoading(null);
+            });
         } else if (provider === "wechat") {
             try {
                 weChatSignIn();

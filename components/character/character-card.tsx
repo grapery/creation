@@ -35,7 +35,7 @@ export function CharacterCard({ character }: { character: Character }) {
                     </span>
                 </div>
                 <Button size="sm" variant="ghost" className="h-6 px-2 text-xs" asChild>
-                    <Link href={`/chat/${character.id}`}>Chat</Link>
+                    <Link href={`/chat/new?characterId=${character.id}`}>Chat</Link>
                 </Button>
             </CardFooter>
         </Card>

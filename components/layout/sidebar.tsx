@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PenTool, Target, TrendingUp, BookOpen, Compass, Sparkles, Bookmark } from "lucide-react";
+import { PenTool, Target, BookOpen, Compass, Sparkles, Bookmark } from "lucide-react";
 import { useTranslation } from "@/providers/language-provider";
 
 export function Sidebar({ className }: { className?: string }) {
@@ -29,7 +29,7 @@ export function Sidebar({ className }: { className?: string }) {
                         </Button>
                         <Button variant="outline" className="h-20 flex-col gap-2" asChild>
                             <Link href="/fragments/create">
-                                <Sparkles className="h-5 w-5 text-purple-500" />
+                                <Sparkles className="h-5 w-5 text-primary" />
                                 <span>{t("sidebar.fragment")}</span>
                             </Link>
                         </Button>
@@ -37,13 +37,13 @@ export function Sidebar({ className }: { className?: string }) {
                     <div className="grid grid-cols-2 gap-2">
                         <Button variant="outline" className="h-16 flex-col gap-1" asChild>
                             <Link href="/create/wizard">
-                                <Target className="h-4 w-4 text-orange-500" />
+                                <Target className="h-4 w-4 text-primary" />
                                 <span className="text-xs">{t("sidebar.storyboard")}</span>
                             </Link>
                         </Button>
                         <Button variant="outline" className="h-16 flex-col gap-1" asChild>
                             <Link href="/plaza">
-                                <Compass className="h-4 w-4 text-blue-500" />
+                                <Compass className="h-4 w-4 text-primary" />
                                 <span className="text-xs">{t("sidebar.discover")}</span>
                             </Link>
                         </Button>
@@ -57,43 +57,16 @@ export function Sidebar({ className }: { className?: string }) {
                     <div className="space-y-1">
                         <Button variant="ghost" className="w-full justify-start gap-2 text-sm" asChild>
                             <Link href="/bookmarks">
-                                <Bookmark className="h-4 w-4 text-amber-500" />
+                                <Bookmark className="h-4 w-4 text-primary" />
                                 {t("sidebar.bookmarks")}
                             </Link>
                         </Button>
                         <Button variant="ghost" className="w-full justify-start gap-2 text-sm" asChild>
                             <Link href="/search">
-                                <Compass className="h-4 w-4 text-blue-500" />
+                                <Compass className="h-4 w-4 text-primary" />
                                 {t("sidebar.search")}
                             </Link>
                         </Button>
-                    </div>
-                </CardContent>
-            </Card>
-
-            {/* Recommended / Trending */}
-            <Card>
-                <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center gap-2 text-base">
-                        <TrendingUp className="h-4 w-4 text-orange-500" />
-                        {t("dashboard.trending_topics")}
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-4">
-                        {[
-                            { title: "Cyberpunk 2077 Lore", count: "12.5k views" },
-                            { title: "Writing Prompts Daily", count: "8.2k views" },
-                            { title: "Character Design Tips", count: "5.1k views" },
-                            { title: "World Building 101", count: "3.4k views" }
-                        ].map((item, i) => (
-                            <div key={i} className="group cursor-pointer">
-                                <div className="text-sm font-medium group-hover:text-primary transition-colors">
-                                    {item.title}
-                                </div>
-                                <div className="text-xs text-muted-foreground">{item.count}</div>
-                            </div>
-                        ))}
                     </div>
                 </CardContent>
             </Card>

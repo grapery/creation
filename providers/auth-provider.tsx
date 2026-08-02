@@ -5,6 +5,8 @@ import { User } from "@/lib/types";
 import { auth } from "@/lib/api/auth";
 import { useRouter, usePathname } from "next/navigation";
 import { getAuthToken } from "@/lib/api/client";
+import { hasCompletedOnboarding, markOnboardingDone } from "@/lib/onboarding";
+import { settings } from "@/lib/api/settings";
 
 interface AuthContextType {
     user: User | null;
@@ -18,6 +20,14 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+function postAuthRedirect(router: ReturnType<typeof useRouter>, isNewUser: boolean) {
+    if (isNewUser || !hasCompletedOnboarding()) {
+        router.push("/onboarding");
+        return;
+    }
+    router.push("/");
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
@@ -36,7 +46,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setUser(userData);
         } catch (error) {
             console.error("Failed to fetch user:", error);
-            // If error (e.g. 401), clear user
             setUser(null);
         } finally {
             setLoading(false);
@@ -47,28 +56,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         refreshUser();
     }, []);
 
+    // Soft gate: only nudge home/plaza visitors who never finished onboarding locally
+    useEffect(() => {
+        if (loading || !user) return;
+        if (pathname === "/onboarding" || pathname?.startsWith("/settings") || pathname?.startsWith("/(auth)")) return;
+        if (hasCompletedOnboarding()) return;
+        if (pathname === "/" || pathname === "/plaza") {
+            // Existing accounts with genre prefs: treat as onboarded
+            settings
+                .getGenrePreferences()
+                .then((prefs) => {
+                    if ((prefs.preferredGenres || []).length > 0) {
+                        markOnboardingDone();
+                        return;
+                    }
+                    router.replace("/onboarding");
+                })
+                .catch(() => {
+                    /* don't block browsing on settings failure */
+                });
+        }
+    }, [user, loading, pathname, router]);
+
     const login = async (email: string, password: string) => {
         await auth.login(email, password);
         await refreshUser();
-        router.push("/");
+        postAuthRedirect(router, false);
     };
 
     const register = async (data: any) => {
         await auth.register(data);
         await refreshUser();
-        router.push("/");
+        postAuthRedirect(router, true);
     };
 
     const loginWithGoogle = async (data: any) => {
         await auth.loginWithGoogle(data);
         await refreshUser();
-        router.push("/");
+        postAuthRedirect(router, false);
     };
 
     const loginWithApple = async (data: any) => {
         await auth.loginWithApple(data);
         await refreshUser();
-        router.push("/");
+        postAuthRedirect(router, false);
     };
 
     const logout = () => {

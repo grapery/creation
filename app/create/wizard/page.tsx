@@ -10,11 +10,15 @@ import { PublishStep } from "@/components/create/wizard/publish-step";
 import { useGenerationPolling } from "@/hooks/use-generation-polling";
 import { creation } from "@/lib/api/creation";
 import { storyboards } from "@/lib/api/storyboards";
+import { useAuthRequired } from "@/lib/hooks/use-auth-required";
+import { showError } from "@/lib/toast-utils";
+import { Loader2 } from "lucide-react";
 import type { Storyboard, StoryboardScene, Character } from "@/lib/types";
 
 function WizardContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const { isAuthenticated, isCheckingAuth, LoginPromptModal, showPrompt } = useAuthRequired();
 
     const storyId = searchParams.get("storyId") || "";
     const parentStoryboardId = searchParams.get("parentStoryboardId") || "";
@@ -32,6 +36,15 @@ function WizardContent() {
     const [rawInput, setRawInput] = useState("");
     const [style, setStyle] = useState("");
     const [sceneCount, setSceneCount] = useState(3);
+
+    useEffect(() => {
+        if (!isCheckingAuth && !isAuthenticated) {
+            showPrompt({
+                title: "Sign in to continue",
+                description: "Please sign in to create storyboards.",
+            });
+        }
+    }, [isAuthenticated, isCheckingAuth, showPrompt]);
 
     const setupData = {
         storyId,
@@ -74,23 +87,22 @@ function WizardContent() {
 
     // Step 1: Setup → Create storyboard and trigger generation
     const handleSetupComplete = async (data: typeof setupData) => {
-        if (!data.rawInput.trim() || !storyId) return;
+        if (!data.rawInput.trim()) {
+            showError("Please describe the story direction first.");
+            return;
+        }
+        if (!storyId) {
+            showError("Missing story. Open the wizard from a story page.");
+            return;
+        }
         setCreating(true);
         try {
-            // Create the storyboard via the API
-            const response = await fetch(`/api/v1/storyboards`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    storyId,
-                    parentId: parentStoryboardId || undefined,
-                    rawInput: data.rawInput,
-                    sceneCount: data.sceneCount,
-                }),
+            const newStoryboard = await storyboards.create({
+                storyId,
+                parentId: parentStoryboardId || undefined,
+                rawInput: data.rawInput,
+                sceneCount: data.sceneCount,
             });
-            if (!response.ok) throw new Error("Failed to create storyboard");
-            const result = await response.json();
-            const newStoryboard = result.data || result;
             setStoryboardId(newStoryboard.id);
             setStoryboard(newStoryboard);
 
@@ -103,6 +115,7 @@ function WizardContent() {
             setStep("generating");
         } catch (err) {
             console.error("Failed to create storyboard:", err);
+            showError(err instanceof Error ? err.message : "Failed to start generation");
         } finally {
             setCreating(false);
         }
@@ -127,6 +140,28 @@ function WizardContent() {
         router.push(`/storyboards/${publishedId}`);
     };
 
+    if (isCheckingAuth) {
+        return (
+            <div className="flex items-center justify-center py-20">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        );
+    }
+
+    if (!isAuthenticated) {
+        return (
+            <div className="flex flex-col items-center justify-center py-20 space-y-4 px-4">
+                <p className="text-muted-foreground text-center">
+                    Sign in is required to use the storyboard wizard.
+                </p>
+                <LoginPromptModal
+                    title="Sign in to continue"
+                    description="Please sign in to create storyboards."
+                />
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-6">
             <div className="text-center">
@@ -143,6 +178,7 @@ function WizardContent() {
                         onChange={handleSetupChange}
                         onNext={() => handleSetupComplete(setupData)}
                         onBack={() => router.back()}
+                        creating={creating}
                     />
                 )}
 

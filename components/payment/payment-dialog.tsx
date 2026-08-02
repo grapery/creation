@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, FormEvent, useRef } from "react";
 import {
     Dialog,
     DialogContent,
@@ -10,14 +10,20 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, CreditCard, Smartphone, Apple, Globe } from "lucide-react";
-import { PaymentMethod, PaymentResponse } from "@/lib/types/payment";
+import { Loader2, CreditCard } from "lucide-react";
+import { PaymentMethod, PaymentStatus } from "@/lib/types/payment";
 import { payment } from "@/lib/api/payment";
+import { getUserIdFromToken } from "@/lib/api/client";
 import { loadStripe, Stripe } from "@stripe/stripe-js";
+import {
+    Elements,
+    PaymentElement,
+    useStripe,
+    useElements,
+} from "@stripe/react-stripe-js";
 import { useTranslation } from "@/providers/language-provider";
 import { DialogManager, DialogType, DialogPriority, hideDialog } from "@/lib/dialog-manager";
 
-// 弹窗ID常量
 const PAYMENT_DIALOG_ID = "payment_dialog";
 
 interface PaymentDialogProps {
@@ -31,14 +37,154 @@ interface PaymentDialogProps {
     onError?: (error: string) => void;
 }
 
-let stripePromise: Promise<Stripe | null>;
+function StripeConfirmForm({
+    paymentId,
+    onSuccess,
+    onError,
+    onCancel,
+}: {
+    paymentId: string;
+    onSuccess: (paymentId: string) => void;
+    onError: (message: string) => void;
+    onCancel: () => void;
+}) {
+    const stripe = useStripe();
+    const elements = useElements();
+    const [submitting, setSubmitting] = useState(false);
 
-const getStripe = () => {
-    if (!stripePromise) {
-        stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
-    }
-    return stripePromise;
-};
+    const handleSubmit = async (e: FormEvent) => {
+        e.preventDefault();
+        if (!stripe || !elements) return;
+
+        setSubmitting(true);
+        try {
+            const { error, paymentIntent } = await stripe.confirmPayment({
+                elements,
+                redirect: "if_required",
+            });
+
+            if (error) {
+                onError(error.message || "Payment confirmation failed");
+                return;
+            }
+
+            if (paymentIntent && (paymentIntent.status === "succeeded" || paymentIntent.status === "processing")) {
+                onSuccess(paymentId);
+            } else {
+                onError(`Unexpected payment status: ${paymentIntent?.status || "unknown"}`);
+            }
+        } catch (err: unknown) {
+            onError(err instanceof Error ? err.message : "Payment confirmation failed");
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="space-y-4">
+            <PaymentElement />
+            <div className="flex justify-between gap-3 pt-2">
+                <Button type="button" variant="outline" onClick={onCancel} disabled={submitting}>
+                    Cancel
+                </Button>
+                <Button type="submit" disabled={!stripe || submitting}>
+                    {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                    Pay now
+                </Button>
+            </div>
+        </form>
+    );
+}
+
+function WeChatPayPanel({
+    qrCodeURL,
+    paymentId,
+    amountLabel,
+    onSuccess,
+    onError,
+    onCancel,
+}: {
+    qrCodeURL: string;
+    paymentId: string;
+    amountLabel: string;
+    onSuccess: (paymentId: string) => void;
+    onError: (message: string) => void;
+    onCancel: () => void;
+}) {
+    const [polling, setPolling] = useState(true);
+    const stopped = useRef(false);
+
+    useEffect(() => {
+        stopped.current = false;
+        let attempts = 0;
+        const maxAttempts = 90; // ~3 minutes at 2s
+
+        const tick = async () => {
+            if (stopped.current) return;
+            attempts += 1;
+            try {
+                const res = await payment.getPaymentStatus(paymentId);
+                const status = String(res.status || "").toLowerCase();
+                if (status === PaymentStatus.SUCCEEDED || status === "succeeded") {
+                    setPolling(false);
+                    onSuccess(paymentId);
+                    return;
+                }
+                if (
+                    status === PaymentStatus.FAILED ||
+                    status === PaymentStatus.CANCELLED ||
+                    status === "failed" ||
+                    status === "cancelled"
+                ) {
+                    setPolling(false);
+                    onError("WeChat payment failed or was cancelled");
+                    return;
+                }
+            } catch {
+                // keep polling through transient errors
+            }
+            if (attempts >= maxAttempts) {
+                setPolling(false);
+                onError("Timed out waiting for WeChat payment. If you already paid, refresh membership shortly.");
+                return;
+            }
+            timer = window.setTimeout(tick, 2000);
+        };
+
+        let timer = window.setTimeout(tick, 2000);
+        return () => {
+            stopped.current = true;
+            window.clearTimeout(timer);
+        };
+    }, [paymentId, onSuccess, onError]);
+
+    const qrImg = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(qrCodeURL)}`;
+
+    return (
+        <div className="space-y-4 text-center">
+            <p className="text-sm text-muted-foreground">
+                Scan with WeChat to pay {amountLabel}
+            </p>
+            <div className="mx-auto w-[220px] h-[220px] rounded-lg border bg-white p-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={qrImg} alt="WeChat Pay QR" className="w-full h-full" />
+            </div>
+            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                {polling ? (
+                    <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Waiting for payment confirmation…
+                    </>
+                ) : (
+                    "Stopped polling"
+                )}
+            </div>
+            <Button type="button" variant="outline" onClick={onCancel} className="w-full">
+                Cancel
+            </Button>
+        </div>
+    );
+}
 
 export function PaymentDialog({
     open,
@@ -51,12 +197,14 @@ export function PaymentDialog({
     onError,
 }: PaymentDialogProps) {
     const { t } = useTranslation();
-    const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string>("");
-    const [paymentResponse, setPaymentResponse] = useState<PaymentResponse | null>(null);
+    const [clientSecret, setClientSecret] = useState<string | null>(null);
+    const [wechatQr, setWechatQr] = useState<string | null>(null);
+    const [paymentId, setPaymentId] = useState<string>("");
+    const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
+    const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
 
-    // 注册到DialogManager
     useEffect(() => {
         if (open) {
             DialogManager.show(
@@ -66,6 +214,12 @@ export function PaymentDialog({
             );
         } else {
             DialogManager.hide(PAYMENT_DIALOG_ID);
+            setClientSecret(null);
+            setWechatQr(null);
+            setPaymentId("");
+            setError("");
+            setStripePromise(null);
+            setSelectedMethod(null);
         }
 
         return () => {
@@ -82,126 +236,102 @@ export function PaymentDialog({
         onOpenChange(newOpen);
     }, [onOpenChange]);
 
-    const formatAmount = (amount: number) => {
-        return (amount / 100).toFixed(2);
+    const formatAmount = (value: number, code: string) => {
+        return `${code.toUpperCase()} ${(value / 100).toFixed(2)}`;
     };
 
-    const paymentMethods = [
-        {
-            method: PaymentMethod.STRIPE,
-            name: "Card Payment",
-            description: "Pay with credit or debit card",
-            icon: CreditCard,
-            color: "text-blue-500",
-            bgColor: "bg-blue-50 dark:bg-blue-950",
-        },
-        {
-            method: PaymentMethod.GOOGLE_PAY,
-            name: "Google Pay",
-            description: "Fast and secure payment with Google",
-            icon: Globe,
-            color: "text-green-500",
-            bgColor: "bg-green-50 dark:bg-green-950",
-        },
-        {
-            method: PaymentMethod.APPLE_PAY,
-            name: "Apple Pay",
-            description: "Quick payment with Apple Pay",
-            icon: Apple,
-            color: "text-gray-700 dark:text-gray-300",
-            bgColor: "bg-gray-50 dark:bg-gray-900",
-        },
-        {
-            method: PaymentMethod.ALIPAY,
-            name: "Alipay",
-            description: "Popular payment method in Asia",
-            icon: Smartphone,
-            color: "text-blue-600",
-            bgColor: "bg-blue-50 dark:bg-blue-950",
-        },
-    ];
+    const planCurrency = (currency || "USD").toUpperCase();
+    const isCnyPlan = planCurrency === "CNY";
+    const cnyUsdRate = Number(process.env.NEXT_PUBLIC_STRIPE_CNY_USD_RATE || "0.14");
+    const stripeChargedAmount = isCnyPlan ? Math.max(50, Math.round((amount / 100) * cnyUsdRate * 100)) : amount;
+    const stripeChargedCurrency = isCnyPlan ? "USD" : planCurrency;
+    // WeChat charges CNY; convert USD plans for display estimate
+    const wechatChargedAmount = isCnyPlan
+        ? amount
+        : Math.max(1, Math.round((amount / 100) / cnyUsdRate * 100));
+    const wechatChargedCurrency = "CNY";
 
-    const handlePayment = async (method: PaymentMethod) => {
-        setSelectedMethod(method);
+    const startCheckout = async (method: PaymentMethod) => {
         setIsLoading(true);
         setError("");
+        setSelectedMethod(method);
+        setClientSecret(null);
+        setWechatQr(null);
 
         try {
-            let response: PaymentResponse;
-
-            switch (method) {
-                case PaymentMethod.STRIPE:
-                    response = await payment.createPayment({
-                        planId,
-                        method: PaymentMethod.STRIPE,
-                        currency,
-                    });
-
-                    if (response.success && response.clientSecret) {
-                        setPaymentResponse(response);
-                        onSuccess?.(response.paymentId || '');
-                        handleOpenChange(false);
-                    } else {
-                        throw new Error(response.error || "Payment initialization failed");
-                    }
-                    break;
-
-                case PaymentMethod.GOOGLE_PAY:
-                case PaymentMethod.APPLE_PAY:
-                    response = await payment.createPayment({
-                        planId,
-                        method,
-                        currency,
-                    });
-
-                    if (response.success && response.clientSecret) {
-                        setPaymentResponse(response);
-                        onSuccess?.(response.paymentId || '');
-                        handleOpenChange(false);
-                    } else {
-                        throw new Error(response.error || "Payment initialization failed");
-                    }
-                    break;
-
-                case PaymentMethod.ALIPAY:
-                    response = await payment.createPayment({
-                        planId,
-                        method: PaymentMethod.ALIPAY,
-                        currency,
-                    });
-
-                    if (response.success && response.paymentUrl) {
-                        // Redirect to Alipay payment page
-                        window.location.href = response.paymentUrl;
-                    } else {
-                        throw new Error(response.error || "Alipay payment initialization failed");
-                    }
-                    break;
-
-                default:
-                    throw new Error("Unsupported payment method");
+            const userId = getUserIdFromToken();
+            if (!userId) {
+                throw new Error("Please sign in to continue");
             }
-        } catch (err: any) {
-            const errorMessage = err.message || "Payment failed";
+
+            const response = await payment.createPayment({
+                userId,
+                planId,
+                amount,
+                currency,
+                method,
+            });
+
+            setPaymentId(response.paymentId || "");
+
+            if (method === PaymentMethod.STRIPE) {
+                if (!response.clientSecret) {
+                    throw new Error(response.error || "Payment initialization failed");
+                }
+                const publishableKey =
+                    response.publishableKey ||
+                    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+                if (!publishableKey) {
+                    throw new Error("Stripe publishable key is not configured");
+                }
+                setStripePromise(loadStripe(publishableKey));
+                setClientSecret(response.clientSecret);
+                return;
+            }
+
+            if (method === PaymentMethod.WECHAT) {
+                const qr = response.paymentUrl;
+                if (!qr) {
+                    throw new Error(response.error || "WeChat Pay QR was not returned");
+                }
+                setWechatQr(qr);
+                return;
+            }
+
+            throw new Error("Unsupported payment method");
+        } catch (err: unknown) {
+            const errorMessage = err instanceof Error ? err.message : "Payment failed";
             setError(errorMessage);
+            setSelectedMethod(null);
             onError?.(errorMessage);
         } finally {
             setIsLoading(false);
         }
     };
 
+    const handleSuccess = useCallback((id: string) => {
+        onSuccess?.(id);
+        handleOpenChange(false);
+    }, [onSuccess, handleOpenChange]);
+
+    const handleConfirmError = useCallback((message: string) => {
+        setError(message);
+        onError?.(message);
+    }, [onError]);
+
+    const showMethodPicker = !clientSecret && !wechatQr;
+
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
-            <DialogContent className="sm:max-w-2xl">
+            <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
                     <DialogTitle>Complete Your Purchase</DialogTitle>
                     <DialogDescription>
-                        Choose a payment method to subscribe to {planName}
+                        Choose Stripe or WeChat Pay to subscribe to {planName}
                     </DialogDescription>
                 </DialogHeader>
 
                 <div className="space-y-6 py-4">
-                    {/* Order Summary */}
                     <Card className="bg-muted/50">
                         <CardContent className="p-4">
                             <div className="flex justify-between items-center">
@@ -211,68 +341,112 @@ export function PaymentDialog({
                                 </div>
                                 <div className="text-right">
                                     <p className="text-2xl font-bold">
-                                        {currency} {formatAmount(amount)}
+                                        {formatAmount(amount, planCurrency)}
                                     </p>
-                                    <p className="text-xs text-muted-foreground">One-time payment</p>
                                 </div>
                             </div>
                         </CardContent>
                     </Card>
 
-                    {/* Error Message */}
                     {error && (
                         <div className="bg-destructive/10 text-destructive p-4 rounded-lg text-sm">
                             {error}
                         </div>
                     )}
 
-                    {/* Payment Methods */}
-                    <div className="space-y-3">
-                        <p className="text-sm font-medium">Select Payment Method</p>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            {paymentMethods.map(({ method, name, description, icon: Icon, color, bgColor }) => (
-                                <Card
-                                    key={method}
-                                    className={`cursor-pointer transition-all hover:shadow-md ${
-                                        selectedMethod === method ? "ring-2 ring-primary" : ""
-                                    }`}
-                                    onClick={() => !isLoading && handlePayment(method)}
-                                >
-                                    <CardContent className="p-4">
-                                        <div className="flex items-start gap-3">
-                                            <div className={`p-2 rounded-lg ${bgColor}`}>
-                                                <Icon className={`h-5 w-5 ${color}`} />
-                                            </div>
-                                            <div className="flex-1">
-                                                <p className="font-semibold text-sm">{name}</p>
-                                                <p className="text-xs text-muted-foreground">{description}</p>
-                                            </div>
-                                            {isLoading && selectedMethod === method && (
-                                                <Loader2 className="h-4 w-4 animate-spin" />
-                                            )}
+                    {showMethodPicker && (
+                        <div className="space-y-3">
+                            <Card
+                                className={`cursor-pointer transition-all hover:shadow-md ${isLoading && selectedMethod === PaymentMethod.STRIPE ? "opacity-70" : ""}`}
+                                onClick={() => !isLoading && startCheckout(PaymentMethod.STRIPE)}
+                            >
+                                <CardContent className="p-4">
+                                    <div className="flex items-start gap-3">
+                                        <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-950">
+                                            <CreditCard className="h-5 w-5 text-blue-500" />
                                         </div>
-                                    </CardContent>
-                                </Card>
-                            ))}
+                                        <div className="flex-1">
+                                            <p className="font-semibold text-sm">Card (Stripe)</p>
+                                            <p className="text-xs text-muted-foreground">
+                                                Credit / debit card
+                                                {isCnyPlan
+                                                    ? ` · charge ≈ ${formatAmount(stripeChargedAmount, stripeChargedCurrency)}`
+                                                    : ""}
+                                            </p>
+                                        </div>
+                                        {isLoading && selectedMethod === PaymentMethod.STRIPE && (
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                        )}
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            <Card
+                                className={`cursor-pointer transition-all hover:shadow-md ${isLoading && selectedMethod === PaymentMethod.WECHAT ? "opacity-70" : ""}`}
+                                onClick={() => !isLoading && startCheckout(PaymentMethod.WECHAT)}
+                            >
+                                <CardContent className="p-4">
+                                    <div className="flex items-start gap-3">
+                                        <div className="p-2 rounded-lg bg-green-50 dark:bg-green-950">
+                                            <span className="block h-5 w-5 text-center text-sm font-bold leading-5 text-green-600">微</span>
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="font-semibold text-sm">微信支付 WeChat Pay</p>
+                                            <p className="text-xs text-muted-foreground">
+                                                Scan QR with WeChat
+                                                {!isCnyPlan
+                                                    ? ` · charge ≈ ${formatAmount(wechatChargedAmount, wechatChargedCurrency)}`
+                                                    : ` · ${formatAmount(wechatChargedAmount, wechatChargedCurrency)}`}
+                                            </p>
+                                        </div>
+                                        {isLoading && selectedMethod === PaymentMethod.WECHAT && (
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                        )}
+                                    </div>
+                                </CardContent>
+                            </Card>
                         </div>
-                    </div>
+                    )}
 
-                    {/* Security Note */}
-                    <div className="text-center">
-                        <p className="text-xs text-muted-foreground">
-                            🔒 Secured by SSL encryption. Your payment information is safe.
-                        </p>
-                    </div>
-                </div>
+                    {clientSecret && stripePromise ? (
+                        <Elements
+                            stripe={stripePromise}
+                            options={{
+                                clientSecret,
+                                appearance: { theme: "stripe" },
+                            }}
+                        >
+                            <StripeConfirmForm
+                                paymentId={paymentId}
+                                onSuccess={handleSuccess}
+                                onError={handleConfirmError}
+                                onCancel={() => handleOpenChange(false)}
+                            />
+                        </Elements>
+                    ) : null}
 
-                <div className="flex justify-between pt-4">
-                    <Button
-                        variant="outline"
-                        onClick={() => handleOpenChange(false)}
-                        disabled={isLoading}
-                    >
-                        Cancel
-                    </Button>
+                    {wechatQr && paymentId ? (
+                        <WeChatPayPanel
+                            qrCodeURL={wechatQr}
+                            paymentId={paymentId}
+                            amountLabel={formatAmount(wechatChargedAmount, wechatChargedCurrency)}
+                            onSuccess={handleSuccess}
+                            onError={handleConfirmError}
+                            onCancel={() => handleOpenChange(false)}
+                        />
+                    ) : null}
+
+                    {showMethodPicker && (
+                        <div className="flex justify-between pt-2">
+                            <Button
+                                variant="outline"
+                                onClick={() => handleOpenChange(false)}
+                                disabled={isLoading}
+                            >
+                                Cancel
+                            </Button>
+                        </div>
+                    )}
                 </div>
             </DialogContent>
         </Dialog>

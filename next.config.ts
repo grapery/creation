@@ -19,6 +19,10 @@ const nextConfig: NextConfig = {
   },
 
   async rewrites() {
+    const vippayOrigin = process.env.VIPPAY_ORIGIN || 'http://127.0.0.1:8060';
+    const graperyOrigin = process.env.GRAPERY_ORIGIN || 'http://127.0.0.1:8080';
+    const agentOrigin = process.env.AGENT_ORIGIN || process.env.GRAPERY_AGENT_ORIGIN || 'http://127.0.0.1:8090';
+
     return [
       // === DO NOT proxy these — handled by Next.js BFF routes ===
       // /api/auth/me → app/api/auth/me/route.ts
@@ -26,34 +30,47 @@ const nextConfig: NextConfig = {
       // /api/legal/terms → app/api/legal/terms/route.ts
       // /api/legal/privacy → app/api/legal/privacy/route.ts
 
+      // === VIPPay (must be before catch-all — not under grapery /api/v1) ===
+      {
+        source: '/api/vippay/:path*',
+        destination: `${vippayOrigin}/api/vippay/:path*`,
+      },
+
+      // === grapery-agent creation/chat streams ===
+      {
+        source: '/api/agent/:path*',
+        destination: `${agentOrigin}/api/v1/agent/:path*`,
+      },
+
       // === Auth routes (public, /api/auth/* — no /v1/) ===
       {
         source: '/api/auth/:path*',
-        destination: 'http://127.0.0.1:8080/api/auth/:path*',
+        destination: `${graperyOrigin}/api/auth/:path*`,
       },
 
       // === Public routes (no /v1/) ===
       {
         source: '/api/public/:path*',
-        destination: 'http://127.0.0.1:8080/api/public/:path*',
+        destination: `${graperyOrigin}/api/public/:path*`,
       },
       {
         source: '/api/invitation-codes/validate',
-        destination: 'http://127.0.0.1:8080/api/invitation-codes/validate',
+        destination: `${graperyOrigin}/api/invitation-codes/validate`,
       },
 
       // === Already has /v1/ — pass through directly ===
       {
         source: '/api/v1/:path*',
-        destination: 'http://127.0.0.1:8080/api/v1/:path*',
+        destination: `${graperyOrigin}/api/v1/:path*`,
       },
 
       // === Catch-all: frontend /api/xxx → backend /api/v1/xxx ===
       // Transforms old paths (/api/stories) to backend's authenticated routes (/api/v1/stories)
       // Excludes /api/legal/* (served by Next.js legal document routes above)
+      // Excludes /api/vippay/* (handled above)
       {
-        source: '/api/:path((?!legal).*)',
-        destination: 'http://127.0.0.1:8080/api/v1/:path',
+        source: '/api/:path((?!legal|vippay|agent).*)',
+        destination: `${graperyOrigin}/api/v1/:path`,
       },
     ];
   },

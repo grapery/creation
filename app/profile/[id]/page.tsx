@@ -3,18 +3,17 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/providers/auth-provider";
-import { ActivityFeed } from "@/components/profile/activity-feed";
-import { ActivityHeatmap } from "@/components/profile/activity-heatmap";
 import { Loader2, Sparkles, Drama, BookOpen, FileText, Layers, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { User, ActivityHeatmapData, ActivityTimeRange } from "@/lib/types";
+import { User } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { profile } from "@/lib/api/profile";
 import { useTranslation } from "@/providers/language-provider";
 import { getAuthToken } from "@/lib/api/client";
 import Link from "next/link";
 import ProfileHeader from "@/components/profile/profile-header-v2";
+import { ContentModerationMenu } from "@/components/moderation/content-moderation-menu";
 
 enum ProfileTab {
     ACTIVITY = "activity",
@@ -221,82 +220,37 @@ export default function ProfilePage() {
                 onEditProfile={() => router.push("/settings/profile")}
                 onFollow={handleFollow}
                 onShare={() => {}}
-                onMessage={() => router.push(`/chat/${profileUser.id}`)}
+                onMessage={() => router.push(`/chat/new?peerUserId=${profileUser.id}`)}
             />
+            {!isOwnProfile && (
+                <div className="flex justify-end px-4 -mt-2 mb-2">
+                    <ContentModerationMenu
+                        target={{
+                            kind: "user",
+                            userId: profileUser.id,
+                            label: profileUser.displayName || profileUser.username,
+                        }}
+                    />
+                </div>
+            )}
 
             {/* Tabs Navigation */}
             <ProfileTabs currentPath={pathname} userId={userId as string} isOwnProfile={!!isOwnProfile} />
 
-            {/* Activity Tab Content (default) */}
-            <ActivityTabContent userId={userId as string} />
+            {/* Overview (activity heatmap removed — backend no longer provides activities) */}
+            <OverviewTabContent />
         </div>
     );
 }
 
-// Activity Tab Content
-function ActivityTabContent({ userId }: { userId: string }) {
-    const [heatmapData, setHeatmapData] = useState<ActivityHeatmapData[]>([]);
-    const [totalCount, setTotalCount] = useState(0);
-    const [selectedTimeRange, setSelectedTimeRange] = useState<ActivityTimeRange>(ActivityTimeRange.MONTH);
-    const [selectedDate, setSelectedDate] = useState<string | null>(null);
-    const [loadingHeatmap, setLoadingHeatmap] = useState(true);
-
-    useEffect(() => {
-        let isMounted = true;
-
-        async function fetchHeatmap() {
-            setLoadingHeatmap(true);
-            try {
-                const response = await profile.getHeatmap(userId, selectedTimeRange);
-                if (!isMounted) return;
-
-                setHeatmapData(response.data || []);
-                setTotalCount(response.totalCount || 0);
-            } catch (e) {
-                console.error('Failed to fetch heatmap:', e);
-                if (isMounted) {
-                    setHeatmapData([]);
-                    setTotalCount(0);
-                }
-            } finally {
-                if (isMounted) {
-                    setLoadingHeatmap(false);
-                }
-            }
-        }
-
-        fetchHeatmap();
-
-        return () => {
-            isMounted = false;
-        };
-    }, [userId, selectedTimeRange]);
-
+function OverviewTabContent() {
     return (
         <div className="py-4">
-            <div className="space-y-4">
-                {/* Heatmap Card */}
-                <Card>
-                    <CardContent className="p-4">
-                        <ActivityHeatmap
-                            data={heatmapData}
-                            totalCount={totalCount}
-                            selectedTimeRange={selectedTimeRange}
-                            selectedDate={selectedDate}
-                            isLoading={loadingHeatmap}
-                            onTimeRangeChange={setSelectedTimeRange}
-                            onDateSelect={setSelectedDate}
-                        />
-                    </CardContent>
-                </Card>
-
-                {/* Activity List */}
-                <Card>
-                    <CardContent className="p-4">
-                        <ActivityFeed userId={userId} />
-                    </CardContent>
-                </Card>
-            </div>
+            <Card>
+                <CardContent className="p-6 text-center text-muted-foreground text-sm">
+                    Use the tabs above to browse stories, storyboards, and characters.
+                </CardContent>
+            </Card>
         </div>
     );
 }

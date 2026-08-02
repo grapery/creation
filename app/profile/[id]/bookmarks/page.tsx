@@ -144,7 +144,7 @@ export default function ProfileBookmarksPage() {
                 onEditProfile={() => router.push("/settings/profile")}
                 onShare={() => {}}
                 onFollow={() => {}}
-                onMessage={() => router.push(`/chat/${profileUser.id}`)}
+                onMessage={() => router.push(`/chat/new?peerUserId=${profileUser.id}`)}
             />
 
             <ProfileTabs currentPath={pathname} userId={userId as string} isOwnProfile={!!isOwnProfile} />

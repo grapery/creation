@@ -1,11 +1,14 @@
 import { request } from './client';
-import { Character } from '../types/character';
 
 export interface ChatSession {
     id: string;
-    characterId: string;
+    characterId?: string;
+    peerUserId?: string;
+    sessionType?: 'character' | 'direct' | string;
     characterName: string;
     characterAvatar?: string;
+    title?: string;
+    avatar?: string;
     lastMessage: string;
     lastMessageTime: number;
     unreadCount: number;
@@ -14,37 +17,50 @@ export interface ChatSession {
 export interface ChatMessage {
     id: string;
     sessionId: string;
-    role: 'user' | 'assistant';
+    role: 'user' | 'assistant' | 'peer';
     content: string;
     timestamp: number;
     status: 'sending' | 'sent' | 'error';
 }
 
-// Note: Chat functionality is not implemented in the backend yet.
-// These endpoints are placeholders and will return mock data.
 export const chat = {
-    // List active conversations
     listSessions: async (page = 1, limit = 20): Promise<ChatSession[]> => {
-        // Return empty array as backend doesn't have this endpoint
-        console.warn('Chat sessions not implemented in backend');
-        return [];
+        const offset = (page - 1) * limit;
+        const res = await request<{ sessions?: ChatSession[] } | ChatSession[]>(
+            `/api/v1/chat/sessions?limit=${limit}&offset=${offset}`
+        );
+        if (Array.isArray(res)) return res;
+        return res?.sessions || [];
     },
 
-    // Create or get session with character
+    getSession: async (sessionId: string): Promise<ChatSession> => {
+        return request(`/api/v1/chat/sessions/${sessionId}`);
+    },
+
+    /** Start or reuse a character roleplay session. */
     startSession: async (characterId: string): Promise<ChatSession> => {
-        console.warn('Chat start session not implemented in backend');
-        throw new Error('Chat not implemented');
+        return request('/api/v1/chat/sessions', 'POST', { characterId });
     },
 
-    // Get messages for session
-    getMessages: async (sessionId: string, before?: number, limit = 20): Promise<ChatMessage[]> => {
-        console.warn('Chat get messages not implemented in backend');
-        return [];
+    /** Start or reuse a direct message session with another user. */
+    startDirectSession: async (peerUserId: string): Promise<ChatSession> => {
+        return request('/api/v1/chat/sessions', 'POST', { peerUserId });
     },
 
-    // Send message
-    sendMessage: async (sessionId: string, content: string): Promise<ChatMessage> => {
-        console.warn('Chat send message not implemented in backend');
-        throw new Error('Chat not implemented');
+    getMessages: async (sessionId: string, before?: number, limit = 50): Promise<ChatMessage[]> => {
+        const params = new URLSearchParams({ limit: String(limit) });
+        if (before) params.set('before', String(before));
+        const res = await request<{ messages?: ChatMessage[] } | ChatMessage[]>(
+            `/api/v1/chat/sessions/${sessionId}/messages?${params.toString()}`
+        );
+        if (Array.isArray(res)) return res;
+        return res?.messages || [];
+    },
+
+    sendMessage: async (
+        sessionId: string,
+        content: string
+    ): Promise<{ userMessage: ChatMessage; assistantMessage?: ChatMessage }> => {
+        return request(`/api/v1/chat/sessions/${sessionId}/messages`, 'POST', { content });
     },
 };

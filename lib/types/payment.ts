@@ -1,9 +1,8 @@
 // Payment method types
 export enum PaymentMethod {
     STRIPE = 'stripe',
-    GOOGLE_PAY = 'google_pay',
-    APPLE_PAY = 'apple_pay',
     ALIPAY = 'alipay',
+    WECHAT = 'wechat',
 }
 
 // Payment status
@@ -16,19 +15,36 @@ export enum PaymentStatus {
     REFUNDED = 'refunded',
 }
 
-// Payment request
+// Payment request — matches vippay CreatePaymentRequest
 export interface PaymentRequest {
+    userId: string;
     planId: string;
+    amount: number; // smallest currency unit (cents / fen)
     method: PaymentMethod;
     currency?: string;
-    savePaymentMethod?: boolean;
+    metadata?: Record<string, unknown>;
 }
 
-// Payment response
+// Raw vippay create-payment data payload
+export interface PaymentCreateData {
+    id: string;
+    clientSecret?: string;
+    qrCodeURL?: string;
+    publishableKey?: string;
+    amount: number;
+    currency: string;
+    status: PaymentStatus | string;
+    method: PaymentMethod | string;
+    createdAt: number;
+    metadata?: Record<string, unknown>;
+}
+
+// Normalized payment response for UI
 export interface PaymentResponse {
     success: boolean;
     paymentId?: string;
     clientSecret?: string;
+    publishableKey?: string;
     paymentUrl?: string;
     error?: string;
     requiresAction?: boolean;
@@ -63,22 +79,6 @@ export interface PaymentIntent {
     currency: string;
     status: string;
     clientSecret?: string;
-    nextAction?: any;
+    nextAction?: unknown;
 }
 
-// Alipay specific
-export interface AlipayResponse {
-    url: string;
-    qrCode?: string;
-    outTradeNo: string;
-}
-
-// Notification types
-export enum PaymentNotificationType {
-    PAYMENT_SUCCESS = 'payment_success',
-    PAYMENT_FAILED = 'payment_failed',
-    SUBSCRIPTION_ACTIVE = 'subscription_active',
-    SUBSCRIPTION_CANCELLED = 'subscription_cancelled',
-    SUBSCRIPTION_RENEWED = 'subscription_renewed',
-    PAYMENT_REFUNDED = 'payment_refunded',
-}

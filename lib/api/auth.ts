@@ -107,6 +107,8 @@ export const auth = {
         authorizationCode?: string;
         user?: string;
         nonce?: string;
+        givenName?: string;
+        familyName?: string;
     }): Promise<AuthResponse> => {
         const raw = await request<any>('/api/vippay/apple-oauth/signin', 'POST', data, paymentClient);
 
@@ -201,7 +203,35 @@ export const auth = {
     verifyPhoneSMSCode: async (phone: string, code: string): Promise<void> =>
         request('/api/v1/auth/phone/verify-sms-code', 'POST', { phone, code }),
 
-    // Account deletion
-    deleteAccount: async (): Promise<{ message: string }> =>
-        request('/api/v1/auth/account', 'DELETE'),
+    // Account deletion (phased: SMS verify → risk ACK → grace window)
+    getAccountDeletionStatus: async (): Promise<{
+        isPending: boolean;
+        userStatus?: string;
+        deletionRequestStatus?: string;
+        scheduledDeletionAt?: number;
+        gracePeriodEndsAt?: number;
+        reason?: string;
+    }> => request('/api/v1/auth/account/deletion'),
+
+    sendAccountDeletionSMS: async (): Promise<void> =>
+        request('/api/v1/auth/account/deletion/send-sms-code', 'POST'),
+
+    verifyAccountDeletionSMS: async (code: string): Promise<void> =>
+        request('/api/v1/auth/account/deletion/verify-sms-code', 'POST', { code }),
+
+    requestAccountDeletion: async (riskAcknowledged: boolean): Promise<{
+        isPending: boolean;
+        scheduledDeletionAt?: number;
+        gracePeriodEndsAt?: number;
+    }> =>
+        request('/api/v1/auth/account', 'DELETE', { riskAcknowledged }),
+
+    cancelAccountDeletion: async (): Promise<void> =>
+        request('/api/v1/auth/account/deletion/cancel', 'POST'),
+
+    /** @deprecated use requestAccountDeletion */
+    deleteAccount: async (): Promise<{ message: string }> => {
+        await request('/api/v1/auth/account', 'DELETE', { riskAcknowledged: true });
+        return { message: 'account deletion requested' };
+    },
 };

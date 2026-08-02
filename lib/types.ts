@@ -54,6 +54,7 @@ export interface VIPInfo {
     quotaLimit: number;
     maxRoles: number;
     maxContexts: number;
+    startsAt?: string;
     expiresAt?: string;
     planId?: string;
     subscriptionId?: string;
@@ -128,7 +129,10 @@ export interface TokenUsage {
     total: number;
     used: number;
     remaining: number;
-    resetAt: number;                     // Timestamp when quota resets
+    /** Subscription period end when known; 0 if unknown. Not a calendar quota-reset clock. */
+    resetAt: number;
+    /** Prefer showing as period end / renews on when resetAt > 0 */
+    periodEndsAt?: number;
 }
 
 // Character Models
@@ -340,24 +344,6 @@ export interface RenderTask {
 export interface RenderStoryResponse {
     story?: Story;
     taskId?: string;
-}
-
-// Activity Heatmap Types
-export interface ActivityHeatmapData {
-    date: string;
-    count: number;
-}
-
-export enum ActivityTimeRange {
-    TODAY = 'today',
-    WEEK = 'week',
-    MONTH = 'month'
-}
-
-export interface ActivityHeatmapResponse {
-    data: ActivityHeatmapData[];
-    totalCount: number;
-    timeRange: ActivityTimeRange;
 }
 
 export interface StoryboardCharacterRef {
@@ -1346,7 +1332,7 @@ export interface WebPayment {
 
 export interface CreateWebPaymentRequest {
     planId: string;
-    paymentMethod: 'stripe' | 'alipay';
+    paymentMethod: 'stripe' | 'alipay' | 'wechat';
     returnUrl?: string;
 }
 

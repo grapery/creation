@@ -7,9 +7,9 @@ This document summarizes the alignment between the Next.js frontend (creation) a
 
 | Service | Port | Base URL | Usage |
 |---------|------|----------|-------|
-| Main | 8080 | `/api` | Core API (stories, users, characters, etc.) |
+| Main | 8080 | `/api` | Core API (stories, users, characters, chat, etc.) |
 | VIPPay | 8060 | `/api/vippay` | Payments and subscriptions |
-| Chat | 8050 | N/A | Not implemented in backend |
+| Chat | 8080 | `/api/v1/chat` | Implemented on Grapery (sessions + messages) |
 
 ## Key Changes Made
 
@@ -120,8 +120,8 @@ interface APIResponse<T> {
 - **Special cases**:
   - `dashboard/trending/storyboards` → proxies to `/api/public/trending/storyboards`
   - `users/[id]/drafts` → proxies to `/api/v1/dashboard/storyboards?status=draft`
-  - `users/[id]/activities*` → returns empty (backend removed)
-  - `characters/[id]/chat|messages` → 501 not implemented
+  - `users/[id]/activities*` → **removed** (backend no longer provides activities/heatmap)
+  - `characters/[id]/chat|messages` → removed; use Grapery `/api/v1/chat/sessions`
   - `dashboard/characters/storyboards` → requires `characterId`, proxies to `/api/v1/characters/:id/storyboards`
 
 ### 11. Bookmark Check HTTP Method (FIXED)
@@ -142,10 +142,38 @@ interface APIResponse<T> {
 
 ## Missing/Unimplemented Features
 
-1. **Chat System** - Backend has no chat endpoints; BFF returns 501
+1. ~~**Chat System**~~ — **Implemented** (minimal): Grapery `/api/v1/chat/sessions` (+ messages); character roleplay + user DM; character sessions get a lightweight assistant echo reply (no LLM yet).
 2. **Following Stories Feed** - Uses storyboard feed with `tab=following` (works for authenticated users)
-3. **User Activities** - Backend removed; frontend returns empty data
-4. **Promo Code Redemption** - Not implemented in backend
+3. **User Activities / Heatmap** - Backend removed; BFF stubs and client helpers deleted
+4. **Promo Code Redemption** - Not implemented; frontend stub removed
+5. **Character multi-poster gallery** - Backend removed; UI shows single `character.poster` when present
+6. **Alipay web payments** - Not productized (filter/UI use Stripe + WeChat only)
+7. **WeChat Pay (Native QR)** - Supported alongside Stripe when merchant credentials are configured
+   - `POST /api/vippay/web/payments` with `method: "wechat"` → `qrCodeURL` (`code_url`)
+   - Notify: `POST /api/vippay/web/webhooks/wechat`
+   - Env: `WECHAT_PAY_MCH_ID`, `WECHAT_PAY_SERIAL_NO`, `WECHAT_PAY_API_V3_KEY`, `WECHAT_PAY_NOTIFY_URL`, `WECHAT_PAY_PRIVATE_KEY` or `_PATH`, `WECHAT_PAY_APP_ID` (or `WECHAT_APP_ID`)
+   - Optional FX: `STRIPE_CNY_USD_RATE` (USD↔CNY for cross-currency display/charge)
+
+## Recent Alignment Fixes (2026-08)
+
+### Web VIP / Stripe
+- `POST /api/vippay/web/payments` requires `{ userId, planId, amount, method }`
+- Response envelope `{ code: 0, data }` (no `success` bool) — payment client accepts `code===0`
+- Browser uses same-origin `/api/vippay/*` rewrite (not `127.0.0.1:8060`)
+- Membership subscribe body: `{ tier, period }` (not `planId`)
+- Plans list unwraps `{ plans: [...] }` and maps price major units → cents for UI/Stripe
+
+### Share
+- Clients call `POST /api/v1/share/issue` before share sheet / clipboard (`lib/api/share.ts`)
+
+### Chat
+- `GET/POST /api/v1/chat/sessions`
+- `GET /api/v1/chat/sessions/:id`
+- `GET/POST /api/v1/chat/sessions/:id/messages`
+
+### Settings
+- Appearance persists via `/api/settings/theme` and `/api/settings/font-size`
+- Blocked list via `GET /api/v1/users/blocked`
 
 ## Issues Found and Fixed
 
@@ -330,6 +358,25 @@ interface APIResponse<T> {
 - [ ] Story detail displays all fields (title, description, cover, stats)
 - [ ] Like/Follow buttons work and update UI
 - [ ] User profile updates successfully
-- [ ] VIP membership page loads plans
+- [ ] VIP membership page loads plans (from `/api/membership/plans`)
+- [ ] Stripe checkout creates payment intent and confirms via Elements
+- [ ] Membership settings subscribe uses `{ tier, period }`
+- [ ] Character create requires story selection (`storyId`)
+- [ ] Storyboard wizard create uses authenticated `storyboards.create`
+- [ ] Home dashboard Load more paginates
+- [ ] Share buttons mint signed URLs via `/api/v1/share/issue`
+- [x] Chat list / character session / user DM send & receive (minimal Grapery chat)
+- [ ] Appearance theme/font persist; blocked users list works
+- [ ] Apple Sign In calls vippay when `NEXT_PUBLIC_APPLE_CLIENT_ID` is set
 - [ ] Public trending stories accessible without login
 - [ ] Notifications SSE connection works
+- [x] No Alipay / poster-gallery / promo / heatmap fake-success paths
+- [x] Payment history detail + story scene create routes wired
+- [x] Guest discover feed; search/characters login guidance
+- [x] WeChat Pay QR checkout alongside Stripe
+- [x] Fragment agent chat create (+ form fallback path)
+- [x] In-content report/block menus
+- [x] Persisted nested notification preferences
+- [x] Immersive story reader `/stories/[id]/read`
+- [x] Onboarding + teen protection settings
+- [x] Account deletion SMS / risk ACK / cancel flow

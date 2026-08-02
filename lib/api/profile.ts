@@ -1,26 +1,6 @@
 import { request, getUserIdFromToken } from './client';
 import { User, Story, Storyboard } from '../types';
 
-export interface UserActivity {
-    id: string;
-    userId: string;
-    userName: string;
-    userAvatar?: string;
-    targetId?: string;
-    targetType?: 'story' | 'character' | 'storyboard';
-    targetName: string;
-    targetImage?: string;
-    message: string;
-    timestamp: number | null;
-    date?: string;
-    user: {
-        id: string;
-        username: string;
-        displayName?: string;
-        avatar?: string;
-    };
-}
-
 export const profile = {
     // Drafts - Uses dashboard storyboards endpoint filtered by status
     getDrafts: async (page = 1, limit = 20): Promise<{ storyboards: Storyboard[], count: number }> => {
@@ -74,23 +54,6 @@ export const profile = {
         });
     },
 
-    // Activity - Backend endpoint not available yet, returns empty data
-    getActivity: async (
-        _userId: string,
-        _page = 1,
-        _limit = 20,
-    ): Promise<{ activities: UserActivity[], count: number }> => {
-        return { activities: [], count: 0 };
-    },
-
-    // Activity Heatmap - Backend endpoint not available yet, returns empty data
-    getHeatmap: async (
-        _userId: string,
-        _timeRange?: string,
-    ): Promise<{ data: { date: string; count: number }[]; totalCount?: number }> => {
-        return { data: [], totalCount: 0 };
-    },
-
     // Stories
     getStories: async (userId: string, page = 1, limit = 20): Promise<{ stories: Story[], count: number }> => {
         const offset = (page - 1) * limit;
@@ -139,12 +102,36 @@ export const profile = {
     unblockUser: async (userId: string): Promise<void> =>
         request(`/api/users/${userId}/block`, 'DELETE'),
 
-    // Get blocked users - Backend endpoint not available yet
-    // getBlockedUsers removed: backend only has block/unblock, no list endpoint
+    getBlockedUsers: async (
+        page = 1,
+        limit = 50
+    ): Promise<{ users: Array<{ id: string; username?: string; displayName?: string; avatar?: string; blockedAt?: number }>; total: number }> => {
+        const offset = (page - 1) * limit;
+        const res = await request<{
+            users?: Array<{ id: string; username?: string; displayName?: string; avatar?: string; blockedAt?: number }>;
+            total?: number;
+        }>(`/api/v1/users/blocked?limit=${limit}&offset=${offset}`);
+        return {
+            users: res?.users || [],
+            total: res?.total ?? (res?.users?.length || 0),
+        };
+    },
 
     // Report User
     reportUser: async (userId: string, reason: string): Promise<void> =>
         request(`/api/users/${userId}/report`, 'POST', { reason }),
+
+    // Report UGC (story / storyboard / fragment / character / comment)
+    reportContent: async (
+        contentType: 'storyboard' | 'story' | 'comment' | 'fragment' | 'character',
+        contentId: string,
+        reason: string,
+    ): Promise<void> =>
+        request('/api/content/report', 'POST', {
+            content_type: contentType,
+            content_id: contentId,
+            reason,
+        }),
 
     // Share profile
     getShareURL: (userId: string): string => {

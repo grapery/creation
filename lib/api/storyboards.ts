@@ -12,6 +12,7 @@ export const storyboards = {
         characterRefs?: string[];
         sceneRefs?: string[];
         tags?: string[];
+        sceneCount?: number;
     }): Promise<Storyboard> => {
         return request('/api/storyboards', 'POST', data);
     },
