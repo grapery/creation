@@ -1,4 +1,5 @@
 import { request, apiClient, AI_TIMEOUT } from './client';
+import { withShareGrant, type ShareGrant } from '@/lib/share-grant';
 import { Character, CharacterMessage } from '../types/character';
 
 export const characters = {
@@ -20,8 +21,9 @@ export const characters = {
         return request(`/api/characters?${queryParams.toString()}`);
     },
 
-    get: async (id: string): Promise<Character> => {
-        return request(`/api/characters/${id}`);
+    // Prefer /api/v1 so signed ?t=&exp= reach Grapery (BFF strips query).
+    get: async (id: string, shareGrant?: ShareGrant): Promise<Character> => {
+        return request(withShareGrant(`/api/v1/characters/${id}`, shareGrant));
     },
 
     create: async (data: any): Promise<Character> => {

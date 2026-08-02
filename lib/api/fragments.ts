@@ -1,5 +1,6 @@
 import { request, apiClient, AI_TIMEOUT } from './client';
 import { search } from './search';
+import { withShareGrant, type ShareGrant } from '@/lib/share-grant';
 import type {
     StoryFragment,
     FragmentListResponse,
@@ -34,16 +35,8 @@ export const fragments = {
     },
 
     // Get fragment by ID (optional signed share grant from ?t=&exp=)
-    get: async (
-        id: string,
-        shareGrant?: { token: string; exp: string }
-    ): Promise<StoryFragment> => {
-        let url = `/api/v1/fragments/${id}`;
-        if (shareGrant?.token && shareGrant?.exp) {
-            const q = new URLSearchParams({ t: shareGrant.token, exp: shareGrant.exp });
-            url += `?${q.toString()}`;
-        }
-        return request(url);
+    get: async (id: string, shareGrant?: ShareGrant): Promise<StoryFragment> => {
+        return request(withShareGrant(`/api/v1/fragments/${id}`, shareGrant));
     },
 
     // Create fragment

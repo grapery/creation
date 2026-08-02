@@ -11,6 +11,7 @@ import { useLoginPrompt } from "@/components/auth/login-prompt";
 import { showSuccess, showError } from "@/lib/toast-utils";
 import { CommentList } from "@/components/comments/comment-list";
 import type { StoryFragment, FragmentStoryPrefillAIResponse, FragmentStoryCreationPrefill } from "@/lib/types";
+import { parseShareGrant } from "@/lib/share-grant";
 
 export default function FragmentDetailPage() {
     const params = useParams();
@@ -31,12 +32,7 @@ export default function FragmentDetailPage() {
     const [converting, setConverting] = useState(false);
     const commentsRef = useRef<HTMLDivElement>(null);
 
-    const shareGrant = (() => {
-        const token = searchParams.get("t");
-        const exp = searchParams.get("exp");
-        if (token && exp) return { token, exp };
-        return undefined;
-    })();
+    const shareGrant = parseShareGrant(searchParams);
 
     useEffect(() => {
         loadFragment();

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { stories } from "@/lib/api/stories";
 import { storyboards } from "@/lib/api/storyboards";
 import { characters as charactersApi } from "@/lib/api/characters";
@@ -17,9 +17,12 @@ import { StoryTeamSection, ContentCreator } from "@/components/story/story-team-
 import { CreatorRole } from "@/components/story/story-team-section";
 import { formatDistanceToNow } from "date-fns";
 import { useTranslation } from "@/providers/language-provider";
+import { parseShareGrant } from "@/lib/share-grant";
 
 export default function StoryPage() {
     const { id } = useParams();
+    const searchParams = useSearchParams();
+    const shareGrant = parseShareGrant(searchParams);
     const { t } = useTranslation();
     const router = useRouter();
     const [story, setStory] = useState<Story | null>(null);
@@ -50,7 +53,7 @@ export default function StoryPage() {
         if (!id) return;
         async function load() {
             try {
-                const data = await stories.get(id as string);
+                const data = await stories.get(id as string, shareGrant);
                 setStory(data);
                 // Load all story data
                 await Promise.all([
@@ -66,7 +69,7 @@ export default function StoryPage() {
             }
         }
         load();
-    }, [id]);
+    }, [id, shareGrant?.token, shareGrant?.exp]);
 
     const loadStoryboards = async (storyId: string) => {
         setLoadingStoryboards(true);

@@ -1,4 +1,5 @@
 import { request, apiClient, AI_TIMEOUT } from './client';
+import { withShareGrant, type ShareGrant } from '@/lib/share-grant';
 import { Story } from '../types';
 
 export const stories = {
@@ -14,8 +15,9 @@ export const stories = {
         return request(`/api/stories?limit=${limit}&offset=${offset}&sort_by=${sortBy}`);
     },
 
-    get: async (id: string): Promise<Story> => {
-        return request(`/api/stories/${id}`);
+    // Prefer /api/v1 so ?t=&exp= reach Grapery (BFF /api/stories strips query).
+    get: async (id: string, shareGrant?: ShareGrant): Promise<Story> => {
+        return request(withShareGrant(`/api/v1/stories/${id}`, shareGrant));
     },
 
     create: async (data: any): Promise<Story> => {

@@ -9,8 +9,9 @@ export async function GET(
     try {
         const { id: characterId } = await params;
         const authHeader = request.headers.get('authorization');
+        const qs = request.nextUrl.searchParams.toString();
 
-        const backendUrl = `${BACKEND_URL}/api/v1/characters/${characterId}`;
+        const backendUrl = `${BACKEND_URL}/api/v1/characters/${characterId}${qs ? `?${qs}` : ''}`;
 
         const response = await fetch(backendUrl, {
             method: 'GET',

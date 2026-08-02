@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { characters } from "@/lib/api/characters";
 import { storyboards } from "@/lib/api/storyboards";
 import { Character } from "@/lib/types/character";
@@ -13,6 +13,7 @@ import { Loader2, MessageCircle, Share2, MoreHorizontal, Film, Image, Info, Spar
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { parseShareGrant } from "@/lib/share-grant";
 
 interface CharacterPoster {
     id: string;
@@ -22,6 +23,8 @@ interface CharacterPoster {
 
 export default function CharacterDetailPage() {
     const { id } = useParams();
+    const searchParams = useSearchParams();
+    const shareGrant = parseShareGrant(searchParams);
     const router = useRouter();
     const [character, setCharacter] = useState<Character | null>(null);
     const [loading, setLoading] = useState(true);
@@ -42,7 +45,7 @@ export default function CharacterDetailPage() {
         if (!id) return;
         async function load() {
             try {
-                const data = await characters.get(id as string);
+                const data = await characters.get(id as string, shareGrant);
                 setCharacter(data);
                 setIsFollowing(data.isFollowing || false);
             } catch (e) {
@@ -52,7 +55,7 @@ export default function CharacterDetailPage() {
             }
         }
         load();
-    }, [id]);
+    }, [id, shareGrant?.token, shareGrant?.exp]);
 
     // Load timeline data when tab switches to timeline
     useEffect(() => {

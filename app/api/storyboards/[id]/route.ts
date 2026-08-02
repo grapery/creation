@@ -20,7 +20,11 @@ async function proxyStoryboard(
         init.body = await request.text();
     }
 
-    const response = await fetch(graperyV1(`/storyboards/${storyboardId}`), init);
+    const qs = method === 'GET' ? request.nextUrl.searchParams.toString() : '';
+    const response = await fetch(
+        graperyV1(`/storyboards/${storyboardId}${qs ? `?${qs}` : ''}`),
+        init
+    );
 
     if (!response.ok) {
         let errorMessage = `Failed to ${method.toLowerCase()} storyboard`;

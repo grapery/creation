@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Header } from "@/components/layout/header";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -18,10 +18,13 @@ import { ContinueDialog } from "@/components/storyboard/continue-dialog";
 import { useTranslation } from "@/providers/language-provider";
 import { useAuth } from "@/providers/auth-provider";
 import { showSuccess } from "@/lib/toast-utils";
+import { parseShareGrant } from "@/lib/share-grant";
 
 export default function StoryboardPage() {
     const { t } = useTranslation();
     const { id } = useParams();
+    const searchParams = useSearchParams();
+    const shareGrant = parseShareGrant(searchParams);
     const router = useRouter();
     const [item, setItem] = useState<Storyboard | null>(null);
     const [loading, setLoading] = useState(true);
@@ -46,7 +49,8 @@ export default function StoryboardPage() {
     const videoRefs = useRef<Map<string, HTMLVideoElement>>(new Map());
 
     useEffect(() => {
-        if (!id || hasLoadedRef.current === id) return;
+        const loadKey = `${id || ""}:${shareGrant?.token || ""}:${shareGrant?.exp || ""}`;
+        if (!id || hasLoadedRef.current === loadKey) return;
 
         let isMounted = true;
 
@@ -58,7 +62,7 @@ export default function StoryboardPage() {
 
         async function load() {
             try {
-                const data = await storyboards.get(id as string);
+                const data = await storyboards.get(id as string, shareGrant);
 
                 if (!isMounted) return;
 
@@ -144,7 +148,7 @@ export default function StoryboardPage() {
                     // Don't block the main content - children navigation will show appropriate UI
                 }
 
-                hasLoadedRef.current = id as string;
+                hasLoadedRef.current = loadKey;
             } catch (e) {
                 console.error("Failed to load storyboard:", e);
                 if (isMounted) {
@@ -162,7 +166,7 @@ export default function StoryboardPage() {
         return () => {
             isMounted = false;
         };
-    }, [id, user]);
+    }, [id, user, shareGrant?.token, shareGrant?.exp]);
 
     const handlePlayVideo = (sceneId: string) => {
         // Pause all other videos

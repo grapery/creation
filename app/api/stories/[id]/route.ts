@@ -20,7 +20,11 @@ async function proxyStory(
         init.body = await request.text();
     }
 
-    const response = await fetch(graperyV1(`/stories/${storyId}`), init);
+    const qs = method === 'GET' ? request.nextUrl.searchParams.toString() : '';
+    const response = await fetch(
+        graperyV1(`/stories/${storyId}${qs ? `?${qs}` : ''}`),
+        init
+    );
 
     if (!response.ok) {
         let errorMessage = `Failed to ${method.toLowerCase()} story`;

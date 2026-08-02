@@ -1,4 +1,5 @@
 import { request, apiClient, AI_TIMEOUT } from './client';
+import { withShareGrant, type ShareGrant } from '@/lib/share-grant';
 import { Storyboard } from '../types';
 
 export const storyboards = {
@@ -68,9 +69,9 @@ export const storyboards = {
         return request(endpoint);
     },
 
-    // Detail
-    get: async (id: string): Promise<Storyboard> => {
-        return request(`/api/storyboards/${id}`);
+    // Detail — use /api/v1 so signed ?t=&exp= reach Grapery (BFF strips query).
+    get: async (id: string, shareGrant?: ShareGrant): Promise<Storyboard> => {
+        return request(withShareGrant(`/api/v1/storyboards/${id}`, shareGrant));
     },
 
     // Get child storyboards (forks)
