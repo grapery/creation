@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,29 +9,20 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, ArrowLeft } from "lucide-react";
 import { stories } from "@/lib/api/stories";
-import { useAuthRequired } from "@/lib/hooks/use-auth-required";
+import { RequireAuth } from "@/components/auth/require-auth";
 import { useTranslation } from "@/providers/language-provider";
 import { showError, showSuccess } from "@/lib/toast-utils";
 
-export default function NewStoryScenePage() {
+function NewStorySceneForm() {
     const { id: storyId } = useParams<{ id: string }>();
     const router = useRouter();
     const { t } = useTranslation();
-    const { isAuthenticated, isCheckingAuth, LoginPromptModal, showPrompt } = useAuthRequired();
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [location, setLocation] = useState("");
     const [timeOfDay, setTimeOfDay] = useState("");
     const [submitting, setSubmitting] = useState(false);
 
-    useEffect(() => {
-        if (!isCheckingAuth && !isAuthenticated) {
-            showPrompt({
-                title: "Sign in to add scenes",
-                description: "Please sign in to create scenes for this story.",
-            });
-        }
-    }, [isAuthenticated, isCheckingAuth, showPrompt]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -39,14 +30,6 @@ export default function NewStoryScenePage() {
             showError("Title is required");
             return;
         }
-        if (!isAuthenticated) {
-            showPrompt({
-                title: "Sign in to add scenes",
-                description: "Please sign in to create scenes for this story.",
-            });
-            return;
-        }
-
         setSubmitting(true);
         try {
             await stories.createScene(storyId, {
@@ -150,7 +133,15 @@ export default function NewStoryScenePage() {
                     </form>
                 </CardContent>
             </Card>
-            <LoginPromptModal />
         </main>
     );
 }
+
+export default function NewStoryScenePage() {
+    return (
+        <RequireAuth>
+            <NewStorySceneForm />
+        </RequireAuth>
+    );
+}
+

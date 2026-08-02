@@ -11,8 +11,10 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useTranslation } from "@/providers/language-provider";
 import { DialogManager, DialogType, DialogPriority, hideDialog } from "@/lib/dialog-manager";
+import { loginUrlWithNext } from "@/lib/auth-redirect";
 
 // 弹窗ID常量
 const LOGIN_PROMPT_ID = "login_prompt";
@@ -31,6 +33,8 @@ export function LoginPrompt({
   description,
 }: LoginPromptProps) {
   const { t } = useTranslation();
+  const pathname = usePathname();
+  const loginHref = loginUrlWithNext(pathname || "/");
 
   // 注册到DialogManager
   useEffect(() => {
@@ -84,7 +88,7 @@ export function LoginPrompt({
               className="flex-1"
               onClick={handleClose}
             >
-              <Link href="/login" className="flex items-center gap-2">
+              <Link href={loginHref} className="flex items-center gap-2">
                 <LogIn className="h-4 w-4" />
                 {t("auth.login") || "Login"}
               </Link>

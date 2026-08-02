@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -15,18 +15,17 @@ import { upload } from "@/lib/api/upload";
 import { CharacterGenerator } from "@/components/character/character-generator";
 import { useTranslation } from "@/providers/language-provider";
 import { useAuth } from "@/providers/auth-provider";
-import { useAuthRequired } from "@/lib/hooks/use-auth-required";
+import { RequireAuth } from "@/components/auth/require-auth";
 import { Textarea } from "@/components/ui/textarea";
 import type { Story } from "@/lib/types";
 import { showError } from "@/lib/toast-utils";
 
-export default function CreateCharacterPage() {
+function CreateCharacter() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const prefillStoryId = searchParams.get("storyId") || "";
     const { t } = useTranslation();
     const { user } = useAuth();
-    const { isAuthenticated, isCheckingAuth, LoginPromptModal, showPrompt } = useAuthRequired();
     const [loading, setLoading] = useState(false);
     const [avatarUploading, setAvatarUploading] = useState(false);
     const [userStories, setUserStories] = useState<Story[]>([]);
@@ -85,14 +84,6 @@ export default function CreateCharacterPage() {
         }
     }, [prefillStoryId]);
 
-    useEffect(() => {
-        if (!isCheckingAuth && !isAuthenticated) {
-            showPrompt({
-                title: "Sign in to create",
-                description: "Please sign in to create characters.",
-            });
-        }
-    }, [isAuthenticated, isCheckingAuth, showPrompt]);
 
     const handleAvatarUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -165,27 +156,6 @@ export default function CreateCharacterPage() {
         }
     };
 
-    if (isCheckingAuth) {
-        return (
-            <div className="flex items-center justify-center py-20">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-        );
-    }
-
-    if (!isAuthenticated) {
-        return (
-            <div className="flex flex-col items-center justify-center py-20 space-y-4 px-4">
-                <p className="text-muted-foreground text-center">
-                    Sign in is required to create characters.
-                </p>
-                <LoginPromptModal
-                    title="Sign in to create"
-                    description="Please sign in to create characters."
-                />
-            </div>
-        );
-    }
 
     return (
         <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
@@ -384,3 +354,14 @@ export default function CreateCharacterPage() {
         </div>
     );
 }
+
+export default function CreateCharacterPage() {
+    return (
+        <Suspense fallback={<div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
+            <RequireAuth title="Sign in to create">
+                <CreateCharacter />
+            </RequireAuth>
+        </Suspense>
+    );
+}
+

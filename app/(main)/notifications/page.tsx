@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "@/providers/language-provider";
-import { useAuthRequired } from "@/lib/hooks/use-auth-required";
+import { RequireAuth } from "@/components/auth/require-auth";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -11,9 +11,8 @@ import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { notifications as notificationsApi, Notification } from "@/lib/api/notifications";
 
-export default function NotificationsPage() {
+function NotificationsContent() {
     const { t } = useTranslation();
-    const { isAuthenticated, isCheckingAuth, LoginPromptModal } = useAuthRequired();
     const [activeTab, setActiveTab] = useState("all");
     const [items, setItems] = useState<Notification[]>([]);
     const [loading, setLoading] = useState(true);
@@ -33,34 +32,9 @@ export default function NotificationsPage() {
     }, []);
 
     useEffect(() => {
-        if (!isAuthenticated) return;
         fetchNotifications();
         notificationsApi.getUnreadCount().then(res => setUnreadCount(res.count)).catch(() => {});
-    }, [isAuthenticated, fetchNotifications]);
-
-    if (!isAuthenticated) {
-        return (
-            <main className="flex-1 container max-w-6xl px-4 py-6 mx-auto flex items-center justify-center">
-                {isCheckingAuth ? (
-                    <div className="text-center space-y-4">
-                        <Loader2 className="h-12 w-12 mx-auto animate-spin text-primary" />
-                        <p className="text-muted-foreground">Loading...</p>
-                    </div>
-                ) : (
-                    <div className="text-center space-y-4">
-                        <Bell className="h-16 w-16 mx-auto text-muted-foreground" />
-                        <div>
-                            <h2 className="text-xl font-bold mb-2">{t("notifications.title")}</h2>
-                            <p className="text-muted-foreground max-w-md">
-                                {t("notifications.notifications_will_appear")}
-                            </p>
-                        </div>
-                    </div>
-                )}
-                <LoginPromptModal />
-            </main>
-        );
-    }
+    }, [fetchNotifications]);
 
     const getIcon = (type: string) => {
         switch (type) {
@@ -173,5 +147,13 @@ export default function NotificationsPage() {
                 </Tabs>
             </div>
         </main>
+    );
+}
+
+export default function NotificationsPage() {
+    return (
+        <RequireAuth>
+            <NotificationsContent />
+        </RequireAuth>
     );
 }

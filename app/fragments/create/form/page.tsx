@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ImagePlus, Wand2, X, Loader2, Send, Sparkles, Image as ImageIcon, MessageSquare } from "lucide-react";
@@ -10,7 +10,7 @@ import { FragmentStylePicker } from "@/components/fragment/fragment-style-picker
 import { FragmentVisibilityPicker } from "@/components/fragment/fragment-visibility-picker";
 import { FragmentGenerationOverlay } from "@/components/fragment/fragment-generation-overlay";
 import { showSuccess, showError } from "@/lib/toast-utils";
-import { useAuthRequired } from "@/lib/hooks/use-auth-required";
+import { RequireAuth } from "@/components/auth/require-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -31,10 +31,9 @@ const ASPECT_RATIOS = [
 
 const PANEL_COUNTS = [1, 2, 3, 4, 5, 6, 7, 8] as const;
 
-export default function CreateFragmentFormPage() {
+function CreateFragmentForm() {
     const router = useRouter();
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const { isAuthenticated, isCheckingAuth, LoginPromptModal, showPrompt } = useAuthRequired();
 
     const [content, setContent] = useState("");
     const [caption, setCaption] = useState("");
@@ -55,20 +54,11 @@ export default function CreateFragmentFormPage() {
     const [draftFragmentId, setDraftFragmentId] = useState<string | null>(null);
     const [submitting, setSubmitting] = useState(false);
 
-    useEffect(() => {
-        if (!isCheckingAuth && !isAuthenticated) {
-            showPrompt({
-                title: "Sign in to create",
-                description: "Please sign in to create fragments.",
-            });
-        }
-    }, [isAuthenticated, isCheckingAuth, showPrompt]);
 
     useEffect(() => {
-        if (!isAuthenticated) return;
         loadStyles();
         loadDraft();
-    }, [isAuthenticated]);
+    }, []);
 
     const loadDraft = async () => {
         try {
@@ -257,25 +247,6 @@ export default function CreateFragmentFormPage() {
 
     const generating = genStatus === "generating" || genStatus === "polling";
 
-    if (isCheckingAuth) {
-        return (
-            <div className="flex items-center justify-center py-20">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            </div>
-        );
-    }
-
-    if (!isAuthenticated) {
-        return (
-            <div className="flex flex-col items-center justify-center py-20 space-y-4 px-4">
-                <p className="text-muted-foreground text-center">Sign in is required to create fragments.</p>
-                <LoginPromptModal
-                    title="Sign in to create"
-                    description="Please sign in to create fragments."
-                />
-            </div>
-        );
-    }
 
     return (
         <div className="container max-w-2xl mx-auto px-4 py-8 md:px-6 space-y-6">
@@ -543,3 +514,14 @@ export default function CreateFragmentFormPage() {
         </div>
     );
 }
+
+export default function CreateFragmentFormPage() {
+    return (
+        <Suspense fallback={<div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+            <RequireAuth title="Sign in to create">
+                <CreateFragmentForm />
+            </RequireAuth>
+        </Suspense>
+    );
+}
+

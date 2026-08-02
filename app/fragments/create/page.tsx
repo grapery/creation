@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Loader2, Send, Sparkles, Check, ArrowLeft } from "lucide-react";
 import { fragments } from "@/lib/api/fragments";
 import { issueAgentAccessToken, streamCreationMessage } from "@/lib/api/agent";
-import { useAuthRequired } from "@/lib/hooks/use-auth-required";
+import { RequireAuth } from "@/components/auth/require-auth";
 import { useTranslation } from "@/providers/language-provider";
 import { showError, showSuccess } from "@/lib/toast-utils";
 import { Button } from "@/components/ui/button";
@@ -47,11 +47,10 @@ async function pollUntilDone(taskId: string, onProgress: (msg: string) => void):
     throw new Error("Generation timed out");
 }
 
-export default function CreateFragmentChatPage() {
+function CreateFragmentChat() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { t } = useTranslation();
-    const { isAuthenticated, isCheckingAuth, LoginPromptModal, showPrompt } = useAuthRequired();
     const [messages, setMessages] = useState<ChatMessage[]>([
         {
             id: "welcome",
@@ -68,14 +67,6 @@ export default function CreateFragmentChatPage() {
     const bottomRef = useRef<HTMLDivElement>(null);
     const abortRef = useRef<AbortController | null>(null);
 
-    useEffect(() => {
-        if (!isCheckingAuth && !isAuthenticated) {
-            showPrompt({
-                title: "Sign in to create",
-                description: "Please sign in to create fragments with AI.",
-            });
-        }
-    }, [isAuthenticated, isCheckingAuth, showPrompt]);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -118,13 +109,6 @@ export default function CreateFragmentChatPage() {
     const handleSend = async () => {
         const text = input.trim();
         if (!text || busy) return;
-        if (!isAuthenticated) {
-            showPrompt({
-                title: "Sign in to create",
-                description: "Please sign in to create fragments with AI.",
-            });
-            return;
-        }
 
         setInput("");
         pushMessage("user", text);
@@ -371,7 +355,17 @@ export default function CreateFragmentChatPage() {
                     </Button>
                 </div>
             </div>
-            <LoginPromptModal />
         </div>
     );
 }
+
+export default function CreateFragmentChatPage() {
+    return (
+        <Suspense fallback={<div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+            <RequireAuth title="Sign in to create">
+                <CreateFragmentChat />
+            </RequireAuth>
+        </Suspense>
+    );
+}
+

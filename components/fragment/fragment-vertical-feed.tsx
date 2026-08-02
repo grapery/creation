@@ -13,6 +13,7 @@ import { fragments } from "@/lib/api/fragments";
 import type { StoryFragment } from "@/lib/types";
 import { useAuth } from "@/providers/auth-provider";
 import { useLoginPrompt } from "@/components/auth/login-prompt";
+import { loginUrlWithNext } from "@/lib/auth-redirect";
 
 interface FragmentVerticalFeedProps {
   tab: "discover" | "following";
@@ -21,7 +22,7 @@ interface FragmentVerticalFeedProps {
 export function FragmentVerticalFeed({ tab }: FragmentVerticalFeedProps) {
   const router = useRouter();
   const { user } = useAuth();
-  const { show: showLoginPrompt } = useLoginPrompt();
+  const { show: showLoginPrompt, LoginPromptModal } = useLoginPrompt();
 
   const [items, setItems] = useState<StoryFragment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -177,12 +178,12 @@ export function FragmentVerticalFeed({ tab }: FragmentVerticalFeedProps) {
     (fragment: StoryFragment, e: React.MouseEvent) => {
       e.stopPropagation();
       if (!user) {
-        showLoginPrompt();
+        router.push(loginUrlWithNext(`/create?fragmentId=${fragment.id}`));
         return;
       }
       router.push(`/create?fragmentId=${fragment.id}`);
     },
-    [user, showLoginPrompt, router]
+    [user, router]
   );
 
   if (loading && items.length === 0) {
@@ -362,6 +363,7 @@ export function FragmentVerticalFeed({ tab }: FragmentVerticalFeedProps) {
           </div>
         </div>
       ))}
+      <LoginPromptModal />
     </div>
   );
 }

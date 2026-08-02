@@ -28,6 +28,7 @@ import { useRouter } from "next/navigation";
 import { githubImages } from "@/lib/github-assets";
 import { SUPPORT_EMAIL } from "@/lib/support";
 import { FeatureCards } from "@/components/marketing/feature-showcase";
+import { AuthLink } from "@/components/auth/auth-link";
 
 const screenshots = [
     { src: githubImages.screenshotFragmentFeed, title: "故事碎片", desc: "记录灵感碎片，AI 辅助创作图文内容" },
@@ -46,7 +47,7 @@ export default function AboutPage() {
 
     const handleNavigate = (route: string) => {
         if (!user) {
-            router.push("/login?redirect=" + encodeURIComponent(route));
+            router.push("/login?next=" + encodeURIComponent(route));
         } else {
             router.push(route);
         }
@@ -85,10 +86,10 @@ export default function AboutPage() {
                                 <BookOpen className="mr-2 h-5 w-5 inline" />
                                 探索故事
                             </Link>
-                            <Link href="/create" className="idea-btn-outline">
+                            <AuthLink href="/create" className="idea-btn-outline">
                                 <PenTool className="mr-2 h-5 w-5 inline" />
                                 开始创作
-                            </Link>
+                            </AuthLink>
                         </div>
                     </div>
                 </div>
@@ -329,10 +330,10 @@ export default function AboutPage() {
                             加入未择，与全球创作者一起探索无限可能的故事世界
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <Link href="/create" className="idea-btn-primary inline-flex">
+                            <AuthLink href="/create" className="idea-btn-primary inline-flex">
                                 免费开始创作
                                 <ArrowRight className="ml-2 h-5 w-5" />
-                            </Link>
+                            </AuthLink>
                             <Link href="/" className="idea-btn-outline inline-flex">
                                 浏览热门故事
                             </Link>

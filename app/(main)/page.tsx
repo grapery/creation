@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
 import { useLoginPrompt } from "@/components/auth/login-prompt";
 import { GuestDiscoverFeed } from "@/components/discover/guest-discover-feed";
+import { loginUrlWithNext } from "@/lib/auth-redirect";
 
 enum Tab {
   STORYBOARDS = "storyboards",
@@ -29,7 +30,7 @@ export default function DashboardPage() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
-  const { show: showLoginPrompt } = useLoginPrompt();
+  const { show: showLoginPrompt, LoginPromptModal } = useLoginPrompt();
 
   useEffect(() => {
     if (!user) return;
@@ -115,7 +116,7 @@ export default function DashboardPage() {
             type="button"
             onClick={() => {
               if (!user) {
-                showLoginPrompt();
+                router.push(loginUrlWithNext("/search"));
                 return;
               }
               router.push("/search");
@@ -242,6 +243,7 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+      <LoginPromptModal />
     </main>
   );
 }

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PenTool, Target, BookOpen, Compass, Sparkles, Bookmark } from "lucide-react";
 import { useTranslation } from "@/providers/language-provider";
+import { AuthLink } from "@/components/auth/auth-link";
 
 export function Sidebar({ className }: { className?: string }) {
     const { t } = useTranslation();
@@ -22,24 +23,24 @@ export function Sidebar({ className }: { className?: string }) {
                 <CardContent className="space-y-3">
                     <div className="grid grid-cols-2 gap-2">
                         <Button variant="outline" className="h-20 flex-col gap-2" asChild>
-                            <Link href="/create">
+                            <AuthLink href="/create">
                                 <BookOpen className="h-5 w-5 text-primary" />
                                 <span>{t("sidebar.write_story")}</span>
-                            </Link>
+                            </AuthLink>
                         </Button>
                         <Button variant="outline" className="h-20 flex-col gap-2" asChild>
-                            <Link href="/fragments/create">
+                            <AuthLink href="/fragments/create">
                                 <Sparkles className="h-5 w-5 text-primary" />
                                 <span>{t("sidebar.fragment")}</span>
-                            </Link>
+                            </AuthLink>
                         </Button>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                         <Button variant="outline" className="h-16 flex-col gap-1" asChild>
-                            <Link href="/create/wizard">
+                            <AuthLink href="/create/wizard">
                                 <Target className="h-4 w-4 text-primary" />
                                 <span className="text-xs">{t("sidebar.storyboard")}</span>
-                            </Link>
+                            </AuthLink>
                         </Button>
                         <Button variant="outline" className="h-16 flex-col gap-1" asChild>
                             <Link href="/plaza">
@@ -56,16 +57,16 @@ export function Sidebar({ className }: { className?: string }) {
                 <CardContent className="pt-4 pb-4">
                     <div className="space-y-1">
                         <Button variant="ghost" className="w-full justify-start gap-2 text-sm" asChild>
-                            <Link href="/bookmarks">
+                            <AuthLink href="/bookmarks">
                                 <Bookmark className="h-4 w-4 text-primary" />
                                 {t("sidebar.bookmarks")}
-                            </Link>
+                            </AuthLink>
                         </Button>
                         <Button variant="ghost" className="w-full justify-start gap-2 text-sm" asChild>
-                            <Link href="/search">
+                            <AuthLink href="/search">
                                 <Compass className="h-4 w-4 text-primary" />
                                 {t("sidebar.search")}
-                            </Link>
+                            </AuthLink>
                         </Button>
                     </div>
                 </CardContent>

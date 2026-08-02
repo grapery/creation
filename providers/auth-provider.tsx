@@ -7,6 +7,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { getAuthToken } from "@/lib/api/client";
 import { hasCompletedOnboarding, markOnboardingDone } from "@/lib/onboarding";
 import { settings } from "@/lib/api/settings";
+import { getSafeAuthNext } from "@/lib/auth-redirect";
 
 interface AuthContextType {
     user: User | null;
@@ -26,7 +27,8 @@ function postAuthRedirect(router: ReturnType<typeof useRouter>, isNewUser: boole
         router.push("/onboarding");
         return;
     }
-    router.push("/");
+    const next = getSafeAuthNext();
+    router.push(next || "/");
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {

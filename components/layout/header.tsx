@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/providers/auth-provider";
 import { Button } from "@/components/ui/button";
 import { UserCircle, LogOut, Loader2, Crown, Search, Bell, MessageSquare, Info } from "lucide-react";
@@ -8,20 +9,19 @@ import { githubImages } from "@/lib/github-assets";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LanguageSelector } from "@/components/auth/language-selector";
 import { useTranslation } from "@/providers/language-provider";
-import { useLoginPrompt } from "@/components/auth/login-prompt";
+import { loginUrlWithNext } from "@/lib/auth-redirect";
 
 export function Header() {
     const { user, loading, logout } = useAuth();
     const { t } = useTranslation();
-    const { LoginPromptModal, show: showLoginPrompt } = useLoginPrompt();
+    const router = useRouter();
 
-    // Handle protected links - show login prompt if not authenticated
+    // Handle protected links — guests go to full login (iOS tab/FAB style)
     const handleProtectedLink = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
         if (!user) {
             e.preventDefault();
-            showLoginPrompt();
+            router.push(loginUrlWithNext(href));
         }
-        // If user is authenticated, let the link work normally
     };
 
     return (
@@ -46,7 +46,11 @@ export function Header() {
                         <Info className="h-4 w-4" />
                         {t("navigation.about")}
                     </Link>
-                    <Link href="/search" className="relative flex-1">
+                    <Link
+                        href="/search"
+                        className="relative flex-1"
+                        onClick={(e) => handleProtectedLink(e, "/search")}
+                    >
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <div
                             className="w-full bg-secondary border-0 rounded-full pl-10 h-10 text-sm text-muted-foreground flex items-center cursor-pointer hover:bg-secondary/80 transition-colors"
@@ -112,8 +116,6 @@ export function Header() {
                     )}
                 </div>
             </div>
-            {/* Login Prompt Modal */}
-            <LoginPromptModal />
         </header>
     );
 }

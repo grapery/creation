@@ -7,7 +7,7 @@ import { stories } from "@/lib/api/stories";
 import { characters } from "@/lib/api/characters";
 import { showSuccess, showError } from "@/lib/toast-utils";
 import { useTranslation } from "@/providers/language-provider";
-import { useAuthRequired } from "@/lib/hooks/use-auth-required";
+import { RequireAuth } from "@/components/auth/require-auth";
 import {
     AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
     AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay,
@@ -22,63 +22,18 @@ interface CreateStoryProps {
 
 export default function CreateStoryPage({ storyId }: CreateStoryProps) {
     return (
-        <Suspense fallback={<div className="flex items-center justify-center py-20">Loading...</div>}>
-            <CreateStory storyId={storyId} />
+        <Suspense fallback={<div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
+            <RequireAuth title="Sign in to create">
+                <CreateStoryForm storyId={storyId} />
+            </RequireAuth>
         </Suspense>
     );
 }
 
-function CreateStory({ storyId }: CreateStoryProps) {
+function CreateStoryForm({ storyId }: CreateStoryProps) {
     const router = useRouter();
     const { t } = useTranslation();
-    const { isAuthenticated, isCheckingAuth, LoginPromptModal, showPrompt } = useAuthRequired();
     const searchParams = useSearchParams();
-
-    useEffect(() => {
-        if (!isCheckingAuth && !isAuthenticated) {
-            showPrompt({
-                title: "Sign in to create",
-                description: "Please sign in to create and publish stories.",
-            });
-        }
-    }, [isAuthenticated, isCheckingAuth, showPrompt]);
-
-    if (isCheckingAuth) {
-        return (
-            <div className="flex items-center justify-center py-20">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-        );
-    }
-
-    if (!isAuthenticated) {
-        return (
-            <div className="flex flex-col items-center justify-center py-20 space-y-4 px-4">
-                <p className="text-muted-foreground text-center">
-                    Sign in is required to create stories.
-                </p>
-                <LoginPromptModal
-                    title="Sign in to create"
-                    description="Please sign in to create and publish stories."
-                />
-            </div>
-        );
-    }
-
-    return <CreateStoryForm storyId={storyId} searchParams={searchParams} t={t} router={router} />;
-}
-
-function CreateStoryForm({
-    storyId,
-    searchParams,
-    t,
-    router,
-}: {
-    storyId?: string;
-    searchParams: ReturnType<typeof useSearchParams>;
-    t: ReturnType<typeof useTranslation>["t"];
-    router: ReturnType<typeof useRouter>;
-}) {
     const [selectedTab, setSelectedTab] = useState(0);
     const [title, setTitle] = useState("");
     const [titleMaxLength, setTitleMaxLength] = useState(200);

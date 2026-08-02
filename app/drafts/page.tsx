@@ -139,7 +139,7 @@ export default function DraftsPage() {
     // Redirect if not logged in
     useEffect(() => {
         if (!authLoading && !user) {
-            router.push("/login");
+            router.push("/login?next=" + encodeURIComponent("/drafts"));
         }
     }, [user, authLoading, router]);
 

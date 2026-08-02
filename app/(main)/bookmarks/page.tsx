@@ -7,8 +7,9 @@ import { Loader2, Bookmark as BookmarkIcon } from "lucide-react";
 import { bookmarks } from "@/lib/api/interactions";
 import type { Bookmark, BookmarkType, PagedBookmarks } from "@/lib/types";
 import Link from "next/link";
+import { RequireAuth } from "@/components/auth/require-auth";
 
-export default function BookmarksPage() {
+function BookmarksContent() {
     const [activeTab, setActiveTab] = useState<BookmarkType | "all">("all");
     const [loading, setLoading] = useState(true);
     const [bookmarkData, setBookmarkData] = useState<PagedBookmarks | null>(null);
@@ -119,3 +120,12 @@ function BookmarkItem({ bookmark }: { bookmark: Bookmark }) {
         </Link>
     );
 }
+
+export default function BookmarksPage() {
+    return (
+        <RequireAuth>
+            <BookmarksContent />
+        </RequireAuth>
+    );
+}
+

@@ -6,6 +6,7 @@ import { ArrowRight, X } from "lucide-react";
 import { githubImages } from "@/lib/github-assets";
 import { imageCache, useCachedImage } from "@/lib/image-cache";
 import Link from "next/link";
+import { AuthLink } from "@/components/auth/auth-link";
 
 const FEATURE_CARDS = [
     {
@@ -107,13 +108,23 @@ export function FeatureCards() {
                     <p className="text-sm text-black/80 leading-relaxed flex-1">
                         {card.desc}
                     </p>
-                    <Link
-                        href={card.href}
-                        className="idea-btn-outline mt-6 self-start bg-black/[0.06] border-black"
-                    >
-                        {card.cta}
-                        <ArrowRight className="w-4 h-4" />
-                    </Link>
+                    {card.href === "/create" ? (
+                        <AuthLink
+                            href={card.href}
+                            className="idea-btn-outline mt-6 self-start bg-black/[0.06] border-black"
+                        >
+                            {card.cta}
+                            <ArrowRight className="w-4 h-4" />
+                        </AuthLink>
+                    ) : (
+                        <Link
+                            href={card.href}
+                            className="idea-btn-outline mt-6 self-start bg-black/[0.06] border-black"
+                        >
+                            {card.cta}
+                            <ArrowRight className="w-4 h-4" />
+                        </Link>
+                    )}
                 </motion.div>
             ))}
         </div>

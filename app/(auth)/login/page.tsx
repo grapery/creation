@@ -10,16 +10,13 @@ import { Card } from "@/components/ui/card";
 import { Loader2, BookOpen } from "lucide-react";
 import { githubImages } from "@/lib/github-assets";
 import { OAuthProviderButton, LanguageSelector, OAuthProvider } from "@/components/auth";
-import { useRouter } from "next/navigation";
 import { useGoogleOAuth } from "@/lib/hooks/use-google-oauth";
 import { useWeChatOAuth } from "@/lib/hooks/use-wechat-oauth";
 import { useAppleOAuth } from "@/lib/hooks/use-apple-oauth";
-import { auth } from "@/lib/api/auth";
 
 export default function LoginPage() {
-    const { login, loginWithApple } = useAuth();
+    const { login, loginWithApple, loginWithGoogle } = useAuth();
     const { t } = useTranslation();
-    const router = useRouter();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -33,12 +30,9 @@ export default function LoginPage() {
         clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
         onSuccess: async (credentialResponse) => {
             try {
-                // Call backend API with Google credential
-                await auth.loginWithGoogle({
+                await loginWithGoogle({
                     idToken: credentialResponse.credential,
                 });
-
-                router.push('/');
             } catch (err: any) {
                 console.error('[Login] Google login error:', err);
                 setOAuthError(err.message || t('auth.login_failed'));
@@ -65,7 +59,6 @@ export default function LoginPage() {
                     givenName: result.givenName,
                     familyName: result.familyName,
                 });
-                router.push('/');
             } catch (err: any) {
                 console.error('[Login] Apple login error:', err);
                 setOAuthError(err.message || t('auth.login_failed'));

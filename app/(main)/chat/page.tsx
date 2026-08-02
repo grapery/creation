@@ -2,24 +2,19 @@
 
 import { useState, useEffect } from "react";
 import { useTranslation } from "@/providers/language-provider";
-import { useAuthRequired } from "@/lib/hooks/use-auth-required";
+import { RequireAuth } from "@/components/auth/require-auth";
 import { chat, ChatSession } from "@/lib/api/chat";
 import { ChatSessionItem } from "@/components/chat/chat-session-item";
-import { Loader2, MessageSquarePlus, MessageSquare } from "lucide-react";
+import { Loader2, MessageSquarePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-export default function ChatListPage() {
+function ChatListContent() {
     const { t } = useTranslation();
-    const { isAuthenticated, isCheckingAuth, LoginPromptModal } = useAuthRequired();
     const [sessions, setSessions] = useState<ChatSession[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!isAuthenticated) {
-            setLoading(false);
-            return;
-        }
         let cancelled = false;
         async function fetchData() {
             setLoading(true);
@@ -35,34 +30,7 @@ export default function ChatListPage() {
         }
         fetchData();
         return () => { cancelled = true; };
-    }, [isAuthenticated]);
-
-    if (!isAuthenticated) {
-        return (
-            <div className="flex-1 container max-w-6xl px-4 py-6 md:px-6 mx-auto flex items-center justify-center">
-                {isCheckingAuth ? (
-                    <div className="text-center space-y-4">
-                        <Loader2 className="h-12 w-12 mx-auto animate-spin text-primary" />
-                        <p className="text-muted-foreground">Checking authentication...</p>
-                    </div>
-                ) : (
-                    <div className="text-center space-y-4">
-                        <MessageSquare className="h-16 w-16 mx-auto text-muted-foreground" />
-                        <div>
-                            <h2 className="text-xl font-bold mb-2">Sign In Required</h2>
-                            <p className="text-muted-foreground max-w-md">
-                                Please sign in to access your chat conversations and start chatting with characters.
-                            </p>
-                        </div>
-                    </div>
-                )}
-                <LoginPromptModal
-                    title="Start Chatting"
-                    description="Sign in to view your chat history and continue conversations with characters."
-                />
-            </div>
-        );
-    }
+    }, []);
 
     return (
         <main className="flex-1 container max-w-6xl px-4 py-6 md:px-6 mx-auto">
@@ -100,5 +68,13 @@ export default function ChatListPage() {
                 )}
             </div>
         </main>
+    );
+}
+
+export default function ChatListPage() {
+    return (
+        <RequireAuth>
+            <ChatListContent />
+        </RequireAuth>
     );
 }

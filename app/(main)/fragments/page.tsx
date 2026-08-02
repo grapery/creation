@@ -9,6 +9,7 @@ import { FragmentVerticalFeed } from "@/components/fragment/fragment-vertical-fe
 import { StoryFragment, FragmentListResponse } from "@/lib/types";
 import { useAuth } from "@/providers/auth-provider";
 import { useLoginPrompt } from "@/components/auth/login-prompt";
+import { loginUrlWithNext } from "@/lib/auth-redirect";
 
 type FeedTab = "discover" | "following";
 type ViewMode = "grid" | "vertical";
@@ -16,7 +17,7 @@ type ViewMode = "grid" | "vertical";
 export default function FragmentsPage() {
     const router = useRouter();
     const { user } = useAuth();
-    const { show: showLoginPrompt } = useLoginPrompt();
+    const { show: showLoginPrompt, LoginPromptModal } = useLoginPrompt();
 
     const [activeTab, setActiveTab] = useState<FeedTab>("discover");
     const [viewMode, setViewMode] = useState<ViewMode>("grid");
@@ -56,10 +57,26 @@ export default function FragmentsPage() {
 
     const handleCreateClick = () => {
         if (!user) {
-            showLoginPrompt();
+            router.push(loginUrlWithNext("/fragments/create"));
             return;
         }
         router.push("/fragments/create");
+    };
+
+    const handleTabClick = (tab: FeedTab) => {
+        if (tab === "following" && !user) {
+            showLoginPrompt();
+            return;
+        }
+        setActiveTab(tab);
+    };
+
+    const handleSearchOpen = () => {
+        if (!user) {
+            showLoginPrompt();
+            return;
+        }
+        setShowSearch(true);
     };
 
     const tabs: { id: FeedTab; label: string; icon: typeof TrendingUp }[] = [
@@ -106,7 +123,7 @@ export default function FragmentsPage() {
                         </div>
                         <div className="flex items-center gap-2">
                             <button
-                                onClick={() => setShowSearch(true)}
+                                onClick={handleSearchOpen}
                                 className="p-2 hover:bg-muted rounded-lg transition-colors"
                                 title="Search"
                             >
@@ -148,7 +165,7 @@ export default function FragmentsPage() {
                         return (
                             <button
                                 key={tab.id}
-                                onClick={() => setActiveTab(tab.id)}
+                                onClick={() => handleTabClick(tab.id)}
                                 className={`relative flex items-center gap-2 px-2 pb-3 text-sm font-medium transition-colors ${
                                     activeTab === tab.id ? "text-foreground" : "text-muted-foreground hover:text-foreground/80"
                                 }`}
@@ -224,6 +241,7 @@ export default function FragmentsPage() {
                     )}
                 </>
             )}
+            <LoginPromptModal />
         </div>
     );
 }
