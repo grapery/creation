@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PenTool, Target, BookOpen, Compass, Sparkles, Bookmark } from "lucide-react";
+import { PenTool, Target, BookOpen, Compass, Sparkles, Bookmark, MessageSquare } from "lucide-react";
 import { useTranslation } from "@/providers/language-provider";
 import { AuthLink } from "@/components/auth/auth-link";
 
@@ -21,6 +21,12 @@ export function Sidebar({ className }: { className?: string }) {
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
+                    <Button className="w-full h-12 justify-start gap-2" asChild>
+                        <AuthLink href="/create/chat">
+                            <MessageSquare className="h-4 w-4" />
+                            <span>{t("sidebar.ai_chat", "AI Create")}</span>
+                        </AuthLink>
+                    </Button>
                     <div className="grid grid-cols-2 gap-2">
                         <Button variant="outline" className="h-20 flex-col gap-2" asChild>
                             <AuthLink href="/create">

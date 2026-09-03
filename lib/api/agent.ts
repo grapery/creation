@@ -43,14 +43,26 @@ export interface AgentGenerationEventPayload {
     message?: string;
     progress?: number;
     step?: string;
+    /** 服务端 progress/completed 事件实际携带的步骤名（analyzing/writing/…） */
+    currentStep?: string;
     taskId?: string;
+    runId?: string;
+    fragmentId?: string;
     draftFragmentId?: string;
     draftId?: string;
+    intent?: string;
+    imageCount?: number;
+    tokensUsed?: number;
     result?: {
         id?: string;
         content?: string;
         imageUrls?: string[];
         caption?: string;
+    };
+    output?: {
+        content?: string;
+        imageUrls?: string[];
+        [key: string]: unknown;
     };
     error?: string;
     assistantMessage?: string;

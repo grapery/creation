@@ -73,7 +73,7 @@
     "login_failed": "登录失败，请检查您的凭据。",
     "register_failed": "注册失败，请重试。",
     "full_name": "姓名",
-    "full_name_placeholder": "张三",
+    "full_name_placeholder": "请输入您的姓名",
     "date_of_birth": "出生日期",
     "age_requirement_notice": "您必须年满13岁才能使用此应用",
     "i_agree_to_the": "我同意",
@@ -105,12 +105,10 @@
     "already_have_account_sign_in": "已有账户？登录",
     "back_to_sign_in": "返回登录",
     "or_sign_up_with_email": "或使用邮箱注册",
-    "full_name_placeholder": "请输入您的姓名",
     "username_placeholder": "选择一个用户名",
     "create_password_placeholder": "创建密码",
     "confirm_password_placeholder": "确认您的密码",
     "create_account_button": "创建账户",
-    "i_agree_to_the": "我同意",
     "passwords_do_not_match_error": "密码不匹配",
     "age_requirement_error": "您必须年满13岁才能注册",
     "browse_as_guest": "游客浏览",
@@ -719,6 +717,25 @@
     "no_notifications": "暂无通知",
     "no_messages": "暂无消息"
   },
+  "create_chat": {
+    "title": "AI 创作",
+    "subtitle": "描述你的想象，助手会和你一起完成一篇带插画的碎片。",
+    "placeholder": "写下你想象中的故事…",
+    "empty_title": "告诉我你的灵感",
+    "empty_desc": "例如：雨夜咖啡馆里的陌生人",
+    "step_connecting": "连接中",
+    "step_accepted": "请求已接受",
+    "step_generating": "生成中",
+    "result_title": "你的碎片已就绪",
+    "view": "查看",
+    "publish": "发布",
+    "publishing": "发布中…",
+    "published": "已发布",
+    "publish_failed": "发布失败",
+    "failed": "生成失败",
+    "error_stream": "创作流连接失败",
+    "hint": "Enter 发送 · Shift+Enter 换行"
+  },
   "sidebar": {
     "creator_center": "创作中心",
     "write_story": "写故事",
@@ -726,7 +743,8 @@
     "storyboard": "故事板",
     "discover": "发现",
     "bookmarks": "收藏",
-    "search": "搜索"
+    "search": "搜索",
+    "ai_chat": "AI 创作"
   },
   "footer": {
     "about": "关于我们",

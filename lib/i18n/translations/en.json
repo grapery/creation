@@ -73,7 +73,7 @@
     "login_failed": "Login failed. Please check your credentials.",
     "register_failed": "Registration failed. Please try again.",
     "full_name": "Full Name",
-    "full_name_placeholder": "Alex Smith",
+    "full_name_placeholder": "Enter your full name",
     "date_of_birth": "Date of Birth",
     "age_requirement_notice": "You must be 13 or older to use this app",
     "i_agree_to_the": "I agree to the",
@@ -105,12 +105,10 @@
     "already_have_account_sign_in": "Already have an account? Sign in",
     "back_to_sign_in": "Back to Sign In",
     "or_sign_up_with_email": "or sign up with email",
-    "full_name_placeholder": "Enter your full name",
     "username_placeholder": "Choose a username",
     "create_password_placeholder": "Create a password",
     "confirm_password_placeholder": "Confirm your password",
     "create_account_button": "Create Account",
-    "i_agree_to_the": "I agree to the",
     "passwords_do_not_match_error": "Passwords do not match",
     "age_requirement_error": "You must be at least 13 years old to register",
     "browse_as_guest": "Browse as Guest",
@@ -719,6 +717,25 @@
     "no_notifications": "No notifications",
     "no_messages": "No messages"
   },
+  "create_chat": {
+    "title": "AI Create",
+    "subtitle": "Describe your idea — the assistant drafts an illustrated fragment with you.",
+    "placeholder": "Describe the story you imagine…",
+    "empty_title": "Tell me your idea",
+    "empty_desc": "e.g. A stranger in a café on a rainy night",
+    "step_connecting": "Connecting",
+    "step_accepted": "Request accepted",
+    "step_generating": "Generating",
+    "result_title": "Your fragment is ready",
+    "view": "View",
+    "publish": "Publish",
+    "publishing": "Publishing…",
+    "published": "Published",
+    "publish_failed": "Publish failed",
+    "failed": "Generation failed",
+    "error_stream": "Creation stream failed",
+    "hint": "Enter to send · Shift+Enter for a new line"
+  },
   "sidebar": {
     "creator_center": "Creator Center",
     "write_story": "Write Story",
@@ -726,7 +743,8 @@
     "storyboard": "Storyboard",
     "discover": "Discover",
     "bookmarks": "Bookmarks",
-    "search": "Search"
+    "search": "Search",
+    "ai_chat": "AI Create"
   },
   "footer": {
     "about": "About",

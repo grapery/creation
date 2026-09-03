@@ -73,7 +73,7 @@
     "login_failed": "ログインに失敗しました。認証情報を確認してください。",
     "register_failed": "登録に失敗しました。もう一度お試しください。",
     "full_name": "氏名",
-    "full_name_placeholder": "山田 太郎",
+    "full_name_placeholder": "氏名を入力",
     "date_of_birth": "生年月日",
     "age_requirement_notice": "StoryForge を利用するには 13 歳以上である必要があります",
     "i_agree_to_the": "同意します：",
@@ -105,12 +105,10 @@
     "already_have_account_sign_in": "アカウントをお持ちですか？サインイン",
     "back_to_sign_in": "サインインに戻る",
     "or_sign_up_with_email": "またはメールでサインアップ",
-    "full_name_placeholder": "氏名を入力",
     "username_placeholder": "ユーザー名を選択",
     "create_password_placeholder": "パスワードを作成",
     "confirm_password_placeholder": "パスワードを確認",
     "create_account_button": "アカウント作成",
-    "i_agree_to_the": "同意します：",
     "passwords_do_not_match_error": "パスワードが一致しません",
     "age_requirement_error": "登録するには13歳以上である必要があります",
     "browse_as_guest": "ゲストとして閲覧",
@@ -719,6 +717,25 @@
     "no_notifications": "通知はありません",
     "no_messages": "メッセージはありません"
   },
+  "create_chat": {
+    "title": "AIつくる",
+    "subtitle": "アイデアを伝えると、アシスタントがイラスト付きフラグメントを一緒に作ります。",
+    "placeholder": "思い描く物語を書いてください…",
+    "empty_title": "アイデアを聞かせて",
+    "empty_desc": "例：雨の夜、カフェにいた見知らぬ人",
+    "step_connecting": "接続中",
+    "step_accepted": "リクエスト受理",
+    "step_generating": "生成中",
+    "result_title": "フラグメントが完成しました",
+    "view": "見る",
+    "publish": "公開する",
+    "publishing": "公開中…",
+    "published": "公開済み",
+    "publish_failed": "公開に失敗しました",
+    "failed": "生成に失敗しました",
+    "error_stream": "作成ストリームに接続できません",
+    "hint": "Enterで送信 · Shift+Enterで改行"
+  },
   "sidebar": {
     "creator_center": "クリエイターセンター",
     "write_story": "ストーリーを作成",
@@ -726,7 +743,8 @@
     "storyboard": "ストーリーボード",
     "discover": "発見",
     "bookmarks": "ブックマーク",
-    "search": "検索"
+    "search": "検索",
+    "ai_chat": "AIつくる"
   },
   "footer": {
     "about": "私たちについて",
