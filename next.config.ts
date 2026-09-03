@@ -21,11 +21,10 @@ const nextConfig: NextConfig = {
   async rewrites() {
     const vippayOrigin = process.env.VIPPAY_ORIGIN || 'http://127.0.0.1:8060';
     const graperyOrigin = process.env.GRAPERY_ORIGIN || 'http://127.0.0.1:8080';
-    const agentOrigin = process.env.AGENT_ORIGIN || process.env.GRAPERY_AGENT_ORIGIN || 'http://127.0.0.1:8090';
+    const agentOrigin = process.env.AGENT_ORIGIN || process.env.GRAPERY_AGENT_ORIGIN || 'http://127.0.0.1:9020';
 
     return [
       // === DO NOT proxy these — handled by Next.js BFF routes ===
-      // /api/auth/me → app/api/auth/me/route.ts
       // /api/users/:id (exact) → app/api/users/[id]/route.ts
       // /api/legal/terms → app/api/legal/terms/route.ts
       // /api/legal/privacy → app/api/legal/privacy/route.ts
@@ -36,7 +35,7 @@ const nextConfig: NextConfig = {
         destination: `${vippayOrigin}/api/vippay/:path*`,
       },
 
-      // === grapery-agent creation/chat streams ===
+      // === grapery-agent creation/chat streams (agent SERVER_PORT defaults to 9020) ===
       {
         source: '/api/agent/:path*',
         destination: `${agentOrigin}/api/v1/agent/:path*`,

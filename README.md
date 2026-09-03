@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Grapery Creation Web
 
-## Getting Started
+Grapery 的用户侧 Web 创作站：故事 / 故事板 / 碎片的浏览与消费、个人主页、
+OAuth 登录（Apple / Google / 微信）、会员订阅与 Web 支付（Stripe / 微信 Native），
+以及故事板创作向导。与 iOS 主 App（voyager）共享同一套后端。
 
-First, run the development server:
+## 技术栈
+
+- **框架**：Next.js 16（App Router, standalone 输出）+ React 19
+- **UI**：Tailwind CSS 4 + Radix UI + lucide-react + framer-motion
+- **语言**：TypeScript；i18n 三语（简中 / English / 日本語，见 `lib/i18n/`）
+- **支付**：Stripe.js（`components/payment/payment-dialog.tsx`）
+
+## 快速开始
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev        # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+生产构建：
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build      # output: 'standalone'
+npm start
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 环境变量
 
-## Learn More
+| 变量 | 默认值 | 说明 |
+|------|--------|------|
+| `NEXT_PUBLIC_API_URL` | `http://127.0.0.1:8080` | grapery 主服务（BFF route 使用） |
+| `GRAPERY_ORIGIN` | `http://127.0.0.1:8080` | grapery 主服务（rewrite 代理目标） |
+| `VIPPAY_ORIGIN` | `http://127.0.0.1:8060` | vippay 支付服务 |
+| `AGENT_ORIGIN` / `GRAPERY_AGENT_ORIGIN` | `http://127.0.0.1:9020` | grapery-agent 创作服务 |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | — | Stripe 前端密钥（可选，镜像 vippay 配置） |
+| `COMMIT_SHA` | `build-<ts>` | 构建版本号 |
 
-To learn more about Next.js, take a look at the following resources:
+## 后端对接架构
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+浏览器只访问同源 `/api/*`，由 Next.js 分发（见 `next.config.ts` 的 rewrites）：
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| 前端路径 | 目标 | 说明 |
+|----------|------|------|
+| `/api/v1/*` | `${GRAPERY_ORIGIN}/api/v1/*` | 主业务 API 直通 |
+| `/api/vippay/*` | `${VIPPAY_ORIGIN}/api/vippay/*` | 支付 / OAuth / VIP |
+| `/api/agent/*` | `${AGENT_ORIGIN}/api/v1/agent/*` | 创作会话流（预留） |
+| `/api/auth/*`, `/api/public/*` | grapery 对应路径 | 公开接口 |
+| `/api/*`（其余） | `${GRAPERY_ORIGIN}/api/v1/*` | 旧路径归一化 |
+| `app/api/**/route.ts` | Next.js BFF | 少量需要服务端处理的接口 |
 
-## Deploy on Vercel
+登录态：JWT + refresh token 存 `localStorage`，axios 拦截器统一注入
+`Authorization` 并处理 401 刷新（`lib/api/client.ts`）。
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 相关文档
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [API_ALIGNMENT.md](./API_ALIGNMENT.md) — 前后端接口对齐说明
+- [PAYMENT_SETUP.md](./PAYMENT_SETUP.md) — Web 支付（Stripe / 微信）配置
+- [DEPLOYMENT.md](./DEPLOYMENT.md) — 部署流程

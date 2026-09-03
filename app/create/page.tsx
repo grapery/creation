@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Share2, Users, Search, ChevronLeft, ChevronRight, Eye, MessageSquare, Sparkles, Save, AlertTriangle, Trash2, Plus, X, RefreshCw, Minus, Loader2 } from "lucide-react";
+import { Share2, Users, Search, ChevronLeft, ChevronRight, Eye, MessageSquare, Sparkles, Save, AlertTriangle, Trash2, Plus, X, RefreshCw, Minus, Loader2, Image as ImageIcon, ImagePlus, Wand2, Coins, CheckCircle2, Wallpaper } from "lucide-react";
 import { stories } from "@/lib/api/stories";
 import { characters } from "@/lib/api/characters";
 import { showSuccess, showError } from "@/lib/toast-utils";
@@ -101,9 +101,7 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                 if (prefill.genre) setSelectedGenres([prefill.genre]);
                 if (prefill.defaultSceneCount) setDefaultSceneCount(prefill.defaultSceneCount);
                 if (prefill.limitTitleToSevenCharacters) setTitleMaxLength(7);
-                if (prefill.suggestedTags && prefill.suggestedTags.length > 0) {
-                    // Tags will be applied to the request
-                }
+                // suggestedTags are applied via `tags` in the create request
             } catch (e) {
                 console.error("Failed to parse fragment prefill:", e);
             }
@@ -147,9 +145,8 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
 
     const tabs = [
         { id: 0, label: "Details" },
-        { id: 1, label: "Panels" },
-        { id: 2, label: "Cast" },
-        { id: 3, label: "Settings" }
+        { id: 1, label: "Cast" },
+        { id: 2, label: "Settings" }
     ];
 
     const toggleGenre = (key: string) => {
@@ -417,9 +414,7 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                                     </>
                                 ) : (
                                     <>
-                                        <svg className="w-12 h-12 text-muted-foreground mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-8a3 3 0 006 1.061l-.431.431.061-3.061L6 6a2 2 0 002.828 2.828-2.828A3 3 0 006 1.061l-.431.431.061-3.061L16 16z" />
-                                        </svg>
+                                        <ImagePlus className="w-12 h-12 text-muted-foreground mb-2" />
                                         <p className="text-sm text-muted-foreground mb-2">Click to upload cover image</p>
                                         <button
                                             onClick={triggerFileInput}
@@ -436,9 +431,7 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                         {/* AI Enrichment Section */}
                         <div className="p-4 bg-purple-50/10 border border-purple-500/20 rounded-xl">
                             <h4 className="text-base font-semibold text-purple-900 mb-3 flex items-center gap-2">
-                                <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M17 20h5v-2a3 3 0 006 1.061l-.431.431.061-3.061L16 16z" />
-                                </svg>
+                                <Sparkles className="w-5 h-5 text-purple-600" />
                                 AI Smart Creation
                             </h4>
                             <p className="text-sm text-muted-foreground mb-4">AI can help enhance your story with descriptions and images</p>
@@ -448,9 +441,7 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                                 {/* Enrich Description Toggle */}
                                 <div className="flex items-center justify-between p-3 bg-card rounded-lg">
                                     <div className="flex items-center gap-3">
-                                        <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 3v1m6.364 1.636l-.707.707M17 20h5v-2a3 3 0 006 1.061l-.431.431.061-3.061L16 16z" />
-                                        </svg>
+                                        <Wand2 className="w-5 h-5 text-purple-600" />
                                         <span className="text-sm font-medium">Enrich story description</span>
                                         <span className="text-xs text-muted-foreground ml-2">Make your story more engaging</span>
                                     </div>
@@ -466,9 +457,7 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                                 {/* Generate Cover Toggle */}
                                 <div className="flex items-center justify-between p-3 bg-card rounded-lg">
                                     <div className="flex items-center gap-3">
-                                        <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-8a3 3 0 006 1.061l-.431.431.061-3.061L16 16z" />
-                                        </svg>
+                                        <ImageIcon className="w-5 h-5 text-purple-600" />
                                         <span className="text-sm font-medium">Generate cover image</span>
                                         <span className="text-xs text-muted-foreground ml-2">Create stunning story cover</span>
                                     </div>
@@ -483,9 +472,7 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                                 {/* Generate Background Toggle */}
                                 <div className="flex items-center justify-between p-3 bg-card rounded-lg">
                                     <div className="flex items-center gap-3">
-                                        <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-8a3 3 0 006 1.061l-.431.431.061-3.061L16 16z" />
-                                        </svg>
+                                        <Wallpaper className="w-5 h-5 text-purple-600" />
                                         <span className="text-sm font-medium">Generate background image</span>
                                         <span className="text-xs text-muted-foreground ml-2">Create immersive background</span>
                                     </div>
@@ -601,9 +588,7 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                             {/* Token Usage Info */}
                             {(useAIEnrich || generateCover || generateBackground) && (
                                 <div className="flex items-center gap-2 p-3 bg-orange-50/10 rounded-lg">
-                                    <svg className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v8m0-6l-6-6h24l-6 6h24l-6 6V8z" />
-                                    </svg>
+                                    <Coins className="w-4 h-4 text-orange-500" />
                                     <span className="text-xs font-medium">This action will consume tokens</span>
                                     <span className="text-sm font-semibold text-orange-600">~1,250 tokens</span>
                                 </div>
@@ -613,9 +598,7 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                             {aiEnrichedDescription.length > 0 && (
                                 <div className="p-4 bg-green-50/10 rounded-lg">
                                     <div className="flex items-center gap-2 mb-2">
-                                        <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2-2a2 2 0 010 10l2 2-2a2 2 010-10-10l-2 2-6a2 2 0 010-10-10-2-2-10V12l2 2-6a2 2 0 010-10l-2-2-10-10l-2-2z" />
-                                        </svg>
+                                        <CheckCircle2 className="w-5 h-5 text-green-500" />
                                         <span className="text-sm font-semibold text-green-700">AI Enriched Description</span>
                                     </div>
                                     <p className="text-sm text-foreground leading-relaxed line-clamp-4">
@@ -628,42 +611,6 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                 )}
 
                 {selectedTab === 1 && (
-                    <div className="space-y-4">
-                        <h3 className="text-xl font-semibold text-foreground">Panels</h3>
-
-                        {/* Header with Add Button */}
-                        <div className="flex items-center justify-between">
-                            <p className="text-sm text-muted-foreground">
-                                0 panels
-                            </p>
-                            <button className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m0 0-6-6h24l-6 6h24l-6 6V4z" />
-                                </svg>
-                                <span className="text-sm font-medium">Add Panel</span>
-                            </button>
-                        </div>
-
-                        {/* Empty State */}
-                        <div className="flex flex-col items-center justify-center py-16 border-2 border-dashed border-border rounded-lg">
-                            <svg className="w-16 h-16 text-muted-foreground mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 5a1 1 0 011-1 1 1.061 3 0 001 1.061l-3 3a1 1 0 015-15 15-15 15v-6l-6-6-6h24l-6-6 6h24l-6-6V5a1 1 0 01-1-1 061-3 0-001-1-1-061-3z" />
-                            </svg>
-                            <p className="text-lg font-semibold text-foreground mb-2">No Panels Yet</p>
-                            <p className="text-sm text-muted-foreground mb-4">
-                                Create your first panel to begin visualizing your story
-                            </p>
-                            <button className="flex items-center gap-2 px-4 py-2 bg-purple-500 text-white rounded-lg">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M17 20h5v-2a3 3 0 006 1.061l-.431.431.061-3.061L16 16z" />
-                                </svg>
-                                <span className="text-sm font-medium">Create First Panel with AI</span>
-                            </button>
-                        </div>
-                    </div>
-                )}
-
-                {selectedTab === 2 && (
                     <div className="space-y-4">
                         <h3 className="text-xl font-semibold text-foreground">Cast</h3>
 
@@ -776,7 +723,7 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                 )}
 
                 {/* Settings Tab */}
-                {selectedTab === 3 && (
+                {selectedTab === 2 && (
                     <div className="space-y-6">
                         <h3 className="text-xl font-semibold text-foreground">Publish Settings</h3>
 
@@ -916,9 +863,7 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                             </>
                         ) : useAIEnrich || generateCover || generateBackground ? (
                             <>
-                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M17 20h5v-2a3 3 0 006 1.061l-.431.431.061-3.061L16 16z" />
-                                </svg>
+                                <Sparkles className="w-4 h-4 mr-2" />
                                 AI Create
                             </>
                         ) : (

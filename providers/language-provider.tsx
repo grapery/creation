@@ -1,7 +1,34 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Language, DEFAULT_LANGUAGE, LANGUAGE_NAMES, translations } from '@/lib/i18n/translations';
+import React, { createContext, useCallback, useContext, useEffect, useSyncExternalStore } from 'react';
+import { Language, DEFAULT_LANGUAGE, translations } from '@/lib/i18n/translations';
+
+const LANGUAGE_STORAGE_KEY = 'language';
+const LANGUAGE_CHANGE_EVENT = 'grapery:language-change';
+
+function isLanguage(value: string | null): value is Language {
+  return !!value && value in translations;
+}
+
+/** Client-only snapshot: saved preference, else browser language, else default. */
+function readClientLanguage(): Language {
+  const saved = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
+  if (isLanguage(saved)) return saved;
+  const browserLang = navigator.language;
+  if (browserLang.startsWith('zh')) return 'zh-Hans';
+  if (browserLang.startsWith('ja')) return 'ja';
+  return DEFAULT_LANGUAGE;
+}
+
+/** Subscribe to same-tab changes and cross-tab storage sync. */
+function subscribeLanguage(callback: () => void): () => void {
+  window.addEventListener(LANGUAGE_CHANGE_EVENT, callback);
+  window.addEventListener('storage', callback);
+  return () => {
+    window.removeEventListener(LANGUAGE_CHANGE_EVENT, callback);
+    window.removeEventListener('storage', callback);
+  };
+}
 
 interface LanguageContextType {
   language: Language;
@@ -13,45 +40,31 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguageState] = useState<Language>(DEFAULT_LANGUAGE);
-  const [isMounted, setIsMounted] = useState(false);
+  // Server render uses the default; after hydration the stored/browser
+  // preference takes over without a hydration mismatch.
+  const language = useSyncExternalStore(
+    subscribeLanguage,
+    readClientLanguage,
+    () => DEFAULT_LANGUAGE
+  );
 
-  useEffect(() => {
-    setIsMounted(true);
-    const savedLanguage = localStorage.getItem('language') as Language;
-    if (savedLanguage && translations[savedLanguage]) {
-      setLanguageState(savedLanguage);
-    } else {
-      // Try to detect browser language if no preference saved
-      const browserLang = navigator.language;
-      if (browserLang.startsWith('zh')) {
-        setLanguageState('zh-Hans');
-      } else if (browserLang.startsWith('ja')) {
-        setLanguageState('ja');
-      }
-    }
+  const setLanguage = useCallback((newLanguage: Language) => {
+    window.localStorage.setItem(LANGUAGE_STORAGE_KEY, newLanguage);
+    window.dispatchEvent(new Event(LANGUAGE_CHANGE_EVENT));
   }, []);
 
-  const setLanguage = (newLanguage: Language) => {
-    setLanguageState(newLanguage);
-    localStorage.setItem('language', newLanguage);
-    document.documentElement.lang = newLanguage;
-  };
-
-  // Set document language on mount/change
+  // Keep the document language attribute in sync (external system).
   useEffect(() => {
-    if (isMounted) {
-      document.documentElement.lang = language;
-    }
-  }, [language, isMounted]);
+    document.documentElement.lang = language;
+  }, [language]);
 
   // Translation function
-  const t = (key: string, defaultValueOrParams?: string | Record<string, string | number>, params?: Record<string, string | number>): string => {
+  const t = useCallback((key: string, defaultValueOrParams?: string | Record<string, string | number>, params?: Record<string, string | number>): string => {
     const keys = key.split('.');
-    let value: any = translations[language];
+    let value: unknown = translations[language];
 
     for (const k of keys) {
-      value = value?.[k];
+      value = (value as Record<string, unknown> | undefined)?.[k];
     }
 
     let result = (typeof value === 'string' ? value : undefined);
@@ -76,7 +89,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     }
 
     return result;
-  };
+  }, [language]);
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t }}>
