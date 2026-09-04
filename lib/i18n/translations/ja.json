@@ -734,7 +734,12 @@
     "publish_failed": "公開に失敗しました",
     "failed": "生成に失敗しました",
     "error_stream": "作成ストリームに接続できません",
-    "hint": "Enterで送信 · Shift+Enterで改行"
+    "hint": "Enterで送信 · Shift+Enterで改行",
+    "target_fragment": "フラグメント",
+    "target_storyboard": "ストーリーボード",
+    "result_storyboard_title": "ストーリーボードが完成しました",
+    "scenes": "シーン",
+    "completed": "生成が完了しました。"
   },
   "sidebar": {
     "creator_center": "クリエイターセンター",

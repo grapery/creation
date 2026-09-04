@@ -1,5 +1,5 @@
-import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { ErrorCodes, getErrorInfo, isAuthError, canRefreshToken, shouldRedirectToLogin } from './error-codes';
+import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
+import { canRefreshToken, isAuthError, shouldRedirectToLogin } from './error-codes';
 
 // Service Types
 export enum ServiceType {
@@ -16,7 +16,7 @@ const SERVICE_URLS = {
 };
 
 // API Response Wrapper
-export interface APIResponse<T = any> {
+export interface APIResponse<T = unknown> {
     code: number;
     message: string;
     data?: T;
@@ -147,9 +147,9 @@ export const setupAuthListeners = () => {
 // Error Class
 export class APIError extends Error {
     code: number;
-    originalError?: any;
+    originalError?: unknown;
 
-    constructor(message: string, code: number, originalError?: any) {
+    constructor(message: string, code: number, originalError?: unknown) {
         super(message);
         this.name = 'APIError';
         this.code = code;
@@ -182,32 +182,36 @@ const createClient = (serviceType: ServiceType = ServiceType.MAIN): AxiosInstanc
     );
 
     // Response Interceptor
-    client.interceptors.response.use(
-        (response: AxiosResponse<APIResponse>) => {
-            const { data } = response;
+    // 解包 grapery {code,message,data} 信封：成功时直接返回业务数据，失败时 reject APIError。
+    // axios 1.20 要求 onFulfilled 返回 AxiosResponse，与解包语义不兼容，注册处做一次显式断言。
+    const unwrapEnvelope = (response: AxiosResponse<APIResponse>): unknown => {
+        const { data } = response;
 
-            // Handle standard envelope
-            // Grapery often uses code===1; vippay web payments use code===0 with data (no success bool)
-            if (data && typeof data.code === 'number') {
-                const isPaymentService = serviceType === ServiceType.PAYMENT;
-                const isSuccess = isPaymentService
-                    ? data.code === 0 || data.code === 1 || (data as { success?: boolean }).success === true
-                    : data.code === 1 || data.code === 0;
+        // Handle standard envelope
+        // Grapery often uses code===1; vippay web payments use code===0 with data (no success bool)
+        if (data && typeof data.code === 'number') {
+            const isPaymentService = serviceType === ServiceType.PAYMENT;
+            const isSuccess = isPaymentService
+                ? data.code === 0 || data.code === 1 || (data as { success?: boolean }).success === true
+                : data.code === 1 || data.code === 0;
 
-                if (isSuccess) {
-                    return data.data ?? data;
-                } else {
-                    return Promise.reject(new APIError(data.message || data.msg || 'Unknown error', data.code));
-                }
+            if (isSuccess) {
+                return data.data ?? data;
             }
+            return Promise.reject(new APIError(data.message || data.msg || 'Unknown error', data.code));
+        }
 
-            return data;
-        },
+        return data;
+    };
+
+    client.interceptors.response.use(
+        unwrapEnvelope as unknown as Parameters<typeof client.interceptors.response.use>[0],
         (error: AxiosError) => {
             if (error.response) {
                 const { status, data } = error.response;
-                const errorCode = (data as any)?.code;
-                const errorMessage = (data as any)?.message || (data as any)?.msg || error.message;
+                const errBody = (data ?? {}) as { code?: number; message?: string; msg?: string };
+                const errorCode = errBody.code ?? status;
+                const errorMessage = errBody.message || errBody.msg || error.message;
 
                 // Only log errors in development or for non-connection errors
                 if (process.env.NODE_ENV === 'development' && status !== 0 && status !== 503) {
@@ -335,15 +339,17 @@ export const AI_TIMEOUT = 120000;
 export const request = async <T>(
     endpoint: string,
     method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET',
-    body?: any,
+    body?: unknown,
     client: AxiosInstance = apiClient,
     timeout?: number
 ): Promise<T> => {
-    const response = await client.request<any, T>({
+    // 响应拦截器已把 {code,message,data} 信封解包为业务数据，
+    // 这里仅做类型收窄（axios 1.20 的 request 泛型签名与拦截器解包后的运行时形状不一致）。
+    const response = await client.request<unknown, T>({
         url: endpoint,
         method,
         data: body,
         timeout: timeout,
     });
-    return response;
+    return response as T;
 };

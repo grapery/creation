@@ -734,7 +734,12 @@
     "publish_failed": "Publish failed",
     "failed": "Generation failed",
     "error_stream": "Creation stream failed",
-    "hint": "Enter to send · Shift+Enter for a new line"
+    "hint": "Enter to send · Shift+Enter for a new line",
+    "target_fragment": "Fragment",
+    "target_storyboard": "Storyboard",
+    "result_storyboard_title": "Your storyboard is ready",
+    "scenes": "scenes",
+    "completed": "Generation completed."
   },
   "sidebar": {
     "creator_center": "Creator Center",

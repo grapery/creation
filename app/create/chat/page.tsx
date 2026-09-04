@@ -2,12 +2,13 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Send, Square, Sparkles, Loader2, Eye, UploadCloud, AlertCircle } from "lucide-react";
+import { Send, Square, Sparkles, Loader2, Eye, UploadCloud, AlertCircle, Image as ImageIcon, Clapperboard } from "lucide-react";
 import { RequireAuth } from "@/components/auth/require-auth";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/providers/language-provider";
 import { showError, showSuccess } from "@/lib/toast-utils";
 import { fragments } from "@/lib/api/fragments";
+import { storyboards } from "@/lib/api/storyboards";
 import {
     AgentCreationMessageRequest,
     AgentGenerationEventPayload,
@@ -15,17 +16,17 @@ import {
     streamCreationMessage,
 } from "@/lib/api/agent";
 
+type CreationTarget = "fragment" | "storyboard";
+
 interface ChatMessage {
     id: string;
     role: "user" | "assistant" | "status" | "error";
     text: string;
 }
 
-interface FragmentResult {
-    fragmentId: string;
-    content?: string;
-    images: string[];
-}
+type CreationResult =
+    | { kind: "fragment"; fragmentId: string; content?: string; images: string[] }
+    | { kind: "storyboard"; storyboardId: string; content?: string; images: string[]; sceneCount?: number };
 
 function uid(): string {
     return typeof crypto !== "undefined" && "randomUUID" in crypto
@@ -52,22 +53,38 @@ function CreateChatContent() {
     const { t } = useTranslation();
     const router = useRouter();
 
+    const [target, setTarget] = useState<CreationTarget>("fragment");
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [input, setInput] = useState("");
     const [isStreaming, setIsStreaming] = useState(false);
     const [activity, setActivity] = useState<{ step: string; progress: number } | null>(null);
-    const [result, setResult] = useState<FragmentResult | null>(null);
+    const [result, setResult] = useState<CreationResult | null>(null);
     const [isPublishing, setIsPublishing] = useState(false);
     const [published, setPublished] = useState(false);
 
     const sessionIdRef = useRef<string>("");
-    const draftIdRef = useRef<string>("");
+    const draftRef = useRef<{ fragmentId: string; storyboardId: string }>({ fragmentId: "", storyboardId: "" });
     const abortRef = useRef<AbortController | null>(null);
     const bottomRef = useRef<HTMLDivElement>(null);
 
     const sessionId = useCallback((): string => {
         if (!sessionIdRef.current) sessionIdRef.current = `cs_${uid()}`;
         return sessionIdRef.current;
+    }, []);
+
+    // 切换目标 = 开启新创作会话（草稿引用、历史与结果一并重置）
+    const switchTarget = useCallback((next: CreationTarget) => {
+        setTarget((prev) => {
+            if (prev === next) return prev;
+            draftRef.current = { fragmentId: "", storyboardId: "" };
+            sessionIdRef.current = "";
+            setMessages([]);
+            setResult(null);
+            setPublished(false);
+            setActivity(null);
+            setInput("");
+            return next;
+        });
     }, []);
 
     useEffect(() => () => abortRef.current?.abort(), []);
@@ -82,8 +99,11 @@ function CreateChatContent() {
 
     const handleEvent = useCallback(
         (event: string, data: AgentGenerationEventPayload) => {
-            const draftId = data.draftFragmentId || data.draftId || data.fragmentId;
-            if (draftId) draftIdRef.current = draftId;
+            const fragmentId = data.draftFragmentId || data.draftId || data.fragmentId;
+            if (fragmentId) draftRef.current.fragmentId = fragmentId;
+            // progress/completed 事件不带 storyboardId，必须从 task_started 捕获
+            const storyboardId = data.storyboardId || data.draftStoryboardId;
+            if (storyboardId) draftRef.current.storyboardId = storyboardId;
 
             switch (event) {
                 case "accepted":
@@ -91,7 +111,10 @@ function CreateChatContent() {
                     break;
                 case "intent":
                     setActivity({
-                        step: `${data.intent || ""}${data.imageCount ? ` · ${data.imageCount} images` : ""}`.trim(),
+                        step:
+                            target === "fragment"
+                                ? `${data.intent || ""}${data.imageCount ? ` · ${data.imageCount} images` : ""}`.trim()
+                                : `${data.intent || ""}${data.sceneCount ? ` · ${data.sceneCount} scenes` : ""}`.trim(),
                         progress: 0.05,
                     });
                     break;
@@ -118,33 +141,62 @@ function CreateChatContent() {
                     break;
             }
         },
-        // finalize 通过 ref 稳定引用，不进依赖
+        // finalize 经 ref 稳定，不进依赖
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [push, t]
+        [push, t, target]
     );
 
     const finalize = useCallback(
         async (data: AgentGenerationEventPayload) => {
-            const fragmentId = data.draftFragmentId || data.draftId || data.fragmentId || draftIdRef.current;
-            const outputImages = data.output?.imageUrls || data.result?.imageUrls || [];
-            if (!fragmentId) {
-                setResult({ fragmentId: "", images: outputImages });
+            if (target === "fragment") {
+                const fragmentId = data.draftFragmentId || data.draftId || data.fragmentId || draftRef.current.fragmentId;
+                const outputImages = data.output?.imageUrls || data.result?.imageUrls || [];
+                if (!fragmentId) {
+                    setResult({ kind: "fragment", fragmentId: "", images: outputImages });
+                    return;
+                }
+                draftRef.current.fragmentId = fragmentId;
+                try {
+                    const frag = await fragments.get(fragmentId);
+                    setResult({
+                        kind: "fragment",
+                        fragmentId,
+                        content: frag.content,
+                        images: frag.imageUrls?.length ? frag.imageUrls : outputImages,
+                    });
+                } catch {
+                    setResult({ kind: "fragment", fragmentId, images: outputImages });
+                }
                 return;
             }
-            draftIdRef.current = fragmentId;
+
+            const storyboardId =
+                data.storyboardId || data.draftStoryboardId || draftRef.current.storyboardId ||
+                (typeof (data.output as Record<string, unknown> | undefined)?.storyboardId === "string"
+                    ? (data.output as Record<string, unknown>).storyboardId as string
+                    : "");
+            if (!storyboardId) {
+                push("status", t("create_chat.completed", "Generation completed."));
+                return;
+            }
+            draftRef.current.storyboardId = storyboardId;
             try {
-                const frag = await fragments.get(fragmentId);
+                const sb = await storyboards.get(storyboardId);
+                const sceneImages = (sb.storyboardScenes || [])
+                    .map((s) => s.image)
+                    .filter((u): u is string => !!u);
                 setResult({
-                    fragmentId,
-                    content: frag.content,
-                    images: frag.imageUrls?.length ? frag.imageUrls : outputImages,
+                    kind: "storyboard",
+                    storyboardId,
+                    content: sb.content,
+                    images: sb.images?.length ? sb.images : sceneImages,
+                    sceneCount: sb.sceneCount ?? sb.storyboardScenes?.length,
                 });
             } catch {
-                // 详情拉取失败不阻断展示流内已带出的图
-                setResult({ fragmentId, images: outputImages });
+                setResult({ kind: "storyboard", storyboardId, images: [] });
             }
         },
-        []
+        [push, t, target]
     );
 
     const send = useCallback(async () => {
@@ -163,24 +215,32 @@ function CreateChatContent() {
 
         try {
             const token = await issueAgentAccessToken({
-                agent: "fragment",
+                agent: target,
                 operation: "generate",
                 sessionId: sessionId(),
-                maxImages: 4,
+                ...(target === "fragment" ? { maxImages: 4 } : {}),
             });
 
+            const draftId = target === "fragment" ? draftRef.current.fragmentId : draftRef.current.storyboardId;
             const body: AgentCreationMessageRequest = {
                 message: text,
                 clientRequestId: uid(),
-                context: {
-                    surface: draftIdRef.current ? "fragment_edit" : "fragment_create",
-                    targetType: "fragment",
-                    draftId: draftIdRef.current || null,
-                },
-                options: {
-                    imageCount: 4,
-                    consistencyLevel: "standard",
-                },
+                context:
+                    target === "fragment"
+                        ? {
+                              surface: draftId ? "fragment_edit" : "fragment_create",
+                              targetType: "fragment",
+                              draftId: draftId || null,
+                          }
+                        : {
+                              surface: draftId ? "storyboard_edit" : "storyboard_create",
+                              targetType: "storyboard",
+                              draftId: draftId || null,
+                          },
+                options:
+                    target === "fragment"
+                        ? { imageCount: 4, consistencyLevel: "standard" }
+                        : { sceneCount: 3 },
             };
 
             for await (const ev of streamCreationMessage(sessionId(), token.agentAccessToken, body, controller.signal)) {
@@ -196,20 +256,27 @@ function CreateChatContent() {
             setActivity(null);
             abortRef.current = null;
         }
-    }, [input, isStreaming, push, handleEvent, sessionId, t]);
+    }, [input, isStreaming, push, handleEvent, sessionId, t, target]);
 
     const stop = useCallback(() => {
         abortRef.current?.abort();
     }, []);
 
     const publish = useCallback(async () => {
-        if (!result?.fragmentId || isPublishing || published) return;
+        if (!result || isPublishing || published) return;
         setIsPublishing(true);
         try {
-            await fragments.update(result.fragmentId, { isDraft: false });
+            let href = "";
+            if (result.kind === "fragment") {
+                await fragments.update(result.fragmentId, { isDraft: false });
+                href = `/fragments/${result.fragmentId}`;
+            } else {
+                await storyboards.publish(result.storyboardId);
+                href = `/storyboards/${result.storyboardId}`;
+            }
             setPublished(true);
             showSuccess(t("create_chat.published", "Published"));
-            router.push(`/fragments/${result.fragmentId}`);
+            router.push(href);
         } catch (e) {
             showError(
                 t("create_chat.publish_failed", "Publish failed"),
@@ -220,10 +287,13 @@ function CreateChatContent() {
         }
     }, [result, isPublishing, published, router, t]);
 
+    const resultId = result ? (result.kind === "fragment" ? result.fragmentId : result.storyboardId) : "";
+    const resultHref = result ? (result.kind === "fragment" ? `/fragments/${result.fragmentId}` : `/storyboards/${result.storyboardId}`) : "";
+
     return (
         <div className="max-w-3xl mx-auto flex flex-col min-h-[70vh]">
             {/* Header */}
-            <div className="pb-4">
+            <div className="pb-3">
                 <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
                     <Sparkles className="h-6 w-6 text-primary" />
                     {t("create_chat.title", "AI Create")}
@@ -231,6 +301,32 @@ function CreateChatContent() {
                 <p className="text-muted-foreground text-sm mt-1">
                     {t("create_chat.subtitle", "Describe your idea — the assistant drafts an illustrated fragment with you.")}
                 </p>
+            </div>
+
+            {/* Target switcher */}
+            <div className="flex gap-1 p-1 rounded-xl border border-border bg-card w-fit mb-2">
+                <button
+                    type="button"
+                    onClick={() => switchTarget("fragment")}
+                    disabled={isStreaming}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${
+                        target === "fragment" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                    }`}
+                >
+                    <ImageIcon className="h-4 w-4" />
+                    {t("create_chat.target_fragment", "Fragment")}
+                </button>
+                <button
+                    type="button"
+                    onClick={() => switchTarget("storyboard")}
+                    disabled={isStreaming}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${
+                        target === "storyboard" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                    }`}
+                >
+                    <Clapperboard className="h-4 w-4" />
+                    {t("create_chat.target_storyboard", "Storyboard")}
+                </button>
             </div>
 
             {/* Messages */}
@@ -302,33 +398,40 @@ function CreateChatContent() {
                 {/* Result card */}
                 {result && (
                     <div className="rounded-xl border border-border bg-card p-4 space-y-3">
-                        <p className="text-sm font-medium">{t("create_chat.result_title", "Your fragment is ready")}</p>
+                        <p className="text-sm font-medium">
+                            {result.kind === "fragment"
+                                ? t("create_chat.result_title", "Your fragment is ready")
+                                : t("create_chat.result_storyboard_title", "Your storyboard is ready")}
+                            {result.kind === "storyboard" && result.sceneCount
+                                ? ` · ${result.sceneCount} ${t("create_chat.scenes", "scenes")}`
+                                : ""}
+                        </p>
                         {result.content && (
                             <p className="text-sm text-muted-foreground line-clamp-4 whitespace-pre-wrap">{result.content}</p>
                         )}
                         {result.images.length > 0 && (
-                            <div className="grid grid-cols-2 gap-2">
+                            <div className={`grid gap-2 ${result.kind === "fragment" ? "grid-cols-2" : "grid-cols-3"}`}>
                                 {result.images.map((url, i) => (
                                     // eslint-disable-next-line @next/next/no-img-element
                                     <img
                                         key={`${url}-${i}`}
                                         src={url}
-                                        alt={`fragment image ${i + 1}`}
+                                        alt={`${result.kind} image ${i + 1}`}
                                         className="w-full aspect-square object-cover rounded-lg border border-border"
                                     />
                                 ))}
                             </div>
                         )}
                         <div className="flex gap-2 pt-1">
-                            {result.fragmentId && (
+                            {resultId && (
                                 <Button variant="outline" size="sm" asChild>
-                                    <a href={`/fragments/${result.fragmentId}`}>
+                                    <a href={resultHref}>
                                         <Eye className="h-4 w-4" />
                                         {t("create_chat.view", "View")}
                                     </a>
                                 </Button>
                             )}
-                            {result.fragmentId && !published && (
+                            {resultId && !published && (
                                 <Button size="sm" onClick={publish} disabled={isPublishing}>
                                     <UploadCloud className="h-4 w-4" />
                                     {isPublishing

@@ -17,9 +17,11 @@ export interface AgentCreationMessageRequest {
     message: string;
     clientRequestId: string;
     context: {
-        surface: 'fragment_create' | 'fragment_edit';
-        targetType: 'fragment';
+        surface?: 'fragment_create' | 'fragment_edit' | 'storyboard_create' | 'storyboard_edit';
+        targetType: 'fragment' | 'storyboard' | 'story' | 'branch';
         draftId?: string | null;
+        storyId?: string | null;
+        parentStoryboardId?: string | null;
         selectedImageIndex?: number | null;
     };
     options: {
@@ -37,7 +39,6 @@ export interface AgentCreationMessageRequest {
         includeGenerationTrace?: boolean;
     };
 }
-
 export interface AgentGenerationEventPayload {
     status?: string;
     message?: string;
@@ -50,6 +51,9 @@ export interface AgentGenerationEventPayload {
     fragmentId?: string;
     draftFragmentId?: string;
     draftId?: string;
+    storyboardId?: string;
+    draftStoryboardId?: string;
+    sceneCount?: number;
     intent?: string;
     imageCount?: number;
     tokensUsed?: number;

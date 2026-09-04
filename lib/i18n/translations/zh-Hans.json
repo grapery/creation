@@ -734,7 +734,12 @@
     "publish_failed": "发布失败",
     "failed": "生成失败",
     "error_stream": "创作流连接失败",
-    "hint": "Enter 发送 · Shift+Enter 换行"
+    "hint": "Enter 发送 · Shift+Enter 换行",
+    "target_fragment": "碎片",
+    "target_storyboard": "故事板",
+    "result_storyboard_title": "你的故事板已就绪",
+    "scenes": "个场景",
+    "completed": "生成完成。"
   },
   "sidebar": {
     "creator_center": "创作中心",
