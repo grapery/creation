@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useMemo, useEffect, useState, useCallback } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { stories } from "@/lib/api/stories";
 import { storyboards } from "@/lib/api/storyboards";
@@ -17,7 +17,7 @@ export default function StoryReadPage() {
     const { id } = useParams<{ id: string }>();
     const router = useRouter();
     const searchParams = useSearchParams();
-    const shareGrant = parseShareGrant(searchParams);
+    const shareGrant = useMemo(() => parseShareGrant(searchParams), [searchParams]);
     const boardIdParam = searchParams.get("board");
 
     const [loading, setLoading] = useState(true);
@@ -62,7 +62,7 @@ export default function StoryReadPage() {
         return () => {
             cancelled = true;
         };
-    }, [id, boardIdParam, shareGrant?.token, shareGrant?.exp]);
+    }, [id, boardIdParam, shareGrant]);
 
     const go = useCallback(
         (delta: number) => {

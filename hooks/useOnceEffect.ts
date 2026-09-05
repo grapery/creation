@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps -- once-effect 工具：依赖数组由调用方透传，非字面量与 effect 引用均为 API 设计的一部分 */
 import { useEffect, useRef } from 'react';
 
 /**

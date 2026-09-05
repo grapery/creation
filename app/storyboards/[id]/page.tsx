@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useMemo, useEffect, useState, useRef } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Header } from "@/components/layout/header";
@@ -24,7 +24,7 @@ export default function StoryboardPage() {
     const { t } = useTranslation();
     const { id } = useParams();
     const searchParams = useSearchParams();
-    const shareGrant = parseShareGrant(searchParams);
+    const shareGrant = useMemo(() => parseShareGrant(searchParams), [searchParams]);
     const router = useRouter();
     const [item, setItem] = useState<Storyboard | null>(null);
     const [loading, setLoading] = useState(true);
@@ -166,7 +166,8 @@ export default function StoryboardPage() {
         return () => {
             isMounted = false;
         };
-    }, [id, user, shareGrant?.token, shareGrant?.exp]);
+         
+    }, [id, user, shareGrant]);
 
     const handlePlayVideo = (sceneId: string) => {
         // Pause all other videos

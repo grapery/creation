@@ -37,6 +37,7 @@ export default function FragmentDetailPage() {
 
     useEffect(() => {
         loadFragment();
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- 仅在碎片/分享参数变化时重载；loadFragment 为普通函数
     }, [fragmentId, shareGrant?.token, shareGrant?.exp]);
 
     const loadFragment = async () => {

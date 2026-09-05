@@ -53,6 +53,7 @@ export default function FragmentsPage() {
     useEffect(() => {
         setOffset(0);
         loadFragments(true);
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- 仅在切换 tab 时重置分页；loadFragments 依赖 offset，纳入会造成循环
     }, [activeTab]);
 
     const handleCreateClick = () => {

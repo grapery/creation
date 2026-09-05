@@ -58,6 +58,7 @@ function CreateFragmentForm() {
     useEffect(() => {
         loadStyles();
         loadDraft();
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- 仅挂载时加载画风与草稿
     }, []);
 
     const loadDraft = async () => {

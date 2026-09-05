@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { stories } from "@/lib/api/stories";
 import { storyboards } from "@/lib/api/storyboards";
@@ -22,7 +22,7 @@ import { errorMessage } from "@/lib/utils";
 export default function StoryPage() {
     const { id } = useParams();
     const searchParams = useSearchParams();
-    const shareGrant = parseShareGrant(searchParams);
+    const shareGrant = useMemo(() => parseShareGrant(searchParams), [searchParams]);
     const { t } = useTranslation();
     const router = useRouter();
     const [story, setStory] = useState<Story | null>(null);
@@ -73,7 +73,8 @@ export default function StoryPage() {
             }
         }
         load();
-    }, [id, shareGrant?.token, shareGrant?.exp]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- 首屏聚合加载：子加载器为普通函数，纳入依赖会每次渲染重建
+    }, [id, shareGrant]);
 
     const loadStoryboards = async (storyId: string) => {
         setLoadingStoryboards(true);

@@ -25,6 +25,7 @@ export default function PlazaPage() {
         } else if (activeTab === "latest" && latestBoards.length === 0) {
             loadLatest();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- 按 tab 懒加载一次；纳入列表状态会在 setState 后重复触发
     }, [activeTab]);
 
     const loadTrending = async () => {

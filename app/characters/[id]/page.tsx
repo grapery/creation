@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { characters } from "@/lib/api/characters";
 import { Character } from "@/lib/types/character";
@@ -17,7 +17,7 @@ import { parseShareGrant } from "@/lib/share-grant";
 export default function CharacterDetailPage() {
     const { id } = useParams();
     const searchParams = useSearchParams();
-    const shareGrant = parseShareGrant(searchParams);
+    const shareGrant = useMemo(() => parseShareGrant(searchParams), [searchParams]);
     const router = useRouter();
     const [character, setCharacter] = useState<Character | null>(null);
     const [loading, setLoading] = useState(true);
@@ -44,7 +44,8 @@ export default function CharacterDetailPage() {
             }
         }
         load();
-    }, [id, shareGrant?.token, shareGrant?.exp]);
+         
+    }, [id, shareGrant]);
 
     // Load timeline data when tab switches to timeline
     useEffect(() => {

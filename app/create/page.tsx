@@ -103,6 +103,7 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                 console.error("Failed to parse fragment prefill:", e);
             }
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- 挂载/参数变化时加载画风与碎片预填；loadStyles 为普通函数
     }, [searchParams]);
 
     const loadStyles = async (page = 0, query = "") => {

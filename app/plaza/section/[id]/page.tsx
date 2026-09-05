@@ -22,6 +22,7 @@ export default function PlazaSectionDetailPage() {
 
     useEffect(() => {
         loadSection();
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- 仅在板块变化时重载；loadSection 为普通函数
     }, [sectionId]);
 
     const loadSection = async () => {

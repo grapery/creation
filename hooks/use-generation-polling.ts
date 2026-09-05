@@ -21,10 +21,13 @@ interface UseGenerationPollingReturn {
     cancelGeneration: () => Promise<void>;
 }
 
+/** 默认退避间隔。模块级常量保证 fetchProgress 身份稳定，避免 effect 依赖抖动。 */
+const DEFAULT_INTERVAL_MS = [2000, 5000, 10000];
+
 export function useGenerationPolling({
     storyboardId,
     enabled = true,
-    intervalMs = [2000, 5000, 10000],
+    intervalMs = DEFAULT_INTERVAL_MS,
 }: UseGenerationPollingOptions): UseGenerationPollingReturn {
     const [progress, setProgress] = useState<StoryboardGenerationProgress | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -66,7 +69,7 @@ export function useGenerationPolling({
                 clearInterval(pollingRef.current);
             }
         };
-    }, [storyboardId, enabled]);
+    }, [storyboardId, enabled, fetchProgress]);
 
     // Separate polling loop that starts after first fetch
     useEffect(() => {

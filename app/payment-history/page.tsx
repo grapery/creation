@@ -47,6 +47,7 @@ export default function PaymentHistoryPage() {
         }
 
         fetchPaymentHistory();
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- 仅在登录态/筛选变化时重载；fetchPaymentHistory 为普通函数
     }, [user, page, statusFilter, methodFilter]);
 
     const fetchPaymentHistory = async () => {

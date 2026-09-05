@@ -68,6 +68,7 @@ export function FragmentVerticalFeed({ tab }: FragmentVerticalFeedProps) {
     setOffset(0);
     setCurrentIndex(0);
     loadFragments(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- 仅在切换 tab 时重置；loadFragments 依赖 offset，纳入会造成循环
   }, [tab]);
 
   const handleScroll = useCallback(() => {
