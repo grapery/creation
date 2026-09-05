@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { errorMessage } from "@/lib/utils";
 
 export default function GenrePreferencesPage() {
-    const [catalog, setCatalog] = useState<{ key: string; label: string }[]>([]);
+    const [catalog, setCatalog] = useState<{ key: string; label: string; emoji?: string }[]>([]);
     const [selected, setSelected] = useState<Set<string>>(new Set());
     const [initialSelected, setInitialSelected] = useState<Set<string>>(new Set());
     const [loading, setLoading] = useState(true);
@@ -115,6 +115,7 @@ export default function GenrePreferencesPage() {
                                     )}
                                 >
                                     <span className="text-sm font-medium truncate">
+                                        {genre.emoji && <span className="mr-1">{genre.emoji}</span>}
                                         {genre.label}
                                     </span>
                                     {isSelected && (

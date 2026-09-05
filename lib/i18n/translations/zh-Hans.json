@@ -1023,5 +1023,10 @@
   },
   "legal": {
     "last_updated": "最后更新"
+  },
+  "reader": {
+    "no_storyboards": "这个故事还没有可阅读的故事板",
+    "load_failed": "阅读器加载失败",
+    "back_to_story": "返回故事"
   }
 }

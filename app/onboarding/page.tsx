@@ -20,7 +20,7 @@ export default function OnboardingPage() {
     const { user, loading: authLoading } = useAuth();
     const { t } = useTranslation();
     const [step, setStep] = useState<Step>("welcome");
-    const [catalog, setCatalog] = useState<{ key: string; label: string }[]>([]);
+    const [catalog, setCatalog] = useState<{ key: string; label: string; emoji?: string }[]>([]);
     const [selected, setSelected] = useState<Set<string>>(new Set());
     const [role, setRole] = useState<"reader" | "creator">("reader");
     const [loading, setLoading] = useState(false);
@@ -148,6 +148,7 @@ export default function OnboardingPage() {
                                                 }}
                                             >
                                                 {active && <Check className="h-3 w-3" />}
+                                                {g.emoji && <span className="mr-0.5">{g.emoji}</span>}
                                                 {g.label || g.key}
                                             </Badge>
                                         );

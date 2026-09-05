@@ -1023,5 +1023,10 @@
   },
   "legal": {
     "last_updated": "最終更新"
+  },
+  "reader": {
+    "no_storyboards": "読めるストーリーボードはまだありません",
+    "load_failed": "リーダーの読み込みに失敗しました",
+    "back_to_story": "ストーリーに戻る"
   }
 }

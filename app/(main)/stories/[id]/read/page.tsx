@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useEffect, useState, useCallback } from "react";
+import { useTranslation } from "@/providers/language-provider";
 import Image from "next/image";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { stories } from "@/lib/api/stories";
@@ -15,6 +16,7 @@ import { parseShareGrant } from "@/lib/share-grant";
  * and presents them full-viewport, matching Voyager's lighter StoryReader path.
  */
 export default function StoryReadPage() {
+    const { t } = useTranslation();
     const { id } = useParams<{ id: string }>();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -45,7 +47,7 @@ export default function StoryReadPage() {
                     targetId = list.storyboards?.[0]?.id || "";
                 }
                 if (!targetId) {
-                    setError("No storyboards to read yet");
+                    setError(t("reader.no_storyboards", "No storyboards to read yet"));
                     return;
                 }
                 const data = await storyboards.get(targetId, shareGrant);
@@ -55,7 +57,7 @@ export default function StoryReadPage() {
                 setScenes(sceneList);
                 setIndex(0);
             } catch (e) {
-                if (!cancelled) setError(e instanceof Error ? e.message : "Failed to load reader");
+                if (!cancelled) setError(e instanceof Error ? e.message : t("reader.load_failed", "Failed to load reader"));
             } finally {
                 if (!cancelled) setLoading(false);
             }
@@ -101,7 +103,7 @@ export default function StoryReadPage() {
             <div className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-center gap-4 p-6">
                 <BookOpen className="h-10 w-10 text-muted-foreground" />
                 <p className="text-muted-foreground">{error || "Nothing to read"}</p>
-                <Button onClick={() => router.push(`/stories/${id}`)}>Back to story</Button>
+                <Button onClick={() => router.push(`/stories/${id}`)}>{t("reader.back_to_story", "Back to story")}</Button>
             </div>
         );
     }

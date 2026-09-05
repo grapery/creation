@@ -188,8 +188,29 @@ export const settings = {
     getGenrePreferences: async (): Promise<{ preferredGenres: string[]; allowedGenres: string[] }> =>
         request('/api/v1/settings/preferences/genres'),
 
-    getGenreCatalog: async (): Promise<{ genres: { key: string; label: string }[]; total: number }> =>
-        request('/api/v1/settings/preferences/genres/catalog'),
+    // 后端返回 { page, items: [{ slug, titleZh, titleEn, titleJa, emoji }] }，
+    // 这里映射为前端通用的 { key, label, emoji }，label 按语言选择。
+    getGenreCatalog: async (): Promise<{ genres: { key: string; label: string; emoji?: string }[]; total: number }> => {
+        const lang = typeof window !== 'undefined' ? (localStorage.getItem('language') || 'en') : 'en';
+        const titleField = lang === 'zh-Hans' ? 'titleZh' : lang === 'ja' ? 'titleJa' : 'titleEn';
+        const res = await request<{ page?: number; items?: { slug: string; titleZh?: string; titleEn?: string; titleJa?: string; emoji?: string }[] } | { genres?: { key: string; label: string }[] }>(
+            '/api/v1/settings/preferences/genres/catalog'
+        );
+        const items = (res as { items?: { slug: string; titleZh?: string; titleEn?: string; titleJa?: string; emoji?: string }[] }).items;
+        if (Array.isArray(items)) {
+            return {
+                genres: items.map((it) => ({
+                    key: it.slug,
+                    label: (it as Record<string, unknown>)[titleField] as string || it.titleEn || it.slug,
+                    emoji: it.emoji,
+                })),
+                total: items.length,
+            };
+        }
+        // 兼容旧结构
+        const legacy = res as { genres?: { key: string; label: string }[] };
+        return { genres: legacy.genres || [], total: legacy.genres?.length ?? 0 };
+    },
 
     updateGenrePreferences: async (preferredGenres: string[]): Promise<{ message: string }> =>
         request('/api/v1/settings/preferences/genres', 'PUT', { preferredGenres }),

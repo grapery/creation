@@ -1023,5 +1023,10 @@
   },
   "legal": {
     "last_updated": "Last updated"
+  },
+  "reader": {
+    "no_storyboards": "No storyboards to read yet",
+    "load_failed": "Failed to load reader",
+    "back_to_story": "Back to story"
   }
 }
