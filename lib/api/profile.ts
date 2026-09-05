@@ -5,36 +5,36 @@ export const profile = {
     // Drafts - Uses dashboard storyboards endpoint filtered by status
     getDrafts: async (page = 1, limit = 20): Promise<{ storyboards: Storyboard[], count: number }> => {
         const offset = (page - 1) * limit;
-        return request(`/api/dashboard/storyboards?limit=${limit}&offset=${offset}&status=draft`);
+        return request(`/api/v1/dashboard/storyboards?limit=${limit}&offset=${offset}&status=draft`);
     },
 
     deleteDraft: async (id: string): Promise<void> => {
-        return request(`/api/storyboards/${id}`, 'DELETE');
+        return request(`/api/v1/storyboards/${id}`, 'DELETE');
     },
 
     // Social - Followers
     getFollowers: async (userId: string, page = 1, limit = 20): Promise<{ users: User[], count: number }> => {
         const offset = (page - 1) * limit;
-        return request(`/api/users/${userId}/followers?limit=${limit}&offset=${offset}`);
+        return request(`/api/v1/users/${userId}/followers?limit=${limit}&offset=${offset}`);
     },
 
     // Social - Following
     getFollowing: async (userId: string, page = 1, limit = 20): Promise<{ users: User[], count: number }> => {
         const offset = (page - 1) * limit;
-        return request(`/api/users/${userId}/following?limit=${limit}&offset=${offset}`);
+        return request(`/api/v1/users/${userId}/following?limit=${limit}&offset=${offset}`);
     },
 
     // Social - Follow/Unfollow
     // Note: Using /api/follows endpoint with followableType and followableID
     followUser: async (userId: string): Promise<void> => {
-        return request('/api/follows', 'POST', {
+        return request('/api/v1/follows', 'POST', {
             followableType: 'user',
             followableId: userId
         });
     },
 
     unfollowUser: async (userId: string): Promise<void> => {
-        return request('/api/follows', 'DELETE', {
+        return request('/api/v1/follows', 'DELETE', {
             followableType: 'user',
             followableId: userId
         });
@@ -42,13 +42,13 @@ export const profile = {
 
     // Check follow status
     isFollowing: async (userId: string): Promise<{ isFollowing: boolean }> => {
-        return request(`/api/follows/check?type=user&id=${userId}`);
+        return request(`/api/v1/follows/check?type=user&id=${userId}`);
     },
 
     // Batch check follow status
     batchCheckFollowing: async (userIds: string[]): Promise<Record<string, boolean>> => {
         if (userIds.length === 0) return {};
-        return request('/api/follows/batch-check', 'POST', {
+        return request('/api/v1/follows/batch-check', 'POST', {
             followableType: 'user',
             followableIds: userIds
         });
@@ -57,24 +57,24 @@ export const profile = {
     // Stories
     getStories: async (userId: string, page = 1, limit = 20): Promise<{ stories: Story[], count: number }> => {
         const offset = (page - 1) * limit;
-        return request(`/api/users/${userId}/stories?limit=${limit}&offset=${offset}`);
+        return request(`/api/v1/users/${userId}/stories?limit=${limit}&offset=${offset}`);
     },
 
     // Characters
     getCharacters: async (userId: string, page = 1, limit = 20): Promise<{ characters: Character[], count: number }> => {
         const offset = (page - 1) * limit;
-        return request(`/api/users/${userId}/characters?limit=${limit}&offset=${offset}`);
+        return request(`/api/v1/users/${userId}/characters?limit=${limit}&offset=${offset}`);
     },
 
     // Storyboards
     getStoryboards: async (userId: string, page = 1, limit = 20): Promise<{ storyboards: Storyboard[], count: number }> => {
         const offset = (page - 1) * limit;
-        return request(`/api/users/${userId}/storyboards?limit=${limit}&offset=${offset}`);
+        return request(`/api/v1/users/${userId}/storyboards?limit=${limit}&offset=${offset}`);
     },
 
     // User Profile
     getProfile: async (userId: string): Promise<User> => {
-        return request(`/api/users/${userId}`);
+        return request(`/api/v1/users/${userId}`);
     },
 
     // Update own profile
@@ -92,15 +92,15 @@ export const profile = {
         if (!userId) {
             throw new Error('User not authenticated');
         }
-        return request(`/api/users/${userId}`, 'PUT', data);
+        return request(`/api/v1/users/${userId}`, 'PUT', data);
     },
 
     // Block/Unblock User
     blockUser: async (userId: string): Promise<void> =>
-        request(`/api/users/${userId}/block`, 'POST'),
+        request(`/api/v1/users/${userId}/block`, 'POST'),
 
     unblockUser: async (userId: string): Promise<void> =>
-        request(`/api/users/${userId}/block`, 'DELETE'),
+        request(`/api/v1/users/${userId}/block`, 'DELETE'),
 
     getBlockedUsers: async (
         page = 1,
@@ -119,7 +119,7 @@ export const profile = {
 
     // Report User
     reportUser: async (userId: string, reason: string): Promise<void> =>
-        request(`/api/users/${userId}/report`, 'POST', { reason }),
+        request(`/api/v1/users/${userId}/report`, 'POST', { reason }),
 
     // Report UGC (story / storyboard / fragment / character / comment)
     reportContent: async (
@@ -127,7 +127,7 @@ export const profile = {
         contentId: string,
         reason: string,
     ): Promise<void> =>
-        request('/api/content/report', 'POST', {
+        request('/api/v1/content/report', 'POST', {
             content_type: contentType,
             content_id: contentId,
             reason,
@@ -155,26 +155,26 @@ export const profile = {
         totalLikes: number;
         totalViews: number;
     }> =>
-        request(`/api/users/${userId}/stats`),
+        request(`/api/v1/users/${userId}/stats`),
 
     getPoints: async (userId: string): Promise<{ points: number }> =>
-        request(`/api/users/${userId}/points`),
+        request(`/api/v1/users/${userId}/points`),
 
     // ==================== Liked Content ====================
 
     getLikedStories: async (userId: string, page = 1, limit = 20): Promise<{ stories: Story[], count: number }> => {
         const offset = (page - 1) * limit;
-        return request(`/api/users/${userId}/liked-stories?limit=${limit}&offset=${offset}`);
+        return request(`/api/v1/users/${userId}/liked-stories?limit=${limit}&offset=${offset}`);
     },
 
     getLikedCharacters: async (userId: string, page = 1, limit = 20): Promise<{ characters: unknown[], count: number }> => {
         const offset = (page - 1) * limit;
-        return request(`/api/users/${userId}/liked-characters?limit=${limit}&offset=${offset}`);
+        return request(`/api/v1/users/${userId}/liked-characters?limit=${limit}&offset=${offset}`);
     },
 
     getLikedStoryboards: async (userId: string, page = 1, limit = 20): Promise<{ storyboards: Storyboard[], count: number }> => {
         const offset = (page - 1) * limit;
-        return request(`/api/users/${userId}/liked-storyboards?limit=${limit}&offset=${offset}`);
+        return request(`/api/v1/users/${userId}/liked-storyboards?limit=${limit}&offset=${offset}`);
     },
 
     // ==================== Creator Analytics ====================
@@ -189,7 +189,7 @@ export const profile = {
         newFollowersThisWeek: number;
     }> => {
         const params = range ? `?range=${range}` : '';
-        return request(`/api/me/creator-analytics${params}`);
+        return request(`/api/v1/me/creator-analytics${params}`);
     },
 
     // ==================== Quota & Dashboard ====================
@@ -198,19 +198,19 @@ export const profile = {
         aiQuota: { used: number; limit: number };
         storyboardQuota: { used: number; limit: number };
         characterQuota: { used: number; limit: number };
-    }> => request('/api/me/quota'),
+    }> => request('/api/v1/me/quota'),
 
     getMeDashboard: async (): Promise<{
         recentStoryboards: Storyboard[];
         recentCharacters: unknown[];
         stats: Record<string, number>;
-    }> => request('/api/me/dashboard'),
+    }> => request('/api/v1/me/dashboard'),
 
     getMeMembership: async (): Promise<unknown> =>
-        request('/api/me/membership'),
+        request('/api/v1/me/membership'),
 
     getMeUsage: async (period?: string): Promise<unknown> => {
         const params = period ? `?period=${period}` : '';
-        return request(`/api/me/usage${params}`);
+        return request(`/api/v1/me/usage${params}`);
     },
 };

@@ -136,25 +136,25 @@ const parseSettingsResponse = (data: unknown): UserSettings => {
 
 export const settings = {
     get: async (): Promise<UserSettings> => {
-        const data = await request('/api/settings');
+        const data = await request('/api/v1/settings');
         return parseSettingsResponse(data);
     },
 
     update: async (updates: Partial<UserSettings>): Promise<UserSettings> => {
-        const data = await request('/api/settings', 'PUT', updates);
+        const data = await request('/api/v1/settings', 'PUT', updates);
         return parseSettingsResponse(data);
     },
 
     updateLanguage: async (language: string): Promise<void> => {
-        return request('/api/settings/language', 'PUT', { language });
+        return request('/api/v1/settings/language', 'PUT', { language });
     },
 
     updateTheme: async (theme: 'light' | 'dark' | 'system'): Promise<void> => {
-        return request('/api/settings/theme', 'PUT', { theme });
+        return request('/api/v1/settings/theme', 'PUT', { theme });
     },
 
     updateFontSize: async (fontSize: 'small' | 'medium' | 'large'): Promise<void> => {
-        return request('/api/settings/font-size', 'PUT', { fontSize });
+        return request('/api/v1/settings/font-size', 'PUT', { fontSize });
     },
 
     updatePrivacy: async (privacy: {
@@ -170,15 +170,15 @@ export const settings = {
         showPublicFragments?: boolean;
         showPublicBookmarks?: boolean;
     }): Promise<void> => {
-        return request('/api/settings/privacy', 'PUT', privacy);
+        return request('/api/v1/settings/privacy', 'PUT', privacy);
     },
 
     updateAI: async (aiEnabled: boolean, aiDataSharing: boolean): Promise<void> => {
-        return request('/api/settings/ai', 'PUT', { aiEnabled, aiDataSharing });
+        return request('/api/v1/settings/ai', 'PUT', { aiEnabled, aiDataSharing });
     },
 
     updateNotifications: async (notificationSettings: NotificationSettings): Promise<void> => {
-        return request('/api/settings/notifications', 'PUT', notificationSettings);
+        return request('/api/v1/settings/notifications', 'PUT', notificationSettings);
     },
 
     updateTeenProtection: async (teenProtectionEnabled: boolean): Promise<UserSettings> => {
@@ -186,11 +186,11 @@ export const settings = {
     },
 
     getGenrePreferences: async (): Promise<{ preferredGenres: string[]; allowedGenres: string[] }> =>
-        request('/api/settings/preferences/genres'),
+        request('/api/v1/settings/preferences/genres'),
 
     getGenreCatalog: async (): Promise<{ genres: { key: string; label: string }[]; total: number }> =>
-        request('/api/settings/preferences/genres/catalog'),
+        request('/api/v1/settings/preferences/genres/catalog'),
 
     updateGenrePreferences: async (preferredGenres: string[]): Promise<{ message: string }> =>
-        request('/api/settings/preferences/genres', 'PUT', { preferredGenres }),
+        request('/api/v1/settings/preferences/genres', 'PUT', { preferredGenres }),
 };

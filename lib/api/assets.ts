@@ -42,7 +42,7 @@ export const assets = {
 
     // Get asset by ID
     get: async (id: string): Promise<Asset> => {
-        return request(`/api/assets/${id}`);
+        return request(`/api/v1/assets/${id}`);
     },
 
     // Create asset
@@ -58,7 +58,7 @@ export const assets = {
         duration?: number;
         tags?: string[];
     }): Promise<Asset> => {
-        return request('/api/assets', 'POST', data);
+        return request('/api/v1/assets', 'POST', data);
     },
 
     // Update asset
@@ -66,11 +66,11 @@ export const assets = {
         name: string;
         tags: string[];
     }>): Promise<Asset> => {
-        return request(`/api/assets/${id}`, 'PUT', data);
+        return request(`/api/v1/assets/${id}`, 'PUT', data);
     },
 
     // Delete asset
     delete: async (id: string): Promise<void> => {
-        return request(`/api/assets/${id}`, 'DELETE');
+        return request(`/api/v1/assets/${id}`, 'DELETE');
     }
 };

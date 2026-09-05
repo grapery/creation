@@ -14,7 +14,7 @@ export const storyboards = {
         tags?: string[];
         sceneCount?: number;
     }): Promise<Storyboard> => {
-        return request('/api/storyboards', 'POST', data);
+        return request('/api/v1/storyboards', 'POST', data);
     },
 
     // Update
@@ -25,25 +25,25 @@ export const storyboards = {
         sceneRefs?: string[];
         characterRefs?: string[];
     }): Promise<Storyboard> => {
-        return request(`/api/storyboards/${id}`, 'PUT', data);
+        return request(`/api/v1/storyboards/${id}`, 'PUT', data);
     },
 
     // Delete
     delete: async (id: string): Promise<void> => {
-        return request(`/api/storyboards/${id}`, 'DELETE');
+        return request(`/api/v1/storyboards/${id}`, 'DELETE');
     },
 
     // Feed (Public/Community)
     getFeed: async (page = 1, limit = 20, tab?: string): Promise<{ storyboards: Storyboard[], total: number }> => {
         const offset = (page - 1) * limit;
         const tabParam = tab ? `&tab=${tab}` : '';
-        return request(`/api/storyboards/feed?limit=${limit}&offset=${offset}${tabParam}`);
+        return request(`/api/v1/storyboards/feed?limit=${limit}&offset=${offset}${tabParam}`);
     },
 
     // Dashboard: Storyboards (Authenticated)
     getDashboardStoryboards: async (page = 1, limit = 20): Promise<{ storyboards: Storyboard[], total: number }> => {
         const offset = (page - 1) * limit;
-        return request(`/api/dashboard/storyboards?limit=${limit}&offset=${offset}`);
+        return request(`/api/v1/dashboard/storyboards?limit=${limit}&offset=${offset}`);
     },
 
     // Trending (Public endpoint)
@@ -55,7 +55,7 @@ export const storyboards = {
     // Dashboard: Character Storyboards - Backend endpoint removed, use characters/:id/storyboards instead
     getCharacterStoryboards: async (characterId: string, page = 1, limit = 20): Promise<{ storyboards: Storyboard[], total: number }> => {
         const offset = (page - 1) * limit;
-        return request(`/api/characters/${characterId}/storyboards?limit=${limit}&offset=${offset}`);
+        return request(`/api/v1/characters/${characterId}/storyboards?limit=${limit}&offset=${offset}`);
     },
 
     // Story: Get storyboards for a specific story
@@ -78,26 +78,26 @@ export const storyboards = {
     // Get child storyboards (forks)
     getChildren: async (id: string, page = 1, limit = 20): Promise<Storyboard[]> => {
         const offset = (page - 1) * limit;
-        return request(`/api/storyboards/${id}/children?limit=${limit}&offset=${offset}`);
+        return request(`/api/v1/storyboards/${id}/children?limit=${limit}&offset=${offset}`);
     },
 
     // Get parent storyboard
     getParent: async (id: string, parentId: string): Promise<Storyboard> => {
-        return request(`/api/storyboards/${parentId}`);
+        return request(`/api/v1/storyboards/${parentId}`);
     },
 
     // Actions — 与后端唯一数据源一致：storyboard_likes + storyboards.likes
-    like: async (id: string) => request(`/api/storyboards/${id}/like`, 'POST'),
-    unlike: async (id: string) => request(`/api/storyboards/${id}/like`, 'DELETE'),
+    like: async (id: string) => request(`/api/v1/storyboards/${id}/like`, 'POST'),
+    unlike: async (id: string) => request(`/api/v1/storyboards/${id}/like`, 'DELETE'),
 
     // 仍走互动接口；服务端已将 storyboard_node 委托到 storyboard_likes
     isLiked: async (id: string): Promise<{ isLiked: boolean }> => {
-        return request(`/api/likes/check?type=storyboard_node&id=${id}`);
+        return request(`/api/v1/likes/check?type=storyboard_node&id=${id}`);
     },
 
     batchCheckLiked: async (storyboardIds: string[]): Promise<Record<string, boolean>> => {
         if (storyboardIds.length === 0) return {};
-        return request('/api/likes/batch-check', 'POST', {
+        return request('/api/v1/likes/batch-check', 'POST', {
             likeableType: 'storyboard_node',
             likeableIds: storyboardIds
         });
@@ -106,7 +106,7 @@ export const storyboards = {
     // ==================== Tree & Branching ====================
 
     getTree: async (id: string): Promise<{ tree: Storyboard[] }> =>
-        request(`/api/storyboards/${id}/tree`),
+        request(`/api/v1/storyboards/${id}/tree`),
 
     fork: async (id: string, data: {
         title: string;
@@ -115,7 +115,7 @@ export const storyboards = {
         isStandalone?: boolean;
         sceneCount?: number;
     }): Promise<Storyboard> =>
-        request(`/api/storyboards/${id}/fork`, 'POST', data),
+        request(`/api/v1/storyboards/${id}/fork`, 'POST', data),
 
     continue_: async (id: string, data: {
         rawInput: string;
@@ -128,16 +128,16 @@ export const storyboards = {
         generatedScenes: unknown[];
         tokensUsed?: number;
     }> =>
-        request(`/api/storyboards/${id}/continue`, 'POST', data),
+        request(`/api/v1/storyboards/${id}/continue`, 'POST', data),
 
     publish: async (id: string): Promise<Storyboard> =>
-        request(`/api/storyboards/${id}/publish`, 'POST'),
+        request(`/api/v1/storyboards/${id}/publish`, 'POST'),
 
     // ==================== Panels ====================
 
     getPanels: async (id: string, page = 1, limit = 20): Promise<{ panels: unknown[] }> => {
         const offset = (page - 1) * limit;
-        return request(`/api/storyboards/${id}/panels?limit=${limit}&offset=${offset}`);
+        return request(`/api/v1/storyboards/${id}/panels?limit=${limit}&offset=${offset}`);
     },
 
     createPanel: async (id: string, data: {
@@ -145,15 +145,15 @@ export const storyboards = {
         imageUrl?: string;
         text?: string;
     }): Promise<unknown> =>
-        request(`/api/storyboards/${id}/panels`, 'POST', data),
+        request(`/api/v1/storyboards/${id}/panels`, 'POST', data),
 
     // ==================== Generation ====================
 
     retryFailedImages: async (id: string): Promise<{ message: string }> =>
-        request(`/api/storyboards/${id}/retry-failed-images`, 'POST'),
+        request(`/api/v1/storyboards/${id}/retry-failed-images`, 'POST'),
 
     cancelGeneration: async (id: string): Promise<{ message: string }> =>
-        request(`/api/storyboards/${id}/cancel-generation`, 'POST'),
+        request(`/api/v1/storyboards/${id}/cancel-generation`, 'POST'),
 
     getGenerationProgress: async (id: string): Promise<{
         status: string;
@@ -162,7 +162,7 @@ export const storyboards = {
         completedSteps: number;
         progress: number;
     }> =>
-        request(`/api/storyboards/${id}/generation-progress`),
+        request(`/api/v1/storyboards/${id}/generation-progress`),
 
     // ==================== AI Generation ====================
     // NOTE: generateContent, generateSceneDetails, generateImage, generateAllImages, generateVideo
@@ -170,10 +170,10 @@ export const storyboards = {
 
     /** Multi-panel comic page (single output image); separate from generateImage. */
     generateComicPage: async (id: string, data: Record<string, unknown>): Promise<{ message: string }> =>
-        request(`/api/storyboards/${id}/generate/comic-page`, 'POST', data, apiClient, AI_TIMEOUT),
+        request(`/api/v1/storyboards/${id}/generate/comic-page`, 'POST', data, apiClient, AI_TIMEOUT),
 
     generateAllComicPages: async (id: string, data?: Record<string, unknown>): Promise<{ message: string }> =>
-        request(`/api/storyboards/${id}/generate/comic-pages`, 'POST', data || {}, apiClient, AI_TIMEOUT),
+        request(`/api/v1/storyboards/${id}/generate/comic-pages`, 'POST', data || {}, apiClient, AI_TIMEOUT),
 
     // ==================== Video Streaming ====================
 

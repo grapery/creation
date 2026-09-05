@@ -7,10 +7,10 @@ export const feedback = {
         content: string;
         contactInfo?: string;
     }): Promise<Feedback> =>
-        request('/api/feedback', 'POST', params),
+        request('/api/v1/feedback', 'POST', params),
 
     listMyFeedback: async (page = 1, limit = 20): Promise<{ feedbacks: Feedback[]; total: number }> => {
         const offset = (page - 1) * limit;
-        return request(`/api/feedback?limit=${limit}&offset=${offset}`);
+        return request(`/api/v1/feedback?limit=${limit}&offset=${offset}`);
     },
 };

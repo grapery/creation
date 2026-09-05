@@ -339,7 +339,7 @@ export const vip = {
     },
 
     cancelSubscription: async (): Promise<void> => {
-        return request('/api/membership/cancel', 'POST');
+        return request('/api/v1/membership/cancel', 'POST');
     },
 
     getUsage: async (): Promise<{
@@ -352,11 +352,11 @@ export const vip = {
         charactersCreated: number;
         charactersLimit: number;
     }> => {
-        return request('/api/membership/usage');
+        return request('/api/v1/membership/usage');
     },
 
     getCurrentMembership: async (): Promise<unknown> => {
-        return request('/api/membership/current');
+        return request('/api/v1/membership/current');
     },
 };
 

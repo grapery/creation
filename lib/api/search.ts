@@ -62,7 +62,7 @@ export const search = {
         if (filters?.genre) queryParams.append('genre', filters.genre);
         if (filters?.status) queryParams.append('status', filters.status);
         if (filters?.sortBy) queryParams.append('sort_by', filters.sortBy);
-        return request(`/api/search?${queryParams.toString()}`);
+        return request(`/api/v1/search?${queryParams.toString()}`);
     },
 
     searchStories: async (query: string, page = 1, limit = 20): Promise<SearchResults> =>

@@ -38,27 +38,27 @@ export const notifications = {
     // List notifications
     list: async (page = 1, limit = 20): Promise<NotificationListResponse> => {
         const offset = (page - 1) * limit;
-        return request(`/api/notifications?limit=${limit}&offset=${offset}`);
+        return request(`/api/v1/notifications?limit=${limit}&offset=${offset}`);
     },
 
     // Get unread count
     getUnreadCount: async (): Promise<{ count: number }> => {
-        return request('/api/notifications/unread/count');
+        return request('/api/v1/notifications/unread/count');
     },
 
     // Mark as read
     markAsRead: async (id: string): Promise<void> => {
-        return request(`/api/notifications/${id}/read`, 'POST');
+        return request(`/api/v1/notifications/${id}/read`, 'POST');
     },
 
     // Mark all as read
     markAllAsRead: async (): Promise<void> => {
-        return request('/api/notifications/read-all', 'POST');
+        return request('/api/v1/notifications/read-all', 'POST');
     },
 
     // Delete notification
     delete: async (id: string): Promise<void> => {
-        return request(`/api/notifications/${id}`, 'DELETE');
+        return request(`/api/v1/notifications/${id}`, 'DELETE');
     },
 
     // Subscribe to SSE notification stream

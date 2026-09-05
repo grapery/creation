@@ -17,36 +17,36 @@ import type {
 
 export const follows = {
     follow: async (type: InteractionTargetType, id: string) =>
-        request('/api/follows', 'POST', {
+        request('/api/v1/follows', 'POST', {
             followableType: type,
             followableId: id,
         }),
 
     unfollow: async (type: InteractionTargetType, id: string) =>
-        request('/api/follows', 'DELETE', {
+        request('/api/v1/follows', 'DELETE', {
             followableType: type,
             followableId: id,
         }),
 
     checkStatus: async (type: InteractionTargetType, id: string): Promise<{ isFollowing: boolean }> =>
-        request(`/api/follows/check?type=${type}&id=${id}`),
+        request(`/api/v1/follows/check?type=${type}&id=${id}`),
 
     batchCheck: async (type: InteractionTargetType, ids: string[]): Promise<BatchCheckResult> => {
         if (ids.length === 0) return {};
-        return request('/api/follows/batch-check', 'POST', {
+        return request('/api/v1/follows/batch-check', 'POST', {
             followableType: type,
             followableIds: ids,
         });
     },
 
     getFollowers: async (type: InteractionTargetType, id: string, page = 1, limit = 20) =>
-        request(`/api/follows/followers/${type}/${id}?page=${page}&pageSize=${limit}`),
+        request(`/api/v1/follows/followers/${type}/${id}?page=${page}&pageSize=${limit}`),
 
     getFollowing: async (userId: string, page = 1, limit = 20) =>
-        request(`/api/follows/following/${userId}?page=${page}&pageSize=${limit}`),
+        request(`/api/v1/follows/following/${userId}?page=${page}&pageSize=${limit}`),
 
     getCount: async (type: InteractionTargetType, id: string): Promise<FollowCount> =>
-        request(`/api/follows/count/${type}/${id}`),
+        request(`/api/v1/follows/count/${type}/${id}`),
 };
 
 // ============================================================
@@ -56,23 +56,23 @@ export const follows = {
 
 export const likes = {
     like: async (type: InteractionTargetType, id: string) =>
-        request('/api/likes', 'POST', {
+        request('/api/v1/likes', 'POST', {
             likeableType: type,
             likeableId: id,
         }),
 
     unlike: async (type: InteractionTargetType, id: string) =>
-        request('/api/likes', 'DELETE', {
+        request('/api/v1/likes', 'DELETE', {
             likeableType: type,
             likeableId: id,
         }),
 
     checkStatus: async (type: InteractionTargetType, id: string): Promise<{ isLiked: boolean }> =>
-        request(`/api/likes/check?type=${type}&id=${id}`),
+        request(`/api/v1/likes/check?type=${type}&id=${id}`),
 
     batchCheck: async (type: InteractionTargetType, ids: string[]): Promise<BatchCheckResult> => {
         if (ids.length === 0) return {};
-        return request('/api/likes/batch-check', 'POST', {
+        return request('/api/v1/likes/batch-check', 'POST', {
             likeableType: type,
             likeableIds: ids,
         });
@@ -80,11 +80,11 @@ export const likes = {
 
     getLikes: async (type: InteractionTargetType, id: string, page = 1, limit = 20) => {
         const offset = (page - 1) * limit;
-        return request(`/api/likes/${type}/${id}?limit=${limit}&offset=${offset}`);
+        return request(`/api/v1/likes/${type}/${id}?limit=${limit}&offset=${offset}`);
     },
 
     getCount: async (type: InteractionTargetType, id: string): Promise<LikeCount> =>
-        request(`/api/likes/count/${type}/${id}`),
+        request(`/api/v1/likes/count/${type}/${id}`),
 };
 
 // ============================================================
@@ -94,17 +94,17 @@ export const likes = {
 
 export const bookmarks = {
     create: async (type: BookmarkType, id: string, collectionName?: string): Promise<Bookmark> =>
-        request('/api/bookmarks', 'POST', {
+        request('/api/v1/bookmarks', 'POST', {
             bookmarkType: type,
             bookmarkId: id,
             collectionName,
         }),
 
     delete: async (bookmarkId: string): Promise<{ message: string }> =>
-        request(`/api/bookmarks/${bookmarkId}`, 'DELETE'),
+        request(`/api/v1/bookmarks/${bookmarkId}`, 'DELETE'),
 
     checkStatus: async (type: BookmarkType, id: string): Promise<{ isBookmarked: boolean; bookmarkId?: string }> =>
-        request(`/api/bookmarks/check?bookmarkType=${encodeURIComponent(type)}&bookmarkId=${encodeURIComponent(id)}`),
+        request(`/api/v1/bookmarks/check?bookmarkType=${encodeURIComponent(type)}&bookmarkId=${encodeURIComponent(id)}`),
 
     getMyBookmarks: async (params: {
         type?: BookmarkType;
@@ -118,7 +118,7 @@ export const bookmarks = {
         queryParams.append('limit', limit.toString());
         if (type) queryParams.append('type', type);
         if (collectionName) queryParams.append('collection', collectionName);
-        return request(`/api/bookmarks/my?${queryParams.toString()}`);
+        return request(`/api/v1/bookmarks/my?${queryParams.toString()}`);
     },
 
     getUserBookmarks: async (userId: string, params: {
@@ -131,11 +131,11 @@ export const bookmarks = {
         queryParams.append('page', page.toString());
         queryParams.append('limit', limit.toString());
         if (type) queryParams.append('type', type);
-        return request(`/api/bookmarks/users/${userId}?${queryParams.toString()}`);
+        return request(`/api/v1/bookmarks/users/${userId}?${queryParams.toString()}`);
     },
 
     getCount: async (type: BookmarkType, id: string): Promise<BookmarkCount> =>
-        request(`/api/bookmarks/count/${type}/${id}`),
+        request(`/api/v1/bookmarks/count/${type}/${id}`),
 
     toggleBookmark: async (type: BookmarkType, id: string): Promise<{ isBookmarked: boolean; bookmarkId?: string }> => {
         const check = await bookmarks.checkStatus(type, id);
