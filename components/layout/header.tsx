@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { notifications } from "@/lib/api/notifications";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/providers/auth-provider";
 import { Button } from "@/components/ui/button";
 import { UserCircle, LogOut, Loader2, Crown, Search, Bell, MessageSquare, Info } from "lucide-react";
@@ -14,6 +16,30 @@ import { loginUrlWithNext } from "@/lib/auth-redirect";
 
 export function Header() {
     const { user, loading, logout } = useAuth();
+    const [unreadCount, setUnreadCount] = useState(0);
+
+    // 铃铛未读数：登录后拉取，SSE 实时累加，60s 兜底轮询
+    useEffect(() => {
+        if (!user) {
+            setUnreadCount(0);
+            return;
+        }
+        let alive = true;
+        const fetchCount = () => notifications.getUnreadCount()
+            .then(res => { if (alive) setUnreadCount(res.count); })
+            .catch(() => {});
+        void fetchCount();
+        const es = notifications.subscribeToSSE(
+            (n) => { if (!n.read) setUnreadCount(prev => prev + 1); },
+            () => {}
+        );
+        const timer = setInterval(fetchCount, 60_000);
+        return () => {
+            alive = false;
+            es?.close();
+            clearInterval(timer);
+        };
+    }, [user]);
     const { t } = useTranslation();
     const router = useRouter();
 
@@ -63,9 +89,14 @@ export function Header() {
                         <Link 
                             href="/notifications" 
                             onClick={(e) => handleProtectedLink(e, "/notifications")}
-                            className="transition-all hover:bg-secondary rounded-full p-2 text-foreground/70 hover:text-foreground"
+                            className="relative transition-all hover:bg-secondary rounded-full p-2 text-foreground/70 hover:text-foreground"
                         >
                             <Bell className="h-5 w-5" />
+                            {unreadCount > 0 && (
+                                <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--like)] px-1 text-[10px] font-semibold text-white">
+                                    {unreadCount > 99 ? "99+" : unreadCount}
+                                </span>
+                            )}
                         </Link>
                         <Link 
                             href="/chat" 

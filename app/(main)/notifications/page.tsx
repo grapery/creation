@@ -36,6 +36,18 @@ function NotificationsContent() {
         notificationsApi.getUnreadCount().then(res => setUnreadCount(res.count)).catch(() => {});
     }, [fetchNotifications]);
 
+    // 实时通知：SSE 收到新通知即置顶插入并累加未读数
+    useEffect(() => {
+        const es = notificationsApi.subscribeToSSE(
+            (notification) => {
+                setItems(prev => (prev.some(n => n.id === notification.id) ? prev : [notification, ...prev]));
+                if (!notification.read) setUnreadCount(prev => prev + 1);
+            },
+            () => { /* 断线静默；下次进入页面会重新拉取 */ }
+        );
+        return () => es?.close();
+    }, []);
+
     const getIcon = (type: string) => {
         switch (type) {
             case 'like': return <Heart className="h-4 w-4 text-red-500" fill="currentColor" />;
