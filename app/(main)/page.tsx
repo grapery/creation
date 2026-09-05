@@ -151,7 +151,7 @@ export default function DashboardPage() {
               </div>
               <div>
                 <p className="font-semibold text-sm">{t("navigation.sidebar.write_story")}</p>
-                <p className="text-xs text-muted-foreground">Fragments & Stories</p>
+                <p className="text-xs text-muted-foreground">{t("discover.fragments_stories")}</p>
               </div>
             </Link>
           </div>

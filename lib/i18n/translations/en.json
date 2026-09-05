@@ -499,15 +499,19 @@
   },
   "discover": {
     "title": "Discover",
-    "search_placeholder": "Search stories, topics, authors…",
-    "trending": "Trending",
-    "new": "New",
-    "hot": "Hot",
-    "view_all": "All",
-    "no_results": "Try a different keyword",
-    "recent_search": "Recent Searches",
-    "clear": "Clear",
-    "hot_topics": "Hot Topics"
+    "subtitle": "Browse trending stories and storyboards — sign in to create, follow, and like.",
+    "sign_in": "Sign in",
+    "fragments": "Fragments",
+    "plaza": "Plaza",
+    "trending_stories": "Trending stories",
+    "storyboards": "Storyboards",
+    "no_public_content": "No public content yet.",
+    "sign_in_explore": "Sign in to explore more",
+    "sign_in_title": "Sign in to continue",
+    "sign_in_desc": "Create, follow, like, and search require an account.",
+    "no_stories": "No stories found",
+    "no_storyboards": "No storyboards found",
+    "fragments_stories": "Fragments & Stories"
   },
   "fragment": {
     "create_title": "Create Fragment",

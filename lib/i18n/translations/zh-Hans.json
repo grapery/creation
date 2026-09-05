@@ -499,15 +499,19 @@
   },
   "discover": {
     "title": "发现",
-    "search_placeholder": "搜索故事、话题、作者…",
-    "trending": "热门",
-    "new": "新",
-    "hot": "热",
-    "view_all": "全部",
-    "no_results": "换个关键词试试",
-    "recent_search": "最近搜索",
-    "clear": "清除",
-    "hot_topics": "热门话题"
+    "subtitle": "浏览热门故事与故事板——登录后即可创作、关注与点赞。",
+    "sign_in": "登录",
+    "fragments": "碎片",
+    "plaza": "广场",
+    "trending_stories": "热门故事",
+    "storyboards": "故事板",
+    "no_public_content": "暂无公开内容。",
+    "sign_in_explore": "登录探索更多",
+    "sign_in_title": "登录以继续",
+    "sign_in_desc": "创作、关注、点赞和搜索需要登录。",
+    "no_stories": "暂无故事",
+    "no_storyboards": "暂无故事板",
+    "fragments_stories": "碎片与故事"
   },
   "fragment": {
     "create_title": "创建碎片",

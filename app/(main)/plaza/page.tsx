@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslation } from "@/providers/language-provider";
 import { StoryboardCard } from "@/components/storyboard/storyboard-card";
 import Image from "next/image";
 import { PlazaFeed } from "@/components/plaza/plaza-feed";
@@ -15,6 +16,7 @@ import type { Story, Storyboard } from "@/lib/types";
 type PlazaTab = "discover" | "trending" | "latest";
 
 export default function PlazaPage() {
+    const { t } = useTranslation();
     const { user, loading: authLoading } = useAuth();
     const [activeTab, setActiveTab] = useState<PlazaTab>("discover");
     const [trendingStories, setTrendingStories] = useState<Story[]>([]);
@@ -75,7 +77,7 @@ export default function PlazaPage() {
     return (
         <main className="flex-1 container max-w-6xl mx-auto px-4 py-6 md:px-6 space-y-6">
             <div>
-                <h1 className="text-2xl font-bold tracking-tight">Plaza</h1>
+                <h1 className="text-2xl font-bold tracking-tight">{t("discover.plaza")}</h1>
                 <p className="text-muted-foreground text-sm">
                     Explore stories and fragments from the community
                 </p>
@@ -141,7 +143,7 @@ export default function PlazaPage() {
                     ))}
                     {trendingStories.length === 0 && (
                         <div className="col-span-full flex flex-col items-center justify-center py-16 text-center">
-                            <p className="text-muted-foreground">No stories found</p>
+                            <p className="text-muted-foreground">{t("discover.no_stories")}</p>
                         </div>
                     )}
                 </div>
@@ -152,7 +154,7 @@ export default function PlazaPage() {
                     ))}
                     {latestBoards.length === 0 && (
                         <div className="col-span-full flex flex-col items-center justify-center py-16 text-center">
-                            <p className="text-muted-foreground">No storyboards found</p>
+                            <p className="text-muted-foreground">{t("discover.no_storyboards")}</p>
                         </div>
                     )}
                 </div>

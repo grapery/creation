@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "@/providers/language-provider";
 import Image from "next/image";
 import Link from "next/link";
 import { Loader2, Sparkles, TrendingUp } from "lucide-react";
@@ -17,6 +18,7 @@ import { Button } from "@/components/ui/button";
  * Does not call auth-only /api/v1/plaza.
  */
 export function GuestDiscoverFeed() {
+    const { t } = useTranslation();
     const [boards, setBoards] = useState<Storyboard[]>([]);
     const [trendingStories, setTrendingStories] = useState<Story[]>([]);
     const [loading, setLoading] = useState(true);
@@ -75,13 +77,13 @@ export function GuestDiscoverFeed() {
         <div className="space-y-8">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Discover</h1>
+                    <h1 className="text-2xl font-bold tracking-tight">{t("discover.title")}</h1>
                     <p className="text-sm text-muted-foreground mt-1">
-                        Browse trending stories and storyboards — sign in to create, follow, and like.
+                        {t("discover.subtitle")}
                     </p>
                 </div>
                 <Button onClick={() => showLoginPrompt()} variant="default">
-                    Sign in
+                    {t("discover.sign_in")}
                 </Button>
             </div>
 
@@ -91,20 +93,20 @@ export function GuestDiscoverFeed() {
                     className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border text-sm hover:bg-muted"
                 >
                     <Sparkles className="h-3.5 w-3.5" />
-                    Fragments
+                    {t("discover.fragments")}
                 </Link>
                 <Link
                     href="/plaza"
                     className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border text-sm hover:bg-muted"
                 >
                     <TrendingUp className="h-3.5 w-3.5" />
-                    Plaza
+                    {t("discover.plaza")}
                 </Link>
             </div>
 
             {trendingStories.length > 0 && (
                 <section className="space-y-3">
-                    <h2 className="text-lg font-semibold">Trending stories</h2>
+                    <h2 className="text-lg font-semibold">{t("discover.trending_stories")}</h2>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {trendingStories.map((story, index) => (
                             <Link key={story.id} href={`/stories/${story.id}`} className="block group">
@@ -131,13 +133,13 @@ export function GuestDiscoverFeed() {
             )}
 
             <section className="space-y-3">
-                <h2 className="text-lg font-semibold">Storyboards</h2>
+                <h2 className="text-lg font-semibold">{t("discover.storyboards")}</h2>
                 {boards.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-16 text-center space-y-3">
                         <Sparkles className="h-10 w-10 text-muted-foreground" />
-                        <p className="text-muted-foreground">No public content yet.</p>
+                        <p className="text-muted-foreground">{t("discover.no_public_content")}</p>
                         <Button variant="outline" onClick={() => showLoginPrompt()}>
-                            Sign in to explore more
+                            {t("discover.sign_in_explore")}
                         </Button>
                     </div>
                 ) : (
@@ -150,8 +152,8 @@ export function GuestDiscoverFeed() {
             </section>
 
             <LoginPromptModal
-                title="Sign in to continue"
-                description="Create, follow, like, and search require an account."
+                title={t("discover.sign_in_title")}
+                description={t("discover.sign_in_desc")}
             />
         </div>
     );

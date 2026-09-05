@@ -498,16 +498,20 @@
     "slice": "日常"
   },
   "discover": {
-    "title": "発見",
-    "search_placeholder": "ストーリー、トピック、作者を検索…",
-    "trending": "トレンド",
-    "new": "新着",
-    "hot": "人気",
-    "view_all": "すべて",
-    "no_results": "別のキーワードを試してください",
-    "recent_search": "最近の検索",
-    "clear": "クリア",
-    "hot_topics": "人気トピック"
+    "title": "ディスカバー",
+    "subtitle": "人気のストーリーとストーリーボードを閲覧—作成・フォロー・いいねにはサインインが必要です。",
+    "sign_in": "サインイン",
+    "fragments": "フラグメント",
+    "plaza": "プラザ",
+    "trending_stories": "人気のストーリー",
+    "storyboards": "ストーリーボード",
+    "no_public_content": "公開コンテンツはまだありません。",
+    "sign_in_explore": "サインインしてもっと見る",
+    "sign_in_title": "続けるにはサインイン",
+    "sign_in_desc": "作成・フォロー・いいね・検索にはサインインが必要です。",
+    "no_stories": "ストーリーが見つかりません",
+    "no_storyboards": "ストーリーボードが見つかりません",
+    "fragments_stories": "フラグメントとストーリー"
   },
   "fragment": {
     "create_title": "断片を作成",
