@@ -1,6 +1,6 @@
 "use client";
 
-import { User as UserIcon, Calendar, Clock, Grid2x2, CheckCircle } from "lucide-react";
+import { User as UserIcon, Calendar, Grid2x2, CheckCircle } from "lucide-react";
 import { Storyboard, StoryboardWorkflow } from "@/lib/types";
 
 interface DetailMetadataProps {

@@ -5,10 +5,9 @@ import { comments, Comment } from "@/lib/api/comments";
 import { CommentItem } from "./comment-item";
 import { Button } from "@/components/ui/button";
 // import { Textarea } from "@/components/ui/textarea" // Removed
-import { Loader2, Send } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useAuth } from "@/providers/auth-provider";
 import Link from "next/link";
-import { Label } from "@/components/ui/label"; // Ensure imports are correct
 
 // Inline Textarea because ui/textarea might not exist or had issues?
 // I removed Textarea import before. Let's check or define inline.
@@ -29,7 +28,7 @@ export function CommentList({ targetId, targetType }: CommentListProps) {
     const [submitting, setSubmitting] = useState(false);
     const [content, setContent] = useState("");
     const [replyTo, setReplyTo] = useState<Comment | null>(null);
-    const [refreshKey, setRefreshKey] = useState(0);
+    const [refreshKey] = useState(0);
     const hasLoadedRef = useRef(false);
 
     useEffect(() => {
@@ -69,11 +68,7 @@ export function CommentList({ targetId, targetType }: CommentListProps) {
         };
     }, [targetId, targetType, refreshKey]);
 
-    const loadComments = async () => {
-        // This function is now called inside useEffect, no longer needed as standalone
-        // But keeping it for manual refresh if needed
-        setRefreshKey(prev => prev + 1);
-    };
+
 
     const onSubmit = async () => {
         if (!content.trim()) return;

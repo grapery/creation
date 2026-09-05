@@ -3,8 +3,7 @@
 import { User } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { useState } from "react";
+import "next/link";
 
 interface UserListProps {
     users: User[];
@@ -13,7 +12,7 @@ interface UserListProps {
     onUnfollow?: (id: string) => void;
 }
 
-export function UserList({ users, loading, onFollow, onUnfollow }: UserListProps) {
+export function UserList({ users, loading, onFollow: _onFollow, onUnfollow: _onUnfollow }: UserListProps) {
     if (loading) return <div>Loading...</div>;
     if (users.length === 0) return <div className="text-muted-foreground text-center py-8">No users found.</div>;
 

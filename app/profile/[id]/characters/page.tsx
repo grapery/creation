@@ -5,16 +5,15 @@ import { useParams, useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/providers/auth-provider";
 import { profile } from "@/lib/api/profile";
 import { Character, User } from "@/lib/types";
-import { Loader2, BookOpen, Layers, FileText, Sparkles, Crown, MessageSquare, Calendar, Settings, Share2, Edit } from "lucide-react";
+import { Loader2, BookOpen, Layers, FileText, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { useTranslation } from "@/providers/language-provider";
 import { getAuthToken } from "@/lib/api/client";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import ProfileHeader from "@/components/profile/profile-header-v2";
 import ContentGrid from "@/components/profile/content-grid";
-import CharacterCard from "@/components/character/character-card-v2";
+import "@/components/character/character-card-v2";
 import ListItem from "@/components/profile/list-item";
 
 // Inline Tabs component

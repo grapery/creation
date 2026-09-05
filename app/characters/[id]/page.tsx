@@ -3,13 +3,12 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { characters } from "@/lib/api/characters";
-import { storyboards } from "@/lib/api/storyboards";
 import { Character } from "@/lib/types/character";
 import { Storyboard } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, MessageCircle, Share2, MoreHorizontal, Film, Image, Info, Sparkles, User as UserIcon } from "lucide-react";
+import { Loader2, MessageCircle, Share2, MoreHorizontal, Film, Image as ImageIcon, Info, Sparkles, User as UserIcon } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -90,7 +89,7 @@ export default function CharacterDetailPage() {
             {/* Hero / Cover */}
             <div className="h-64 md:h-80 bg-muted relative">
                 {character.background && (
-                    <img src={character.background} className="w-full h-full object-cover opacity-80" />
+                    <img src={character.background} alt="" className="w-full h-full object-cover opacity-80" />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
             </div>
@@ -101,7 +100,7 @@ export default function CharacterDetailPage() {
                     <div className="flex-shrink-0 flex flex-col items-center md:items-start gap-4 w-full md:w-64">
                         <div className="h-40 w-40 md:h-48 md:w-48 rounded-2xl border-4 border-background shadow-lg bg-secondary overflow-hidden">
                             {character.avatar ? (
-                                <img src={character.avatar} className="w-full h-full object-cover" />
+                                <img src={character.avatar} alt={character.name} className="w-full h-full object-cover" />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-5xl font-bold text-muted-foreground">{character.name[0]}</div>
                             )}
@@ -242,7 +241,7 @@ export default function CharacterDetailPage() {
                                     Timeline
                                 </TabsTrigger>
                                 <TabsTrigger value="gallery">
-                                    <Image className="w-4 h-4 mr-2" />
+                                    <ImageIcon className="w-4 h-4 mr-2" />
                                     Gallery
                                 </TabsTrigger>
                                 <TabsTrigger value="info">
@@ -334,7 +333,7 @@ export default function CharacterDetailPage() {
                                     </div>
                                 ) : (
                                     <div className="flex flex-col items-center justify-center py-20 text-center">
-                                        <Image className="w-16 h-16 text-muted-foreground/50 mb-4" />
+                                        <ImageIcon className="w-16 h-16 text-muted-foreground/50 mb-4" />
                                         <h3 className="text-lg font-semibold text-foreground mb-2">No poster yet</h3>
                                         <p className="text-sm text-muted-foreground">
                                             A character poster will appear here when available

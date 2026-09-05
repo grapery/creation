@@ -6,10 +6,10 @@ import { useAuth } from "@/providers/auth-provider";
 import { useTranslation } from "@/providers/language-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription } from "@/components/ui/card";
-import { Loader2, User, Mail, Lock, Calendar, ArrowLeft, BookOpen } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Loader2, User, Mail, Lock, Calendar, ArrowLeft } from "lucide-react";
 import { githubImages } from "@/lib/github-assets";
-import { AuthBackground, LanguageSelector, OAuthProviderButton, OAuthProvider } from "@/components/auth";
+import { AuthBackground, OAuthProviderButton, OAuthProvider } from "@/components/auth";
 import { useGoogleOAuth } from "@/lib/hooks/use-google-oauth";
 import { useWeChatOAuth } from "@/lib/hooks/use-wechat-oauth";
 import { useAppleOAuth } from "@/lib/hooks/use-apple-oauth";
@@ -36,7 +36,7 @@ export default function RegisterPage() {
     const [oauthLoading, setOAuthLoading] = useState<OAuthProvider | null>(null);
     const [oauthError, setOAuthError] = useState("");
 
-    const { isLoaded: googleLoaded, signIn: googleSignIn } = useGoogleOAuth({
+    const { signIn: googleSignIn } = useGoogleOAuth({
         clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
         onSuccess: async (credentialResponse) => {
             try {

@@ -3,7 +3,7 @@
 import { MembershipPlan, formatPrice } from "@/lib/api/vip";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, CheckCircle2, Star, Tag } from "lucide-react";
+import { Check, Star, Tag } from "lucide-react";
 import { useTranslation } from "@/providers/language-provider";
 
 interface PlanCardProps {

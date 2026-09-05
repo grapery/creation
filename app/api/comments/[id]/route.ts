@@ -25,7 +25,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
             try {
                 const errorData = await response.json();
                 errorMessage = errorData.message || errorData.msg || errorMessage;
-            } catch (e) {}
+            } catch {}
             return NextResponse.json(
                 { code: response.status, message: errorMessage },
                 { status: response.status }
@@ -79,7 +79,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
             try {
                 const errorData = await response.json();
                 errorMessage = errorData.message || errorData.msg || errorMessage;
-            } catch (e) {}
+            } catch {}
             return NextResponse.json(
                 { code: response.status, message: errorMessage },
                 { status: response.status }

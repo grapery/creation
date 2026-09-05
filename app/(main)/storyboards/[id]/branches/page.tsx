@@ -7,7 +7,6 @@ import { Storyboard } from "@/lib/types";
 import { Loader2, GitBranch, GitCommit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useTranslation } from "@/providers/language-provider";
 
 interface TreeNode {
     id: string;
@@ -46,7 +45,6 @@ function buildTree(items: Storyboard[], currentId: string): TreeNode | null {
 
 export default function BranchingPage() {
     const { id } = useParams();
-    const { t } = useTranslation();
     const [loading, setLoading] = useState(true);
     const [tree, setTree] = useState<TreeNode | null>(null);
 

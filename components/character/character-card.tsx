@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { Character } from "@/lib/types/character"
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
+import { Card, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { MessageCircle, Heart } from "lucide-react"
 

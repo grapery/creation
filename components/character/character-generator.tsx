@@ -3,7 +3,6 @@
 import { useState } from "react";
 import type { Character } from "@/lib/types";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Sparkles, Wand2 } from "lucide-react";
 import { characters } from "@/lib/api/characters";

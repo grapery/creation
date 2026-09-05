@@ -86,7 +86,7 @@ class DialogManagerClass {
      */
     hide(id: string): void {
         if (this.currentDialog?.id === id) {
-            const previousDialog = this.currentDialog;
+void this.currentDialog;
             this.currentDialog.onHide?.();
 
             // 显示队列中的下一个弹窗

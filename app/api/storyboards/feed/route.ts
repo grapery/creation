@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
             try {
                 const errorData = await response.json();
                 errorMessage = errorData.message || errorData.msg || errorMessage;
-            } catch (e) {}
+            } catch {}
             return NextResponse.json(
                 { code: response.status, message: errorMessage },
                 { status: response.status }

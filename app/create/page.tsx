@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Share2, Users, Search, ChevronLeft, ChevronRight, Eye, MessageSquare, Sparkles, Save, AlertTriangle, Trash2, Plus, X, RefreshCw, Minus, Loader2, Image as ImageIcon, ImagePlus, Wand2, Coins, CheckCircle2, Wallpaper } from "lucide-react";
+import { Users, Search, ChevronLeft, ChevronRight, Eye, MessageSquare, Sparkles, Save, AlertTriangle, Trash2, Plus, X, RefreshCw, Minus, Loader2, Image as ImageIcon, ImagePlus, Wand2, Coins, CheckCircle2, Wallpaper } from "lucide-react";
 import { stories } from "@/lib/api/stories";
 import { characters } from "@/lib/api/characters";
 import { showSuccess, showError } from "@/lib/toast-utils";
@@ -13,7 +13,7 @@ import {
     AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay,
     AlertDialogPortal, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { StyleConfig, CreateStoryRequest, FragmentStoryCreationPrefill, GENRES, FragmentVisibility } from "@/lib/types";
+import { StyleConfig, CreateStoryRequest, FragmentStoryCreationPrefill, GENRES } from "@/lib/types";
 import type { Character } from "@/lib/types/character";
 
 interface CreateStoryProps {
@@ -60,11 +60,8 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
     const [generateBackground, setGenerateBackground] = useState(false);
     const [selectedAIStyle, setSelectedAIStyle] = useState<StyleConfig | null>(null);
     const [isAIProcessing, setIsAIProcessing] = useState(false);
-    const [aiEnrichedDescription, setAiEnrichedDescription] = useState("");
+    const [aiEnrichedDescription] = useState("");
     const [aiGeneratedCoverURL, setAiGeneratedCoverURL] = useState("");
-    const [aiGeneratedPosterURL, setAiGeneratedPosterURL] = useState("");
-    const [aiGeneratedBackgroundURL, setAiGeneratedBackgroundURL] = useState("");
-    const [tokensUsed, setTokensUsed] = useState(0);
 
     // Style Selection States
     const [styles, setStyles] = useState<StyleConfig[]>([]);
@@ -178,10 +175,6 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
 
     const triggerFileInput = () => {
         fileInputRef.current?.click();
-    };
-
-    const handleCreate = async () => {
-        return handleCreateWithStatus("published");
     };
 
     const handleCreateWithStatus = async (status: "draft" | "published") => {
@@ -898,7 +891,7 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                                         await stories.delete(storyId);
                                         showSuccess("Story deleted");
                                         router.push("/");
-                                    } catch (e) {
+                                    } catch {
                                         showError("Delete failed", "Failed to delete story");
                                     } finally {
                                         setIsDeleting(false);
@@ -932,7 +925,7 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                                         await stories.update(storyId, { status: "archived" });
                                         showSuccess("Story archived");
                                         router.push("/");
-                                    } catch (e) {
+                                    } catch {
                                         showError("Archive failed", "Failed to archive story");
                                     }
                                 }}

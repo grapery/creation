@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { vip, VIPPlan, MembershipPlan } from "@/lib/api/vip";
+import { vip, MembershipPlan } from "@/lib/api/vip";
 import { PlanCard } from "@/components/vip/plan-card";
 import { PaymentDialog } from "@/components/payment/payment-dialog";
 import { useAuth } from "@/providers/auth-provider";
@@ -12,7 +12,7 @@ import { showSuccess, showError } from "@/lib/toast-utils";
 
 export default function VIPPage() {
     const { t, language } = useTranslation();
-    const { user, refreshUser } = useAuth();
+    const { refreshUser } = useAuth();
     const router = useRouter();
     const [plans, setPlans] = useState<MembershipPlan[]>([]);
     const [loading, setLoading] = useState(true);
@@ -46,7 +46,7 @@ export default function VIPPage() {
         setPaymentDialogOpen(true);
     };
 
-    const handlePaymentSuccess = async (paymentId: string) => {
+    const handlePaymentSuccess = async (_paymentId: string) => {
         // Refresh user data to get updated membership status
         await refreshUser?.();
 

@@ -11,7 +11,7 @@ interface LanguageSelectorProps {
 }
 
 export function LanguageSelector({ className, currentLanguage, onLanguageChange }: LanguageSelectorProps) {
-    const { language: contextLanguage, setLanguage: setContextLanguage, t } = useTranslation();
+    const { language: contextLanguage, setLanguage: setContextLanguage } = useTranslation();
     const language = currentLanguage || contextLanguage;
     const [isOpen, setIsOpen] = useState(false);
 

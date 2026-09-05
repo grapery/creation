@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Wand2, RefreshCw, Loader2, RotateCcw } from "lucide-react";
+import { Wand2, RefreshCw, Loader2 } from "lucide-react";
 import { creation } from "@/lib/api/creation";
-import type { StoryboardScene, StoryboardImageGeneration } from "@/lib/types";
+import type { StoryboardScene } from "@/lib/types";
 import { showSuccess, showError } from "@/lib/toast-utils";
 
 interface ImagesStepProps {

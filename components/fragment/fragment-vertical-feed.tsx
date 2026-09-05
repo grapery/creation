@@ -28,7 +28,7 @@ export function FragmentVerticalFeed({ tab }: FragmentVerticalFeedProps) {
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(false);
   const [offset, setOffset] = useState(0);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [, setCurrentIndex] = useState(0);
   const [likedAnimations, setLikedAnimations] = useState<
     Record<string, boolean>
   >({});

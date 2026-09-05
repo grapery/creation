@@ -139,7 +139,7 @@ export function useGoogleOAuth({
       setIsLoading(true);
       // Use Google's ID token flow (recommended for server-side verification)
       // This returns an ID token that can be verified by the backend
-      const client = window.google.accounts.oauth2.initCodeClient({
+void window.google.accounts.oauth2.initCodeClient({
         client_id: clientId,
         scope: 'openid email profile',
         callback: (response: { code?: string; error?: string }) => {

@@ -2,8 +2,7 @@
 
 import { Comment, comments } from "@/lib/api/comments";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Heart, Reply, Trash2, MoreHorizontal } from "lucide-react";
+import { Heart, Reply, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useState } from "react";
 import { useAuth } from "@/providers/auth-provider";

@@ -24,13 +24,11 @@ import {
 import { Loader2, Download, Filter } from "lucide-react";
 import { payment, PaymentHistoryQuery } from "@/lib/api/payment";
 import { PaymentMethod, PaymentStatus, PaymentRecord } from "@/lib/types/payment";
-import { useTranslation } from "@/providers/language-provider";
 import { formatDistanceToNow } from "date-fns";
 
 export default function PaymentHistoryPage() {
     const { user } = useAuth();
     const router = useRouter();
-    const { t } = useTranslation();
 
     const [payments, setPayments] = useState<PaymentRecord[]>([]);
     const [total, setTotal] = useState(0);

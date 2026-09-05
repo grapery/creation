@@ -27,7 +27,7 @@ export async function PUT(
             try {
                 const errorData = await response.json();
                 errorMessage = errorData.message || errorData.msg || errorMessage;
-            } catch (e) {}
+            } catch {}
             return NextResponse.json(
                 { code: response.status, message: errorMessage },
                 { status: response.status }
@@ -84,7 +84,7 @@ export async function DELETE(
             try {
                 const errorData = await response.json();
                 errorMessage = errorData.message || errorData.msg || errorMessage;
-            } catch (e) {}
+            } catch {}
             return NextResponse.json(
                 { code: response.status, message: errorMessage },
                 { status: response.status }

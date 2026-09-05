@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { Storyboard, StoryboardScene } from "@/lib/types";
+import "next/link";
+import { Storyboard } from "@/lib/types";
 import { Heart, MessageSquare, GitBranch, Copy } from "lucide-react";
 import { useTranslation } from "@/providers/language-provider";
 
@@ -48,7 +48,7 @@ function formatCount(value: number = 0): string {
 export function StoryboardCard({
     storyboard,
     onTap,
-    onLike,
+    onLike: _onLike,
     onCreatorTap,
     onCharacterTap,
 }: StoryboardCardProps) {

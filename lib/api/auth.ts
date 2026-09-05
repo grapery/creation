@@ -1,4 +1,4 @@
-import { apiClient, paymentClient, request, setTokens, clearTokens } from './client';
+import { paymentClient, request, setTokens, clearTokens } from './client';
 import { User, AuthResponse } from '../types';
 import { errorMessage } from "@/lib/utils";
 

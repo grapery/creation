@@ -27,8 +27,8 @@ function WizardContent() {
     const [storyboardId, setStoryboardId] = useState<string>(existingStoryboardId);
     const [storyboard, setStoryboard] = useState<Storyboard | null>(null);
     const [scenes, setScenes] = useState<StoryboardScene[]>([]);
-    const [characters, setCharacters] = useState<Character[]>([]);
-    const [coverImage, setCoverImage] = useState<string | null>(null);
+    const [characters] = useState<Character[]>([]);
+    const [coverImage] = useState<string | null>(null);
     const [creating, setCreating] = useState(false);
 
     // Setup form state — lifted into parent so handleSetupComplete receives actual user input
@@ -51,7 +51,7 @@ function WizardContent() {
     };
 
     // Poll generation progress
-    const { progress, isGenerating, retryFailedImages, cancelGeneration, refetch } =
+    const { progress, isGenerating, retryFailedImages, cancelGeneration } =
         useGenerationPolling({
             storyboardId: step === "generating" ? storyboardId : null,
             enabled: step === "generating",

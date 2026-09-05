@@ -5,9 +5,8 @@ import { useParams, useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/providers/auth-provider";
 import { profile } from "@/lib/api/profile";
 import { Storyboard, User } from "@/lib/types";
-import { Loader2, BookOpen, FileText, Sparkles, Layers, Crown, MessageSquare, Calendar, Settings, Share2, Edit, Trash2 } from "lucide-react";
+import { Loader2, BookOpen, FileText, Sparkles, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { useTranslation } from "@/providers/language-provider";
 import { getAuthToken } from "@/lib/api/client";
 import { showConfirm, showSuccess, showError } from "@/lib/toast-utils";
@@ -15,7 +14,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import ProfileHeader from "@/components/profile/profile-header-v2";
 import ContentGrid from "@/components/profile/content-grid";
-import StoryboardCard from "@/components/storyboard/storyboard-card-v2";
+import "@/components/storyboard/storyboard-card-v2";
 import ListItem from "@/components/profile/list-item";
 
 // Inline Tabs component

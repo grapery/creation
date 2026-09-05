@@ -17,7 +17,7 @@ interface StoryScenesSectionProps {
 export function StoryScenesSection({
     title,
     scenes,
-    storyId,
+    storyId: _storyId,
     isLoading = false,
     error,
     onAddScene

@@ -9,6 +9,11 @@ const eslintConfig = defineConfig([
     rules: {
       // any 统一收敛为 unknown，由调用方显式收窄；--fix 会自动改写为 unknown。
       "@typescript-eslint/no-explicit-any": ["error", { fixToUnknown: true }],
+      // 下划线前缀显式表示"有意保留"，不算未使用
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" },
+      ],
     },
   },
   // Override default ignores of eslint-config-next.

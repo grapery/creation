@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Loader2, Upload, Wand2, User, X } from "lucide-react";
+import { Loader2, Upload, X } from "lucide-react";
 import { characters } from "@/lib/api/characters";
 import { upload } from "@/lib/api/upload";
 import { CharacterGenerator } from "@/components/character/character-generator";

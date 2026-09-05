@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode } from "react";
-import { FileText, Layers, Drama, Trash2, Loader2 } from "lucide-react";
+import { FileText, Loader2 } from "lucide-react";
 
 interface ContentGridProps {
     title: string;

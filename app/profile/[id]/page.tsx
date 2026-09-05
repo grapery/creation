@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/providers/auth-provider";
-import { Loader2, Sparkles, Drama, BookOpen, FileText, Layers, Bookmark } from "lucide-react";
+import { Loader2, Sparkles, BookOpen, FileText, Layers, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { User } from "@/lib/types";
@@ -14,14 +14,6 @@ import { getAuthToken } from "@/lib/api/client";
 import Link from "next/link";
 import ProfileHeader from "@/components/profile/profile-header-v2";
 import { ContentModerationMenu } from "@/components/moderation/content-moderation-menu";
-
-enum ProfileTab {
-    ACTIVITY = "activity",
-    STORIES = "stories",
-    STORYBOARDS = "storyboards",
-    CHARACTERS = "characters",
-    DRAFTS = "drafts",
-}
 
 // Inline Tabs component
 function ProfileTabs({

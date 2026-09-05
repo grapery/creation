@@ -15,7 +15,6 @@ import { StoryCastSection } from "@/components/story/story-cast-section";
 import { StoryScenesSection } from "@/components/story/story-scenes-section";
 import { StoryTeamSection, ContentCreator } from "@/components/story/story-team-section";
 import { CreatorRole } from "@/components/story/story-team-section";
-import { formatDistanceToNow } from "date-fns";
 import { useTranslation } from "@/providers/language-provider";
 import { parseShareGrant } from "@/lib/share-grant";
 import { errorMessage } from "@/lib/utils";

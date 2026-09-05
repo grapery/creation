@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { BACKEND_URL, graperyPublic, isConnectionError, backendUnavailableResponse } from "@/lib/bff-backend";
+import { graperyPublic, isConnectionError, backendUnavailableResponse } from "@/lib/bff-backend";
 
 export async function GET(request: NextRequest) {
     try {

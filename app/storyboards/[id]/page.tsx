@@ -8,11 +8,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { storyboards } from "@/lib/api/storyboards";
 import { likes, bookmarks } from "@/lib/api/interactions";
 import { Storyboard } from "@/lib/types";
-import { Loader2, ArrowLeft, Sparkles, Users, Heart, MessageSquare, GitFork, Share2, Info, Workflow, Play, X, ChevronLeft, ChevronRight, LayoutList, Grid3x3, ArrowUp, ArrowDown, AlertCircle, Plus, Bookmark, Send } from "lucide-react";
+import { Loader2, ArrowLeft, Sparkles, Users, Heart, MessageSquare, GitFork, Share2, Info, Workflow, Play, X, ChevronLeft, ChevronRight, LayoutList, Grid3x3, ArrowUp, ArrowDown, AlertCircle, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CommentList } from "@/components/comments/comment-list";
 import { StoryboardRoadmap } from "@/components/storyboard/roadmap";
-import { DetailMetadata } from "@/components/storyboard/detail-metadata";
 import { ForkDialog } from "@/components/storyboard/fork-dialog";
 import { ContinueDialog } from "@/components/storyboard/continue-dialog";
 import { ContentModerationMenu } from "@/components/moderation/content-moderation-menu";
@@ -82,7 +81,7 @@ export default function StoryboardPage() {
                             setIsLiked(likeStatus.isLiked);
                             setIsBookmarked(bookmarkStatus.isBookmarked);
                         }
-                    } catch (e) {
+                    } catch {
                         // Silently ignore interaction check failures
                     }
                 }
@@ -104,7 +103,7 @@ export default function StoryboardPage() {
                                 isAIGenerated: data.isAIGenerated || false,
                             });
                         }
-                    } catch (e) {
+                    } catch {
                         // Generation progress not available, use storyboard data
                         if (isMounted && data.storyboardScenes) {
                             setWorkflow({

@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
+import "next/link";
 import { User } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Settings, Share2, Crown, MessageSquare, Edit } from "lucide-react";
+import { Share2, Crown, MessageSquare, Edit } from "lucide-react";
 
 interface ProfileHeaderProps {
     user: User;

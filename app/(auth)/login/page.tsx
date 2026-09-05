@@ -7,7 +7,7 @@ import { useTranslation } from "@/providers/language-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Loader2, BookOpen } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { githubImages } from "@/lib/github-assets";
 import { OAuthProviderButton, LanguageSelector, OAuthProvider } from "@/components/auth";
 import { useGoogleOAuth } from "@/lib/hooks/use-google-oauth";
@@ -27,7 +27,7 @@ export default function LoginPage() {
     const [showEmailLogin, setShowEmailLogin] = useState(false);
 
     // Google OAuth integration
-    const { isLoaded: googleLoaded, isLoading: googleLoading, signIn: googleSignIn } = useGoogleOAuth({
+    const { isLoaded: googleLoaded, signIn: googleSignIn } = useGoogleOAuth({
         clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
         onSuccess: async (credentialResponse) => {
             try {

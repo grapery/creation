@@ -20,7 +20,7 @@ import {
     Sparkles,
     PenLine,
     Clock,
-    Image,
+    Image as ImageIcon,
     Video,
     Film,
 } from "lucide-react";
@@ -90,7 +90,7 @@ function StatusIcon({ status }: { status: string | undefined }) {
         case "content_ready":
             return <FileText className="w-4 h-4 text-blue-500" />;
         case "images_ready":
-            return <Image className="w-4 h-4 text-green-500" />;
+            return <ImageIcon className="w-4 h-4 text-green-500" />;
         case "video_ready":
             return <Video className="w-4 h-4 text-purple-500" />;
         default:

@@ -8,11 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Palette, Check } from "lucide-react";
 import { showSuccess, showError } from "@/lib/toast-utils";
 import { cn } from "@/lib/utils";
-import { useTranslation } from "@/providers/language-provider";
 import { errorMessage } from "@/lib/utils";
 
 export default function GenrePreferencesPage() {
-    const { t } = useTranslation();
     const [catalog, setCatalog] = useState<{ key: string; label: string }[]>([]);
     const [selected, setSelected] = useState<Set<string>>(new Set());
     const [initialSelected, setInitialSelected] = useState<Set<string>>(new Set());
@@ -39,9 +37,7 @@ export default function GenrePreferencesPage() {
     }, []);
 
     useEffect(() => {
-        let isMounted = true;
-        loadData().then(() => {});
-        return () => { isMounted = false; };
+        void loadData();
     }, [loadData]);
 
     const toggleGenre = (key: string) => {

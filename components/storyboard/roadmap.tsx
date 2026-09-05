@@ -1,6 +1,6 @@
 "use client";
 
-import { Storyboard, StoryboardScene } from "@/lib/types";
+import { Storyboard } from "@/lib/types";
 import {
     TextCursor,
     FileText,

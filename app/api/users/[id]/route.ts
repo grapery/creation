@@ -31,7 +31,7 @@ export async function GET(
             try {
                 const errorData = await response.json();
                 errorMessage = errorData.message || errorData.msg || errorMessage;
-            } catch (e) {
+            } catch {
             }
 
             return NextResponse.json(
@@ -69,7 +69,7 @@ export async function GET(
                     const followData = await followRes.json();
                     isFollowing = followData.data?.isFollowing ?? followData.isFollowing ?? false;
                 }
-            } catch (e) {
+            } catch {
                 // Silently ignore follow status check failures
             }
         }

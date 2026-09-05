@@ -3,7 +3,6 @@
 import { ReactNode } from "react";
 import { MoreHorizontal, Heart, MessageSquare, Calendar, BookOpen } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 export interface ListItemProps {

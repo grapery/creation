@@ -1,9 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChevronRight, User, Shield, Bell, Globe, Lock, Mail, Trash2, LogOut, Monitor, Info } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChevronRight, User, Shield, Monitor } from "lucide-react";
 import Link from "next/link";
 import { useTranslation } from "@/providers/language-provider";
 
@@ -106,7 +104,7 @@ function SettingsGroupCard({ group, isActionGroup = false }: { group: SettingsGr
 }
 
 export default function SettingsPage() {
-    const { t, language } = useTranslation();
+    const { t } = useTranslation();
 
     return (
         <div className="space-y-6">

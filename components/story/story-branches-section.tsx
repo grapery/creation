@@ -15,7 +15,7 @@ interface StoryBranchesSectionProps {
 import { useTranslation } from "@/providers/language-provider";
 
 export function StoryBranchesSection({
-    storyId,
+    storyId: _storyId,
     storyTitle,
     storyboards,
     isLoading,

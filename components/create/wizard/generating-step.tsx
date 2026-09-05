@@ -17,7 +17,7 @@ interface GeneratingStepProps {
 
 export function GeneratingStep({
     progress,
-    isPolling,
+    isPolling: _isPolling,
     error,
     onRetryFailedImages,
     onCancel,
