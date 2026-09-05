@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronRight } from "lucide-react";
+import Image from "next/image";
 import type { PlazaSection } from "@/lib/types";
 
 interface PlazaSectionHeaderProps {
@@ -18,7 +19,7 @@ export function PlazaSectionHeader({ section, onSeeAll }: PlazaSectionHeaderProp
             <div className="flex items-center gap-2 min-w-0">
                 {/* Avatar */}
                 {section.avatarURL && (
-                    <img src={section.avatarURL} alt="" className="w-7 h-7 rounded-full shrink-0" />
+                    <Image src={section.avatarURL} alt="" width={28} height={28} className="rounded-full shrink-0" sizes="28px" />
                 )}
                 <div className="min-w-0">
                     <div className="flex items-center gap-2">

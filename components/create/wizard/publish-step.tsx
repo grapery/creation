@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Send, Loader2, CheckCircle, Eye } from "lucide-react";
 import { creation } from "@/lib/api/creation";
 import { showSuccess, showError } from "@/lib/toast-utils";
@@ -66,7 +67,7 @@ export function PublishStep({ storyboardId, storyboard, scenes, onBack, onPublis
                     {scenes.map((scene, i) => (
                         <div key={scene.id} className="flex gap-3 p-3 border border-border rounded-lg">
                             {scene.image ? (
-                                <img src={scene.image} alt="" className="w-16 h-16 rounded-lg object-cover shrink-0" />
+                                <Image src={scene.image} alt="" width={64} height={64} className="rounded-lg object-cover shrink-0" sizes="64px" />
                             ) : (
                                 <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center shrink-0">
                                     <Eye className="w-5 h-5 text-muted-foreground" />

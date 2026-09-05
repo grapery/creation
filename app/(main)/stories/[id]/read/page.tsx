@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useEffect, useState, useCallback } from "react";
+import Image from "next/image";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { stories } from "@/lib/api/stories";
 import { storyboards } from "@/lib/api/storyboards";
@@ -136,7 +137,7 @@ export default function StoryReadPage() {
                 }}
             >
                 {image ? (
-                    <img src={image} alt="" className="max-h-full max-w-full object-contain" />
+                    <Image src={image} alt="" width={0} height={0} className="object-contain" style={{ width: "100%", height: "100%", maxHeight: "100%", maxWidth: "100%" }} sizes="100vw" />
                 ) : (
                     <div className="px-8 text-center space-y-3 max-w-lg">
                         <p className="text-lg font-semibold">{scene?.title || `Scene ${index + 1}`}</p>

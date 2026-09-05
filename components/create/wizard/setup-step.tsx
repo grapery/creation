@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { Wand2, ChevronUp, ChevronDown, Loader2, Sparkles } from "lucide-react";
 import type { Character, FragmentStyle } from "@/lib/types";
 import { fragments } from "@/lib/api/fragments";
@@ -176,7 +177,7 @@ export function SetupStep({ data, onChange, onNext, onBack, creating = false }: 
                     <div className="flex flex-wrap gap-2">
                         {data.characters.map((char) => (
                             <div key={char.id} className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                                {char.avatar && <img src={char.avatar} alt="" className="w-5 h-5 rounded-full" />}
+                                {char.avatar && <Image src={char.avatar} alt="" width={20} height={20} className="rounded-full" sizes="20px" />}
                                 <span className="text-sm">{char.name}</span>
                             </div>
                         ))}

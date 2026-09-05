@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Header } from "@/components/layout/header";
@@ -293,11 +294,7 @@ export default function DraftsPage() {
                                                     </div>
                                                     {sb.image && (
                                                         <div className="h-12 w-12 rounded-md overflow-hidden flex-shrink-0 bg-muted">
-                                                            <img
-                                                                src={sb.image}
-                                                                alt=""
-                                                                className="h-full w-full object-cover"
-                                                            />
+                                                            <Image src={sb.image} alt="" width={0} height={0} className="h-full w-full object-cover" style={{ width: "100%", height: "100%" }} sizes="100vw" />
                                                         </div>
                                                     )}
                                                 </div>
@@ -382,11 +379,7 @@ export default function DraftsPage() {
                                                     {fragment.imageUrls &&
                                                     fragment.imageUrls.length > 0 ? (
                                                         <div className="h-12 w-12 rounded-md overflow-hidden flex-shrink-0 bg-muted">
-                                                            <img
-                                                                src={fragment.imageUrls[0]}
-                                                                alt=""
-                                                                className="h-full w-full object-cover"
-                                                            />
+                                                            <Image src={fragment.imageUrls[0]} alt="" width={0} height={0} className="h-full w-full object-cover" style={{ width: "100%", height: "100%" }} sizes="100vw" />
                                                         </div>
                                                     ) : (
                                                         <div className="h-12 w-12 rounded-md flex items-center justify-center flex-shrink-0 bg-muted">

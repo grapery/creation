@@ -1,6 +1,7 @@
 "use client";
 
 import { StoryScene } from "@/lib/types";
+import Image from "next/image";
 import { Plus, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/providers/language-provider";
@@ -83,10 +84,13 @@ function SceneRow({ scene }: SceneRowProps) {
                 {/* Thumbnail */}
                 <div className="flex-shrink-0">
                     {scene.image ? (
-                        <img
+                        <Image
                             src={scene.image}
                             alt={scene.title}
-                            className="w-23 h-23 rounded-xl object-cover"
+                            width={92}
+                            height={92}
+                            sizes="92px"
+                            className="rounded-xl object-cover"
                             style={{ width: 92, height: 92 }}
                         />
                     ) : (

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, Suspense } from "react";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Users, Search, ChevronLeft, ChevronRight, Eye, MessageSquare, Sparkles, Save, AlertTriangle, Trash2, Plus, X, RefreshCw, Minus, Loader2, Image as ImageIcon, ImagePlus, Wand2, Coins, CheckCircle2, Wallpaper } from "lucide-react";
 import { stories } from "@/lib/api/stories";
@@ -388,11 +389,7 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
 
                                 {coverImage || aiGeneratedCoverURL ? (
                                     <>
-                                        <img
-                                            src={coverImage || aiGeneratedCoverURL}
-                                            alt="Cover"
-                                            className="w-full h-full object-cover"
-                                        />
+                                        <Image src={coverImage || aiGeneratedCoverURL} alt="Cover" width={0} height={0} className="w-full h-full object-cover" style={{ width: "100%", height: "100%" }} sizes="100vw" />
                                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
                                             <button
                                                 onClick={triggerFileInput}
@@ -530,11 +527,7 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                                                 >
                                                     <div className="aspect-video bg-muted relative">
                                                         {style.preview_image ? (
-                                                            <img
-                                                                src={style.preview_image}
-                                                                alt={style.name}
-                                                                className="w-full h-full object-cover"
-                                                            />
+                                                            <Image src={style.preview_image} alt={style.name} width={0} height={0} className="w-full h-full object-cover" style={{ width: "100%", height: "100%" }} sizes="100vw" />
                                                         ) : (
                                                             <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
                                                                 {t("create.no_preview")}
@@ -618,7 +611,7 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                                     {selectedCharacters.map((char) => (
                                         <div key={char.id} className="flex items-center gap-3 p-3 bg-card rounded-lg border border-border">
                                             {char.avatar ? (
-                                                <img src={char.avatar} alt="" className="w-10 h-10 rounded-full object-cover" />
+                                                <Image src={char.avatar} alt="" width={40} height={40} className="rounded-full object-cover" sizes="40px" />
                                             ) : (
                                                 <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-medium">
                                                     {char.name[0]}
@@ -686,7 +679,7 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                                             className="w-full flex items-center gap-3 p-3 hover:bg-muted transition-colors text-left border-b border-border last:border-b-0"
                                         >
                                             {char.avatar ? (
-                                                <img src={char.avatar} alt="" className="w-8 h-8 rounded-full object-cover" />
+                                                <Image src={char.avatar} alt="" width={32} height={32} className="rounded-full object-cover" sizes="32px" />
                                             ) : (
                                                 <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium">
                                                     {char.name[0]}

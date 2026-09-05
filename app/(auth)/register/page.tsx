@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/providers/auth-provider";
 import { useTranslation } from "@/providers/language-provider";
@@ -199,8 +200,8 @@ export default function RegisterPage() {
 
                     {/* App Icon and Title */}
                     <div className="mb-6 flex flex-col items-center space-y-3">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={githubImages.appIcon256} alt="" className="h-16 w-16 rounded-2xl shadow-lg" />
+                        { }
+                        <Image src={githubImages.appIcon256} alt="" width={64} height={64} className="rounded-2xl shadow-lg" sizes="64px" />
                         <h1 className="text-3xl font-bold tracking-tight">{t("common.app_name")}</h1>
                         <p className="text-muted-foreground text-center">
                             {t('auth.register_tagline')}

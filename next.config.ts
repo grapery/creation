@@ -4,6 +4,17 @@ const nextConfig: NextConfig = {
   /* config options here */
   output: 'standalone',
 
+  images: {
+    // UGC 图片来自 OSS / 第三方头像 / 支付二维码等多个已知与动态域名，
+    // 统一经 Next 优化器代理；SVG 允许以保持与 <img> 时代一致的渲染行为。
+    dangerouslyAllowSVG: true,
+    remotePatterns: [
+      { protocol: 'https', hostname: '**' },
+      { protocol: 'http', hostname: 'localhost' },
+      { protocol: 'http', hostname: '127.0.0.1' },
+    ],
+  },
+
   generateBuildId: async () => {
     return process.env.COMMIT_SHA || `build-${Date.now()}`;
   },

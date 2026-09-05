@@ -1,6 +1,7 @@
 "use client";
 
 import "next/link";
+import Image from "next/image";
 import { Storyboard } from "@/lib/types";
 import { Heart, MessageSquare, GitBranch, Copy } from "lucide-react";
 import { useTranslation } from "@/providers/language-provider";
@@ -22,7 +23,7 @@ function Avatar({ src, name, size = 24 }: { src?: string; name?: string; size?: 
             style={{ width: size, height: size }}
         >
             {src ? (
-                <img src={src} alt={name || "avatar"} className="w-full h-full object-cover" />
+                <Image src={src} alt={name || "avatar"} width={0} height={0} className="w-full h-full object-cover" style={{ width: "100%", height: "100%" }} sizes="100vw" />
             ) : (
                 <span
                     className="text-white font-bold"
@@ -69,11 +70,7 @@ export function StoryboardCard({
                 {/* Thumbnail */}
                 <div className="flex-shrink-0">
                     {thumbnail ? (
-                        <img
-                            src={thumbnail}
-                            alt={storyboard.title}
-                            className="w-[84px] h-[84px] rounded-[12px] object-cover shadow-sm"
-                        />
+                        <Image src={thumbnail} alt={storyboard.title} width={0} height={0} className="w-[84px] h-[84px] rounded-[12px] object-cover shadow-sm" style={{ width: "auto", height: "auto" }} sizes="100vw" />
                     ) : (
                         <div className="w-[84px] h-[84px] rounded-[12px] bg-muted/50 flex items-center justify-center border border-border/50">
                             <Copy className="w-6 h-6 text-muted-foreground/50" />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, Suspense } from "react";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Loader2, Send, Sparkles, Check, ArrowLeft } from "lucide-react";
@@ -305,12 +306,7 @@ function CreateFragmentChat() {
                         {previewUrls.length > 0 && (
                             <div className="grid grid-cols-2 gap-2">
                                 {previewUrls.map((url) => (
-                                    <img
-                                        key={url}
-                                        src={url}
-                                        alt=""
-                                        className="rounded-lg object-cover w-full aspect-[3/4] bg-muted"
-                                    />
+                                    <Image key={url} src={url} alt="" width={0} height={0} className="rounded-lg object-cover w-full aspect-[3/4] bg-muted" style={{ width: "100%", height: "auto" }} sizes="100vw" />
                                 ))}
                             </div>
                         )}

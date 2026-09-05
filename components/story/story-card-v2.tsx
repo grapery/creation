@@ -1,6 +1,7 @@
 "use client";
 
 import { Story } from "@/lib/types";
+import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookOpen, Heart, Users, Book, User } from "lucide-react";
 import Link from "next/link";
@@ -26,11 +27,7 @@ export default function StoryCard({ story, className }: StoryCardProps) {
                         {/* Cover Image - 88x88 like iOS */}
                         <div className="relative w-[88px] h-[88px] flex-shrink-0 rounded-xl overflow-hidden bg-muted">
                             {story.coverImage ? (
-                                <img
-                                    src={story.coverImage}
-                                    alt={story.title}
-                                    className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300"
-                                />
+                                <Image src={story.coverImage} alt={story.title} width={0} height={0} className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300" style={{ width: "100%", height: "100%" }} sizes="100vw" />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-secondary/20">
                                     <BookOpen className="h-8 w-8 text-muted-foreground/50" />
@@ -57,11 +54,7 @@ export default function StoryCard({ story, className }: StoryCardProps) {
                                 {story.author && (
                                     <div className="flex items-center gap-2 mb-2">
                                         {story.author.avatar ? (
-                                            <img 
-                                                src={story.author.avatar} 
-                                                alt={story.author.displayName || story.author.username}
-                                                className="w-5 h-5 rounded-full object-cover"
-                                            />
+                                            <Image src={story.author.avatar} alt={story.author.displayName || story.author.username} width={20} height={20} className="rounded-full object-cover" sizes="20px" />
                                         ) : (
                                             <User className="w-5 h-5 text-muted-foreground" />
                                         )}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useEffect, useState } from "react";
+import Image from "next/image";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { characters } from "@/lib/api/characters";
 import { Character } from "@/lib/types/character";
@@ -90,7 +91,7 @@ export default function CharacterDetailPage() {
             {/* Hero / Cover */}
             <div className="h-64 md:h-80 bg-muted relative">
                 {character.background && (
-                    <img src={character.background} alt="" className="w-full h-full object-cover opacity-80" />
+                    <Image src={character.background} alt="" width={0} height={0} sizes="100vw" style={{ width: "100%", height: "100%" }} className="object-cover opacity-80" />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
             </div>
@@ -101,7 +102,7 @@ export default function CharacterDetailPage() {
                     <div className="flex-shrink-0 flex flex-col items-center md:items-start gap-4 w-full md:w-64">
                         <div className="h-40 w-40 md:h-48 md:w-48 rounded-2xl border-4 border-background shadow-lg bg-secondary overflow-hidden">
                             {character.avatar ? (
-                                <img src={character.avatar} alt={character.name} className="w-full h-full object-cover" />
+                                <Image src={character.avatar} alt={character.name} width={0} height={0} sizes="128px" style={{ width: "100%", height: "100%" }} className="object-cover" />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-5xl font-bold text-muted-foreground">{character.name[0]}</div>
                             )}
@@ -326,10 +327,14 @@ export default function CharacterDetailPage() {
                             <TabsContent value="gallery" className="mt-6">
                                 {character.poster ? (
                                     <div className="max-w-sm mx-auto aspect-[3/4] rounded-lg overflow-hidden bg-secondary">
-                                        <img
+                                        <Image
                                             src={character.poster}
                                             alt={`${character.name} poster`}
-                                            className="w-full h-full object-cover"
+                                            width={0}
+                                            height={0}
+                                            sizes="(max-width: 640px) 100vw, 384px"
+                                            style={{ width: "100%", height: "100%" }}
+                                            className="object-cover"
                                         />
                                     </div>
                                 ) : (

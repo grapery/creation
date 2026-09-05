@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { Heart, MessageCircle } from "lucide-react";
 import { fragments } from "@/lib/api/fragments";
@@ -43,11 +44,7 @@ export function FragmentCard({ fragment, compact = false, onLikeChange }: Fragme
                 {/* Image */}
                 {fragment.imageUrls && fragment.imageUrls.length > 0 ? (
                     <div className={`relative overflow-hidden ${compact ? "h-[160px]" : "h-[200px]"}`}>
-                        <img
-                            src={fragment.imageUrls[0]}
-                            alt={fragment.caption || fragment.content.slice(0, 50)}
-                            className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                        />
+                        <Image src={fragment.imageUrls[0]} alt={fragment.caption || fragment.content.slice(0, 50)} width={0} height={0} className="w-full h-full object-cover transition-transform group-hover:scale-105" style={{ width: "100%", height: "100%" }} sizes="100vw" />
                         {/* Multi-image indicator */}
                         {fragment.imageUrls.length > 1 && (
                             <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-black/60 rounded text-white text-xs backdrop-blur-sm">
@@ -79,7 +76,7 @@ export function FragmentCard({ fragment, compact = false, onLikeChange }: Fragme
                     {/* Author */}
                     <div className="flex items-center gap-2">
                         {fragment.creatorAvatar && (
-                            <img src={fragment.creatorAvatar} alt="" className="w-5 h-5 rounded-full" />
+                            <Image src={fragment.creatorAvatar} alt="" width={20} height={20} className="rounded-full" sizes="20px" />
                         )}
                         <span className="text-xs text-muted-foreground truncate">
                             {fragment.creatorName || "Unknown"}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Send, Square, Sparkles, Loader2, Eye, UploadCloud, AlertCircle, Image as ImageIcon, Clapperboard, Settings2, Plus, X, RotateCcw } from "lucide-react";
 import { RequireAuth } from "@/components/auth/require-auth";
@@ -500,8 +501,8 @@ function CreateChatContent() {
                                             }`}
                                         >
                                             {s.preview_image ? (
-                                                // eslint-disable-next-line @next/next/no-img-element
-                                                <img src={s.preview_image} alt={s.name} className="h-6 w-6 rounded object-cover" />
+                                                 
+                                                <Image src={s.preview_image!} alt={s.name} width={24} height={24} sizes="24px" className="rounded object-cover" />
                                             ) : (
                                                 <span className="h-6 w-6 rounded bg-muted" />
                                             )}
@@ -521,8 +522,8 @@ function CreateChatContent() {
                                 <div className="flex gap-2 flex-wrap">
                                     {referenceImages.map((url, i) => (
                                         <div key={url} className="relative group">
-                                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                                            <img src={url} alt={`reference ${i + 1}`} className="h-16 w-16 rounded-lg object-cover border border-border" />
+                                            { }
+                                            <Image src={url} alt={`reference ${i + 1}`} width={64} height={64} sizes="64px" className="rounded-lg object-cover border border-border" />
                                             <button
                                                 type="button"
                                                 onClick={() => setReferenceImages((prev) => prev.filter((u) => u !== url))}
@@ -661,12 +662,15 @@ function CreateChatContent() {
                         {result.images.length > 0 && (
                             <div className={`grid gap-2 ${result.kind === "fragment" ? "grid-cols-2" : "grid-cols-3"}`}>
                                 {result.images.map((url, i) => (
-                                    // eslint-disable-next-line @next/next/no-img-element
-                                    <img
+<Image
                                         key={`${url}-${i}`}
                                         src={url}
                                         alt={`${result.kind} image ${i + 1}`}
-                                        className="w-full aspect-square object-cover rounded-lg border border-border"
+                                        width={0}
+                                        height={0}
+                                        sizes="(max-width: 768px) 50vw, 300px"
+                                        style={{ width: "100%", height: "auto" }}
+                                        className="aspect-square object-cover rounded-lg border border-border"
                                     />
                                 ))}
                             </div>
@@ -700,8 +704,8 @@ function CreateChatContent() {
                 {referenceImages.length > 0 && target === "fragment" && !showOptions && (
                     <div className="flex gap-1.5 mb-2">
                         {referenceImages.map((url) => (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img key={url} src={url} alt="reference" className="h-9 w-9 rounded-md object-cover border border-border" />
+                             
+                            <Image key={url} src={url} alt="reference" width={36} height={36} sizes="36px" className="rounded-md object-cover border border-border" />
                         ))}
                     </div>
                 )}

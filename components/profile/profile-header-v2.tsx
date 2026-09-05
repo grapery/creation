@@ -1,6 +1,7 @@
 "use client";
 
 import "next/link";
+import Image from "next/image";
 import { User } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -42,11 +43,7 @@ export default function ProfileHeader({
             <div className="h-[180px] md:h-[220px] w-full relative bg-gradient-to-br from-primary/20 via-primary/10 to-background">
                 {user.background ? (
                     <>
-                        <img
-                            src={user.background}
-                            alt="Cover"
-                            className="w-full h-full object-cover"
-                        />
+                        <Image src={user.background} alt="Cover" width={0} height={0} className="w-full h-full object-cover" style={{ width: "100%", height: "100%" }} sizes="100vw" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                     </>
                 ) : (

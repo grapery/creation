@@ -1,6 +1,7 @@
 "use client";
 
 import { Character } from "@/lib/types";
+import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Heart, MessageSquare, Calendar, Sparkles } from "lucide-react";
 import Link from "next/link";
@@ -17,11 +18,7 @@ export default function CharacterCard({ character }: CharacterCardProps) {
                     {/* Character Avatar */}
                     <div className="relative aspect-square w-full rounded-xl bg-muted/30 mb-4 overflow-hidden">
                         {character.avatar ? (
-                            <img
-                                src={character.avatar}
-                                alt={character.name}
-                                className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300"
-                            />
+                            <Image src={character.avatar} alt={character.name} width={0} height={0} className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300" style={{ width: "100%", height: "100%" }} sizes="100vw" />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-secondary/20">
                                 <Sparkles className="h-12 w-12 text-muted-foreground/50" />

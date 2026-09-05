@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image";
 import { Character } from "@/lib/types/character"
 import { Card, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -10,7 +11,7 @@ export function CharacterCard({ character }: { character: Character }) {
             <Link href={`/characters/${character.id}`}>
                 <div className="aspect-[3/4] w-full bg-secondary relative">
                     {character.avatar ? (
-                        <img src={character.avatar} alt={character.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                        <Image src={character.avatar} alt={character.name} width={0} height={0} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ width: "100%", height: "100%" }} sizes="100vw" />
                     ) : (
                         <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-muted-foreground">
                             {character.name[0]}

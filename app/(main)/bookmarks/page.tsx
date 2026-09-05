@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Bookmark as BookmarkIcon } from "lucide-react";
 import { bookmarks } from "@/lib/api/interactions";
@@ -99,13 +100,9 @@ function BookmarkItem({ bookmark }: { bookmark: Bookmark }) {
             className="block p-3 rounded-lg border hover:bg-muted/50 transition-colors"
         >
             <div className="flex items-center gap-3">
-                {card?.coverImage || card?.image || card?.avatar ? (
+                {(card?.coverImage || card?.image || card?.avatar) ? (
                     <div className="h-12 w-12 rounded bg-muted overflow-hidden flex-shrink-0">
-                        <img
-                            src={card?.coverImage || card?.image || card?.avatar}
-                            alt=""
-                            className="h-full w-full object-cover"
-                        />
+                        <Image src={(card?.coverImage || card?.image || card?.avatar)!} alt="" width={0} height={0} className="h-full w-full object-cover" style={{ width: "100%", height: "100%" }} sizes="100vw" />
                     </div>
                 ) : (
                     <div className="h-12 w-12 rounded bg-muted flex items-center justify-center flex-shrink-0">

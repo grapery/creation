@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { ArrowRight, X } from "lucide-react";
 import { githubImages } from "@/lib/github-assets";
@@ -75,12 +76,7 @@ function CachedSlideImage({ src, alt }: { src: string; alt: string }) {
     }
 
     return (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-            src={cachedSrc || src}
-            alt={alt}
-            className="w-full aspect-[4/3] object-cover"
-        />
+        <Image src={cachedSrc || src} alt={alt} width={0} height={0} className="w-full aspect-[4/3] object-cover" style={{ width: "100%", height: "auto" }} sizes="100vw" />
     );
 }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { Header } from "@/components/layout/header";
+import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import {
     TreeDeciduous,
@@ -61,12 +62,8 @@ export default function AboutPage() {
             <section className="relative overflow-hidden py-20 md:py-28">
                 <div className="container max-w-6xl mx-auto px-4 relative z-10">
                     <div className="max-w-4xl mx-auto text-center">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                            src={githubImages.appIcon}
-                            alt="未择"
-                            className="w-24 h-24 md:w-28 md:h-28 rounded-3xl mx-auto shadow-[var(--idea-shadow-lg)] mb-8"
-                        />
+                        { }
+                        <Image src={githubImages.appIcon} alt="未择" width={96} height={96} className="md:w-28 md:h-28 rounded-3xl mx-auto shadow-[var(--idea-shadow-lg)] mb-8" sizes="96px" />
                         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white text-sm font-medium text-[var(--idea-text-secondary)] mb-6 shadow-[var(--idea-shadow)]">
                             <Sparkles className="w-4 h-4 text-[var(--idea-accent)]" />
                             AI 驱动的分支故事创作平台
@@ -115,13 +112,8 @@ export default function AboutPage() {
                         {screenshots.map((s, i) => (
                             <div key={i} className="group">
                                 <div className="idea-preview-card rounded-2xl overflow-hidden bg-[var(--idea-bg)] aspect-[9/16] flex items-center justify-center mb-3 shadow-[var(--idea-shadow)]">
-                                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    <img
-                                        src={s.src}
-                                        alt={s.title}
-                                        className="idea-preview-image w-full h-full object-cover object-top"
-                                        loading="lazy"
-                                    />
+                                    { }
+                                    <Image src={s.src} alt={s.title} width={0} height={0} className="idea-preview-image w-full h-full object-cover object-top" style={{ width: "100%", height: "100%" }} sizes="100vw" loading="lazy" />
                                 </div>
                                 <h3 className="font-semibold text-center text-black">{s.title}</h3>
                                 <p className="text-sm text-[var(--idea-text-muted)] text-center">{s.desc}</p>
@@ -389,8 +381,8 @@ export default function AboutPage() {
                     </div>
                     <div className="pt-8 border-t border-[var(--idea-border)] text-center text-sm text-[var(--idea-text-muted)]">
                         <div className="flex items-center justify-center gap-2 mb-2">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={githubImages.appIcon64} alt="未择" className="w-6 h-6 rounded-md" />
+                            { }
+                            <Image src={githubImages.appIcon64} alt="未择" width={24} height={24} className="rounded-md" sizes="24px" />
                             <span className="font-semibold text-black">未择</span>
                         </div>
                         <p>&copy; 2025 未择. All rights reserved.</p>

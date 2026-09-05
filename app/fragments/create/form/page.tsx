@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, Suspense } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ImagePlus, Wand2, X, Loader2, Send, Sparkles, Image as ImageIcon, MessageSquare } from "lucide-react";
@@ -294,7 +295,7 @@ function CreateFragmentForm() {
                                 key={url}
                                 className="relative shrink-0 w-24 h-24 rounded-lg overflow-hidden border border-border"
                             >
-                                <img src={url} alt="" className="w-full h-full object-cover" />
+                                <Image src={url} alt="" width={0} height={0} className="w-full h-full object-cover" style={{ width: "100%", height: "100%" }} sizes="100vw" />
                                 <Button
                                     type="button"
                                     variant="secondary"

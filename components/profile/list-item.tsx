@@ -1,6 +1,7 @@
 "use client";
 
 import { ReactNode } from "react";
+import Image from "next/image";
 import { MoreHorizontal, Heart, MessageSquare, Calendar, BookOpen } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
@@ -53,11 +54,7 @@ export default function ListItem({
                     <div className="flex-shrink-0">
                         <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-lg overflow-hidden bg-muted/10 flex items-center justify-center">
                             {coverImage ? (
-                                <img
-                                    src={coverImage}
-                                    alt={title}
-                                    className="w-full h-full object-cover"
-                                />
+                                <Image src={coverImage} alt={title} width={0} height={0} className="w-full h-full object-cover" style={{ width: "100%", height: "100%" }} sizes="100vw" />
                             ) : coverIcon ? (
                                 <div className="text-muted-foreground/50">
                                     {coverIcon}

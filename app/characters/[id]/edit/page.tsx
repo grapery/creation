@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
+import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -171,7 +172,7 @@ export default function EditCharacterPage() {
                     onClick={() => fileInputRef.current?.click()}
                 >
                     {formData.avatar ? (
-                        <img src={formData.avatar} alt="Avatar" className="w-full h-full object-cover" />
+                        <Image src={formData.avatar} alt="Avatar" width={0} height={0} className="w-full h-full object-cover" style={{ width: "100%", height: "100%" }} sizes="100vw" />
                     ) : (
                         <div className="w-full h-full bg-muted flex items-center justify-center">
                             {avatarUploading ? (

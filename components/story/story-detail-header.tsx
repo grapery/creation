@@ -1,6 +1,7 @@
 "use client";
 
 import { Heart, Share2, User, BookOpen } from "lucide-react";
+import Image from "next/image";
 import { Story } from "@/lib/types";
 import { useTranslation } from "@/providers/language-provider";
 import { Button } from "@/components/ui/button";
@@ -60,11 +61,7 @@ export function StoryDetailHeader({ story, onLike, onRead, liking = false }: Sto
                     <div className="relative flex-shrink-0 mx-auto md:mx-0">
                         <div className="w-[40px] h-[40px] md:w-[60px] md:h-[60px] rounded-lg shadow-2xl overflow-hidden ring-1 ring-white/20 transition-transform hover:-translate-y-1 duration-300">
                             {story.coverImage ? (
-                                <img
-                                    src={story.coverImage}
-                                    alt={story.title}
-                                    className="w-full h-full object-cover"
-                                />
+                                <Image src={story.coverImage} alt={story.title} width={0} height={0} className="w-full h-full object-cover" style={{ width: "100%", height: "100%" }} sizes="100vw" />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900 text-white p-4 text-center">
                                     <span className="text-[10px] font-serif italic opacity-50">{story.title.substring(0, 2)}</span>
@@ -96,7 +93,7 @@ export function StoryDetailHeader({ story, onLike, onRead, liking = false }: Sto
                                 <div className="flex items-center gap-1 font-medium text-foreground">
                                     <div className="w-4 h-4 rounded-full overflow-hidden bg-secondary">
                                         {story.author?.avatar ? (
-                                            <img src={story.author.avatar} alt={story.author.username} className="w-full h-full object-cover" />
+                                            <Image src={story.author.avatar} alt={story.author.username} width={0} height={0} className="w-full h-full object-cover" style={{ width: "100%", height: "100%" }} sizes="100vw" />
                                         ) : (
                                             <User className="w-full h-full p-0.5" />
                                         )}

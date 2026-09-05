@@ -1,6 +1,7 @@
 "use client";
 
 import { Contributor } from "@/lib/types";
+import Image from "next/image";
 import { UserPlus, Crown, BookOpen, User, Image as ImageIcon, Users2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/providers/language-provider";
@@ -107,11 +108,7 @@ function ContentCreatorRow({ creator }: ContentCreatorRowProps) {
             {/* Avatar */}
             <div className="flex-shrink-0">
                 {creator.avatar ? (
-                    <img
-                        src={creator.avatar}
-                        alt={creator.name}
-                        className="w-14 h-14 rounded-full object-cover"
-                    />
+                    <Image src={creator.avatar} alt={creator.name} width={56} height={56} className="rounded-full object-cover" sizes="56px" />
                 ) : (
                     <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center">
                         <span className="text-xl font-bold text-muted-foreground">
@@ -157,11 +154,7 @@ function ContributorRow({ contributor }: ContributorRowProps) {
             {/* Avatar */}
             <div className="flex-shrink-0">
                 {contributor.avatar ? (
-                    <img
-                        src={contributor.avatar}
-                        alt={contributor.name}
-                        className="w-14 h-14 rounded-full object-cover"
-                    />
+                    <Image src={contributor.avatar} alt={contributor.name} width={56} height={56} className="rounded-full object-cover" sizes="56px" />
                 ) : (
                     <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center">
                         <span className="text-xl font-bold text-muted-foreground">

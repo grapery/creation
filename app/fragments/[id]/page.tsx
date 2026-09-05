@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, Heart, MessageCircle, Share2, Bookmark, BookOpen, Loader2, UserPlus } from "lucide-react";
 import { fragments } from "@/lib/api/fragments";
@@ -204,11 +205,7 @@ export default function FragmentDetailPage() {
             {fragment.imageUrls && fragment.imageUrls.length > 0 && (
                 <div className="space-y-2">
                     <div className="relative rounded-xl overflow-hidden bg-muted aspect-[4/3]">
-                        <img
-                            src={fragment.imageUrls[currentImageIndex]}
-                            alt=""
-                            className="w-full h-full object-cover"
-                        />
+                        <Image src={fragment.imageUrls[currentImageIndex]} alt="" width={0} height={0} className="w-full h-full object-cover" style={{ width: "100%", height: "100%" }} sizes="100vw" />
                         {fragment.imageUrls.length > 1 && (
                             <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
                                 {fragment.imageUrls.map((_, i) => (
@@ -233,7 +230,7 @@ export default function FragmentDetailPage() {
                                         i === currentImageIndex ? "border-primary" : "border-transparent"
                                     }`}
                                 >
-                                    <img src={url} alt="" className="w-full h-full object-cover" />
+                                    <Image src={url} alt="" width={0} height={0} className="w-full h-full object-cover" style={{ width: "100%", height: "100%" }} sizes="100vw" />
                                 </button>
                             ))}
                         </div>
@@ -262,7 +259,7 @@ export default function FragmentDetailPage() {
             {/* Author */}
             <div className="flex items-center gap-3 py-3 border-t border-b">
                 {fragment.creatorAvatar && (
-                    <img src={fragment.creatorAvatar} alt="" className="w-10 h-10 rounded-full" />
+                    <Image src={fragment.creatorAvatar} alt="" width={40} height={40} className="rounded-full" sizes="40px" />
                 )}
                 <div className="flex-1">
                     <p className="font-medium text-sm">{fragment.creatorName || "Unknown"}</p>

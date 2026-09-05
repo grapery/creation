@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { Loader2, Sparkles, TrendingUp } from "lucide-react";
 import { storyboards } from "@/lib/api/storyboards";
@@ -110,11 +111,7 @@ export function GuestDiscoverFeed() {
                                 <div className="rounded-xl overflow-hidden border border-border bg-card transition-all hover:shadow-md hover:border-primary/30">
                                     {story.coverImage ? (
                                         <div className="aspect-[3/4] overflow-hidden">
-                                            <img
-                                                src={story.coverImage}
-                                                alt={story.title}
-                                                className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                                            />
+                                            <Image src={story.coverImage} alt={story.title} width={0} height={0} className="w-full h-full object-cover transition-transform group-hover:scale-105" style={{ width: "100%", height: "100%" }} sizes="100vw" />
                                         </div>
                                     ) : (
                                         <div className="aspect-[3/4] bg-muted flex items-center justify-center p-3">

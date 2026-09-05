@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   Heart,
@@ -226,11 +227,7 @@ export function FragmentVerticalFeed({ tab }: FragmentVerticalFeedProps) {
           <div className="relative w-full h-full max-w-lg mx-auto overflow-hidden bg-black">
             {/* Image */}
             {fragment.imageUrls && fragment.imageUrls.length > 0 ? (
-              <img
-                src={fragment.imageUrls[0]}
-                alt={fragment.caption || fragment.content.slice(0, 50)}
-                className="w-full h-full object-contain"
-              />
+              <Image src={fragment.imageUrls[0]} alt={fragment.caption || fragment.content.slice(0, 50)} width={0} height={0} className="w-full h-full object-contain" style={{ width: "100%", height: "100%" }} sizes="100vw" />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-purple-900/40 to-blue-900/40 flex items-center justify-center p-8">
                 <p className="text-white/90 text-center text-lg leading-relaxed">
@@ -251,11 +248,7 @@ export function FragmentVerticalFeed({ tab }: FragmentVerticalFeedProps) {
               {/* Author */}
               <div className="flex items-center gap-2 mb-2">
                 {fragment.creatorAvatar && (
-                  <img
-                    src={fragment.creatorAvatar}
-                    alt=""
-                    className="w-8 h-8 rounded-full border border-white/30"
-                  />
+                  <Image src={fragment.creatorAvatar} alt="" width={32} height={32} className="rounded-full border border-white/30" sizes="32px" />
                 )}
                 <span className="text-white text-sm font-semibold">
                   {fragment.creatorName || "Unknown"}
@@ -281,11 +274,7 @@ export function FragmentVerticalFeed({ tab }: FragmentVerticalFeedProps) {
               <div className="flex flex-col items-center">
                 <div className="relative">
                   {fragment.creatorAvatar ? (
-                    <img
-                      src={fragment.creatorAvatar}
-                      alt=""
-                      className="w-10 h-10 rounded-full border-2 border-white"
-                    />
+                    <Image src={fragment.creatorAvatar} alt="" width={40} height={40} className="rounded-full border-2 border-white" sizes="40px" />
                   ) : (
                     <div className="w-10 h-10 rounded-full bg-muted border-2 border-white flex items-center justify-center text-white text-xs">
                       {(fragment.creatorName || "U")[0].toUpperCase()}

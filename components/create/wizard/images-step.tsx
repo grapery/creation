@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Wand2, RefreshCw, Loader2 } from "lucide-react";
 import { creation } from "@/lib/api/creation";
 import type { StoryboardScene } from "@/lib/types";
@@ -97,11 +98,7 @@ export function ImagesStep({ storyboardId, scenes, onScenesUpdate, onNext, onBac
                         {scenes.map((scene, index) => (
                             <div key={scene.id} className="relative rounded-xl overflow-hidden border border-border bg-muted group">
                                 {scene.image ? (
-                                    <img
-                                        src={scene.image}
-                                        alt={scene.title}
-                                        className="w-full h-[200px] object-cover"
-                                    />
+                                    <Image src={scene.image} alt={scene.title} width={0} height={0} className="w-full h-[200px] object-cover" style={{ width: "100%", height: "auto" }} sizes="100vw" />
                                 ) : (
                                     <div className="w-full h-[200px] flex flex-col items-center justify-center gap-2">
                                         {sceneStatuses[scene.id] === "generating" || generatingSceneId === scene.id ? (

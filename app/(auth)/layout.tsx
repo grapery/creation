@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { githubImages } from "@/lib/github-assets";
@@ -28,12 +29,8 @@ export default function AuthLayout({
                 {/* Top bar */}
                 <div className="sticky top-0 z-20 flex items-center justify-between px-6 py-4 bg-[var(--idea-bg)]/90 backdrop-blur-sm">
                     <div className="flex items-center gap-3">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                            src={githubImages.appIcon64}
-                            alt="未择"
-                            className="w-8 h-8 rounded-lg"
-                        />
+                        { }
+                        <Image src={githubImages.appIcon64} alt="未择" width={32} height={32} className="rounded-lg" sizes="32px" />
                         <span className="font-semibold text-base text-black">未择</span>
                     </div>
 
@@ -169,12 +166,8 @@ export default function AuthLayout({
                 <div className="px-6 py-6 border-t border-[var(--idea-border)]">
                     <div className="flex flex-col items-center gap-3">
                         <div className="flex items-center gap-2">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                                src={githubImages.appIcon64}
-                                alt="未择"
-                                className="w-6 h-6 rounded-md"
-                            />
+                            { }
+                            <Image src={githubImages.appIcon64} alt="未择" width={24} height={24} className="rounded-md" sizes="24px" />
                             <span className="font-semibold text-sm text-black">未择</span>
                         </div>
                         <p className="text-xs text-[var(--idea-text-muted)]">

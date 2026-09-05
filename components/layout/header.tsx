@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/providers/auth-provider";
 import { Button } from "@/components/ui/button";
@@ -28,8 +29,8 @@ export function Header() {
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="container max-w-6xl flex h-14 items-center px-4 md:px-6 mx-auto">
                 <Link href="/about" className="mr-6 flex items-center space-x-2">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={githubImages.appIcon64} alt="" className="h-6 w-6 rounded-md" />
+                    { }
+                    <Image src={githubImages.appIcon64} alt="" width={24} height={24} className="rounded-md" sizes="24px" />
                     <span className="hidden font-bold sm:inline-block">{t("common.app_name")}</span>
                 </Link>
                 <div className="mr-4 hidden md:flex">

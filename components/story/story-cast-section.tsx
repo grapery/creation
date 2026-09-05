@@ -1,6 +1,7 @@
 "use client";
 
 import { Character } from "@/lib/types";
+import Image from "next/image";
 import { Plus, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/providers/language-provider";
@@ -73,11 +74,7 @@ function CharacterRow({ character }: CharacterRowProps) {
             {/* Avatar */}
             <div className="flex-shrink-0">
                 {character.avatar ? (
-                    <img
-                        src={character.avatar}
-                        alt={character.name}
-                        className="w-14 h-14 rounded-full object-cover"
-                    />
+                    <Image src={character.avatar} alt={character.name} width={56} height={56} className="rounded-full object-cover" sizes="56px" />
                 ) : (
                     <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center">
                         <span className="text-xl font-bold text-muted-foreground">
