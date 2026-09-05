@@ -41,7 +41,7 @@ export function PlazaSectionRail({ section }: PlazaSectionRailProps) {
                     >
                         <div className="relative rounded-xl overflow-hidden h-[180px] bg-muted">
                             {story.coverURL ? (
-                                <Image src={story.coverURL} alt={story.title || ""} width={0} height={0} className="w-full h-full object-cover transition-transform group-hover:scale-105" style={{ width: "100%", height: "100%" }} sizes="100vw" />
+<Image src={story.coverURL} alt={story.title || ""} fill sizes="130px" className="object-cover transition-transform group-hover:scale-105" />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center">
                                     <span className="text-xs text-muted-foreground">{story.title}</span>

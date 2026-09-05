@@ -137,7 +137,7 @@ export default function StoryReadPage() {
                 }}
             >
                 {image ? (
-                    <Image src={image} alt="" width={0} height={0} className="object-contain" style={{ width: "100%", height: "100%", maxHeight: "100%", maxWidth: "100%" }} sizes="100vw" />
+                    <Image src={image} alt="" priority width={0} height={0} className="object-contain" style={{ width: "100%", height: "100%", maxHeight: "100%", maxWidth: "100%" }} sizes="100vw" />
                 ) : (
                     <div className="px-8 text-center space-y-3 max-w-lg">
                         <p className="text-lg font-semibold">{scene?.title || `Scene ${index + 1}`}</p>

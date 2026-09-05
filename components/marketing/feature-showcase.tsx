@@ -70,13 +70,13 @@ function CachedSlideImage({ src, alt }: { src: string; alt: string }) {
     if (isLoading) {
         return (
             <div className="w-full aspect-[4/3] bg-[var(--idea-selection)] flex items-center justify-center">
-                <div className="w-8 h-8 border-2 border-[var(--idea-border)] border-t-[var(--idea-text)] rounded-full animate-spin" />
+                <div className="w-8 h-8 border-2 border-[var(--idea-border)] border-t-[var(--idea-text)] rounded-full animate-spin relative" />
             </div>
         );
     }
 
     return (
-        <Image src={cachedSrc || src} alt={alt} width={0} height={0} className="w-full aspect-[4/3] object-cover" style={{ width: "100%", height: "auto" }} sizes="100vw" />
+<Image src={cachedSrc || src} alt={alt} fill sizes="(max-width: 768px) 100vw, 33vw" className="aspect-[4/3] object-cover" />
     );
 }
 

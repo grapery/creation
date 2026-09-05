@@ -205,7 +205,7 @@ export default function FragmentDetailPage() {
             {fragment.imageUrls && fragment.imageUrls.length > 0 && (
                 <div className="space-y-2">
                     <div className="relative rounded-xl overflow-hidden bg-muted aspect-[4/3]">
-                        <Image src={fragment.imageUrls[currentImageIndex]} alt="" width={0} height={0} className="w-full h-full object-cover" style={{ width: "100%", height: "100%" }} sizes="100vw" />
+<Image src={fragment.imageUrls[currentImageIndex]} alt="" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
                         {fragment.imageUrls.length > 1 && (
                             <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
                                 {fragment.imageUrls.map((_, i) => (
@@ -221,7 +221,7 @@ export default function FragmentDetailPage() {
                         )}
                     </div>
                     {fragment.imageUrls.length > 1 && (
-                        <div className="flex gap-2 overflow-x-auto pb-1">
+                        <div className="flex gap-2 overflow-x-auto pb-1 relative">
                             {fragment.imageUrls.map((url, i) => (
                                 <button
                                     key={i}
@@ -230,7 +230,7 @@ export default function FragmentDetailPage() {
                                         i === currentImageIndex ? "border-primary" : "border-transparent"
                                     }`}
                                 >
-                                    <Image src={url} alt="" width={0} height={0} className="w-full h-full object-cover" style={{ width: "100%", height: "100%" }} sizes="100vw" />
+<Image src={url} alt="" fill sizes="64px" className="object-cover" />
                                 </button>
                             ))}
                         </div>

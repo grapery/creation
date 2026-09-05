@@ -111,9 +111,9 @@ export default function AboutPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         {screenshots.map((s, i) => (
                             <div key={i} className="group">
-                                <div className="idea-preview-card rounded-2xl overflow-hidden bg-[var(--idea-bg)] aspect-[9/16] flex items-center justify-center mb-3 shadow-[var(--idea-shadow)]">
+                                <div className="idea-preview-card rounded-2xl overflow-hidden bg-[var(--idea-bg)] aspect-[9/16] flex items-center justify-center mb-3 shadow-[var(--idea-shadow)] relative">
                                     { }
-                                    <Image src={s.src} alt={s.title} width={0} height={0} className="idea-preview-image w-full h-full object-cover object-top" style={{ width: "100%", height: "100%" }} sizes="100vw" loading="lazy" />
+<Image src={s.src} alt={s.title} fill sizes="(max-width: 768px) 100vw, 50vw" className="idea-preview-image object-cover object-top" />
                                 </div>
                                 <h3 className="font-semibold text-center text-black">{s.title}</h3>
                                 <p className="text-sm text-[var(--idea-text-muted)] text-center">{s.desc}</p>

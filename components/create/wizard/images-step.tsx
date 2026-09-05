@@ -98,7 +98,7 @@ export function ImagesStep({ storyboardId, scenes, onScenesUpdate, onNext, onBac
                         {scenes.map((scene, index) => (
                             <div key={scene.id} className="relative rounded-xl overflow-hidden border border-border bg-muted group">
                                 {scene.image ? (
-                                    <Image src={scene.image} alt={scene.title} width={0} height={0} className="w-full h-[200px] object-cover" style={{ width: "100%", height: "auto" }} sizes="100vw" />
+                                    <Image src={scene.image} alt={scene.title} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover" />
                                 ) : (
                                     <div className="w-full h-[200px] flex flex-col items-center justify-center gap-2">
                                         {sceneStatuses[scene.id] === "generating" || generatingSceneId === scene.id ? (

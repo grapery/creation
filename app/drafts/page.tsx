@@ -293,8 +293,8 @@ export default function DraftsPage() {
                                                         )}
                                                     </div>
                                                     {sb.image && (
-                                                        <div className="h-12 w-12 rounded-md overflow-hidden flex-shrink-0 bg-muted">
-                                                            <Image src={sb.image} alt="" width={0} height={0} className="h-full w-full object-cover" style={{ width: "100%", height: "100%" }} sizes="100vw" />
+                                                        <div className="h-12 w-12 rounded-md overflow-hidden flex-shrink-0 bg-muted relative">
+<Image src={sb.image} alt="" fill sizes="48px" className="object-cover" />
                                                         </div>
                                                     )}
                                                 </div>
@@ -378,8 +378,8 @@ export default function DraftsPage() {
                                                 <div className="flex items-start gap-3">
                                                     {fragment.imageUrls &&
                                                     fragment.imageUrls.length > 0 ? (
-                                                        <div className="h-12 w-12 rounded-md overflow-hidden flex-shrink-0 bg-muted">
-                                                            <Image src={fragment.imageUrls[0]} alt="" width={0} height={0} className="h-full w-full object-cover" style={{ width: "100%", height: "100%" }} sizes="100vw" />
+                                                        <div className="h-12 w-12 rounded-md overflow-hidden flex-shrink-0 bg-muted relative">
+<Image src={fragment.imageUrls[0]} alt="" fill sizes="48px" className="object-cover" />
                                                         </div>
                                                     ) : (
                                                         <div className="h-12 w-12 rounded-md flex items-center justify-center flex-shrink-0 bg-muted">

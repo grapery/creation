@@ -61,7 +61,7 @@ export default function StoryboardCard({ storyboard, href, onLikeChange, onBookm
                     {/* Cover Image */}
                     <div className="relative aspect-video rounded-lg bg-muted/30 mb-4 overflow-hidden">
                         {storyboard.image ? (
-                            <Image src={storyboard.image} alt={storyboard.title} width={0} height={0} className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300" style={{ width: "100%", height: "100%" }} sizes="100vw" />
+<Image src={storyboard.image} alt={storyboard.title} fill sizes="(max-width: 640px) 100vw, 50vw" className="object-cover transition-transform group-hover:scale-105 duration-300" />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-secondary/20">
                                 <Layers className="h-12 w-12 text-muted-foreground/50" />

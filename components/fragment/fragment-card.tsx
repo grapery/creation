@@ -44,7 +44,7 @@ export function FragmentCard({ fragment, compact = false, onLikeChange }: Fragme
                 {/* Image */}
                 {fragment.imageUrls && fragment.imageUrls.length > 0 ? (
                     <div className={`relative overflow-hidden ${compact ? "h-[160px]" : "h-[200px]"}`}>
-                        <Image src={fragment.imageUrls[0]} alt={fragment.caption || fragment.content.slice(0, 50)} width={0} height={0} className="w-full h-full object-cover transition-transform group-hover:scale-105" style={{ width: "100%", height: "100%" }} sizes="100vw" />
+<Image src={fragment.imageUrls[0]} alt={fragment.caption || fragment.content.slice(0, 50)} fill sizes="(max-width: 768px) 50vw, 33vw" className="object-cover transition-transform group-hover:scale-105" />
                         {/* Multi-image indicator */}
                         {fragment.imageUrls.length > 1 && (
                             <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-black/60 rounded text-white text-xs backdrop-blur-sm">

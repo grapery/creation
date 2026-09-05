@@ -166,9 +166,9 @@ function WeChatPayPanel({
             <p className="text-sm text-muted-foreground">
                 Scan with WeChat to pay {amountLabel}
             </p>
-            <div className="mx-auto w-[220px] h-[220px] rounded-lg border bg-white p-2">
+            <div className="mx-auto w-[220px] h-[220px] rounded-lg border bg-white p-2 relative">
                 { }
-                <Image src={qrImg} alt="WeChat Pay QR" width={0} height={0} className="w-full h-full" style={{ width: "100%", height: "100%" }} sizes="100vw" />
+<Image src={qrImg} alt="WeChat Pay QR" fill sizes="220px" />
             </div>
             <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
                 {polling ? (

@@ -19,11 +19,11 @@ function Avatar({ src, name, size = 24 }: { src?: string; name?: string; size?: 
     const initial = name && name.length > 0 ? name[0].toUpperCase() : "?";
     return (
         <div
-            className="rounded-full overflow-hidden bg-gradient-to-br from-purple-400/60 to-blue-400/60 flex items-center justify-center border border-border"
+            className="relative rounded-full overflow-hidden bg-gradient-to-br from-purple-400/60 to-blue-400/60 flex items-center justify-center border border-border"
             style={{ width: size, height: size }}
         >
             {src ? (
-                <Image src={src} alt={name || "avatar"} width={0} height={0} className="w-full h-full object-cover" style={{ width: "100%", height: "100%" }} sizes="100vw" />
+<Image src={src} alt={name || "avatar"} fill sizes="36px" className="object-cover" />
             ) : (
                 <span
                     className="text-white font-bold"
@@ -70,7 +70,7 @@ export function StoryboardCard({
                 {/* Thumbnail */}
                 <div className="flex-shrink-0">
                     {thumbnail ? (
-                        <Image src={thumbnail} alt={storyboard.title} width={0} height={0} className="w-[84px] h-[84px] rounded-[12px] object-cover shadow-sm" style={{ width: "auto", height: "auto" }} sizes="100vw" />
+                        <Image src={thumbnail} alt={storyboard.title} width={84} height={84} sizes="84px" className="rounded-[12px] object-cover shadow-sm" />
                     ) : (
                         <div className="w-[84px] h-[84px] rounded-[12px] bg-muted/50 flex items-center justify-center border border-border/50">
                             <Copy className="w-6 h-6 text-muted-foreground/50" />

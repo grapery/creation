@@ -11,7 +11,7 @@ export function CharacterCard({ character }: { character: Character }) {
             <Link href={`/characters/${character.id}`}>
                 <div className="aspect-[3/4] w-full bg-secondary relative">
                     {character.avatar ? (
-                        <Image src={character.avatar} alt={character.name} width={0} height={0} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ width: "100%", height: "100%" }} sizes="100vw" />
+<Image src={character.avatar} alt={character.name} fill sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" className="object-cover transition-transform duration-500 group-hover:scale-105" />
                     ) : (
                         <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-muted-foreground">
                             {character.name[0]}

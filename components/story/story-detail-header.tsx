@@ -59,9 +59,9 @@ export function StoryDetailHeader({ story, onLike, onRead, liking = false }: Sto
             <div className="relative container max-w-6xl px-4 md:px-6 mx-auto">
                 <div className="flex flex-col md:flex-row items-start gap-3 md:gap-5 -mt-[20px] md:-mt-[30px]">
                     <div className="relative flex-shrink-0 mx-auto md:mx-0">
-                        <div className="w-[40px] h-[40px] md:w-[60px] md:h-[60px] rounded-lg shadow-2xl overflow-hidden ring-1 ring-white/20 transition-transform hover:-translate-y-1 duration-300">
+                        <div className="w-[40px] h-[40px] md:w-[60px] md:h-[60px] rounded-lg shadow-2xl overflow-hidden ring-1 ring-white/20 transition-transform hover:-translate-y-1 duration-300 relative">
                             {story.coverImage ? (
-                                <Image src={story.coverImage} alt={story.title} width={0} height={0} className="w-full h-full object-cover" style={{ width: "100%", height: "100%" }} sizes="100vw" />
+<Image src={story.coverImage} alt={story.title} fill sizes="100vw" className="object-cover"  priority />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900 text-white p-4 text-center">
                                     <span className="text-[10px] font-serif italic opacity-50">{story.title.substring(0, 2)}</span>
@@ -91,9 +91,9 @@ export function StoryDetailHeader({ story, onLike, onRead, liking = false }: Sto
                             <div className="flex items-center justify-center md:justify-start gap-1.5 text-xs text-muted-foreground">
                                 <span>by</span>
                                 <div className="flex items-center gap-1 font-medium text-foreground">
-                                    <div className="w-4 h-4 rounded-full overflow-hidden bg-secondary">
+                                    <div className="w-4 h-4 rounded-full overflow-hidden bg-secondary relative">
                                         {story.author?.avatar ? (
-                                            <Image src={story.author.avatar} alt={story.author.username} width={0} height={0} className="w-full h-full object-cover" style={{ width: "100%", height: "100%" }} sizes="100vw" />
+<Image src={story.author.avatar} alt={story.author.username} fill sizes="(max-width: 768px) 100vw, 25vw" className="object-cover" />
                                         ) : (
                                             <User className="w-full h-full p-0.5" />
                                         )}

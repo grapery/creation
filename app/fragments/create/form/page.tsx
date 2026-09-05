@@ -295,7 +295,7 @@ function CreateFragmentForm() {
                                 key={url}
                                 className="relative shrink-0 w-24 h-24 rounded-lg overflow-hidden border border-border"
                             >
-                                <Image src={url} alt="" width={0} height={0} className="w-full h-full object-cover" style={{ width: "100%", height: "100%" }} sizes="100vw" />
+<Image src={url} alt="" fill sizes="120px" className="object-cover" />
                                 <Button
                                     type="button"
                                     variant="secondary"

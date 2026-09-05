@@ -52,9 +52,9 @@ export default function ListItem({
                 <div className="flex gap-4">
                     {/* Left - Cover Image */}
                     <div className="flex-shrink-0">
-                        <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-lg overflow-hidden bg-muted/10 flex items-center justify-center">
+                        <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-lg overflow-hidden bg-muted/10 flex items-center justify-center relative">
                             {coverImage ? (
-                                <Image src={coverImage} alt={title} width={0} height={0} className="w-full h-full object-cover" style={{ width: "100%", height: "100%" }} sizes="100vw" />
+<Image src={coverImage} alt={title} fill sizes="(max-width: 640px) 96px, 128px" className="object-cover" />
                             ) : coverIcon ? (
                                 <div className="text-muted-foreground/50">
                                     {coverIcon}

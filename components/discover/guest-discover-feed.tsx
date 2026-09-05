@@ -106,12 +106,12 @@ export function GuestDiscoverFeed() {
                 <section className="space-y-3">
                     <h2 className="text-lg font-semibold">Trending stories</h2>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {trendingStories.map((story) => (
+                        {trendingStories.map((story, index) => (
                             <Link key={story.id} href={`/stories/${story.id}`} className="block group">
                                 <div className="rounded-xl overflow-hidden border border-border bg-card transition-all hover:shadow-md hover:border-primary/30">
                                     {story.coverImage ? (
-                                        <div className="aspect-[3/4] overflow-hidden">
-                                            <Image src={story.coverImage} alt={story.title} width={0} height={0} className="w-full h-full object-cover transition-transform group-hover:scale-105" style={{ width: "100%", height: "100%" }} sizes="100vw" />
+                                        <div className="aspect-[3/4] overflow-hidden relative">
+<Image src={story.coverImage} alt={story.title} fill sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw" className="object-cover transition-transform group-hover:scale-105"  priority={index === 0} />
                                         </div>
                                     ) : (
                                         <div className="aspect-[3/4] bg-muted flex items-center justify-center p-3">

@@ -389,7 +389,7 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
 
                                 {coverImage || aiGeneratedCoverURL ? (
                                     <>
-                                        <Image src={coverImage || aiGeneratedCoverURL} alt="Cover" width={0} height={0} className="w-full h-full object-cover" style={{ width: "100%", height: "100%" }} sizes="100vw" />
+<Image src={coverImage || aiGeneratedCoverURL} alt="Cover" fill sizes="600px" className="object-cover" />
                                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
                                             <button
                                                 onClick={triggerFileInput}
@@ -527,7 +527,7 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                                                 >
                                                     <div className="aspect-video bg-muted relative">
                                                         {style.preview_image ? (
-                                                            <Image src={style.preview_image} alt={style.name} width={0} height={0} className="w-full h-full object-cover" style={{ width: "100%", height: "100%" }} sizes="100vw" />
+<Image src={style.preview_image} alt={style.name} fill sizes="(max-width: 640px) 100vw, 33vw" className="object-cover" />
                                                         ) : (
                                                             <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
                                                                 {t("create.no_preview")}

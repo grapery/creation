@@ -660,18 +660,9 @@ function CreateChatContent() {
                             <p className="text-sm text-muted-foreground line-clamp-4 whitespace-pre-wrap">{result.content}</p>
                         )}
                         {result.images.length > 0 && (
-                            <div className={`grid gap-2 ${result.kind === "fragment" ? "grid-cols-2" : "grid-cols-3"}`}>
+                            <div className={`grid grid-cols-2 gap-2`}>
                                 {result.images.map((url, i) => (
-<Image
-                                        key={`${url}-${i}`}
-                                        src={url}
-                                        alt={`${result.kind} image ${i + 1}`}
-                                        width={0}
-                                        height={0}
-                                        sizes="(max-width: 768px) 50vw, 300px"
-                                        style={{ width: "100%", height: "auto" }}
-                                        className="aspect-square object-cover rounded-lg border border-border"
-                                    />
+<Image key={`${url}-${i}`} src={url} alt={`${result.kind} image ${i + 1}`} width={0} height={0} sizes="(max-width: 768px) 50vw, 300px" style={{ width: "100%", height: "auto" }} className="aspect-square object-cover rounded-lg border border-border" />
                                 ))}
                             </div>
                         )}

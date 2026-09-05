@@ -61,7 +61,7 @@ export function GeneratingStep({
             {/* Hero backdrop */}
             {backgroundImage && (
                 <div className="relative rounded-xl overflow-hidden h-48">
-                    <Image src={backgroundImage} alt="" width={0} height={0} className="w-full h-full object-cover blur-sm opacity-50" style={{ width: "100%", height: "100%" }} sizes="100vw" />
+<Image src={backgroundImage} alt="" fill sizes="100vw" className="object-cover blur-sm opacity-50" />
                     <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
                 </div>
             )}

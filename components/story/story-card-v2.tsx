@@ -27,7 +27,7 @@ export default function StoryCard({ story, className }: StoryCardProps) {
                         {/* Cover Image - 88x88 like iOS */}
                         <div className="relative w-[88px] h-[88px] flex-shrink-0 rounded-xl overflow-hidden bg-muted">
                             {story.coverImage ? (
-                                <Image src={story.coverImage} alt={story.title} width={0} height={0} className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300" style={{ width: "100%", height: "100%" }} sizes="100vw" />
+<Image src={story.coverImage} alt={story.title} fill sizes="88px" className="object-cover transition-transform group-hover:scale-105 duration-300" />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-secondary/20">
                                     <BookOpen className="h-8 w-8 text-muted-foreground/50" />

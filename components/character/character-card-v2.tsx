@@ -18,7 +18,7 @@ export default function CharacterCard({ character }: CharacterCardProps) {
                     {/* Character Avatar */}
                     <div className="relative aspect-square w-full rounded-xl bg-muted/30 mb-4 overflow-hidden">
                         {character.avatar ? (
-                            <Image src={character.avatar} alt={character.name} width={0} height={0} className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300" style={{ width: "100%", height: "100%" }} sizes="100vw" />
+<Image src={character.avatar} alt={character.name} fill sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" className="object-cover transition-transform group-hover:scale-105 duration-300" />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-secondary/20">
                                 <Sparkles className="h-12 w-12 text-muted-foreground/50" />

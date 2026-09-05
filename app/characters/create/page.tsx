@@ -211,7 +211,7 @@ function CreateCharacter() {
                     onClick={() => fileInputRef.current?.click()}
                 >
                     {formData.avatar ? (
-                        <Image src={formData.avatar} alt="Avatar" width={0} height={0} className="w-full h-full object-cover" style={{ width: "100%", height: "100%" }} sizes="100vw" />
+<Image src={formData.avatar} alt="Avatar" fill sizes="192px" className="object-cover" />
                     ) : (
                         <div className="w-full h-full bg-muted flex items-center justify-center">
                             {avatarUploading ? (

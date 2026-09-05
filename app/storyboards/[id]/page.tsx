@@ -277,9 +277,9 @@ export default function StoryboardPage() {
 
                         <div className="flex items-center justify-between gap-4 text-sm">
                             <div className="flex items-center gap-2">
-                                <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center overflow-hidden">
+                                <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center overflow-hidden relative">
                                     {item.creatorAvatar ? (
-                                        <Image src={item.creatorAvatar!} alt={item.creatorName ?? ""} width={0} height={0} className="w-full h-full object-cover" style={{ width: "100%", height: "100%" }} sizes="100vw" />
+<Image src={item.creatorAvatar!} alt={item.creatorName ?? ""} fill sizes="32px" className="object-cover" />
                                     ) : (
                                         <span className="font-bold text-xs">{(item.creatorName || "U")[0]}</span>
                                     )}
@@ -480,7 +480,7 @@ export default function StoryboardPage() {
                                                     {/* Scene Image */}
                                                     {scene.image && (
                                                         <div className="relative w-full bg-muted group">
-                                                            <Image src={scene.image} alt={scene.title} width={0} height={0} className="w-full h-auto object-cover max-h-[600px]" style={{ width: "100%", height: "auto" }} sizes="100vw" />
+                                                            <Image src={scene.image} alt={scene.title} width={0} height={0} className="object-cover max-h-[600px] w-full" style={{ width: "100%", height: "auto" }} sizes="(max-width: 768px) 100vw, 672px" />
                                                             {/* Video Play Button */}
                                                             {scene.videoUrl && (
                                                                 <div
@@ -609,7 +609,7 @@ export default function StoryboardPage() {
                                             {/* Scene Image */}
                                             {scene.image && (
                                                 <div className="relative w-full bg-muted group">
-                                                    <Image src={scene.image} alt={scene.title} width={0} height={0} className="w-full h-auto object-cover max-h-[600px]" style={{ width: "100%", height: "auto" }} sizes="100vw" />
+                                                    <Image src={scene.image} alt={scene.title} width={0} height={0} className="object-cover max-h-[600px] w-full" style={{ width: "100%", height: "auto" }} sizes="(max-width: 768px) 100vw, 672px" />
                                                     {/* Video Play Button */}
                                                     {scene.videoUrl && (
                                                         <div
@@ -683,9 +683,9 @@ export default function StoryboardPage() {
                                             href={`/characters/${char.characterId}`}
                                             className="flex items-start gap-4 p-4 rounded-lg border border-border hover:bg-secondary/50 transition-colors"
                                         >
-                                            <div className="h-16 w-16 rounded-lg bg-muted overflow-hidden flex-shrink-0">
+                                            <div className="h-16 w-16 rounded-lg bg-muted overflow-hidden flex-shrink-0 relative">
                                                 {avatar ? (
-                                                    <Image src={avatar} alt={name} width={0} height={0} className="w-full h-full object-cover" style={{ width: "100%", height: "100%" }} sizes="100vw" />
+<Image src={avatar} alt={name} fill sizes="64px" className="object-cover" />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary font-bold text-2xl">
                                                         {name[0]}

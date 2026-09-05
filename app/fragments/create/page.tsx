@@ -304,9 +304,9 @@ function CreateFragmentChat() {
                             <p className="text-sm whitespace-pre-wrap">{previewContent}</p>
                         )}
                         {previewUrls.length > 0 && (
-                            <div className="grid grid-cols-2 gap-2">
+                            <div className="grid grid-cols-2 gap-2 relative">
                                 {previewUrls.map((url) => (
-                                    <Image key={url} src={url} alt="" width={0} height={0} className="rounded-lg object-cover w-full aspect-[3/4] bg-muted" style={{ width: "100%", height: "auto" }} sizes="100vw" />
+<Image key={url} src={url} alt="" fill sizes="50vw" className="rounded-lg object-cover aspect-[3/4] bg-muted" />
                                 ))}
                             </div>
                         )}

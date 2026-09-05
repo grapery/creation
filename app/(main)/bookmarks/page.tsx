@@ -101,8 +101,8 @@ function BookmarkItem({ bookmark }: { bookmark: Bookmark }) {
         >
             <div className="flex items-center gap-3">
                 {(card?.coverImage || card?.image || card?.avatar) ? (
-                    <div className="h-12 w-12 rounded bg-muted overflow-hidden flex-shrink-0">
-                        <Image src={(card?.coverImage || card?.image || card?.avatar)!} alt="" width={0} height={0} className="h-full w-full object-cover" style={{ width: "100%", height: "100%" }} sizes="100vw" />
+                    <div className="h-12 w-12 rounded bg-muted overflow-hidden flex-shrink-0 relative">
+<Image src={(card?.coverImage || card?.image || card?.avatar)!} alt="" fill sizes="48px" className="object-cover" />
                     </div>
                 ) : (
                     <div className="h-12 w-12 rounded bg-muted flex items-center justify-center flex-shrink-0">

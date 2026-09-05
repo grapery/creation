@@ -124,17 +124,9 @@ export function StoryboardRoadmap({ storyboard }: StoryboardRoadmapProps) {
                         .map((scene, index) => (
                             <div
                                 key={scene.id}
-                                className="relative rounded-[12px] overflow-hidden"
+                                className="relative h-[150px] rounded-[12px] overflow-hidden"
                             >
-                                <Image
-                                    src={scene.image}
-                                    alt={scene.title || `Scene ${index + 1}`}
-                                    width={0}
-                                    height={0}
-                                    sizes="(max-width: 768px) 100vw, 360px"
-                                    style={{ width: "100%", height: 150 }}
-                                    className="object-cover"
-                                />
+                                <Image src={scene.image} alt={scene.title || `Scene ${index + 1}`} fill sizes="(max-width: 768px) 100vw, 360px" className="object-cover" />
                             </div>
                         ))}
                 </div>
