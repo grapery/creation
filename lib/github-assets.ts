@@ -7,8 +7,9 @@
  * To use a different CDN, set NEXT_PUBLIC_ASSETS_URL in .env.local.
  * Fallback to local public/ paths when no CDN is configured.
  */
-const ASSETS_BASE_URL = process.env.NEXT_PUBLIC_ASSETS_URL ||
-  "https://raw.githubusercontent.com/grapery/creation/develop/public";
+// 默认走本地 /public 同源路径：服务器端图像优化器无法访问 raw.githubusercontent.com（国内出口超时），
+// 同源静态资源可直接优化且无出网依赖。如需 CDN 请显式设置 NEXT_PUBLIC_ASSETS_URL。
+const ASSETS_BASE_URL = process.env.NEXT_PUBLIC_ASSETS_URL || "";
 
 // Individual image URLs - can be customized per image
 // Fallback to local paths if GitHub URLs are not set

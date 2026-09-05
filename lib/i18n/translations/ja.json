@@ -56,7 +56,16 @@
     "forks": "フォーク",
     "and": "と",
     "saving": "保存中...",
-    "app_name": "未择"
+    "app_name": "未择",
+    "go_back": "戻る",
+    "likes": "いいね",
+    "yes": "はい",
+    "no": "いいえ",
+    "title": "タイトル",
+    "description": "説明",
+    "create": "作成",
+    "link_copied": "リンクをコピーしました",
+    "share_failed": "共有に失敗しました"
   },
   "auth": {
     "sign_in": "ログイン",

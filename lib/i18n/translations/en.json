@@ -56,7 +56,16 @@
     "forks": "Forks",
     "and": "and",
     "saving": "Saving...",
-    "app_name": "Voyager"
+    "app_name": "Voyager",
+    "go_back": "Go Back",
+    "likes": "Likes",
+    "yes": "Yes",
+    "no": "No",
+    "title": "Title",
+    "description": "Description",
+    "create": "Create",
+    "link_copied": "Link copied to clipboard",
+    "share_failed": "Failed to share"
   },
   "auth": {
     "sign_in": "Sign In",
