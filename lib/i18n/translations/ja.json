@@ -72,7 +72,12 @@
     "open_draft": "下書きを開く",
     "form_mode": "フォームモード",
     "no_bookmarks": "ブックマークはまだありません",
-    "view_all": "すべて見る"
+    "view_all": "すべて見る",
+    "story_by": "作者",
+    "stat_boards": "ボード",
+    "stat_chars": "文字数",
+    "stat_views": "閲覧",
+    "read": "読む"
   },
   "auth": {
     "sign_in": "ログイン",
@@ -472,7 +477,8 @@
     "actions": {
       "share": "共有",
       "start_reading": "読み始める",
-      "create_first_storyboard": "最初のストーリーボードを作成"
+      "create_first_storyboard": "最初のストーリーボードを作成",
+      "read_now": "読む"
     },
     "empty": {
       "no_storyboards_title": "まだストーリーボードがありません",

@@ -288,7 +288,7 @@ export const vip = {
     getPlans: async (): Promise<MembershipPlan[]> => {
         try {
             const data = await request<{ plans?: BackendMembershipPlan[] } | BackendMembershipPlan[]>(
-                '/api/membership/plans'
+                '/api/v1/membership/plans'
             );
             const list = Array.isArray(data)
                 ? data
@@ -326,7 +326,7 @@ export const vip = {
             period = planOrId.cycle;
         }
         const res = await request<{ orderId?: string; paymentUrl?: string; status?: string }>(
-            '/api/membership/subscribe',
+            '/api/v1/membership/subscribe',
             'POST',
             { tier, period }
         );

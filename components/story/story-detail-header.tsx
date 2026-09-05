@@ -89,7 +89,7 @@ export function StoryDetailHeader({ story, onLike, onRead, liking = false }: Sto
                             </h1>
 
                             <div className="flex items-center justify-center md:justify-start gap-1.5 text-xs text-muted-foreground">
-                                <span>by</span>
+                                <span>{t("common.story_by")}</span>
                                 <div className="flex items-center gap-1 font-medium text-foreground">
                                     <div className="w-4 h-4 rounded-full overflow-hidden bg-secondary relative">
                                         {story.author?.avatar ? (
@@ -106,15 +106,15 @@ export function StoryDetailHeader({ story, onLike, onRead, liking = false }: Sto
                         <div className="grid grid-cols-3 max-w-[200px] mx-auto md:mx-0 gap-2 py-1.5 border-y border-border/50">
                             <div className="flex flex-col items-center md:items-start">
                                 <span className="text-sm font-bold text-foreground">{story.storyboardCount || 0}</span>
-                                <span className="text-[8px] uppercase tracking-wider text-muted-foreground">Boards</span>
+                                <span className="text-[8px] uppercase tracking-wider text-muted-foreground">{t("common.stat_boards")}</span>
                             </div>
                             <div className="flex flex-col items-center md:items-start">
                                 <span className="text-sm font-bold text-foreground">{story.characterCount || 0}</span>
-                                <span className="text-[8px] uppercase tracking-wider text-muted-foreground">Chars</span>
+                                <span className="text-[8px] uppercase tracking-wider text-muted-foreground">{t("common.stat_chars")}</span>
                             </div>
                             <div className="flex flex-col items-center md:items-start">
                                 <span className="text-sm font-bold text-foreground">{story.viewCount || 0}</span>
-                                <span className="text-[8px] uppercase tracking-wider text-muted-foreground">Views</span>
+                                <span className="text-[8px] uppercase tracking-wider text-muted-foreground">{t("common.stat_views")}</span>
                             </div>
                         </div>
 

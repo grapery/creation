@@ -72,7 +72,12 @@
     "open_draft": "打开草稿",
     "form_mode": "表单模式",
     "no_bookmarks": "还没有收藏",
-    "view_all": "查看全部"
+    "view_all": "查看全部",
+    "story_by": "作者",
+    "stat_boards": "故事板",
+    "stat_chars": "字数",
+    "stat_views": "浏览",
+    "read": "阅读"
   },
   "auth": {
     "sign_in": "登录",
@@ -472,7 +477,8 @@
     "actions": {
       "share": "分享",
       "start_reading": "开始阅读",
-      "create_first_storyboard": "创建第一个故事板"
+      "create_first_storyboard": "创建第一个故事板",
+      "read_now": "阅读"
     },
     "empty": {
       "no_storyboards_title": "暂无故事板",

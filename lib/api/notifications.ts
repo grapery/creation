@@ -72,7 +72,7 @@ export const notifications = {
 
         // Build SSE URL with auth token
         const baseURL = process.env.NEXT_PUBLIC_API_URL || '';
-        const url = `${baseURL}/api/sse/notifications?token=${encodeURIComponent(token)}`;
+        const url = `${baseURL}/api/v1/sse/notifications?token=${encodeURIComponent(token)}`;
 
         const eventSource = new EventSource(url);
 

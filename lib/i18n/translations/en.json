@@ -72,7 +72,12 @@
     "open_draft": "Open draft",
     "form_mode": "Form mode",
     "no_bookmarks": "No bookmarks yet",
-    "view_all": "View all"
+    "view_all": "View all",
+    "story_by": "by",
+    "stat_boards": "Boards",
+    "stat_chars": "Chars",
+    "stat_views": "Views",
+    "read": "Read"
   },
   "auth": {
     "sign_in": "Sign In",
@@ -472,7 +477,8 @@
     "actions": {
       "share": "Share",
       "start_reading": "Start Reading",
-      "create_first_storyboard": "Create First Storyboard"
+      "create_first_storyboard": "Create First Storyboard",
+      "read_now": "Read"
     },
     "empty": {
       "no_storyboards_title": "No Storyboards Yet",
