@@ -77,7 +77,8 @@
     "stat_boards": "ボード",
     "stat_chars": "文字数",
     "stat_views": "閲覧",
-    "read": "読む"
+    "read": "読む",
+    "continue": "続ける"
   },
   "auth": {
     "sign_in": "ログイン",
@@ -752,7 +753,9 @@
     "reader_title": "読者として始める",
     "reader_desc": "素晴らしいストーリーを閲覧し、インスピレーションを集めましょう",
     "creator_title": "クリエイターとして始める",
-    "creator_desc": "断片からストーリーを作り、AI でインスピレーションを現実に"
+    "creator_desc": "断片からストーリーを作り、AI でインスピレーションを現実に",
+    "welcome_title": "Voyagerへようこそ",
+    "role_title": "どう始めますか？"
   },
   "drafts": {
     "title": "下書き",

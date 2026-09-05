@@ -77,7 +77,8 @@
     "stat_boards": "故事板",
     "stat_chars": "字数",
     "stat_views": "浏览",
-    "read": "阅读"
+    "read": "阅读",
+    "continue": "继续"
   },
   "auth": {
     "sign_in": "登录",
@@ -752,7 +753,9 @@
     "reader_title": "以读者身份开始",
     "reader_desc": "浏览精彩故事，收藏灵感碎片",
     "creator_title": "以创作者身份开始",
-    "creator_desc": "用碎片创作故事，让 AI 帮你把灵感变成现实"
+    "creator_desc": "用碎片创作故事，让 AI 帮你把灵感变成现实",
+    "welcome_title": "欢迎来到未择",
+    "role_title": "你想怎么开始？"
   },
   "drafts": {
     "title": "草稿",

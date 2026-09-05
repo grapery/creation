@@ -94,9 +94,9 @@ export default function OnboardingPage() {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Sparkles className="h-5 w-5 text-primary" />
-                        {step === "welcome" && t("onboarding.welcome_prefix", "Welcome to")} Voyager
+                        {step === "welcome" && t("onboarding.welcome_title", "Welcome to Voyager")}
                         {step === "genres" && t("onboarding.choose_preferences", "Choose Your Preferences")}
-                        {step === "role" && "How will you start?"}
+                        {step === "role" && t("onboarding.role_title", "How will you start?")}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -126,7 +126,7 @@ export default function OnboardingPage() {
                                         {catalogError || "No genres available yet."}
                                     </p>
                                     <Button variant="outline" size="sm" onClick={loadCatalog}>
-                                        Retry
+                                        {t("common.retry", "Retry")}
                                     </Button>
                                 </div>
                             ) : (
@@ -157,10 +157,10 @@ export default function OnboardingPage() {
                             )}
                             <div className="flex gap-2">
                                 <Button variant="outline" onClick={() => setStep("welcome")}>
-                                    Back
+                                    {t("common.go_back", "Back")}
                                 </Button>
                                 <Button className="flex-1" onClick={() => setStep("role")}>
-                                    Continue
+                                    {t("common.continue", "Continue")}
                                 </Button>
                             </div>
                         </>
@@ -203,7 +203,7 @@ export default function OnboardingPage() {
                             </button>
                             <div className="flex gap-2">
                                 <Button variant="outline" onClick={() => setStep("genres")}>
-                                    Back
+                                    {t("common.go_back", "Back")}
                                 </Button>
                                 <Button className="flex-1" onClick={finish} disabled={saving}>
                                     {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}

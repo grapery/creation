@@ -77,7 +77,8 @@
     "stat_boards": "Boards",
     "stat_chars": "Chars",
     "stat_views": "Views",
-    "read": "Read"
+    "read": "Read",
+    "continue": "Continue"
   },
   "auth": {
     "sign_in": "Sign In",
@@ -752,7 +753,9 @@
     "reader_title": "Start as a Reader",
     "reader_desc": "Browse amazing stories, collect inspiration fragments",
     "creator_title": "Start as a Creator",
-    "creator_desc": "Create stories from fragments, let AI help turn your inspiration into reality"
+    "creator_desc": "Create stories from fragments, let AI help turn your inspiration into reality",
+    "welcome_title": "Welcome to Voyager",
+    "role_title": "How will you start?"
   },
   "drafts": {
     "title": "Draft",
