@@ -71,7 +71,8 @@
     "view": "查看",
     "open_draft": "打开草稿",
     "form_mode": "表单模式",
-    "no_bookmarks": "还没有收藏"
+    "no_bookmarks": "还没有收藏",
+    "view_all": "查看全部"
   },
   "auth": {
     "sign_in": "登录",
@@ -607,7 +608,11 @@
     "topic_detail_retry": "重试",
     "topic_detail_kind_fragment": "碎片",
     "topic_detail_kind_story": "故事",
-    "search_placeholder": "搜索分区..."
+    "search_placeholder": "搜索分区...",
+    "tab_trending": "热门",
+    "tab_latest": "最新",
+    "subtitle": "探索社区的故事与碎片",
+    "search_sections": "搜索分区…"
   },
   "wizard": {
     "story_direction": "故事走向描述",

@@ -59,9 +59,9 @@ export default function PlazaPage() {
     };
 
     const tabs: { id: PlazaTab; label: string; icon: typeof Sparkles }[] = [
-        { id: "discover", label: "Discover", icon: Sparkles },
-        { id: "trending", label: "Trending", icon: TrendingUp },
-        { id: "latest", label: "Latest", icon: Clock },
+        { id: "discover", label: t("discover.title"), icon: Sparkles },
+        { id: "trending", label: t("plaza.tab_trending", "Trending"), icon: TrendingUp },
+        { id: "latest", label: t("plaza.tab_latest", "Latest"), icon: Clock },
     ];
 
     if (authLoading) {
@@ -79,7 +79,7 @@ export default function PlazaPage() {
             <div>
                 <h1 className="text-2xl font-bold tracking-tight">{t("discover.plaza")}</h1>
                 <p className="text-muted-foreground text-sm">
-                    Explore stories and fragments from the community
+                    {t("plaza.subtitle")}
                 </p>
             </div>
 
@@ -109,7 +109,7 @@ export default function PlazaPage() {
             </div>
 
             {activeTab === "discover" ? (
-                user ? <PlazaFeed /> : <GuestDiscoverFeed />
+                user ? <PlazaFeed /> : <GuestDiscoverFeed showHeader={false} />
             ) : loadingExtra ? (
                 <div className="flex items-center justify-center py-20">
                     <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />

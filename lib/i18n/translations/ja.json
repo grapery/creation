@@ -71,7 +71,8 @@
     "view": "見る",
     "open_draft": "下書きを開く",
     "form_mode": "フォームモード",
-    "no_bookmarks": "ブックマークはまだありません"
+    "no_bookmarks": "ブックマークはまだありません",
+    "view_all": "すべて見る"
   },
   "auth": {
     "sign_in": "ログイン",
@@ -607,7 +608,11 @@
     "topic_detail_retry": "再試行",
     "topic_detail_kind_fragment": "断片",
     "topic_detail_kind_story": "ストーリー",
-    "search_placeholder": "セクションを検索..."
+    "search_placeholder": "セクションを検索...",
+    "tab_trending": "人気",
+    "tab_latest": "最新",
+    "subtitle": "コミュニティのストーリーとフラグメントを探索",
+    "search_sections": "セクションを検索…"
   },
   "wizard": {
     "story_direction": "ストーリーの方向性",

@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
  * public trending storyboards / stories + optional-auth community feed.
  * Does not call auth-only /api/v1/plaza.
  */
-export function GuestDiscoverFeed() {
+export function GuestDiscoverFeed({ showHeader = true }: { showHeader?: boolean }) {
     const { t } = useTranslation();
     const [boards, setBoards] = useState<Storyboard[]>([]);
     const [trendingStories, setTrendingStories] = useState<Story[]>([]);
@@ -75,17 +75,19 @@ export function GuestDiscoverFeed() {
 
     return (
         <div className="space-y-8">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">{t("discover.title")}</h1>
-                    <p className="text-sm text-muted-foreground mt-1">
-                        {t("discover.subtitle")}
-                    </p>
+            {showHeader && (
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <h1 className="text-2xl font-bold tracking-tight">{t("discover.title")}</h1>
+                        <p className="text-sm text-muted-foreground mt-1">
+                            {t("discover.subtitle")}
+                        </p>
+                    </div>
+                    <Button onClick={() => showLoginPrompt()} variant="default">
+                        {t("discover.sign_in")}
+                    </Button>
                 </div>
-                <Button onClick={() => showLoginPrompt()} variant="default">
-                    {t("discover.sign_in")}
-                </Button>
-            </div>
+            )}
 
             <div className="flex flex-wrap gap-3">
                 <Link

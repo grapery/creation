@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useTranslation } from "@/providers/language-provider";
 import { plaza } from "@/lib/api/plaza";
 import { PlazaSectionRail } from "./plaza-section-rail";
 import { Loader2, Search, Sparkles } from "lucide-react";
 import type { PlazaSection } from "@/lib/types";
 
 export function PlazaFeed() {
+    const { t } = useTranslation();
     const [sections, setSections] = useState<PlazaSection[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
@@ -53,7 +55,7 @@ export function PlazaFeed() {
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search sections..."
+                    placeholder={t("plaza.search_sections")}
                     className="w-full pl-10 pr-4 py-2.5 bg-secondary border-0 rounded-full text-sm focus:outline-none focus:ring-1 focus:ring-primary/30"
                 />
             </div>

@@ -71,7 +71,8 @@
     "view": "View",
     "open_draft": "Open draft",
     "form_mode": "Form mode",
-    "no_bookmarks": "No bookmarks yet"
+    "no_bookmarks": "No bookmarks yet",
+    "view_all": "View all"
   },
   "auth": {
     "sign_in": "Sign In",
@@ -607,7 +608,11 @@
     "topic_detail_retry": "Retry",
     "topic_detail_kind_fragment": "Fragment",
     "topic_detail_kind_story": "Story",
-    "search_placeholder": "Search sections..."
+    "search_placeholder": "Search sections...",
+    "tab_trending": "Trending",
+    "tab_latest": "Latest",
+    "subtitle": "Explore stories and fragments from the community",
+    "search_sections": "Search sections..."
   },
   "wizard": {
     "story_direction": "Story Direction Description",
