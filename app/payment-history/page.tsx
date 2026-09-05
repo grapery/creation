@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslation } from "@/providers/language-provider";
 import { useAuth } from "@/providers/auth-provider";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -24,9 +25,10 @@ import {
 import { Loader2, Download, Filter } from "lucide-react";
 import { payment, PaymentHistoryQuery } from "@/lib/api/payment";
 import { PaymentMethod, PaymentStatus, PaymentRecord } from "@/lib/types/payment";
-import { formatDistanceToNow } from "date-fns";
+import { formatRelativeTimeMs } from "@/lib/utils";
 
 export default function PaymentHistoryPage() {
+    const { t, language } = useTranslation();
     const { user } = useAuth();
     const router = useRouter();
 
@@ -233,7 +235,7 @@ export default function PaymentHistoryPage() {
                                                     <div>
                                                         <div>{new Date(payment.createdAt).toLocaleDateString()}</div>
                                                         <div className="text-xs text-muted-foreground">
-                                                            {formatDistanceToNow(payment.createdAt, { addSuffix: true })}
+                                                            {formatRelativeTimeMs(payment.createdAt, language)}
                                                         </div>
                                                     </div>
                                                 </TableCell>

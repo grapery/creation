@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "@/providers/language-provider";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/providers/auth-provider";
 import { Button } from "@/components/ui/button";
@@ -9,9 +10,10 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, ArrowLeft } from "lucide-react";
 import { payment } from "@/lib/api/payment";
 import { PaymentMethod, PaymentStatus, PaymentRecord } from "@/lib/types/payment";
-import { formatDistanceToNow } from "date-fns";
+import { formatRelativeTimeMs } from "@/lib/utils";
 
 export default function PaymentDetailPage() {
+    const { t, language } = useTranslation();
     const { id } = useParams<{ id: string }>();
     const router = useRouter();
     const { user } = useAuth();
@@ -128,7 +130,7 @@ export default function PaymentDetailPage() {
                         {(record.metadata?.productName || record.planId || "Subscription").replace(/_/g, " ")}
                     </CardTitle>
                     <CardDescription>
-                        {formatDistanceToNow(record.createdAt, { addSuffix: true })}
+                        {formatRelativeTimeMs(record.createdAt, language)}
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">

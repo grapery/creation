@@ -1,10 +1,12 @@
 import Link from "next/link"
+import { useTranslation } from "@/providers/language-provider";
 import { ChatSession } from "@/lib/api/chat"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { formatDistanceToNow } from "date-fns"
+import { formatRelativeTimeMs } from "@/lib/utils"
 import { cn } from "@/lib/utils"
 
 export function ChatSessionItem({ session }: { session: ChatSession }) {
+    const { t, language } = useTranslation();
     return (
         <Link
             href={`/chat/${session.id}`}
@@ -25,7 +27,7 @@ export function ChatSessionItem({ session }: { session: ChatSession }) {
                 <div className="flex justify-between items-baseline mb-1">
                     <h4 className="font-semibold truncate">{session.characterName}</h4>
                     <span className="text-xs text-muted-foreground whitespace-nowrap">
-                        {formatDistanceToNow(new Date(session.lastMessageTime), { addSuffix: true })}
+                        {formatRelativeTimeMs(new Date(session.lastMessageTime), language)}
                     </span>
                 </div>
                 <p className={cn("text-sm truncate", session.unreadCount > 0 ? "font-medium text-foreground" : "text-muted-foreground")}>

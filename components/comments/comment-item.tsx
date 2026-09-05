@@ -3,7 +3,7 @@
 import { Comment, comments } from "@/lib/api/comments";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Heart, Reply, Trash2 } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import { formatRelativeTime } from "@/lib/utils";
 import { useState } from "react";
 import { useAuth } from "@/providers/auth-provider";
 import { useTranslation } from "@/providers/language-provider";
@@ -17,7 +17,7 @@ interface CommentItemProps {
 
 export function CommentItem({ comment, onReply, onDelete }: CommentItemProps) {
     const { user } = useAuth();
-    const { t } = useTranslation();
+    const { t, language } = useTranslation();
     const [isLiked, setIsLiked] = useState(false); // Should come from API
     const [likes, setLikes] = useState(comment.likes || 0);
 
@@ -46,7 +46,7 @@ export function CommentItem({ comment, onReply, onDelete }: CommentItemProps) {
                 <div className="bg-muted/30 p-3 rounded-xl rounded-tl-sm">
                     <div className="flex justify-between items-start mb-1">
                         <span className="font-semibold text-sm">{comment.user?.displayName || comment.user?.username || t("comments.unknown")}</span>
-                        <span className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(comment.createdAt * 1000), { addSuffix: true })}</span>
+                        <span className="text-xs text-muted-foreground">{formatRelativeTime(comment.createdAt, language)}</span>
                     </div>
                     <p className="text-sm">{comment.content}</p>
                 </div>

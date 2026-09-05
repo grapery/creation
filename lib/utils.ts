@@ -15,3 +15,18 @@ export function errorMessage(e: unknown): string {
     }
     return "Unknown error";
 }
+
+import { formatDistanceToNow } from "date-fns";
+import { zhCN, ja, enUS } from "date-fns/locale";
+
+/** 按界面语言格式化相对时间（date-fns 默认英文，这里跟随 i18n 语言码）。 */
+export function formatRelativeTime(timestampSeconds: number, language: string): string {
+    const locale = language === "zh-Hans" ? zhCN : language === "ja" ? ja : enUS;
+    return formatDistanceToNow(new Date(timestampSeconds * 1000), { addSuffix: true, locale });
+}
+
+/** 毫秒时间戳/Date 的相对时间（支付记录、会话列表用毫秒）。 */
+export function formatRelativeTimeMs(date: Date | number, language: string): string {
+    const locale = language === "zh-Hans" ? zhCN : language === "ja" ? ja : enUS;
+    return formatDistanceToNow(typeof date === "number" ? new Date(date) : date, { addSuffix: true, locale });
+}

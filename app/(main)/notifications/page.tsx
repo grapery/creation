@@ -8,11 +8,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Bell, Heart, UserPlus, MessageCircle, Loader2, Check, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { formatDistanceToNow } from "date-fns";
+import { formatRelativeTime } from "@/lib/utils";
 import { notifications as notificationsApi, Notification } from "@/lib/api/notifications";
 
 function NotificationsContent() {
-    const { t } = useTranslation();
+    const { t, language } = useTranslation();
     const [activeTab, setActiveTab] = useState("all");
     const [items, setItems] = useState<Notification[]>([]);
     const [loading, setLoading] = useState(true);
@@ -139,7 +139,7 @@ function NotificationsContent() {
                                             {note.content || note.title}
                                         </div>
                                         <div className="text-xs text-muted-foreground mt-1">
-                                            {note.createdAt ? formatDistanceToNow(new Date(note.createdAt * 1000), { addSuffix: true }) : ""}
+                                            {note.createdAt ? formatRelativeTime(note.createdAt, language) : ""}
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
