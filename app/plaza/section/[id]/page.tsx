@@ -15,7 +15,7 @@ export default function PlazaSectionDetailPage() {
     const sectionId = params.id as string;
 
     const [section, setSection] = useState<PlazaSection | null>(null);
-    const [items, setItems] = useState<any[]>([]);
+    const [items, setItems] = useState<unknown[]>([]);
     const [loading, setLoading] = useState(true);
     const [hasMore, setHasMore] = useState(false);
     const [offset, setOffset] = useState(0);
@@ -101,11 +101,11 @@ export default function PlazaSectionDetailPage() {
                 ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
                 : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
             }>
-                {items.map((item: any) =>
+                {items.map((item, i) =>
                     isFragmentKind ? (
-                        <FragmentCard key={item.id} fragment={item} compact />
+                        <FragmentCard key={i} fragment={item as StoryFragment} compact />
                     ) : (
-                        <StoryCardV2 key={item.id} story={item} />
+                        <StoryCardV2 key={i} story={item as Story} />
                     )
                 )}
             </div>

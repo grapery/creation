@@ -68,7 +68,7 @@ function SettingsGroupCard({ group, isActionGroup = false }: { group: SettingsGr
                     <div className="p-2 bg-secondary rounded-md">
                         <group.icon className="w-4 h-4" />
                     </div>
-                    {group.titleKey ? t(group.titleKey as any) : group.title}
+                    {group.titleKey ? t(group.titleKey as string) : group.title}
                 </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
@@ -85,11 +85,11 @@ function SettingsGroupCard({ group, isActionGroup = false }: { group: SettingsGr
                             <div className="flex items-center gap-3">
                                 <div className="flex-1">
                                     <div className="text-sm font-medium text-foreground">
-                                        {item.labelKey ? t(item.labelKey as any) : item.label}
+                                        {item.labelKey ? t(item.labelKey as string) : item.label}
                                     </div>
                                     {item.description && (
                                         <div className="text-xs text-muted-foreground mt-0.5">
-                                            {item.descriptionKey ? t(item.descriptionKey as any) : item.description}
+                                            {item.descriptionKey ? t(item.descriptionKey as string) : item.description}
                                         </div>
                                     )}
                                 </div>

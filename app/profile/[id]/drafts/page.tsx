@@ -133,9 +133,9 @@ export default function ProfileDraftsPage() {
                 if (!isMounted) return;
 
                 // Filter for draft status if backend returns all statuses
-                const allStoryboards = draftsData.storyboards || [];
+                const allStoryboards = (draftsData.storyboards || []) as (Storyboard & { status?: string; publishedAt?: number })[];
                 const draftItems = allStoryboards.filter(
-                    (sb: any) => sb.status === 'draft' || sb.publishedAt === 0 || !sb.publishedAt
+                    (sb) => sb.status === 'draft' || sb.publishedAt === 0 || !sb.publishedAt
                 );
                 setDrafts(draftItems.length > 0 ? draftItems : allStoryboards);
             } catch (e) {

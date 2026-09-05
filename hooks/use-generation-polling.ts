@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { creation } from "@/lib/api/creation";
+import { errorMessage } from "@/lib/utils";
 import type { StoryboardGenerationProgress } from "@/lib/types";
 
 interface UseGenerationPollingOptions {
@@ -46,8 +47,8 @@ export function useGenerationPolling({
             } else {
                 setBackoffIndex(0);
             }
-        } catch (err: any) {
-            setError(err?.message || "Failed to fetch progress");
+        } catch (err: unknown) {
+            setError(errorMessage(err) || "Failed to fetch progress");
         } finally {
             setIsLoading(false);
         }
@@ -93,8 +94,8 @@ export function useGenerationPolling({
         try {
             await creation.retryFailedImages(storyboardId);
             await fetchProgress();
-        } catch (err: any) {
-            setError(err?.message || "Failed to retry");
+        } catch (err: unknown) {
+            setError(errorMessage(err) || "Failed to retry");
         }
     }, [storyboardId, fetchProgress]);
 
@@ -103,8 +104,8 @@ export function useGenerationPolling({
         try {
             await creation.cancelGeneration(storyboardId);
             await fetchProgress();
-        } catch (err: any) {
-            setError(err?.message || "Failed to cancel");
+        } catch (err: unknown) {
+            setError(errorMessage(err) || "Failed to cancel");
         }
     }, [storyboardId, fetchProgress]);
 

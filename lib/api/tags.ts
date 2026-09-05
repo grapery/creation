@@ -14,7 +14,7 @@ export const tags = {
     },
 
     // Get stories by tag
-    getStoriesByTag: async (tagId: string, page = 1, limit = 20): Promise<{ stories: any[]; total: number }> => {
+    getStoriesByTag: async (tagId: string, page = 1, limit = 20): Promise<{ stories: unknown[]; total: number }> => {
         const offset = (page - 1) * limit;
         return request(`/api/tags/${tagId}/stories?limit=${limit}&offset=${offset}`);
     },

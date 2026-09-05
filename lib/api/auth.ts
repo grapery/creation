@@ -1,5 +1,34 @@
 import { apiClient, paymentClient, request, setTokens, clearTokens } from './client';
 import { User, AuthResponse } from '../types';
+import { errorMessage } from "@/lib/utils";
+
+interface OAuthTokenPayload {
+    token: string;
+    refreshToken?: string;
+    user: User;
+    expiresIn?: number;
+}
+
+/** vippay 信封：paymentClient 拦截器在 code===0 时可能已解包，因此直接 payload 与信封两种形状都接受 */
+type OAuthSignInResponse = OAuthTokenPayload | {
+    success?: boolean;
+    data?: OAuthTokenPayload;
+    msg?: string;
+    message?: string;
+};
+
+function oauthPayload(raw: OAuthSignInResponse | null | undefined): OAuthTokenPayload | null {
+    if (!raw || typeof raw !== 'object') return null;
+    if ('token' in raw && typeof raw.token === 'string') return raw;
+    const env = raw as { success?: boolean; data?: OAuthTokenPayload };
+    if (env.success === true && env.data && typeof env.data.token === 'string') return env.data;
+    return null;
+}
+
+function oauthError(raw: OAuthSignInResponse | null | undefined, fallback: string): Error {
+    const env = (raw ?? {}) as { msg?: string; message?: string };
+    return new Error(env.msg || env.message || fallback);
+}
 
 export const auth = {
     login: async (email: string, password: string): Promise<AuthResponse> => {
@@ -15,9 +44,9 @@ export const auth = {
             }
 
             return response;
-        } catch (error: any) {
+        } catch (error: unknown) {
             // Provide better error messages for common issues
-            if (error.message?.includes('ECONNREFUSED') || error.message?.includes('Network Error')) {
+            if (errorMessage(error)?.includes('ECONNREFUSED') || errorMessage(error)?.includes('Network Error')) {
                 throw new Error('Unable to connect to server. Please check your connection and try again.');
             }
             throw error;
@@ -73,33 +102,27 @@ export const auth = {
         refreshToken?: string;
     }): Promise<AuthResponse> => {
         // Call vippay API for Google OAuth (uses payment service on port 8060)
-        const response = await request<any>('/api/vippay/google-oauth/signin', 'POST', {
+        const raw = await request<OAuthSignInResponse>('/api/vippay/google-oauth/signin', 'POST', {
             idToken: data.idToken,
             accessToken: data.accessToken,
             refreshToken: data.refreshToken,
         }, paymentClient);
 
-        // Handle vippay API response format
-        if (response && response.success && response.data) {
-            const { token, refreshToken, user } = response.data;
-
-            // Transform to AuthResponse format
-            const authResponse: AuthResponse = {
-                accessToken: token,
-                refreshToken: refreshToken,
-                user: user,
-                expiresIn: response.data.expiresIn,
-            };
-
-            // Save tokens
-            if (token && typeof token === 'string') {
-                setTokens(token, refreshToken);
-            }
-
-            return authResponse;
-        } else {
-            throw new Error(response?.msg || response?.message || 'Google OAuth login failed');
+        const payload = oauthPayload(raw);
+        if (!payload) {
+            throw oauthError(raw, 'Google OAuth login failed');
         }
+
+        const { token, refreshToken, user, expiresIn } = payload;
+        if (token) {
+            setTokens(token, refreshToken);
+        }
+        return {
+            accessToken: token,
+            refreshToken,
+            user,
+            expiresIn,
+        };
     },
 
     loginWithApple: async (data: {
@@ -110,80 +133,69 @@ export const auth = {
         givenName?: string;
         familyName?: string;
     }): Promise<AuthResponse> => {
-        const raw = await request<any>('/api/vippay/apple-oauth/signin', 'POST', data, paymentClient);
+        const raw = await request<OAuthSignInResponse>('/api/vippay/apple-oauth/signin', 'POST', data, paymentClient);
 
-        const payload =
-            raw && typeof raw === 'object' && raw.success === true && raw.data != null
-                ? raw.data
-                : raw;
-
-        if (!payload || typeof payload.token !== 'string') {
-            throw new Error(raw?.msg || raw?.message || 'Apple OAuth login failed');
+        const payload = oauthPayload(raw);
+        if (!payload) {
+            throw oauthError(raw, 'Apple OAuth login failed');
         }
 
         const { token, refreshToken, user, expiresIn } = payload;
-        const authResponse: AuthResponse = {
-            accessToken: token,
-            refreshToken: refreshToken,
-            user: user,
-            expiresIn: expiresIn,
-        };
-
         if (token) {
             setTokens(token, refreshToken);
         }
-
-        return authResponse;
+        return {
+            accessToken: token,
+            refreshToken,
+            user,
+            expiresIn,
+        };
     },
 
     loginWithWeChat: async (data: {
         code: string;
     }): Promise<AuthResponse> => {
-        const raw = await request<any>('/api/vippay/wechat-oauth/signin', 'POST', {
+        const raw = await request<OAuthSignInResponse>('/api/vippay/wechat-oauth/signin', 'POST', {
             code: data.code,
         }, paymentClient);
 
         // paymentClient 拦截器在 code===0 时已解包为 data 字段；兼容未解包信封
-        const payload =
-            raw && typeof raw === 'object' && raw.success === true && raw.data != null
-                ? raw.data
-                : raw;
-
-        if (!payload || typeof payload.token !== 'string') {
-            throw new Error(raw?.msg || raw?.message || 'WeChat OAuth login failed');
+        const payload = oauthPayload(raw);
+        if (!payload) {
+            throw oauthError(raw, 'WeChat OAuth login failed');
         }
 
         const { token, refreshToken, user, expiresIn } = payload;
-
-        const authResponse: AuthResponse = {
-            accessToken: token,
-            refreshToken: refreshToken,
-            user: user,
-            expiresIn: expiresIn,
-        };
-
         if (token) {
             setTokens(token, refreshToken);
         }
-
-        return authResponse;
+        return {
+            accessToken: token,
+            refreshToken,
+            user,
+            expiresIn,
+        };
     },
 
     /** 将微信账号绑定到当前登录用户（需已登录；先走 qrconnect 拿到 code） */
     linkWeChat: async (data: { code: string }): Promise<User> => {
-        const raw = await request<any>(
+        type LinkResponse = { user?: User } | { success?: boolean; data?: { user?: User }; msg?: string; message?: string };
+        const raw = await request<LinkResponse>(
             '/api/vippay/wechat-oauth/link',
             'POST',
             { code: data.code },
             paymentClient
         );
         const payload =
-            raw && typeof raw === 'object' && raw.success === true && raw.data != null
-                ? raw.data
-                : raw;
+            raw && typeof raw === 'object' && 'user' in raw
+                ? raw
+                : raw && typeof raw === 'object' && (raw as { data?: { user?: User } }).data
+                  ? (raw as { data: { user?: User } }).data
+                  : null;
         const user = payload?.user;
         if (!user) {
-            throw new Error(raw?.msg || raw?.message || 'WeChat link failed');
+            const env = (raw ?? {}) as { msg?: string; message?: string };
+            throw new Error(env.msg || env.message || 'WeChat link failed');
         }
         return user;
     },

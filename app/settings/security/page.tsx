@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, Lock, CheckCircle, Trash2 } from "lucide-react";
 import { auth } from "@/lib/api/auth";
 import { showError, showSuccess } from "@/lib/toast-utils";
+import { errorMessage } from "@/lib/utils";
 
 export default function SecuritySettingsPage() {
     const [loading, setLoading] = useState(false);
@@ -57,8 +58,8 @@ export default function SecuritySettingsPage() {
                 await auth.changePassword(form.oldPassword, form.newPassword);
                 setSuccess(true);
                 setForm({ oldPassword: "", newPassword: "", confirmPassword: "" });
-            } catch (err: any) {
-                setError(err.message || "Failed to change password");
+            } catch (err: unknown) {
+                setError(errorMessage(err) || "Failed to change password");
             } finally {
                 setLoading(false);
             }

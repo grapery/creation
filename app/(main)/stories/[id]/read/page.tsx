@@ -108,7 +108,7 @@ export default function StoryReadPage() {
     const scene = scenes[index];
     const image =
         scene?.image ||
-        (scene as any)?.videoCoverUrl ||
+        (scene as { videoCoverUrl?: string })?.videoCoverUrl ||
         board.image;
 
     return (
@@ -141,7 +141,7 @@ export default function StoryReadPage() {
                     <div className="px-8 text-center space-y-3 max-w-lg">
                         <p className="text-lg font-semibold">{scene?.title || `Scene ${index + 1}`}</p>
                         <p className="text-sm text-white/80 whitespace-pre-wrap">
-                            {(scene as any)?.content || (scene as any)?.description || board.content || "No scene media"}
+                            {(scene as { content?: string; description?: string })?.content || (scene as { content?: string; description?: string })?.description || board.content || "No scene media"}
                         </p>
                     </div>
                 )}
@@ -151,8 +151,8 @@ export default function StoryReadPage() {
                 {scene && (
                     <div className="mb-3 max-w-2xl mx-auto text-center">
                         {scene.title && <p className="text-sm font-medium">{scene.title}</p>}
-                        {(scene as any).content && (
-                            <p className="text-xs text-white/70 line-clamp-3 mt-1">{(scene as any).content}</p>
+                        {(scene as { content?: string }).content && (
+                            <p className="text-xs text-white/70 line-clamp-3 mt-1">{(scene as { content?: string }).content}</p>
                         )}
                     </div>
                 )}

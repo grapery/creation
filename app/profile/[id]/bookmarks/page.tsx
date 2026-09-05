@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/providers/auth-provider";
 import { bookmarks } from "@/lib/api/interactions";
+import type { Bookmark as BookmarkModel } from "@/lib/types";
 import { Loader2, BookOpen, FileText, Sparkles, Layers, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/providers/language-provider";
@@ -69,7 +70,18 @@ export default function ProfileBookmarksPage() {
     const pathname = usePathname();
     const { t } = useTranslation();
     const [profileUser, setProfileUser] = useState<User | null>(null);
-    const [bookmarkItems, setBookmarkItems] = useState<any[]>([]);
+    // 服务端展开的收藏行可能带 target* 冗余字段
+    interface ProfileBookmarkRow extends BookmarkModel {
+        targetId?: string;
+        targetTitle?: string;
+        targetDescription?: string;
+        targetCoverImage?: string;
+        title?: string;
+        description?: string;
+        coverImage?: string;
+        type?: string;
+    }
+    const [bookmarkItems, setBookmarkItems] = useState<ProfileBookmarkRow[]>([]);
     const [loading, setLoading] = useState(true);
 
     const isOwnProfile = !!currentUser?.id && currentUser.id === id;
@@ -93,7 +105,7 @@ export default function ProfileBookmarksPage() {
 
                 const bookmarkData = await bookmarks.getMyBookmarks({ page: 1, limit: 50 });
                 if (!isMounted) return;
-                setBookmarkItems(bookmarkData.bookmarks || []);
+                setBookmarkItems((bookmarkData.bookmarks || []) as ProfileBookmarkRow[]);
             } catch (e) {
                 console.error(e);
             } finally {

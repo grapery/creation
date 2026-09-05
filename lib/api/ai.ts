@@ -26,7 +26,7 @@ export const ai = {
     getTask: async (taskId: string): Promise<AITask> =>
         request(`/api/ai/tasks/${taskId}`),
 
-    getTaskResult: async (taskId: string): Promise<any> =>
+    getTaskResult: async (taskId: string): Promise<unknown> =>
         request(`/api/ai/tasks/${taskId}/result`),
 
     cancelTask: async (taskId: string): Promise<{ message: string }> =>

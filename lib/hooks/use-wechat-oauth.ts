@@ -4,7 +4,7 @@ import { auth } from '@/lib/api/auth';
 declare global {
   interface Window {
     // WeChat JS SDK global
-    WechatJSBridge?: any;
+    WechatJSBridge?: unknown;
   }
 }
 

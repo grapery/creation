@@ -1,5 +1,5 @@
 import { request, getUserIdFromToken } from './client';
-import { User, Story, Storyboard } from '../types';
+import { Character, User, Story, Storyboard } from '../types';
 
 export const profile = {
     // Drafts - Uses dashboard storyboards endpoint filtered by status
@@ -61,7 +61,7 @@ export const profile = {
     },
 
     // Characters
-    getCharacters: async (userId: string, page = 1, limit = 20): Promise<{ characters: any[], count: number }> => {
+    getCharacters: async (userId: string, page = 1, limit = 20): Promise<{ characters: Character[], count: number }> => {
         const offset = (page - 1) * limit;
         return request(`/api/users/${userId}/characters?limit=${limit}&offset=${offset}`);
     },
@@ -167,7 +167,7 @@ export const profile = {
         return request(`/api/users/${userId}/liked-stories?limit=${limit}&offset=${offset}`);
     },
 
-    getLikedCharacters: async (userId: string, page = 1, limit = 20): Promise<{ characters: any[], count: number }> => {
+    getLikedCharacters: async (userId: string, page = 1, limit = 20): Promise<{ characters: unknown[], count: number }> => {
         const offset = (page - 1) * limit;
         return request(`/api/users/${userId}/liked-characters?limit=${limit}&offset=${offset}`);
     },
@@ -202,14 +202,14 @@ export const profile = {
 
     getMeDashboard: async (): Promise<{
         recentStoryboards: Storyboard[];
-        recentCharacters: any[];
+        recentCharacters: unknown[];
         stats: Record<string, number>;
     }> => request('/api/me/dashboard'),
 
-    getMeMembership: async (): Promise<any> =>
+    getMeMembership: async (): Promise<unknown> =>
         request('/api/me/membership'),
 
-    getMeUsage: async (period?: string): Promise<any> => {
+    getMeUsage: async (period?: string): Promise<unknown> => {
         const params = period ? `?period=${period}` : '';
         return request(`/api/me/usage${params}`);
     },

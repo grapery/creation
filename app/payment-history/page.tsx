@@ -71,7 +71,7 @@ export default function PaymentHistoryPage() {
             const response = await payment.getPaymentHistory(user?.id || '', query);
             setPayments(response.payments);
             setTotal(response.total);
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Failed to fetch payment history:", error);
         } finally {
             setIsLoading(false);
@@ -170,7 +170,7 @@ export default function PaymentHistoryPage() {
                         <Select
                             value={statusFilter}
                             onValueChange={(value) => {
-                                setStatusFilter(value as any);
+                                setStatusFilter(value as typeof statusFilter);
                                 setPage(1);
                             }}
                         >
@@ -189,7 +189,7 @@ export default function PaymentHistoryPage() {
                         <Select
                             value={methodFilter}
                             onValueChange={(value) => {
-                                setMethodFilter(value as any);
+                                setMethodFilter(value as typeof methodFilter);
                                 setPage(1);
                             }}
                         >

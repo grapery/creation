@@ -1,6 +1,6 @@
 import { request, apiClient, AI_TIMEOUT } from './client';
 import { withShareGrant, type ShareGrant } from '@/lib/share-grant';
-import { Story } from '../types';
+import { Story, StoryScene, Contributor, StyleConfig } from '../types';
 
 export const stories = {
     // Public Trending Stories (24h)
@@ -20,11 +20,11 @@ export const stories = {
         return request(withShareGrant(`/api/v1/stories/${id}`, shareGrant));
     },
 
-    create: async (data: any): Promise<Story> => {
+    create: async (data: unknown): Promise<Story> => {
         return request('/api/stories', 'POST', data);
     },
 
-    update: async (id: string, data: any): Promise<Story> => {
+    update: async (id: string, data: unknown): Promise<Story> => {
         return request(`/api/stories/${id}`, 'PUT', data);
     },
 
@@ -95,18 +95,18 @@ export const stories = {
     },
 
     // Note: Style endpoints are at /api/styles, not /api/stories/styles
-    getStyles: async (limit = 20, offset = 0): Promise<{ styles: any[], total: number }> => {
+    getStyles: async (limit = 20, offset = 0): Promise<{ styles: StyleConfig[], total: number }> => {
         return request(`/api/styles?limit=${limit}&offset=${offset}`);
     },
 
-    searchStyles: async (query: string, limit = 20, offset = 0): Promise<{ styles: any[], total: number }> => {
+    searchStyles: async (query: string, limit = 20, offset = 0): Promise<{ styles: StyleConfig[], total: number }> => {
         return request(`/api/styles/search?q=${encodeURIComponent(query)}&limit=${limit}&offset=${offset}`);
     },
 
     // ==================== Scenes Management ====================
 
     // Get story scenes
-    getScenes: async (storyId: string, limit = 20, offset = 0): Promise<{ scenes: any[], count: number }> => {
+    getScenes: async (storyId: string, limit = 20, offset = 0): Promise<{ scenes: StoryScene[], count: number }> => {
         return request(`/api/stories/${storyId}/scenes?limit=${limit}&offset=${offset}`);
     },
 
@@ -122,7 +122,7 @@ export const stories = {
         sourceImage?: string;
         isPublic?: boolean;
         tags?: string[];
-    }): Promise<any> => {
+    }): Promise<unknown> => {
         return request(`/api/stories/${storyId}/scenes`, 'POST', data);
     },
 
@@ -138,7 +138,7 @@ export const stories = {
         sourceImage?: string;
         isPublic?: boolean;
         tags?: string[];
-    }): Promise<any> => {
+    }): Promise<unknown> => {
         return request(`/api/stories/${storyId}/scenes/${sceneId}`, 'PUT', data);
     },
 
@@ -160,12 +160,12 @@ export const stories = {
     // ==================== Contributors Management ====================
 
     // Get story contributors
-    getContributors: async (storyId: string, limit = 20, offset = 0): Promise<{ contributors: any[], count: number }> => {
+    getContributors: async (storyId: string, limit = 20, offset = 0): Promise<{ contributors: Contributor[], count: number }> => {
         return request(`/api/stories/${storyId}/contributors?limit=${limit}&offset=${offset}`);
     },
 
     // Invite contributor
-    inviteContributor: async (storyId: string, userId: string, role: 'collaborator' | 'contributor'): Promise<any> => {
+    inviteContributor: async (storyId: string, userId: string, role: 'collaborator' | 'contributor'): Promise<unknown> => {
         return request(`/api/stories/${storyId}/contributors`, 'POST', { userId, role });
     },
 
@@ -176,7 +176,7 @@ export const stories = {
 
     // ==================== Panels Management ====================
 
-    getPanels: async (storyId: string): Promise<{ panels: any[] }> =>
+    getPanels: async (storyId: string): Promise<{ panels: unknown[] }> =>
         request(`/api/stories/${storyId}/panels`),
 
     createPanel: async (storyId: string, data: {
@@ -185,7 +185,7 @@ export const stories = {
         text?: string;
         textPosition?: string;
         sequence?: number;
-    }): Promise<any> =>
+    }): Promise<unknown> =>
         request(`/api/stories/${storyId}/panels`, 'POST', data),
 
     updatePanel: async (storyId: string, panelId: string, data: {
@@ -194,7 +194,7 @@ export const stories = {
         text?: string;
         textPosition?: string;
         sequence?: number;
-    }): Promise<any> =>
+    }): Promise<unknown> =>
         request(`/api/stories/${storyId}/panels/${panelId}`, 'PUT', data),
 
     deletePanel: async (storyId: string, panelId: string): Promise<{ message: string }> =>
@@ -222,7 +222,7 @@ export const stories = {
         generateCover?: boolean;
         style?: string;
         aspectRatio?: string;
-    }): Promise<any> =>
+    }): Promise<unknown> =>
         request(`/api/stories/${storyId}/render`, 'POST', params || {}),
 
     renderMedia: async (storyId: string, params: {
@@ -233,7 +233,7 @@ export const stories = {
         request(`/api/stories/${storyId}/render-media`, 'POST', params),
 
     getRenderStatus: async (storyId: string): Promise<{
-        tasks: any[];
+        tasks: unknown[];
         overallStatus: string;
     }> =>
         request(`/api/stories/${storyId}/render-status`),

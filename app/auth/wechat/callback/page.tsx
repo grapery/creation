@@ -17,13 +17,13 @@ export default function WeChatCallbackPage() {
 
         if (!code || !state) {
             console.error('[WeChat Callback] Missing required parameters');
-            setError('No authorization code or state received. You may have cancelled the authorization.');
-            setLoading(false);
+            const message = 'No authorization code or state received. You may have cancelled the authorization.';
 
-            // 没有code，可能是用户取消授权
+            // 没有code，可能是用户取消授权；setState 延迟到回调中避免 effect 内同步级联渲染
             setTimeout(() => {
-                const redirectUrl = `/login${error ? '?error=' + encodeURIComponent(error) : ''}`;
-                window.location.href = redirectUrl;
+                setError(message);
+                setLoading(false);
+                window.location.href = `/login?error=${encodeURIComponent(message)}`;
             }, 2000);
             return;
         }

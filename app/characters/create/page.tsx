@@ -17,7 +17,7 @@ import { useTranslation } from "@/providers/language-provider";
 import { useAuth } from "@/providers/auth-provider";
 import { RequireAuth } from "@/components/auth/require-auth";
 import { Textarea } from "@/components/ui/textarea";
-import type { Story } from "@/lib/types";
+import type { Character, Story } from "@/lib/types";
 import { showError } from "@/lib/toast-utils";
 
 function CreateCharacter() {
@@ -99,7 +99,7 @@ function CreateCharacter() {
         }
     }, []);
 
-    const handleAIGenerated = useCallback((generated: any) => {
+    const handleAIGenerated = useCallback((generated: Partial<Character>) => {
         setFormData(prev => ({
             ...prev,
             name: generated.name || prev.name,
@@ -107,7 +107,7 @@ function CreateCharacter() {
             personality: generated.personality || prev.personality,
             background: generated.background || prev.background,
             systemPrompt: generated.systemPrompt || generated.personality || prev.systemPrompt,
-        }));
+        }) as typeof prev);
     }, []);
 
     const addTag = () => {

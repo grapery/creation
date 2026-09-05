@@ -4,7 +4,7 @@ import ja from './translations/ja.json';
 
 export type Language = 'en' | 'zh-Hans' | 'ja';
 
-export const translations: Record<Language, any> = {
+export const translations: Record<Language, unknown> = {
   en,
   'zh-Hans': zhHans,
   ja,
@@ -20,13 +20,13 @@ export const LANGUAGE_NAMES: Record<Language, { name: string; nativeName: string
 
 export function getTranslation(key: string, language: Language = DEFAULT_LANGUAGE): string {
   const keys = key.split('.');
-  let value: any = translations[language];
+  let value: unknown = translations[language];
 
   for (const k of keys) {
-    value = value?.[k];
+    value = (value as Record<string, unknown> | undefined)?.[k];
   }
 
-  return value || key;
+  return typeof value === 'string' && value ? value : key;
 }
 
 export function interpolate(template: string, params: Record<string, string | number>): string {

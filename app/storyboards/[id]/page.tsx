@@ -29,7 +29,7 @@ export default function StoryboardPage() {
     const router = useRouter();
     const [item, setItem] = useState<Storyboard | null>(null);
     const [loading, setLoading] = useState(true);
-    const [workflow, setWorkflow] = useState<any>(null);
+    const [workflow, setWorkflow] = useState<Record<string, unknown> | null>(null);
     const [showDetailsModal, setShowDetailsModal] = useState(false);
     const [showProcessModal, setShowProcessModal] = useState(false);
     const [expandedVideoSceneId, setExpandedVideoSceneId] = useState<string | null>(null);

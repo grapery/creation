@@ -2,7 +2,32 @@ import { useEffect, useRef, useState } from 'react';
 
 declare global {
   interface Window {
-    google: any;
+    google: {
+      accounts: {
+        id: {
+          initialize: (config: {
+            client_id: string;
+            callback: (response: { credential?: string; error?: string }) => void;
+            auto_select?: boolean;
+            cancel_on_tap_outside?: boolean;
+            use_fedcm_for_prompt?: boolean;
+          }) => void;
+          renderButton: (
+            element: HTMLElement,
+            options: { theme?: string; size?: string; text?: string; shape?: string }
+          ) => void;
+          prompt: (listener?: (notification: { isNotDisplayed?: () => boolean; isSkippedMoment?: () => boolean }) => void) => void;
+        };
+        oauth2: {
+          initCodeClient: (config: {
+            client_id: string;
+            scope: string;
+            callback: (response: { code?: string; error?: string }) => void;
+            error_callback?: (error: { type?: string; message?: string }) => void;
+          }) => { requestCode: () => void };
+        };
+      };
+    };
   }
 }
 
@@ -37,7 +62,7 @@ export function useGoogleOAuth({
     if (scriptLoaded.current) {
       // Check if window.google is available
       if (window.google && window.google.accounts) {
-        setIsLoaded(true);
+        queueMicrotask(() => setIsLoaded(true));
       }
       return;
     }
@@ -117,7 +142,7 @@ export function useGoogleOAuth({
       const client = window.google.accounts.oauth2.initCodeClient({
         client_id: clientId,
         scope: 'openid email profile',
-        callback: (response: any) => {
+        callback: (response: { code?: string; error?: string }) => {
           if (response.code) {
             // Note: Backend would need to exchange this code for tokens
             // For now, we'll use the implicit flow with ID token instead
@@ -128,7 +153,7 @@ export function useGoogleOAuth({
             setIsLoading(false);
           }
         },
-        error_callback: (error: any) => {
+        error_callback: (error: { type?: string; message?: string }) => {
           console.error('[Google OAuth] Authorization error:', error);
           onError?.();
           setIsLoading(false);
@@ -139,17 +164,17 @@ export function useGoogleOAuth({
       // This is simpler for web clients
       window.google.accounts.id.initialize({
         client_id: clientId,
-        callback: (response: GoogleCredentialResponse) => {
+        callback: (response: { credential?: string }) => {
           setIsLoading(false);
-          onSuccess?.(response);
+          onSuccess?.(response as GoogleCredentialResponse);
         },
         auto_select: false,
         cancel_on_tap_outside: true,
       });
 
       // Prompt the user to sign in
-      window.google.accounts.id.prompt((notification: any) => {
-        if (notification.isNotDisplayed()) {
+      window.google.accounts.id.prompt((notification: { isNotDisplayed?: () => boolean; isSkippedMoment?: () => boolean } | undefined) => {
+        if (notification?.isNotDisplayed?.()) {
           console.error('[Google OAuth] Prompt not displayed');
           onError?.();
           setIsLoading(false);

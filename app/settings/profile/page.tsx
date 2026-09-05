@@ -255,7 +255,7 @@ export default function ProfileSettingsPage() {
                             ].map((option) => (
                                 <button
                                     key={option.value}
-                                    onClick={() => setAiPromptPreference(option.value as any)}
+                                    onClick={() => setAiPromptPreference(option.value as "detailed" | "balanced" | "concise")}
                                     className={`
                                         flex-1 p-3 rounded-lg border ${aiPromptPreference === option.value
                                             ? "bg-primary text-white border-primary"

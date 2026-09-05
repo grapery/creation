@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, ArrowLeft, Mail } from "lucide-react";
+import { errorMessage } from "@/lib/utils";
 
 export default function ForgotPasswordPage() {
     const [email, setEmail] = useState("");
@@ -22,8 +23,8 @@ export default function ForgotPasswordPage() {
         try {
             await auth.requestPasswordReset(email);
             setSuccess(true);
-        } catch (err: any) {
-            setError(err.message || "Failed to send reset link. Please try again.");
+        } catch (err: unknown) {
+            setError(errorMessage(err) || "Failed to send reset link. Please try again.");
         } finally {
             setIsLoading(false);
         }
@@ -51,10 +52,10 @@ export default function ForgotPasswordPage() {
                                 <div className="space-y-2">
                                     <h2 className="text-2xl font-bold tracking-tight">Check Your Email</h2>
                                     <p className="text-muted-foreground">
-                                        We've sent a password reset link to <span className="font-medium text-foreground">{email}</span>
+                                        We&apos;ve sent a password reset link to <span className="font-medium text-foreground">{email}</span>
                                     </p>
                                     <p className="text-sm text-muted-foreground">
-                                        Click the link in the email to reset your password. If you don't see it, check your spam folder.
+                                        Click the link in the email to reset your password. If you don&apos;t see it, check your spam folder.
                                     </p>
                                 </div>
                                 <Button
@@ -75,7 +76,7 @@ export default function ForgotPasswordPage() {
                         <CardHeader className="px-0 pb-6">
                             <CardTitle className="text-2xl">Forgot Password</CardTitle>
                             <CardDescription>
-                                Enter your email address and we'll send you a link to reset your password
+                                Enter your email address and we&apos;ll send you a link to reset your password
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="px-0">

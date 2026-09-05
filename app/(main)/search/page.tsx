@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
+import type { Story, Character, User, Storyboard } from "@/lib/types";
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { search } from "@/lib/api/search";
@@ -188,12 +189,14 @@ function SearchPageContent() {
 }
 
 function SearchResultsList({ results, type }: { results: SearchResults; type: SearchType }) {
-    const items: any[] = [
+    // 混合结果按展示字段收窄为联合形状（按 storyId/personality/email 区分类型）
+    type SearchHit = Partial<Story & Character & User & Storyboard> & { id: string };
+    const items = ([
         ...(type === "all" || type === "story" ? results.stories || [] : []),
         ...(type === "all" || type === "character" ? results.characters || [] : []),
         ...(type === "all" || type === "user" ? results.users || [] : []),
         ...(type === "all" || type === "storyboard" ? results.storyboards || [] : []),
-    ];
+    ] as SearchHit[]);
 
     if (items.length === 0) {
         return <p className="text-center text-muted-foreground py-12">No results found.</p>;

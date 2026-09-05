@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, Save } from "lucide-react";
 import { showSuccess, showError } from "@/lib/toast-utils";
+import { errorMessage } from "@/lib/utils";
 
 // Inline components if not created
 function SimpleLabel({ children, htmlFor }: { children: React.ReactNode, htmlFor?: string }) {
@@ -66,9 +67,9 @@ export default function EditorPage() {
             });
             showSuccess("Branch saved successfully");
             router.push(`/storyboards/${result.id}`);
-        } catch (e: any) {
+        } catch (e: unknown) {
             console.error(e);
-            showError(e.message || "Failed to save branch");
+            showError(errorMessage(e) || "Failed to save branch");
         } finally {
             setSaving(false);
         }
@@ -128,8 +129,8 @@ export default function EditorPage() {
                                     sceneDescription: formData.content || 'Default scene',
                                 });
                                 showSuccess("Image generation started");
-                            } catch (e: any) {
-                                showError(e.message || "Failed to generate image");
+                            } catch (e: unknown) {
+                                showError(errorMessage(e) || "Failed to generate image");
                             } finally {
                                 setGenerating(false);
                             }

@@ -125,7 +125,7 @@ export const storyboards = {
         comicStyle?: string;
     }): Promise<{
         newStoryboard: Storyboard;
-        generatedScenes: any[];
+        generatedScenes: unknown[];
         tokensUsed?: number;
     }> =>
         request(`/api/storyboards/${id}/continue`, 'POST', data),
@@ -135,7 +135,7 @@ export const storyboards = {
 
     // ==================== Panels ====================
 
-    getPanels: async (id: string, page = 1, limit = 20): Promise<{ panels: any[] }> => {
+    getPanels: async (id: string, page = 1, limit = 20): Promise<{ panels: unknown[] }> => {
         const offset = (page - 1) * limit;
         return request(`/api/storyboards/${id}/panels?limit=${limit}&offset=${offset}`);
     },
@@ -144,7 +144,7 @@ export const storyboards = {
         sequence: number;
         imageUrl?: string;
         text?: string;
-    }): Promise<any> =>
+    }): Promise<unknown> =>
         request(`/api/storyboards/${id}/panels`, 'POST', data),
 
     // ==================== Generation ====================

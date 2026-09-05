@@ -9,6 +9,7 @@ import { Loader2, Palette, Check } from "lucide-react";
 import { showSuccess, showError } from "@/lib/toast-utils";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/providers/language-provider";
+import { errorMessage } from "@/lib/utils";
 
 export default function GenrePreferencesPage() {
     const { t } = useTranslation();
@@ -62,8 +63,8 @@ export default function GenrePreferencesPage() {
             await settings.updateGenrePreferences(Array.from(selected));
             setInitialSelected(new Set(selected));
             showSuccess("Genre preferences updated!");
-        } catch (e: any) {
-            showError(e.message || "Failed to save preferences.");
+        } catch (e: unknown) {
+            showError(errorMessage(e) || "Failed to save preferences.");
         } finally {
             setSaving(false);
         }

@@ -18,6 +18,7 @@ import { CreatorRole } from "@/components/story/story-team-section";
 import { formatDistanceToNow } from "date-fns";
 import { useTranslation } from "@/providers/language-provider";
 import { parseShareGrant } from "@/lib/share-grant";
+import { errorMessage } from "@/lib/utils";
 
 export default function StoryPage() {
     const { id } = useParams();
@@ -100,11 +101,11 @@ export default function StoryPage() {
             // Fetch characters from API using storyId
             const response = await charactersApi.list({ storyId });
             setCharacters(response.characters || []);
-        } catch (e: any) {
+        } catch (e: unknown) {
             console.error('Failed to load characters:', e);
             setCharacters([]);
             // Set error message
-            if (e.code === 401 || e.message?.includes('authorization')) {
+            if ((e as { code?: number }).code === 401 || errorMessage(e).includes('authorization')) {
                 setCharactersError('Please login to view characters');
             } else {
                 setCharactersError('Failed to load characters');
@@ -121,11 +122,11 @@ export default function StoryPage() {
             // Fetch scenes from API
             const response = await stories.getScenes(storyId);
             setScenes(response.scenes || []);
-        } catch (e: any) {
+        } catch (e: unknown) {
             console.error('Failed to load scenes:', e);
             setScenes([]);
             // Set error message
-            if (e.code === 401 || e.message?.includes('authorization')) {
+            if ((e as { code?: number }).code === 401 || errorMessage(e).includes('authorization')) {
                 setScenesError('Please login to view scenes');
             } else {
                 setScenesError('Failed to load scenes');
@@ -209,12 +210,12 @@ export default function StoryPage() {
             // Fetch contributors from API
             const contributorsResponse = await stories.getContributors(storyId);
             setContributors(contributorsResponse.contributors || []);
-        } catch (e: any) {
+        } catch (e: unknown) {
             console.error('Failed to load team:', e);
             setCreators([]);
             setContributors([]);
             // Set error message
-            if (e.code === 401 || e.message?.includes('authorization')) {
+            if ((e as { code?: number }).code === 401 || errorMessage(e).includes('authorization')) {
                 setTeamError('Please login to view team members');
             } else {
                 setTeamError('Failed to load team members');

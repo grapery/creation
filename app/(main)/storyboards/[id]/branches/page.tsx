@@ -56,7 +56,8 @@ export default function BranchingPage() {
         async function load() {
             try {
                 const data = await storyboards.getTree(id as string);
-                const nodes = (data as any).storyboards || (data as any).nodes || (Array.isArray(data) ? data : []);
+                const dataObj = data as { storyboards?: Storyboard[]; nodes?: Storyboard[] };
+                const nodes = dataObj.storyboards || dataObj.nodes || (Array.isArray(data) ? (data as Storyboard[]) : []);
                 const built = buildTree(nodes as Storyboard[], id as string);
                 if (isMounted) setTree(built);
             } catch (e) {

@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { profile } from "@/lib/api/profile";
 import { showSuccess, showError } from "@/lib/toast-utils";
+import { errorMessage } from "@/lib/utils";
 
 interface BlockedUser {
     id: string;
@@ -40,9 +41,9 @@ export default function BlockedUsersPage() {
             const res = await profile.getBlockedUsers(1, 100);
             setBlockedUsers(res.users || []);
             setTotal(res.total || 0);
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Failed to fetch blocked users:", err);
-            setError(err.message || "Failed to load blocked users");
+            setError(errorMessage(err) || "Failed to load blocked users");
         } finally {
             setLoading(false);
         }
@@ -59,9 +60,9 @@ export default function BlockedUsersPage() {
             setBlockedUsers((prev) => prev.filter((u) => u.id !== userId));
             setTotal((prev) => Math.max(0, prev - 1));
             showSuccess("User unblocked", "The user has been removed from your blocked list.");
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Failed to unblock user:", err);
-            showError("Failed to unblock", err.message || "Something went wrong. Please try again.");
+            showError("Failed to unblock", errorMessage(err) || "Something went wrong. Please try again.");
         } finally {
             setUnblockingId(null);
         }

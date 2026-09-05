@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Bookmark as BookmarkIcon } from "lucide-react";
 import { bookmarks } from "@/lib/api/interactions";
-import type { Bookmark, BookmarkType, PagedBookmarks } from "@/lib/types";
+import type { Bookmark, BookmarkType, PagedBookmarks, Story, Storyboard, StoryFragment, Character } from "@/lib/types";
 import Link from "next/link";
 import { RequireAuth } from "@/components/auth/require-auth";
 
@@ -91,7 +91,8 @@ function BookmarkItem({ bookmark }: { bookmark: Bookmark }) {
     };
 
     const item = bookmark.story || bookmark.storyboard || bookmark.fragment || bookmark.character;
-    const title = (item as any)?.title || (item as any)?.name || (item as any)?.content?.slice(0, 50) || "Untitled";
+    const card = item as Partial<Story & Storyboard & StoryFragment & Character> | undefined;
+    const title = card?.title || card?.name || card?.content?.slice(0, 50) || "Untitled";
 
     return (
         <Link
@@ -99,10 +100,10 @@ function BookmarkItem({ bookmark }: { bookmark: Bookmark }) {
             className="block p-3 rounded-lg border hover:bg-muted/50 transition-colors"
         >
             <div className="flex items-center gap-3">
-                {(item as any)?.coverImage || (item as any)?.image || (item as any)?.avatar ? (
+                {card?.coverImage || card?.image || card?.avatar ? (
                     <div className="h-12 w-12 rounded bg-muted overflow-hidden flex-shrink-0">
                         <img
-                            src={(item as any).coverImage || (item as any).image || (item as any).avatar}
+                            src={card?.coverImage || card?.image || card?.avatar}
                             alt=""
                             className="h-full w-full object-cover"
                         />

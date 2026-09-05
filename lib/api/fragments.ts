@@ -143,12 +143,12 @@ export const fragments = {
     },
 
     // Get fragment comments
-    getComments: async (id: string, limit = 20, offset = 0): Promise<{ comments: any[]; total: number }> => {
+    getComments: async (id: string, limit = 20, offset = 0): Promise<{ comments: unknown[]; total: number }> => {
         return request(`/api/v1/fragments/${id}/comments?limit=${limit}&offset=${offset}`);
     },
 
     // Add comment
-    addComment: async (fragmentId: string, content: string, parentId?: string): Promise<any> => {
+    addComment: async (fragmentId: string, content: string, parentId?: string): Promise<unknown> => {
         return request(`/api/v1/fragments/${fragmentId}/comments`, 'POST', { content, parentId });
     },
 
@@ -186,13 +186,13 @@ export const fragments = {
     },
 
     // Get fragment likes list
-    getLikes: async (id: string, page = 1, limit = 20): Promise<{ likes: any[]; total: number; page?: number; limit?: number }> => {
+    getLikes: async (id: string, page = 1, limit = 20): Promise<{ likes: unknown[]; total: number; page?: number; limit?: number }> => {
         const offset = (page - 1) * limit;
         return request(`/api/v1/fragments/${id}/likes?limit=${limit}&offset=${offset}`);
     },
 
     // Update fragment comment
-    updateComment: async (commentId: string, content: string): Promise<any> =>
+    updateComment: async (commentId: string, content: string): Promise<unknown> =>
         request(`/api/v1/fragments/comments/${commentId}`, 'PUT', { content }),
 
     // Delete fragment comment
@@ -200,7 +200,7 @@ export const fragments = {
         request(`/api/v1/fragments/comments/${commentId}`, 'DELETE'),
 
     // Get comment replies
-    getCommentReplies: async (commentId: string, limit = 20, offset = 0): Promise<{ comments: any[]; total: number }> =>
+    getCommentReplies: async (commentId: string, limit = 20, offset = 0): Promise<{ comments: unknown[]; total: number }> =>
         request(`/api/v1/fragments/comments/${commentId}/replies?limit=${limit}&offset=${offset}`),
 
     // List generation tasks
@@ -214,7 +214,7 @@ export const fragments = {
     // Get fragment generation assets
     getGenerationAssets: async (id: string, params?: {
         type?: string;
-    }): Promise<{ assets: any[] }> => {
+    }): Promise<{ assets: unknown[] }> => {
         const query = params?.type ? `?type=${params.type}` : '';
         return request(`/api/v1/fragments/${id}/assets${query}`);
     },

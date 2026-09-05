@@ -30,7 +30,7 @@ export const creation = {
     generateSceneDetails: async (
         storyboardId: string,
         data: { sceneId: string; sceneTitle?: string; sceneLocation?: string; inputDescription: string }
-    ): Promise<any> => {
+    ): Promise<unknown> => {
         return request(`/api/v1/storyboards/${storyboardId}/generate/scene-details`, 'POST', data, apiClient, AI_TIMEOUT);
     },
 

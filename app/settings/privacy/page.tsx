@@ -74,8 +74,8 @@ export default function PrivacySettingsPage() {
                 profileVisibility,
                 showOnlineStatus,
                 showReadReceipts,
-                allowMessagesFrom: allowMessagesFrom as any,
-                allowCommentsFrom: allowCommentsFrom as any,
+                allowMessagesFrom: allowMessagesFrom as "followers_only" | "everyone" | "no_one",
+                allowCommentsFrom: allowCommentsFrom as "followers_only" | "everyone" | "no_one",
             });
             showSuccess("Privacy settings saved");
         } catch (e) {

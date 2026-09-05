@@ -9,15 +9,39 @@ import { hasCompletedOnboarding, markOnboardingDone } from "@/lib/onboarding";
 import { settings } from "@/lib/api/settings";
 import { getSafeAuthNext } from "@/lib/auth-redirect";
 
+interface RegisterData {
+    username: string;
+    email: string;
+    password: string;
+    displayName: string;
+    agreeTerms: boolean;
+    dateOfBirth?: string;
+}
+
+interface GoogleSignInData {
+    idToken: string;
+    accessToken?: string;
+    refreshToken?: string;
+}
+
+interface AppleSignInData {
+    identityToken: string;
+    authorizationCode?: string;
+    user?: string;
+    nonce?: string;
+    givenName?: string;
+    familyName?: string;
+}
+
 interface AuthContextType {
     user: User | null;
     loading: boolean;
     login: (email: string, password: string) => Promise<void>;
-    register: (data: any) => Promise<void>;
+    register: (data: RegisterData) => Promise<void>;
     logout: () => void;
     refreshUser: () => Promise<void>;
-    loginWithGoogle: (data: any) => Promise<void>;
-    loginWithApple: (data: any) => Promise<void>;
+    loginWithGoogle: (data: GoogleSignInData) => Promise<void>;
+    loginWithApple: (data: AppleSignInData) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -86,19 +110,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         postAuthRedirect(router, false);
     };
 
-    const register = async (data: any) => {
+    const register = async (data: RegisterData) => {
         await auth.register(data);
         await refreshUser();
         postAuthRedirect(router, true);
     };
 
-    const loginWithGoogle = async (data: any) => {
+    const loginWithGoogle = async (data: GoogleSignInData) => {
         await auth.loginWithGoogle(data);
         await refreshUser();
         postAuthRedirect(router, false);
     };
 
-    const loginWithApple = async (data: any) => {
+    const loginWithApple = async (data: AppleSignInData) => {
         await auth.loginWithApple(data);
         await refreshUser();
         postAuthRedirect(router, false);

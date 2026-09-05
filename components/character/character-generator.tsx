@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { Character } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,14 +11,14 @@ import { useTranslation } from "@/providers/language-provider";
 import { Textarea } from "@/components/ui/textarea";
 
 interface CharacterGeneratorProps {
-    onGenerated?: (character: any) => void;
+    onGenerated?: (character: Partial<Character>) => void;
 }
 
 export function CharacterGenerator({ onGenerated }: CharacterGeneratorProps) {
     const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
     const [prompt, setPrompt] = useState("");
-    const [generated, setGenerated] = useState<any>(null);
+    const [generated, setGenerated] = useState<Partial<Character> | null>(null);
 
     const handleGenerate = async () => {
         if (!prompt.trim()) return;

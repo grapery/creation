@@ -11,7 +11,7 @@ export const referrals = {
     getStats: async (): Promise<ReferralStats> =>
         request('/api/referrals/stats'),
 
-    list: async (page = 1, limit = 20): Promise<{ referrals: any[]; total: number }> => {
+    list: async (page = 1, limit = 20): Promise<{ referrals: unknown[]; total: number }> => {
         const offset = (page - 1) * limit;
         return request(`/api/referrals?limit=${limit}&offset=${offset}`);
     },

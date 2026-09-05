@@ -15,6 +15,7 @@ import { useWeChatOAuth } from "@/lib/hooks/use-wechat-oauth";
 import { useAppleOAuth } from "@/lib/hooks/use-apple-oauth";
 import { auth } from "@/lib/api/auth";
 import { useRouter } from "next/navigation";
+import { errorMessage } from "@/lib/utils";
 
 export default function RegisterPage() {
     const { register, loginWithApple } = useAuth();
@@ -41,8 +42,8 @@ export default function RegisterPage() {
             try {
                 await auth.loginWithGoogle({ idToken: credentialResponse.credential });
                 router.push('/');
-            } catch (err: any) {
-                setOAuthError(err.message || 'Google sign-in failed');
+            } catch (err: unknown) {
+                setOAuthError(errorMessage(err) || 'Google sign-in failed');
             } finally {
                 setOAuthLoading(null);
             }
@@ -68,8 +69,8 @@ export default function RegisterPage() {
                     familyName: result.familyName,
                 });
                 router.push('/');
-            } catch (err: any) {
-                setOAuthError(err.message || 'Apple sign-in failed');
+            } catch (err: unknown) {
+                setOAuthError(errorMessage(err) || 'Apple sign-in failed');
                 setOAuthLoading(null);
             }
         },
@@ -124,8 +125,8 @@ export default function RegisterPage() {
             }
             try {
                 googleSignIn();
-            } catch (e: any) {
-                setOAuthError(e.message || "Failed to initiate Google sign-in.");
+            } catch (e: unknown) {
+                setOAuthError(errorMessage(e) || "Failed to initiate Google sign-in.");
                 setOAuthLoading(null);
             }
         } else if (provider === "apple") {
@@ -134,15 +135,15 @@ export default function RegisterPage() {
                 setOAuthLoading(null);
                 return;
             }
-            appleSignIn().catch((e: any) => {
-                setOAuthError(e.message || "Failed to initiate Apple sign-in.");
+            appleSignIn().catch((e: unknown) => {
+                setOAuthError(errorMessage(e) || "Failed to initiate Apple sign-in.");
                 setOAuthLoading(null);
             });
         } else if (provider === "wechat") {
             try {
                 weChatSignIn();
-            } catch (e: any) {
-                setOAuthError(e.message || "Failed to initiate WeChat sign-in.");
+            } catch (e: unknown) {
+                setOAuthError(errorMessage(e) || "Failed to initiate WeChat sign-in.");
                 setOAuthLoading(null);
             }
         }
@@ -175,8 +176,8 @@ export default function RegisterPage() {
                 agreeTerms: agreeToTerms && agreeToPrivacy,
                 dateOfBirth: formatDateOfBirth(formData.dateOfBirth),
             });
-        } catch (err: any) {
-            setError(err.message || t('auth.register_failed'));
+        } catch (err: unknown) {
+            setError(errorMessage(err) || t('auth.register_failed'));
         } finally {
             setIsLoading(false);
         }

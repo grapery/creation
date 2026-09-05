@@ -89,7 +89,7 @@ export interface UserSettings {
 function mergeNotificationSettings(raw: unknown): NotificationSettings {
     const defaults = defaultNotificationSettings();
     if (!raw || typeof raw !== 'object') return defaults;
-    const src = raw as Record<string, any>;
+    const src = raw as Record<string, unknown>;
 
     // Legacy flat shape → nested
     if (typeof src.push === 'boolean' || typeof src.email === 'boolean' || typeof src.likes === 'boolean') {
@@ -117,19 +117,21 @@ function mergeNotificationSettings(raw: unknown): NotificationSettings {
     };
 }
 
-const parseSettingsResponse = (data: any): UserSettings => {
+const parseSettingsResponse = (data: unknown): UserSettings => {
+    const obj = (data && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+    const raw = obj.notificationSettings;
     const notificationSettings = mergeNotificationSettings(
-        typeof data.notificationSettings === 'string'
+        typeof raw === 'string'
             ? (() => {
                   try {
-                      return JSON.parse(data.notificationSettings);
+                      return JSON.parse(raw) as unknown;
                   } catch {
                       return {};
                   }
               })()
-            : data.notificationSettings
+            : raw
     );
-    return { ...data, notificationSettings };
+    return { ...(obj as Partial<UserSettings>), notificationSettings } as UserSettings;
 };
 
 export const settings = {

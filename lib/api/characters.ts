@@ -1,6 +1,7 @@
 import { request, apiClient, AI_TIMEOUT } from './client';
 import { withShareGrant, type ShareGrant } from '@/lib/share-grant';
 import { Character, CharacterMessage } from '../types/character';
+import type { Storyboard } from '../types';
 
 export const characters = {
     list: async (params: {
@@ -26,11 +27,11 @@ export const characters = {
         return request(withShareGrant(`/api/v1/characters/${id}`, shareGrant));
     },
 
-    create: async (data: any): Promise<Character> => {
+    create: async (data: unknown): Promise<Character> => {
         return request('/api/characters', 'POST', data);
     },
 
-    update: async (id: string, data: any): Promise<Character> => {
+    update: async (id: string, data: unknown): Promise<Character> => {
         return request(`/api/characters/${id}`, 'PUT', data);
     },
 
@@ -152,7 +153,7 @@ export const characters = {
         request(`/api/characters/${id}/analytics`),
 
     getStoryboards: async (id: string, page = 1, limit = 20): Promise<{
-        storyboards: any[];
+        storyboards: Storyboard[];
         total: number;
     }> => {
         const offset = (page - 1) * limit;
@@ -174,7 +175,7 @@ export const characters = {
         limit?: number;
         offset?: number;
         status?: string;
-    }): Promise<{ tasks: any[]; total: number }> => {
+    }): Promise<{ tasks: unknown[]; total: number }> => {
         const query = new URLSearchParams();
         if (params?.limit) query.set('limit', params.limit.toString());
         if (params?.offset) query.set('offset', params.offset.toString());
@@ -182,15 +183,15 @@ export const characters = {
         return request(`/api/character-generation-tasks?${query.toString()}`);
     },
 
-    getGenerationTask: async (taskId: string): Promise<any> =>
+    getGenerationTask: async (taskId: string): Promise<unknown> =>
         request(`/api/character-generation-tasks/${taskId}`),
 
-    retryGenerationTask: async (taskId: string): Promise<any> =>
+    retryGenerationTask: async (taskId: string): Promise<unknown> =>
         request(`/api/character-generation-tasks/${taskId}/retry`, 'POST'),
 
     dismissFromDrafts: async (taskId: string): Promise<void> =>
         request(`/api/character-generation-tasks/${taskId}/dismiss-from-drafts`, 'POST'),
 
-    getFragmentCharacterSuggestions: async (storyId: string): Promise<any> =>
+    getFragmentCharacterSuggestions: async (storyId: string): Promise<unknown> =>
         request(`/api/stories/${storyId}/fragment-character-suggestions`),
 };

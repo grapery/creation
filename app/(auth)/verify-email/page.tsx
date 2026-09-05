@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, ArrowLeft, Mail, CheckCircle2, AlertCircle } from "lucide-react";
+import { errorMessage } from "@/lib/utils";
 
 function VerifyEmailContent() {
     const router = useRouter();
@@ -31,8 +32,8 @@ function VerifyEmailContent() {
         try {
             await auth.sendEmailVerificationCode(email);
             setSentOnce(true);
-        } catch (err: any) {
-            setError(err.message || "Failed to send verification code. Please try again.");
+        } catch (err: unknown) {
+            setError(errorMessage(err) || "Failed to send verification code. Please try again.");
         } finally {
             setIsSendingCode(false);
         }
@@ -54,8 +55,8 @@ function VerifyEmailContent() {
             setTimeout(() => {
                 router.push("/");
             }, 2000);
-        } catch (err: any) {
-            setError(err.message || "Verification failed. Please check your code and try again.");
+        } catch (err: unknown) {
+            setError(errorMessage(err) || "Verification failed. Please check your code and try again.");
         } finally {
             setIsLoading(false);
         }
@@ -176,7 +177,7 @@ function VerifyEmailContent() {
 
                             <div className="mt-6 text-center text-sm">
                                 <p className="text-muted-foreground">
-                                    Didn't receive a code?{" "}
+                                    Didn&apos;t receive a code?{" "}
                                     <button
                                         type="button"
                                         onClick={handleSendCode}

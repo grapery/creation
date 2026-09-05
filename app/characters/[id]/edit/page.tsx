@@ -88,7 +88,7 @@ export default function EditCharacterPage() {
         }
     }, []);
 
-    const handleAIGenerated = useCallback((generated: any) => {
+    const handleAIGenerated = useCallback((generated: Partial<Character>) => {
         setFormData(prev => ({
             ...prev,
             name: generated.name || prev.name,
@@ -96,7 +96,7 @@ export default function EditCharacterPage() {
             personality: generated.personality || prev.personality,
             background: generated.background || prev.background,
             systemPrompt: generated.systemPrompt || generated.personality || prev.systemPrompt,
-        }));
+        }) as typeof prev);
     }, []);
 
     const addTag = () => {

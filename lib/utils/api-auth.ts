@@ -28,15 +28,17 @@ export async function withAuth<T>(
       error: null,
       requiresAuth: false,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Check if it's a 401 authentication error
+    const err = (error ?? {}) as { code?: number; status?: number; message?: string };
+    const msg = err.message ?? "";
     const isAuthError =
-      error?.code === 401 ||
-      error?.status === 401 ||
-      error?.message?.includes("401") ||
-      error?.message?.includes("Unauthorized") ||
-      error?.message?.includes("token") ||
-      error?.message?.includes("authentication");
+      err.code === 401 ||
+      err.status === 401 ||
+      msg.includes("401") ||
+      msg.includes("Unauthorized") ||
+      msg.includes("token") ||
+      msg.includes("authentication");
 
     if (isAuthError && onShowLogin) {
       onShowLogin();
@@ -53,13 +55,15 @@ export async function withAuth<T>(
 /**
  * Check if an error is an authentication error
  */
-export function isAuthError(error: any): boolean {
+export function isAuthError(error: unknown): boolean {
+  const err = (error ?? {}) as { code?: number; status?: number; message?: string };
+  const msg = err.message ?? "";
   return (
-    error?.code === 401 ||
-    error?.status === 401 ||
-    error?.message?.includes("401") ||
-    error?.message?.includes("Unauthorized") ||
-    error?.message?.includes("token") ||
-    error?.message?.includes("authentication")
+    err.code === 401 ||
+    err.status === 401 ||
+    msg.includes("401") ||
+    msg.includes("Unauthorized") ||
+    msg.includes("token") ||
+    msg.includes("authentication")
   );
 }

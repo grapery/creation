@@ -41,7 +41,7 @@ export interface AuthResponse {
     accessToken: string;
     refreshToken?: string;
     user: User;
-    expiresIn: number;
+    expiresIn?: number;
 }
 
 export interface VIPInfo {
@@ -1261,7 +1261,7 @@ export interface AITask {
     type: AIEntityType;
     status: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled';
     progress?: number;
-    result?: any;
+    result?: unknown;
     error?: string;
     createdAt: number;
     updatedAt: number;

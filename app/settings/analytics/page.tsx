@@ -5,6 +5,7 @@ import { BarChart3, BookOpen, Layers, Users, Heart, TrendingUp, Loader2 } from "
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { profile } from "@/lib/api/profile";
+import { errorMessage } from "@/lib/utils";
 
 type TimeRange = "7d" | "30d";
 
@@ -38,9 +39,9 @@ export default function CreatorAnalyticsPage() {
         try {
             const data = await profile.getCreatorAnalytics();
             setAnalytics(data);
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Failed to fetch creator analytics:", err);
-            setError(err.message || "Failed to load analytics");
+            setError(errorMessage(err) || "Failed to load analytics");
         } finally {
             setLoading(false);
         }

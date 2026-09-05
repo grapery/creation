@@ -10,7 +10,7 @@ import type {
 const paymentRequest = async <T>(
     endpoint: string,
     method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET',
-    body?: any
+    body?: unknown
 ): Promise<T> => request(endpoint, method, body, paymentClient);
 
 export const tokenUsage = {

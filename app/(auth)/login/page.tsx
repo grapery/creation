@@ -13,6 +13,7 @@ import { OAuthProviderButton, LanguageSelector, OAuthProvider } from "@/componen
 import { useGoogleOAuth } from "@/lib/hooks/use-google-oauth";
 import { useWeChatOAuth } from "@/lib/hooks/use-wechat-oauth";
 import { useAppleOAuth } from "@/lib/hooks/use-apple-oauth";
+import { errorMessage } from "@/lib/utils";
 
 export default function LoginPage() {
     const { login, loginWithApple, loginWithGoogle } = useAuth();
@@ -33,9 +34,9 @@ export default function LoginPage() {
                 await loginWithGoogle({
                     idToken: credentialResponse.credential,
                 });
-            } catch (err: any) {
+            } catch (err: unknown) {
                 console.error('[Login] Google login error:', err);
-                setOAuthError(err.message || t('auth.login_failed'));
+                setOAuthError(errorMessage(err) || t('auth.login_failed'));
                 setOAuthLoading(null);
             }
         },
@@ -59,9 +60,9 @@ export default function LoginPage() {
                     givenName: result.givenName,
                     familyName: result.familyName,
                 });
-            } catch (err: any) {
+            } catch (err: unknown) {
                 console.error('[Login] Apple login error:', err);
-                setOAuthError(err.message || t('auth.login_failed'));
+                setOAuthError(errorMessage(err) || t('auth.login_failed'));
                 setOAuthLoading(null);
             }
         },
@@ -78,8 +79,8 @@ export default function LoginPage() {
 
         try {
             await login(email, password);
-        } catch (err: any) {
-            setError(err.message || t('auth.login_failed'));
+        } catch (err: unknown) {
+            setError(errorMessage(err) || t('auth.login_failed'));
         } finally {
             setIsLoading(false);
         }
@@ -110,9 +111,9 @@ export default function LoginPage() {
 
             try {
                 googleSignIn();
-            } catch (error: any) {
+            } catch (error: unknown) {
                 console.error('[Login] Google sign-in error:', error);
-                setOAuthError(error.message || "Failed to initiate Google sign-in. Please try again.");
+                setOAuthError(errorMessage(error) || "Failed to initiate Google sign-in. Please try again.");
                 setOAuthLoading(null);
             }
         } else if (provider === "apple") {
@@ -123,9 +124,9 @@ export default function LoginPage() {
             }
             try {
                 await appleSignIn();
-            } catch (error: any) {
+            } catch (error: unknown) {
                 console.error('[Login] Apple sign-in error:', error);
-                setOAuthError(error.message || "Failed to initiate Apple sign-in.");
+                setOAuthError(errorMessage(error) || "Failed to initiate Apple sign-in.");
                 setOAuthLoading(null);
             }
         } else if (provider === "wechat") {
@@ -133,9 +134,9 @@ export default function LoginPage() {
             try {
                 weChatSignIn();
                 // Note: WeChat OAuth will redirect the browser, so we don't need to set loading to false here
-            } catch (error: any) {
+            } catch (error: unknown) {
                 console.error('[Login] WeChat sign-in error:', error);
-                setOAuthError(error.message || "Failed to initiate WeChat sign-in. Please try again.");
+                setOAuthError(errorMessage(error) || "Failed to initiate WeChat sign-in. Please try again.");
                 setOAuthLoading(null);
             }
         }

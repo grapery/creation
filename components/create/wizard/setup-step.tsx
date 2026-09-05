@@ -5,15 +5,17 @@ import { Wand2, ChevronUp, ChevronDown, Loader2, Sparkles } from "lucide-react";
 import type { Character, FragmentStyle } from "@/lib/types";
 import { fragments } from "@/lib/api/fragments";
 
+export interface SetupData {
+    storyId: string;
+    rawInput: string;
+    style: string;
+    sceneCount: number;
+    characters: Character[];
+}
+
 interface SetupStepProps {
-    data: {
-        storyId: string;
-        rawInput: string;
-        style: string;
-        sceneCount: number;
-        characters: Character[];
-    };
-    onChange: (data: any) => void;
+    data: SetupData;
+    onChange: (data: SetupData) => void;
     onNext: () => void;
     onBack: () => void;
     creating?: boolean;
