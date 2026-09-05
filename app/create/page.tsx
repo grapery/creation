@@ -32,7 +32,6 @@ export default function CreateStoryPage({ storyId }: CreateStoryProps) {
 
 function CreateStoryForm({ storyId }: CreateStoryProps) {
     const router = useRouter();
-    const { t } = useTranslation();
     const searchParams = useSearchParams();
     const [selectedTab, setSelectedTab] = useState(0);
     const [title, setTitle] = useState("");
@@ -137,14 +136,17 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
         styleSearchTimer.current = setTimeout(() => loadStyles(0, query), 500);
     };
 
+    const { t, language } = useTranslation();
+    // GENRES 的 label 键为 en/zh/ja，与 i18n 语言码（zh-Hans）做一次映射
+    const genreLang = language === "zh-Hans" ? "zh" : language;
     const genreOptions = GENRES;
 
 
 
     const tabs = [
-        { id: 0, label: "Details" },
-        { id: 1, label: "Cast" },
-        { id: 2, label: "Settings" }
+        { id: 0, label: t("create.tab_details") },
+        { id: 1, label: t("create.tab_cast") },
+        { id: 2, label: t("create.tab_settings") }
     ];
 
     const toggleGenre = (key: string) => {
@@ -235,8 +237,8 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
         <div className="space-y-6">
             {/* Page Header */}
             <div>
-                <h2 className="text-2xl font-bold tracking-tight">New Story</h2>
-                <p className="text-muted-foreground">Create a new story with AI assistance.</p>
+                <h2 className="text-2xl font-bold tracking-tight">{t("create.new_story")}</h2>
+                <p className="text-muted-foreground">{t("create.subtitle")}</p>
             </div>
 
             {/* Tab Navigation */}
@@ -262,14 +264,14 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
             <div className="max-w-2xl mx-auto space-y-6">
                 {selectedTab === 0 && (
                     <div className="space-y-6">
-                        <h3 className="text-xl font-semibold text-foreground">Story Information</h3>
+                        <h3 className="text-xl font-semibold text-foreground">{t("create.story_information")}</h3>
 
                         {/* Fragment Source Indicator */}
                         {fragmentPrefill && (
                             <div className="flex items-center gap-2 p-3 bg-purple-50/10 border border-purple-500/20 rounded-lg">
                                 <Sparkles className="w-4 h-4 text-purple-500" />
                                 <span className="text-sm text-purple-700">
-                                    Created from Fragment &ldquo;{fragmentPrefill.title}&rdquo;
+                                    {t("create.from_fragment", { title: fragmentPrefill.title })}
                                 </span>
                             </div>
                         )}
@@ -277,7 +279,7 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                         {/* Title Field */}
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                                <label className="text-sm font-medium text-foreground">Title</label>
+                                <label className="text-sm font-medium text-foreground">{t("create.title_label")}</label>
                                 <span className={`text-xs ${title.length > titleMaxLength * 0.9 ? "text-red-500" : "text-muted-foreground"}`}>
                                     {title.length}/{titleMaxLength}
                                 </span>
@@ -286,18 +288,18 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                                 type="text"
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value.slice(0, titleMaxLength))}
-                                placeholder={fragmentPrefill ? "AI suggested title" : "Enter story title"}
+                                placeholder={fragmentPrefill ? t("create.title_ai_placeholder") : t("create.title_placeholder")}
                                 className="w-full px-4 py-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
                             />
                         </div>
 
                         {/* Description Field */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-foreground">Description</label>
+                            <label className="text-sm font-medium text-foreground">{t("create.description_label")}</label>
                             <textarea
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
-                                placeholder="Describe your story..."
+                                placeholder={t("create.description_placeholder")}
                                 rows={4}
                                 className="w-full px-4 py-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary resize-none"
                             />
@@ -306,8 +308,8 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                         {/* Genre Chips */}
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                                <label className="text-sm font-medium text-foreground">Genre</label>
-                                <span className="text-xs text-muted-foreground">{selectedGenres.length}/3</span>
+                                <label className="text-sm font-medium text-foreground">{t("create.genre_label")}</label>
+                                <span className="text-xs text-muted-foreground">{t("create.genre_count", { count: selectedGenres.length })}</span>
                             </div>
                             <div className="flex flex-wrap gap-2">
                                 {genreOptions.map((genre) => (
@@ -320,7 +322,7 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                                                 : "bg-background text-foreground border-border hover:border-primary/40"
                                         }`}
                                     >
-                                        {genre.label.en}
+                                        {genre.label[genreLang]}
                                     </button>
                                 ))}
                             </div>
@@ -328,7 +330,7 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
 
                         {/* Default Scene Count Stepper */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-foreground">Default Scene Count</label>
+                            <label className="text-sm font-medium text-foreground">{t("create.scene_count_label")}</label>
                             <div className="flex items-center gap-3">
                                 <button
                                     onClick={() => setDefaultSceneCount(prev => Math.max(2, prev - 1))}
@@ -347,14 +349,14 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                                 >
                                     <Plus className="w-4 h-4" />
                                 </button>
-                                <span className="text-sm text-muted-foreground">scenes (2–8)</span>
+                                <span className="text-sm text-muted-foreground">{t("create.scenes_range")}</span>
                             </div>
                         </div>
 
                         {/* Cover Image Upload */}
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                                <label className="text-sm font-medium text-foreground">Cover Image</label>
+                                <label className="text-sm font-medium text-foreground">{t("create.cover_label")}</label>
                                 <div className="flex items-center gap-1">
                                     {(["1:1", "3:4", "4:3", "9:16", "16:9"] as const).map((r) => (
                                         <button
@@ -396,26 +398,26 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                                                 onClick={triggerFileInput}
                                                 className="px-4 py-2 bg-white text-black rounded-lg text-sm font-medium"
                                             >
-                                                Change Cover
+                                                {t("create.change_cover")}
                                             </button>
                                         </div>
                                         {(aiGeneratedCoverURL && !coverImage) && (
                                             <div className="absolute top-2 right-2 px-2 py-1 bg-purple-500 text-white text-xs rounded shadow-sm flex items-center gap-1">
                                                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                                                AI Generated
+                                                {t("create.ai_generated")}
                                             </div>
                                         )}
                                     </>
                                 ) : (
                                     <>
                                         <ImagePlus className="w-12 h-12 text-muted-foreground mb-2" />
-                                        <p className="text-sm text-muted-foreground mb-2">Click to upload cover image</p>
+                                        <p className="text-sm text-muted-foreground mb-2">{t("create.click_upload")}</p>
                                         <button
                                             onClick={triggerFileInput}
                                             disabled={isUploadingCover}
                                             className="px-4 py-2 bg-card text-foreground rounded-lg border border-border hover:bg-muted disabled:opacity-50"
                                         >
-                                            {isUploadingCover ? "Uploading..." : "Upload Cover"}
+                                            {isUploadingCover ? t("create.uploading") : t("create.upload_cover")}
                                         </button>
                                     </>
                                 )}
@@ -426,9 +428,9 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                         <div className="p-4 bg-purple-50/10 border border-purple-500/20 rounded-xl">
                             <h4 className="text-base font-semibold text-purple-900 mb-3 flex items-center gap-2">
                                 <Sparkles className="w-5 h-5 text-purple-600" />
-                                AI Smart Creation
+                                {t("create.ai_smart_creation")}
                             </h4>
-                            <p className="text-sm text-muted-foreground mb-4">AI can help enhance your story with descriptions and images</p>
+                            <p className="text-sm text-muted-foreground mb-4">{t("create.ai_smart_desc")}</p>
 
                             {/* AI Options */}
                             <div className="space-y-3">
@@ -436,8 +438,8 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                                 <div className="flex items-center justify-between p-3 bg-card rounded-lg">
                                     <div className="flex items-center gap-3">
                                         <Wand2 className="w-5 h-5 text-purple-600" />
-                                        <span className="text-sm font-medium">Enrich story description</span>
-                                        <span className="text-xs text-muted-foreground ml-2">Make your story more engaging</span>
+                                        <span className="text-sm font-medium">{t("create.enrich_desc")}</span>
+                                        <span className="text-xs text-muted-foreground ml-2">{t("create.enrich_desc_hint")}</span>
                                     </div>
                                     <button
                                         onClick={() => setUseAIEnrich(!useAIEnrich)}
@@ -452,8 +454,8 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                                 <div className="flex items-center justify-between p-3 bg-card rounded-lg">
                                     <div className="flex items-center gap-3">
                                         <ImageIcon className="w-5 h-5 text-purple-600" />
-                                        <span className="text-sm font-medium">Generate cover image</span>
-                                        <span className="text-xs text-muted-foreground ml-2">Create stunning story cover</span>
+                                        <span className="text-sm font-medium">{t("create.gen_cover")}</span>
+                                        <span className="text-xs text-muted-foreground ml-2">{t("create.gen_cover_hint")}</span>
                                     </div>
                                     <button
                                         onClick={() => setGenerateCover(!generateCover)}
@@ -467,8 +469,8 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                                 <div className="flex items-center justify-between p-3 bg-card rounded-lg">
                                     <div className="flex items-center gap-3">
                                         <Wallpaper className="w-5 h-5 text-purple-600" />
-                                        <span className="text-sm font-medium">Generate background image</span>
-                                        <span className="text-xs text-muted-foreground ml-2">Create immersive background</span>
+                                        <span className="text-sm font-medium">{t("create.gen_background")}</span>
+                                        <span className="text-xs text-muted-foreground ml-2">{t("create.gen_background_hint")}</span>
                                     </div>
                                     <button
                                         onClick={() => setGenerateBackground(!generateBackground)}
@@ -486,11 +488,11 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                             {(generateCover || generateBackground) && (
                                 <div className="space-y-3 pt-3 border-t border-purple-200/50">
                                     <div className="flex items-center justify-between">
-                                        <h5 className="text-sm font-medium text-purple-900">Art Style</h5>
+                                        <h5 className="text-sm font-medium text-purple-900">{t("create.art_style")}</h5>
                                         <button
                                             onClick={() => loadStyles(0, styleSearchQuery)}
                                             className="p-1.5 hover:bg-muted rounded-lg transition-colors"
-                                            title="Refresh styles"
+                                            title={t("create.refresh_styles")}
                                         >
                                             <RefreshCw className={`w-4 h-4 text-muted-foreground ${isLoadingStyles ? "animate-spin" : ""}`} />
                                         </button>
@@ -501,7 +503,7 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                         <input
                                             type="text"
-                                            placeholder="Search styles..."
+                                            placeholder={t("create.search_styles")}
                                             value={styleSearchQuery}
                                             onChange={handleStyleSearch}
                                             className="w-full pl-9 pr-4 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-purple-500"
@@ -535,7 +537,7 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                                                             />
                                                         ) : (
                                                             <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
-                                                                No Preview
+                                                                {t("create.no_preview")}
                                                             </div>
                                                         )}
                                                         {selectedAIStyle?.id === style.id && (
@@ -558,7 +560,7 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
 
                                     {/* Pagination */}
                                     <div className="flex items-center justify-between text-xs text-muted-foreground">
-                                        <span>Showing {styles.length} of {stylesTotal}</span>
+                                        <span>{t("create.showing_of", { shown: styles.length, total: stylesTotal })}</span>
                                         <div className="flex gap-2">
                                             <button
                                                 onClick={() => loadStyles(stylesPage - 1, styleSearchQuery)}
@@ -583,8 +585,8 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                             {(useAIEnrich || generateCover || generateBackground) && (
                                 <div className="flex items-center gap-2 p-3 bg-orange-50/10 rounded-lg">
                                     <Coins className="w-4 h-4 text-orange-500" />
-                                    <span className="text-xs font-medium">This action will consume tokens</span>
-                                    <span className="text-sm font-semibold text-orange-600">~1,250 tokens</span>
+                                    <span className="text-xs font-medium">{t("create.consume_tokens")}</span>
+                                    <span className="text-sm font-semibold text-orange-600">{t("create.tokens_estimate")}</span>
                                 </div>
                             )}
 
@@ -593,7 +595,7 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                                 <div className="p-4 bg-green-50/10 rounded-lg">
                                     <div className="flex items-center gap-2 mb-2">
                                         <CheckCircle2 className="w-5 h-5 text-green-500" />
-                                        <span className="text-sm font-semibold text-green-700">AI Enriched Description</span>
+                                        <span className="text-sm font-semibold text-green-700">{t("create.ai_enriched_desc")}</span>
                                     </div>
                                     <p className="text-sm text-foreground leading-relaxed line-clamp-4">
                                         {aiEnrichedDescription}
@@ -606,12 +608,12 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
 
                 {selectedTab === 1 && (
                     <div className="space-y-4">
-                        <h3 className="text-xl font-semibold text-foreground">Cast</h3>
+                        <h3 className="text-xl font-semibold text-foreground">{t("create.tab_cast")}</h3>
 
                         {/* Selected Characters */}
                         {selectedCharacters.length > 0 && (
                             <div className="space-y-2">
-                                <p className="text-sm text-muted-foreground">{selectedCharacters.length} character{selectedCharacters.length > 1 ? "s" : ""}</p>
+                                <p className="text-sm text-muted-foreground">{t("create.characters_count", { count: selectedCharacters.length })}</p>
                                 <div className="space-y-2">
                                     {selectedCharacters.map((char) => (
                                         <div key={char.id} className="flex items-center gap-3 p-3 bg-card rounded-lg border border-border">
@@ -660,7 +662,7 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                                             setSearchResults([]);
                                         }
                                     }}
-                                    placeholder="Search characters..."
+                                    placeholder={t("create.search_characters")}
                                     className="w-full pl-9 pr-4 py-2.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                                 />
                             </div>
@@ -700,7 +702,7 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                             )}
 
                             {characterSearch.trim().length >= 2 && !isSearching && searchResults.length === 0 && (
-                                <p className="text-sm text-muted-foreground text-center py-4">No characters found</p>
+                                <p className="text-sm text-muted-foreground text-center py-4">{t("create.no_characters")}</p>
                             )}
                         </div>
 
@@ -709,7 +711,7 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                             <div className="flex flex-col items-center justify-center py-12 border-2 border-dashed border-border rounded-lg">
                                 <Users className="w-12 h-12 text-muted-foreground mb-3" />
                                 <p className="text-sm text-muted-foreground">
-                                    Search and add characters to bring your story to life
+                                    {t("create.cast_empty")}
                                 </p>
                             </div>
                         )}
@@ -719,13 +721,13 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                 {/* Settings Tab */}
                 {selectedTab === 2 && (
                     <div className="space-y-6">
-                        <h3 className="text-xl font-semibold text-foreground">Publish Settings</h3>
+                        <h3 className="text-xl font-semibold text-foreground">{t("create.publish_settings")}</h3>
 
                         {/* Visibility */}
                         <div className="space-y-3">
                             <div className="flex items-center gap-2">
                                 <Eye className="w-4 h-4 text-muted-foreground" />
-                                <label className="text-sm font-medium">Visibility</label>
+                                <label className="text-sm font-medium">{t("create.visibility")}</label>
                             </div>
                             <div className="flex gap-2">
                                 {(["public", "followers", "private"] as const).map((v) => (
@@ -738,7 +740,7 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                                                 : "bg-background text-foreground border-border hover:border-primary/40"
                                         }`}
                                     >
-                                        {v.charAt(0).toUpperCase() + v.slice(1)}
+                                        {v === "public" ? t("create.vis_public") : v === "followers" ? t("create.vis_followers") : t("create.vis_private")}
                                     </button>
                                 ))}
                             </div>
@@ -749,8 +751,8 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                             <div className="flex items-center gap-3">
                                 <Users className="w-4 h-4 text-muted-foreground" />
                                 <div>
-                                    <p className="text-sm font-medium">Allow Collaboration</p>
-                                    <p className="text-xs text-muted-foreground">Let others contribute to your story</p>
+                                    <p className="text-sm font-medium">{t("create.allow_collab")}</p>
+                                    <p className="text-xs text-muted-foreground">{t("create.allow_collab_hint")}</p>
                                 </div>
                             </div>
                             <button
@@ -766,8 +768,8 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                             <div className="flex items-center gap-3">
                                 <MessageSquare className="w-4 h-4 text-muted-foreground" />
                                 <div>
-                                    <p className="text-sm font-medium">Allow Comments</p>
-                                    <p className="text-xs text-muted-foreground">Enable comments on your story</p>
+                                    <p className="text-sm font-medium">{t("create.allow_comments")}</p>
+                                    <p className="text-xs text-muted-foreground">{t("create.allow_comments_hint")}</p>
                                 </div>
                             </div>
                             <button
@@ -783,8 +785,8 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                             <div className="flex items-center gap-3">
                                 <Sparkles className="w-4 h-4 text-purple-500" />
                                 <div>
-                                    <p className="text-sm font-medium">AI Content Label</p>
-                                    <p className="text-xs text-muted-foreground">Show AI-generated content label</p>
+                                    <p className="text-sm font-medium">{t("create.ai_label")}</p>
+                                    <p className="text-xs text-muted-foreground">{t("create.ai_label_hint")}</p>
                                 </div>
                             </div>
                             <button
@@ -800,7 +802,7 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                         <div className="pt-4 border-t border-border">
                             <div className="flex items-center gap-2 mb-3">
                                 <AlertTriangle className="w-4 h-4 text-destructive" />
-                                <h4 className="text-sm font-medium text-destructive">Danger Zone</h4>
+                                <h4 className="text-sm font-medium text-destructive">{t("create.danger_zone")}</h4>
                             </div>
                             <div className="space-y-2">
                                 <button
@@ -808,8 +810,8 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                                     className="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:border-destructive/50 transition-colors text-left group"
                                 >
                                     <div>
-                                        <p className="text-sm font-medium">Archive Story</p>
-                                        <p className="text-xs text-muted-foreground">Hide this story from public view</p>
+                                        <p className="text-sm font-medium">{t("create.archive_story")}</p>
+                                        <p className="text-xs text-muted-foreground">{t("create.archive_story_hint")}</p>
                                     </div>
                                     <AlertTriangle className="w-4 h-4 text-muted-foreground group-hover:text-destructive" />
                                 </button>
@@ -818,8 +820,8 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                                     className="w-full flex items-center justify-between p-3 rounded-lg border border-destructive/30 hover:border-destructive transition-colors text-left group"
                                 >
                                     <div>
-                                        <p className="text-sm font-medium text-destructive">Delete Story</p>
-                                        <p className="text-xs text-muted-foreground">Permanently remove this story</p>
+                                        <p className="text-sm font-medium text-destructive">{t("create.delete_story")}</p>
+                                        <p className="text-xs text-muted-foreground">{t("create.delete_story_hint")}</p>
                                     </div>
                                     <Trash2 className="w-4 h-4 text-destructive/50 group-hover:text-destructive" />
                                 </button>
@@ -834,7 +836,7 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                         onClick={() => router.back()}
                         className="flex-1 py-3 border border-border bg-card hover:bg-muted text-foreground font-medium rounded-lg disabled:opacity-50"
                     >
-                        Cancel
+                        {t("create.cancel")}
                     </button>
                     <button
                         onClick={() => handleCreateWithStatus("draft")}
@@ -842,7 +844,7 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                         className="flex-1 py-3 border border-border bg-card hover:bg-muted text-foreground font-medium rounded-lg flex items-center justify-center gap-2"
                     >
                         <Save className="w-4 h-4" />
-                        Save Draft
+                        {t("create.save_draft")}
                     </button>
                     <button
                         onClick={() => handleCreateWithStatus("published")}
@@ -853,16 +855,16 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                         {isAIProcessing ? (
                             <>
                                 <div className="w-4 h-4 border-2 border-white/50 border-t-transparent rounded-full animate-spin mr-2" />
-                                Creating...
+                                {t("create.creating")}
                             </>
                         ) : useAIEnrich || generateCover || generateBackground ? (
                             <>
                                 <Sparkles className="w-4 h-4 mr-2" />
-                                AI Create
+                                {t("create.ai_create")}
                             </>
                         ) : (
                             <>
-                                Publish
+                                {t("create.publish")}
                             </>
                         )}
                     </button>
@@ -875,13 +877,13 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                     <AlertDialogOverlay />
                     <AlertDialogContent>
                         <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Story</AlertDialogTitle>
+                            <AlertDialogTitle>{t("create.delete_story")}</AlertDialogTitle>
                             <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete the story and all its content.
+                                {t("create.delete_confirm")}
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogCancel>{t("create.cancel")}</AlertDialogCancel>
                             <AlertDialogAction
                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                 disabled={isDeleting}
@@ -890,16 +892,16 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                                     setIsDeleting(true);
                                     try {
                                         await stories.delete(storyId);
-                                        showSuccess("Story deleted");
+                                        showSuccess(t("create.story_deleted"));
                                         router.push("/");
                                     } catch {
-                                        showError("Delete failed", "Failed to delete story");
+                                        showError(t("create.delete_failed"), t("create.failed_delete"));
                                     } finally {
                                         setIsDeleting(false);
                                     }
                                 }}
                             >
-                                {isDeleting ? "Deleting..." : "Delete"}
+                                {isDeleting ? t("create.deleting") : t("create.delete")}
                             </AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>
@@ -912,26 +914,26 @@ function CreateStoryForm({ storyId }: CreateStoryProps) {
                     <AlertDialogOverlay />
                     <AlertDialogContent>
                         <AlertDialogHeader>
-                            <AlertDialogTitle>Archive Story</AlertDialogTitle>
+                            <AlertDialogTitle>{t("create.archive_story")}</AlertDialogTitle>
                             <AlertDialogDescription>
-                                This will hide the story from public view. You can restore it later.
+                                {t("create.archive_confirm")}
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogCancel>{t("create.cancel")}</AlertDialogCancel>
                             <AlertDialogAction
                                 onClick={async () => {
                                     if (!storyId) return;
                                     try {
                                         await stories.update(storyId, { status: "archived" });
-                                        showSuccess("Story archived");
+                                        showSuccess(t("create.story_archived"));
                                         router.push("/");
                                     } catch {
-                                        showError("Archive failed", "Failed to archive story");
+                                        showError(t("create.archive_failed"), t("create.failed_archive"));
                                     }
                                 }}
                             >
-                                Archive
+                                {t("create.archive")}
                             </AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>
