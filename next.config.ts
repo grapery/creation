@@ -74,13 +74,13 @@ const nextConfig: NextConfig = {
         destination: `${graperyOrigin}/api/v1/:path*`,
       },
 
-      // === Catch-all: frontend /api/xxx → backend /api/v1/xxx ===
+      // === Catch-all: frontend /api/xxx… → backend /api/v1/xxx… ===
       // Transforms old paths (/api/stories) to backend's authenticated routes (/api/v1/stories)
-      // Excludes /api/legal/* (served by Next.js legal document routes above)
-      // Excludes /api/vippay/* (handled above)
+      // :path* 匹配任意段数（单段 :path 会漏掉 /api/notifications/unread/count 这类多段路径导致 404）；
+      // legal/vippay/agent/auth/public 等前缀已被上方更早的规则优先匹配，不受影响。
       {
-        source: '/api/:path((?!legal|vippay|agent).*)',
-        destination: `${graperyOrigin}/api/v1/:path`,
+        source: '/api/:path*',
+        destination: `${graperyOrigin}/api/v1/:path*`,
       },
     ];
   },
