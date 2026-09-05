@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
+import { StoryboardCard } from "@/components/storyboard/storyboard-card";
 import type { Story, Character, User, Storyboard } from "@/lib/types";
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
@@ -202,25 +203,41 @@ function SearchResultsList({ results, type }: { results: SearchResults; type: Se
         return <p className="text-center text-muted-foreground py-12">No results found.</p>;
     }
 
+    const isStoryboard = (h: SearchHit) =>
+        h.storyId === undefined && h.personality === undefined && h.email === undefined;
+
+    const storyboardHits = items.filter(isStoryboard);
+    const otherHits = items.filter((h) => !isStoryboard(h));
+
     return (
-        <div className="space-y-2">
-            {items.map((item) => (
-                <Link
-                    key={item.id}
-                    href={
-                        item.title && item.storyId !== undefined ? `/stories/${item.id}` :
-                        item.personality !== undefined ? `/characters/${item.id}` :
-                        item.email !== undefined ? `/profile/${item.id}` :
-                        `/storyboards/${item.id}`
-                    }
-                    className="block p-3 rounded-lg border hover:bg-muted/50 transition-colors"
-                >
-                    <div className="font-medium">{item.title || item.name || item.username || item.displayName}</div>
-                    <div className="text-sm text-muted-foreground line-clamp-1">
-                        {item.description || item.bio || item.content || ""}
-                    </div>
-                </Link>
-            ))}
+        <div className="space-y-4">
+            {otherHits.length > 0 && (
+                <div className="space-y-2">
+                    {otherHits.map((item) => (
+                        <Link
+                            key={item.id}
+                            href={
+                                item.title && item.storyId !== undefined ? `/stories/${item.id}` :
+                                item.personality !== undefined ? `/characters/${item.id}` :
+                                `/profile/${item.id}`
+                            }
+                            className="block rounded-lg border p-3 transition-colors hover:bg-muted/50"
+                        >
+                            <div className="font-medium">{item.title || item.name || item.username || item.displayName}</div>
+                            <div className="line-clamp-1 text-sm text-muted-foreground">
+                                {item.description || item.bio || item.content || ""}
+                            </div>
+                        </Link>
+                    ))}
+                </div>
+            )}
+            {storyboardHits.length > 0 && (
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+                    {storyboardHits.map((item) => (
+                        <StoryboardCard key={item.id} storyboard={item as Storyboard} />
+                    ))}
+                </div>
+            )}
         </div>
     );
 }

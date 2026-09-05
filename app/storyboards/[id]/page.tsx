@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useEffect, useState, useRef } from "react";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import Image from "next/image";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -368,31 +369,45 @@ export default function StoryboardPage() {
                             <div className="border border-border rounded-lg p-4 bg-secondary/20">
                                 <p className="text-sm text-muted-foreground mb-3">{t("storyboard_detail.select_child", "Select a child storyboard:")}</p>
                                 <div className="flex gap-3 overflow-x-auto pb-2">
-                                    {childStoryboards.map((child) => (
-                                        <button
-                                            key={child.id}
-                                            onClick={() => handleChildSelect(child.id)}
-                                            className="flex-shrink-0 w-48 text-left p-3 rounded-lg border border-border hover:bg-secondary/50 transition-colors bg-card"
-                                        >
-                                            <div className="font-semibold text-sm mb-2 truncate">{child.title}</div>
-                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                                <div className="flex items-center gap-1">
-                                                    <Heart className="h-3 w-3" />
-                                                    {child.likes || 0}
+                                    {childStoryboards.map((child) => {
+                                        const cover = child.storyboardScenes?.find((sc) => sc.image)?.image || child.image || "";
+                                        return (
+                                            <button
+                                                key={child.id}
+                                                onClick={() => handleChildSelect(child.id)}
+                                                className="w-40 flex-shrink-0 overflow-hidden rounded-lg border border-border bg-card text-left transition-all hover:border-primary/30 hover:shadow-md"
+                                            >
+                                                <div className="relative aspect-[3/4]">
+                                                    <ImageWithFallback
+                                                        src={cover}
+                                                        alt={child.title}
+                                                        fill
+                                                        sizes="160px"
+                                                        className="object-cover"
+                                                        fallbackText={child.title}
+                                                    />
+                                                    {child.isAIGenerated && (
+                                                        <span className="absolute bottom-1.5 right-1.5 flex rounded-full bg-black/60 p-1 text-white backdrop-blur-sm">
+                                                            <Sparkles className="h-3 w-3 text-[var(--ai-complete)]" />
+                                                        </span>
+                                                    )}
                                                 </div>
-                                                <div className="flex items-center gap-1">
-                                                    <MessageSquare className="h-3 w-3" />
-                                                    {child.comments || 0}
-                                                </div>
-                                                {child.isAIGenerated && (
-                                                    <div className="flex items-center gap-1 text-purple-600 dark:text-purple-400">
-                                                        <Sparkles className="h-3 w-3" />
-                                                        AI
+                                                <div className="p-2">
+                                                    <div className="mb-1 line-clamp-2 text-xs font-semibold leading-snug">{child.title}</div>
+                                                    <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+                                                        <span className="flex items-center gap-0.5">
+                                                            <Heart className="h-2.5 w-2.5" />
+                                                            {child.likes || 0}
+                                                        </span>
+                                                        <span className="flex items-center gap-0.5">
+                                                            <MessageSquare className="h-2.5 w-2.5" />
+                                                            {child.comments || 0}
+                                                        </span>
                                                     </div>
-                                                )}
-                                            </div>
-                                        </button>
-                                    ))}
+                                                </div>
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         )}

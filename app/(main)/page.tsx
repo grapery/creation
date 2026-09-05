@@ -183,12 +183,14 @@ export default function DashboardPage() {
 
           <div className="space-y-4">
             {loading ? (
-              <div className="space-y-4">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="rounded-xl border border-border bg-card p-4 space-y-3 animate-pulse">
-                    <div className="aspect-video bg-muted rounded-lg" />
-                    <div className="h-5 bg-muted rounded w-3/4" />
-                    <div className="h-4 bg-muted rounded w-1/2" />
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div key={i} className="overflow-hidden rounded-xl border border-border bg-card animate-pulse">
+                    <div className="aspect-[3/4] bg-muted" />
+                    <div className="space-y-2 p-3">
+                      <div className="h-4 bg-muted rounded w-3/4" />
+                      <div className="h-3 bg-muted rounded w-1/2" />
+                    </div>
                   </div>
                 ))}
               </div>
@@ -199,27 +201,9 @@ export default function DashboardPage() {
                 </p>
               </div>
             ) : (
-              <div className="space-y-4">
-                {items.map((board) => (
-                  <StoryboardCard
-                    key={board.id}
-                    storyboard={board}
-                    onTap={() => router.push(`/storyboards/${board.id}`)}
-                    onLike={async () => {
-                      try {
-                        if (board.isLiked) {
-                          await storyboards.unlike(board.id);
-                        } else {
-                          await storyboards.like(board.id);
-                        }
-                      } catch (e) {
-                        console.error("Failed to like/unlike:", e);
-                      }
-                    }}
-                    onCreatorTap={(creatorId) => {
-                      router.push(`/profile/${creatorId}`);
-                    }}
-                  />
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+                {items.map((board, index) => (
+                  <StoryboardCard key={board.id} storyboard={board} priority={index < 3} />
                 ))}
                 {hasMore && (
                   <div className="flex justify-center pt-4">

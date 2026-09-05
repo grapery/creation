@@ -9,7 +9,8 @@ interface StoryBranchesSectionProps {
     storyTitle: string;
     storyboards: Storyboard[];
     isLoading: boolean;
-    onStoryboardTap: (storyboard: Storyboard) => void;
+    /** 卡片已内置链接跳转；保留 prop 以兼容既有调用方 */
+    onStoryboardTap?: (storyboard: Storyboard) => void;
 }
 
 import { useTranslation } from "@/providers/language-provider";
@@ -41,13 +42,13 @@ export function StoryBranchesSection({
             <h2 className="text-xl font-bold tracking-tight">
                 {t("story_detail.story_branches", "Story Branches")}
             </h2>
-            {Array.isArray(storyboards) && storyboards.map((storyboard) => (
-                <StoryboardCard
-                    key={storyboard.id}
-                    storyboard={storyboard}
-                    onTap={() => onStoryboardTap(storyboard)}
-                />
-            ))}
+            {Array.isArray(storyboards) && (
+                <div className="grid grid-cols-2 gap-4">
+                    {storyboards.map((storyboard) => (
+                        <StoryboardCard key={storyboard.id} storyboard={storyboard} />
+                    ))}
+                </div>
+            )}
         </div>
     );
 }

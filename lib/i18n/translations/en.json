@@ -65,7 +65,8 @@
     "description": "Description",
     "create": "Create",
     "link_copied": "Link copied to clipboard",
-    "share_failed": "Failed to share"
+    "share_failed": "Failed to share",
+    "unknown": "Unknown"
   },
   "auth": {
     "sign_in": "Sign In",
@@ -430,7 +431,9 @@
     "continue_title": "Continue Story",
     "continue_description": "Describe what happens next in the story",
     "continue_what_next": "What happens next?",
-    "continue_scene_count": "Number of Scenes"
+    "continue_scene_count": "Number of Scenes",
+    "forked": "Fork",
+    "ai_generated": "AI generated"
   },
   "story_detail": {
     "tabs": {

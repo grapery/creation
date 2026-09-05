@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { StoryboardCard } from "@/components/storyboard/storyboard-card";
 import Image from "next/image";
 import { PlazaFeed } from "@/components/plaza/plaza-feed";
 import { GuestDiscoverFeed } from "@/components/discover/guest-discover-feed";
@@ -145,18 +146,9 @@ export default function PlazaPage() {
                     )}
                 </div>
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {latestBoards.map((board) => (
-                        <Link
-                            key={board.id}
-                            href={`/storyboards/${board.id}`}
-                            className="rounded-xl border border-border bg-card p-4 hover:border-primary/30 transition-colors"
-                        >
-                            <p className="font-medium line-clamp-2">{board.title || board.id}</p>
-                            {board.storyId && (
-                                <p className="text-xs text-muted-foreground mt-1">Story #{board.storyId}</p>
-                            )}
-                        </Link>
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+                    {latestBoards.map((board, index) => (
+                        <StoryboardCard key={board.id} storyboard={board} priority={index < 4} />
                     ))}
                     {latestBoards.length === 0 && (
                         <div className="col-span-full flex flex-col items-center justify-center py-16 text-center">

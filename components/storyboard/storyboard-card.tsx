@@ -1,39 +1,16 @@
 "use client";
 
-import "next/link";
-import Image from "next/image";
+import Link from "next/link";
 import { Storyboard } from "@/lib/types";
-import { Heart, MessageSquare, GitBranch, Copy } from "lucide-react";
+import { Heart, Eye, GitBranch, Sparkles, Layers } from "lucide-react";
 import { useTranslation } from "@/providers/language-provider";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 
 interface StoryboardCardProps {
     storyboard: Storyboard;
-    onTap?: () => void;
-    onLike?: () => void;
-    onCreatorTap?: (creatorId: string) => void;
-    onCharacterTap?: (characterId: string) => void;
-}
-
-// Avatar component inline
-function Avatar({ src, name, size = 24 }: { src?: string; name?: string; size?: number }) {
-    const initial = name && name.length > 0 ? name[0].toUpperCase() : "?";
-    return (
-        <div
-            className="relative rounded-full overflow-hidden bg-gradient-to-br from-purple-400/60 to-blue-400/60 flex items-center justify-center border border-border"
-            style={{ width: size, height: size }}
-        >
-            {src ? (
-<Image src={src} alt={name || "avatar"} fill sizes="36px" className="object-cover" />
-            ) : (
-                <span
-                    className="text-white font-bold"
-                    style={{ fontSize: size * 0.4 }}
-                >
-                    {initial}
-                </span>
-            )}
-        </div>
-    );
+    href?: string;
+    /** 首屏主图传 true 提前加载 */
+    priority?: boolean;
 }
 
 // Helper to format count (e.g., 1.5K, 2M)
@@ -46,137 +23,119 @@ function formatCount(value: number = 0): string {
     return String(value);
 }
 
-export function StoryboardCard({
-    storyboard,
-    onTap,
-    onLike: _onLike,
-    onCreatorTap,
-    onCharacterTap,
-}: StoryboardCardProps) {
+/**
+ * 封面竖卡：3:4 首场景封面 + 角标（fork / 场景数 / #topic / AI）+ 标题 + 作者 + 统计。
+ * 自适应列宽，用于发现类网格（首页 / plaza / 搜索 / 分支推荐）。
+ */
+export function StoryboardCard({ storyboard, href, priority }: StoryboardCardProps) {
     const { t } = useTranslation();
 
-    // Get first scene image for thumbnail
-    const firstSceneImage = storyboard.storyboardScenes
-        ?.find((scene) => scene.image)
-        ?.image;
-    const thumbnail = firstSceneImage || storyboard.image;
+    const cover =
+        storyboard.storyboardScenes?.find((scene) => scene.image)?.image ||
+        storyboard.image ||
+        storyboard.images?.[0] ||
+        "";
 
     return (
-        <div
-            className="group floating-card p-4 cursor-pointer card-press"
-            onClick={onTap}
+        <Link
+            href={href ?? `/storyboards/${storyboard.id}`}
+            className="group block rounded-xl border border-border bg-card overflow-hidden transition-all hover:border-primary/30 hover:shadow-lg hover:-translate-y-0.5"
         >
-            <div className="flex gap-4">
-                {/* Thumbnail */}
-                <div className="flex-shrink-0">
-                    {thumbnail ? (
-                        <Image src={thumbnail} alt={storyboard.title} width={84} height={84} sizes="84px" className="rounded-[12px] object-cover shadow-sm" />
-                    ) : (
-                        <div className="w-[84px] h-[84px] rounded-[12px] bg-muted/50 flex items-center justify-center border border-border/50">
-                            <Copy className="w-6 h-6 text-muted-foreground/50" />
-                        </div>
-                    )}
-                </div>
+            {/* Cover */}
+            <div className="relative aspect-[3/4] overflow-hidden bg-muted">
+                <ImageWithFallback
+                    src={cover || ""}
+                    alt={storyboard.title}
+                    fill
+                    priority={priority}
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                    className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                    fallbackText={storyboard.title}
+                />
 
-                {/* Content */}
-                <div className="flex-1 min-w-0 flex flex-col justify-between">
-                    <div>
-                        {/* Title with Fork Badge */}
-                        <div className="flex items-start justify-between mb-1.5">
-                            <h3 className="text-[16px] font-bold text-foreground truncate pr-2">
-                                {storyboard.title}
-                            </h3>
-                            {storyboard.parentId && (
-                                <span className="flex-shrink-0 px-2 py-0.5 rounded-full bg-secondary text-[10px] font-medium text-secondary-foreground flex items-center gap-1">
-                                    <GitBranch className="w-3 h-3" />
-                                    {t("common.forks")}
-                                </span>
+                {/* Top-left: fork badge */}
+                {storyboard.parentId && (
+                    <span className="absolute top-2 left-2 flex items-center gap-1 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">
+                        <GitBranch className="h-3 w-3" />
+                        {t("storyboard.forked", "Fork")}
+                    </span>
+                )}
+
+                {/* Top-right: scene count */}
+                {(storyboard.sceneCount ?? storyboard.storyboardScenes?.length) ? (
+                    <span className="absolute top-2 right-2 flex items-center gap-1 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">
+                        <Layers className="h-3 w-3" />
+                        {storyboard.sceneCount ?? storyboard.storyboardScenes?.length} {t("create_chat.scenes", "scenes")}
+                    </span>
+                ) : null}
+
+                {/* Bottom-left: topic */}
+                {storyboard.topic && (
+                    <span className="absolute bottom-2 left-2 max-w-[70%] truncate rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">
+                        #{storyboard.topic}
+                    </span>
+                )}
+
+                {/* Bottom-right: AI badge */}
+                {storyboard.isAIGenerated && (
+                    <span className="absolute bottom-2 right-2 flex items-center gap-0.5 rounded-full bg-black/60 px-1.5 py-0.5 text-[10px] text-white backdrop-blur-sm" title={t("storyboard.ai_generated", "AI generated")}>
+                        <Sparkles className="h-3 w-3 text-[var(--ai-complete)]" />
+                    </span>
+                )}
+            </div>
+
+            {/* Info */}
+            <div className="space-y-1.5 p-3">
+                <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-foreground">
+                    {storyboard.title}
+                </h3>
+
+                {storyboard.content && (
+                    <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+                        {storyboard.content}
+                    </p>
+                )}
+
+                <div className="flex items-center justify-between pt-0.5">
+                    <div className="flex min-w-0 items-center gap-1.5">
+                        <div className="relative h-5 w-5 shrink-0 overflow-hidden rounded-full bg-gradient-to-br from-purple-400/60 to-blue-400/60">
+                            {storyboard.creatorAvatar && (
+                                <ImageWithFallback
+                                    src={storyboard.creatorAvatar}
+                                    alt={storyboard.creatorName || "avatar"}
+                                    fill
+                                    sizes="20px"
+                                    className="object-cover"
+                                    fallbackText={storyboard.creatorName?.[0] ?? ""}
+                                />
                             )}
                         </div>
-
-                        {/* Content Preview */}
-                        {storyboard.content && (
-                            <p className="text-[13px] text-muted-foreground line-clamp-2 leading-relaxed mb-3">
-                                {storyboard.content}
-                            </p>
-                        )}
+                        <span className="truncate text-xs text-muted-foreground">
+                            {storyboard.creatorName || storyboard.author || t("common.unknown", "Unknown")}
+                        </span>
                     </div>
                 </div>
 
-                {/* Creator Info (Top Right) */}
-                {storyboard.creatorId && (
-                    <div className="flex-shrink-0 -mt-1 -mr-1">
-                        <button
-                            className="flex items-center gap-1.5 px-2 py-1 rounded-full hover:bg-muted/50 transition-colors"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onCreatorTap?.(storyboard.creatorId!);
-                            }}
-                        >
-                            <span className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors max-w-[80px] truncate">
-                                {storyboard.creatorName || "Unknown"}
-                            </span>
-                            <Avatar
-                                src={storyboard.creatorAvatar}
-                                name={storyboard.creatorName || "Unknown"}
-                                size={20}
-                            />
-                        </button>
-                    </div>
-                )}
+                <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                        <Heart className="h-3 w-3" />
+                        {formatCount(storyboard.likes)}
+                    </span>
+                    <span className="flex items-center gap-1">
+                        <Eye className="h-3 w-3" />
+                        {formatCount(storyboard.views || 0)}
+                    </span>
+                    <span className="flex items-center gap-1">
+                        <GitBranch className="h-3 w-3" />
+                        {formatCount(storyboard.forkCount || 0)}
+                    </span>
+                    {storyboard.createdAt && (
+                        <span className="ml-auto">
+                            {new Date(storyboard.createdAt * 1000).toLocaleDateString()}
+                        </span>
+                    )}
+                </div>
             </div>
-
-            {/* Characters section */}
-            {storyboard.characterRefs && storyboard.characterRefs.length > 0 && (
-                <div className="mt-3 mb-3 flex gap-2 overflow-x-auto scrollbar-hide">
-                    {storyboard.characterRefs.slice(0, 5).map((ref, index) => (
-                        <button
-                            key={`${ref.characterId}-${index}`}
-                            className="flex items-center gap-1.5 px-1.5 py-1 rounded-full bg-secondary/30 border border-transparent hover:border-border/50 transition-colors whitespace-nowrap"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onCharacterTap?.(ref.characterId);
-                            }}
-                        >
-                            <Avatar
-                                src={ref.avatarUrl}
-                                name={ref.displayName || "Character"}
-                                size={16}
-                            />
-                            <span className="text-[11px] font-medium text-muted-foreground group-hover:text-foreground transition-colors truncate max-w-[80px]">
-                                {ref.displayName || "Character"}
-                            </span>
-                        </button>
-                    ))}
-                </div>
-            )}
-
-            <div className="h-px bg-border/40 my-3" />
-
-            {/* Metrics Footer */}
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4 text-xs text-muted-foreground font-medium">
-                    <div className="flex items-center gap-1.5 hover:text-foreground transition-colors">
-                        <Heart className="w-3.5 h-3.5" />
-                        <span>{formatCount(storyboard.likes)} {t("common.likes").toLowerCase()}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 hover:text-foreground transition-colors">
-                        <MessageSquare className="w-3.5 h-3.5" />
-                        <span>{formatCount(storyboard.views || 0)} {t("common.views").toLowerCase()}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 hover:text-foreground transition-colors">
-                        <GitBranch className="w-3.5 h-3.5" />
-                        <span>{formatCount(storyboard.forkCount || 0)} {t("common.forks").toLowerCase()}</span>
-                    </div>
-                </div>
-
-                {/* Time */}
-                {storyboard.createdAt && (
-                    <div className="text-[11px] text-muted-foreground/60">
-                        {new Date(storyboard.createdAt * 1000).toLocaleDateString()}
-                    </div>
-                )}
-            </div>
-        </div>
+        </Link>
     );
 }

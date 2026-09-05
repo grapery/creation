@@ -14,7 +14,6 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import ProfileHeader from "@/components/profile/profile-header-v2";
 import ContentGrid from "@/components/profile/content-grid";
-import "@/components/storyboard/storyboard-card-v2";
 import ListItem from "@/components/profile/list-item";
 
 // Inline Tabs component

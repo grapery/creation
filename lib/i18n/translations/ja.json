@@ -65,7 +65,8 @@
     "description": "説明",
     "create": "作成",
     "link_copied": "リンクをコピーしました",
-    "share_failed": "共有に失敗しました"
+    "share_failed": "共有に失敗しました",
+    "unknown": "不明"
   },
   "auth": {
     "sign_in": "ログイン",
@@ -377,7 +378,9 @@
     "continue_title": "ストーリーを続ける",
     "continue_description": "次に何が起こるか説明してください",
     "continue_what_next": "次に何が起こる？",
-    "continue_scene_count": "シーン数"
+    "continue_scene_count": "シーン数",
+    "forked": "フォーク",
+    "ai_generated": "AI生成"
   },
   "storyboard_detail": {
     "back": "戻る",

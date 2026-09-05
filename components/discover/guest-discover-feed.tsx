@@ -142,8 +142,8 @@ export function GuestDiscoverFeed() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {boards.map((board) => (
-                            <StoryboardCard key={board.id} storyboard={board} />
+                        {boards.map((board, index) => (
+                            <StoryboardCard key={board.id} storyboard={board} priority={index === 0} />
                         ))}
                     </div>
                 )}

@@ -65,7 +65,8 @@
     "description": "描述",
     "create": "创建",
     "link_copied": "链接已复制到剪贴板",
-    "share_failed": "分享失败"
+    "share_failed": "分享失败",
+    "unknown": "未知"
   },
   "auth": {
     "sign_in": "登录",
@@ -430,7 +431,9 @@
     "continue_title": "续写故事",
     "continue_description": "描述接下来会发生什么",
     "continue_what_next": "接下来发生什么？",
-    "continue_scene_count": "场景数量"
+    "continue_scene_count": "场景数量",
+    "forked": "分叉",
+    "ai_generated": "AI 生成"
   },
   "story_detail": {
     "tabs": {

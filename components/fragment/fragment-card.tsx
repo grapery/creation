@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import { Heart, MessageCircle } from "lucide-react";
+import { Heart, MessageCircle, Sparkles } from "lucide-react";
 import { fragments } from "@/lib/api/fragments";
 import type { StoryFragment } from "@/lib/types";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 
 interface FragmentCardProps {
     fragment: StoryFragment;
@@ -16,6 +16,8 @@ interface FragmentCardProps {
 export function FragmentCard({ fragment, compact = false, onLikeChange }: FragmentCardProps) {
     const [isLiked, setIsLiked] = useState(fragment.isLiked || false);
     const [likeCount, setLikeCount] = useState(fragment.likes || 0);
+
+    const altText = fragment.caption || fragment.content.slice(0, 50);
 
     const handleLike = async (e: React.MouseEvent) => {
         e.preventDefault();
@@ -40,60 +42,73 @@ export function FragmentCard({ fragment, compact = false, onLikeChange }: Fragme
 
     return (
         <Link href={`/fragments/${fragment.id}`} className="block group">
-            <div className={`relative rounded-xl overflow-hidden border border-border bg-card transition-all hover:shadow-lg hover:border-primary/30 ${compact ? "w-[120px]" : "w-full"}`}>
-                {/* Image */}
-                {fragment.imageUrls && fragment.imageUrls.length > 0 ? (
-                    <div className={`relative overflow-hidden ${compact ? "h-[160px]" : "h-[200px]"}`}>
-<Image src={fragment.imageUrls[0]} alt={fragment.caption || fragment.content.slice(0, 50)} fill sizes="(max-width: 768px) 50vw, 33vw" className="object-cover transition-transform group-hover:scale-105" />
-                        {/* Multi-image indicator */}
-                        {fragment.imageUrls.length > 1 && (
-                            <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-black/60 rounded text-white text-xs backdrop-blur-sm">
-                                {fragment.imageUrls.length}
-                            </div>
-                        )}
-                        {/* Topic badge */}
-                        {fragment.topic && (
-                            <div className="absolute bottom-2 left-2 px-2 py-0.5 bg-black/60 rounded-full text-white text-xs backdrop-blur-sm">
-                                #{fragment.topic}
-                            </div>
-                        )}
-                    </div>
-                ) : (
-                    <div className={`bg-gradient-to-br from-purple-500/10 to-blue-500/10 flex items-center justify-center ${compact ? "h-[160px]" : "h-[200px]"}`}>
-                        <p className="text-sm text-muted-foreground p-4 line-clamp-3 text-center">
-                            {fragment.content.slice(0, 80)}
-                        </p>
-                    </div>
-                )}
+            <div className="relative w-full overflow-hidden rounded-xl border border-border bg-card transition-all hover:border-primary/30 hover:shadow-lg">
+                {/* Cover: 3:4, 破图/无图均走渐变文字兜底 */}
+                <div className="relative aspect-[3/4] overflow-hidden">
+                    <ImageWithFallback
+                        src={fragment.imageUrls?.[0] || ""}
+                        alt={altText}
+                        fill
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                        className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                        fallbackText={fragment.caption || fragment.content.slice(0, 60)}
+                    />
+
+                    {/* Multi-image indicator */}
+                    {(fragment.imageUrls?.length ?? 0) > 1 && (
+                        <div className="absolute right-2 top-2 rounded bg-black/60 px-1.5 py-0.5 text-xs text-white backdrop-blur-sm">
+                            {fragment.imageUrls.length}
+                        </div>
+                    )}
+
+                    {/* AI badge */}
+                    {fragment.sourceType === "ai_fragment_generation" && (
+                        <span className="absolute bottom-2 right-2 flex rounded-full bg-black/60 p-1 text-white backdrop-blur-sm" title="AI generated">
+                            <Sparkles className="h-3 w-3 text-[var(--ai-complete)]" />
+                        </span>
+                    )}
+                </div>
 
                 {/* Content */}
-                <div className="p-3 space-y-2">
-                    {/* Caption/Content */}
-                    <p className={`text-sm text-foreground leading-snug ${compact ? "line-clamp-2" : "line-clamp-3"}`}>
+                <div className="space-y-2 p-3">
+                    <p className={`text-sm leading-snug text-foreground ${compact ? "line-clamp-2" : "line-clamp-3"}`}>
                         {fragment.caption || fragment.content}
                     </p>
 
-                    {/* Author */}
-                    <div className="flex items-center gap-2">
+                    {/* Topic + Author */}
+                    <div className="flex items-center gap-1.5">
                         {fragment.creatorAvatar && (
-                            <Image src={fragment.creatorAvatar} alt="" width={20} height={20} className="rounded-full" sizes="20px" />
+                            <ImageWithFallback
+                                src={fragment.creatorAvatar}
+                                alt={fragment.creatorName || "avatar"}
+                                width={20}
+                                height={20}
+                                sizes="20px"
+                                className="rounded-full object-cover"
+                                fallbackText=""
+                            />
                         )}
-                        <span className="text-xs text-muted-foreground truncate">
+                        <span className="truncate text-xs text-muted-foreground">
                             {fragment.creatorName || "Unknown"}
                         </span>
+                        {fragment.topic && (
+                            <span className="ml-auto max-w-[45%] truncate text-xs text-muted-foreground">
+                                #{fragment.topic}
+                            </span>
+                        )}
                     </div>
 
                     {/* Stats */}
                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
                         <button
                             onClick={handleLike}
-                            className="flex items-center gap-1 hover:text-red-500 transition-colors"
+                            className="flex items-center gap-1 transition-colors hover:text-red-500"
                         >
-                            <Heart className={`w-3.5 h-3.5 transition-all ${isLiked ? "fill-red-500 text-red-500" : ""}`} />
+                            <Heart className={`h-3.5 w-3.5 transition-all ${isLiked ? "fill-red-500 text-red-500" : ""}`} />
                             {likeCount}
                         </button>
                         <span className="flex items-center gap-1">
-                            <MessageCircle className="w-3.5 h-3.5" />
+                            <MessageCircle className="h-3.5 w-3.5" />
                             {fragment.comments || 0}
                         </span>
                     </div>
