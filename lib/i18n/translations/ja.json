@@ -511,7 +511,19 @@
     "sign_in_desc": "作成・フォロー・いいね・検索にはサインインが必要です。",
     "no_stories": "ストーリーが見つかりません",
     "no_storyboards": "ストーリーボードが見つかりません",
-    "fragments_stories": "フラグメントとストーリー"
+    "fragments_stories": "フラグメントとストーリー",
+    "tabs_all": "すべて",
+    "tabs_stories": "ストーリー",
+    "tabs_characters": "キャラクター",
+    "tabs_users": "ユーザー",
+    "tabs_storyboards": "ストーリーボード",
+    "search_placeholder": "ストーリー、キャラクター、ユーザーを検索…",
+    "search_fragments": "フラグメントを検索…",
+    "load_more": "もっと見る",
+    "no_results": "結果が見つかりません。",
+    "type_something": "キーワードを入力して検索。",
+    "no_fragments_found": "「{query}」に関連するフラグメントはありません",
+    "no_fragments_yet": "フラグメントはまだありません"
   },
   "fragment": {
     "create_title": "断片を作成",

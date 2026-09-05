@@ -511,7 +511,19 @@
     "sign_in_desc": "创作、关注、点赞和搜索需要登录。",
     "no_stories": "暂无故事",
     "no_storyboards": "暂无故事板",
-    "fragments_stories": "碎片与故事"
+    "fragments_stories": "碎片与故事",
+    "tabs_all": "全部",
+    "tabs_stories": "故事",
+    "tabs_characters": "角色",
+    "tabs_users": "用户",
+    "tabs_storyboards": "故事板",
+    "search_placeholder": "搜索故事、角色、用户…",
+    "search_fragments": "搜索碎片…",
+    "load_more": "加载更多",
+    "no_results": "未找到结果。",
+    "type_something": "输入关键词开始搜索。",
+    "no_fragments_found": "没有找到与「{query}」相关的碎片",
+    "no_fragments_yet": "还没有碎片"
   },
   "fragment": {
     "create_title": "创建碎片",

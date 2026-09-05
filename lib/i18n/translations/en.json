@@ -511,7 +511,19 @@
     "sign_in_desc": "Create, follow, like, and search require an account.",
     "no_stories": "No stories found",
     "no_storyboards": "No storyboards found",
-    "fragments_stories": "Fragments & Stories"
+    "fragments_stories": "Fragments & Stories",
+    "tabs_all": "All",
+    "tabs_stories": "Stories",
+    "tabs_characters": "Characters",
+    "tabs_users": "Users",
+    "tabs_storyboards": "Storyboards",
+    "search_placeholder": "Search stories, characters, users...",
+    "search_fragments": "Search fragments...",
+    "load_more": "Load More",
+    "no_results": "No results found.",
+    "type_something": "Type something to search.",
+    "no_fragments_found": "No fragments found for “{query}”",
+    "no_fragments_yet": "No fragments yet"
   },
   "fragment": {
     "create_title": "Create Fragment",

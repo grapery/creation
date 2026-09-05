@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "@/providers/language-provider";
 import { useRouter } from "next/navigation";
 import { Plus, Sparkles, TrendingUp, Users, LayoutGrid, Rows3, Search, X } from "lucide-react";
 import { fragments } from "@/lib/api/fragments";
@@ -15,6 +16,7 @@ type FeedTab = "discover" | "following";
 type ViewMode = "grid" | "vertical";
 
 export default function FragmentsPage() {
+    const { t } = useTranslation();
     const router = useRouter();
     const { user } = useAuth();
     const { show: showLoginPrompt, LoginPromptModal } = useLoginPrompt();
@@ -81,8 +83,8 @@ export default function FragmentsPage() {
     };
 
     const tabs: { id: FeedTab; label: string; icon: typeof TrendingUp }[] = [
-        { id: "discover", label: "Discover", icon: TrendingUp },
-        { id: "following", label: "Following", icon: Users },
+        { id: "discover", label: t("discover.title"), icon: TrendingUp },
+        { id: "following", label: t("dashboard.following", "Following"), icon: Users },
     ];
 
     return (
@@ -108,7 +110,7 @@ export default function FragmentsPage() {
                                     setSearchResults([]);
                                 }
                             }}
-                            placeholder="Search fragments..."
+                            placeholder={t("discover.search_fragments")}
                             className="flex-1 py-1 text-sm bg-transparent focus:outline-none"
                             autoFocus
                         />
@@ -190,7 +192,7 @@ export default function FragmentsPage() {
                     </div>
                 ) : searchResults.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20 text-center">
-                        <p className="text-muted-foreground">No fragments found for &ldquo;{searchQuery}&rdquo;</p>
+                        <p className="text-muted-foreground">{t("discover.no_fragments_found", { query: searchQuery })}</p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
@@ -210,7 +212,7 @@ export default function FragmentsPage() {
             ) : fragmentsList.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 text-center">
                     <Sparkles className="w-12 h-12 text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">No fragments yet</h3>
+                    <h3 className="text-lg font-semibold mb-2">{t("discover.no_fragments_yet")}</h3>
                     <p className="text-sm text-muted-foreground mb-4">
                         {activeTab === "discover"
                             ? "Be the first to create a fragment!"

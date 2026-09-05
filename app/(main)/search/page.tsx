@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
+import { useTranslation } from "@/providers/language-provider";
 import { StoryboardCard } from "@/components/storyboard/storyboard-card";
 import type { Story, Character, User, Storyboard } from "@/lib/types";
 import { useState, useEffect, useCallback } from "react";
@@ -25,6 +26,7 @@ export default function SearchPage() {
 }
 
 function SearchPageContent() {
+    const { t } = useTranslation();
     const params = useSearchParams();
     const initialQuery = params.get("q") || "";
     const [query, setQuery] = useState(initialQuery);
@@ -106,11 +108,11 @@ function SearchPageContent() {
     };
 
     const tabs: { value: SearchType; label: string }[] = [
-        { value: "all", label: "All" },
-        { value: "story", label: "Stories" },
-        { value: "character", label: "Characters" },
-        { value: "user", label: "Users" },
-        { value: "storyboard", label: "Storyboards" },
+        { value: "all", label: t("discover.tabs_all") },
+        { value: "story", label: t("discover.tabs_stories") },
+        { value: "character", label: t("discover.tabs_characters") },
+        { value: "user", label: t("discover.tabs_users") },
+        { value: "storyboard", label: t("discover.tabs_storyboards") },
     ];
 
     return (
@@ -120,7 +122,7 @@ function SearchPageContent() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                         className="pl-9"
-                        placeholder="Search stories, characters, users..."
+                        placeholder={t("discover.search_placeholder")}
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         onKeyDown={handleKeyDown}
@@ -168,7 +170,7 @@ function SearchPageContent() {
                         ) : (
                             !loading && (
                                 <p className="text-center text-muted-foreground py-12">
-                                    {initialQuery ? "No results found." : "Type something to search."}
+                                    {initialQuery ? t("discover.no_results") : t("discover.type_something")}
                                 </p>
                             )
                         )}
@@ -179,7 +181,7 @@ function SearchPageContent() {
                         )}
                         {hasMore && !loading && (
                             <div className="flex justify-center py-4">
-                                <Button variant="outline" onClick={loadMore}>Load More</Button>
+                                <Button variant="outline" onClick={loadMore}>{t("discover.load_more")}</Button>
                             </div>
                         )}
                     </TabsContent>
@@ -190,6 +192,7 @@ function SearchPageContent() {
 }
 
 function SearchResultsList({ results, type }: { results: SearchResults; type: SearchType }) {
+    const { t } = useTranslation();
     // 混合结果按展示字段收窄为联合形状（按 storyId/personality/email 区分类型）
     type SearchHit = Partial<Story & Character & User & Storyboard> & { id: string };
     const items = ([
@@ -200,7 +203,7 @@ function SearchResultsList({ results, type }: { results: SearchResults; type: Se
     ] as SearchHit[]);
 
     if (items.length === 0) {
-        return <p className="text-center text-muted-foreground py-12">No results found.</p>;
+        return <p className="text-center text-muted-foreground py-12">{t("discover.no_results")}</p>;
     }
 
     const isStoryboard = (h: SearchHit) =>
