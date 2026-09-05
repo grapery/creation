@@ -445,7 +445,12 @@
     "continue_what_next": "接下来发生什么？",
     "continue_scene_count": "场景数量",
     "forked": "分叉",
-    "ai_generated": "AI 生成"
+    "ai_generated": "AI 生成",
+    "unavailable_title": "故事板无法访问",
+    "unavailable_hint": "该故事板可能是私密的、仍在草稿中，或你没有访问权限。",
+    "not_found_title": "故事板不存在",
+    "not_found_hint": "它可能已被删除，或链接不正确。",
+    "back_home": "返回首页"
   },
   "story_detail": {
     "tabs": {

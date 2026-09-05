@@ -445,7 +445,12 @@
     "continue_what_next": "What happens next?",
     "continue_scene_count": "Number of Scenes",
     "forked": "Fork",
-    "ai_generated": "AI generated"
+    "ai_generated": "AI generated",
+    "unavailable_title": "Storyboard unavailable",
+    "unavailable_hint": "This storyboard is private, still in draft, or you don't have access.",
+    "not_found_title": "Storyboard not found",
+    "not_found_hint": "It may have been deleted, or the link is incorrect.",
+    "back_home": "Back to home"
   },
   "story_detail": {
     "tabs": {

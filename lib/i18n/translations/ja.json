@@ -392,7 +392,12 @@
     "continue_what_next": "次に何が起こる？",
     "continue_scene_count": "シーン数",
     "forked": "フォーク",
-    "ai_generated": "AI生成"
+    "ai_generated": "AI生成",
+    "unavailable_title": "ストーリーボードを表示できません",
+    "unavailable_hint": "このストーリーボードは非公開・下書き中、またはアクセス権がありません。",
+    "not_found_title": "ストーリーボードが見つかりません",
+    "not_found_hint": "削除されたか、リンクが正しくありません。",
+    "back_home": "ホームに戻る"
   },
   "storyboard_detail": {
     "back": "戻る",

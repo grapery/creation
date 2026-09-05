@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { storyboards } from "@/lib/api/storyboards";
 import { likes, bookmarks } from "@/lib/api/interactions";
 import { Storyboard } from "@/lib/types";
-import { Loader2, ArrowLeft, Sparkles, Users, Heart, MessageSquare, GitFork, Share2, Info, Workflow, Play, X, ChevronLeft, ChevronRight, LayoutList, Grid3x3, ArrowUp, ArrowDown, AlertCircle, Bookmark } from "lucide-react";
+import { Loader2, ArrowLeft, Sparkles, Users, Heart, MessageSquare, GitFork, Share2, Info, Workflow, Play, X, ChevronLeft, ChevronRight, LayoutList, Grid3x3, ArrowUp, ArrowDown, AlertCircle, Bookmark , Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CommentList } from "@/components/comments/comment-list";
 import { StoryboardRoadmap } from "@/components/storyboard/roadmap";
@@ -28,6 +28,7 @@ export default function StoryboardPage() {
     const searchParams = useSearchParams();
     const shareGrant = useMemo(() => parseShareGrant(searchParams), [searchParams]);
     const router = useRouter();
+    const [loadError, setLoadError] = useState<number | null>(null);
     const [item, setItem] = useState<Storyboard | null>(null);
     const [loading, setLoading] = useState(true);
     const [workflow, setWorkflow] = useState<Record<string, unknown> | null>(null);
@@ -154,6 +155,8 @@ export default function StoryboardPage() {
             } catch (e) {
                 console.error("Failed to load storyboard:", e);
                 if (isMounted) {
+                    const code = (e as { code?: number })?.code;
+                    if (code === 403 || code === 404) setLoadError(code);
                     setLoading(false);
                 }
             } finally {
@@ -253,8 +256,21 @@ export default function StoryboardPage() {
     );
 
     if (!item) return (
-        <div className="min-h-screen bg-background flex items-center justify-center">
-            <div>Not Found</div>
+        <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-3 px-4 text-center">
+            <Layers className="h-10 w-10 text-muted-foreground/60" />
+            <p className="font-medium">
+                {loadError === 403
+                    ? t("storyboard.unavailable_title", "Storyboard unavailable")
+                    : t("storyboard.not_found_title", "Storyboard not found")}
+            </p>
+            <p className="text-sm text-muted-foreground max-w-sm">
+                {loadError === 403
+                    ? t("storyboard.unavailable_hint", "This storyboard is private, still in draft, or you don't have access.")
+                    : t("storyboard.not_found_hint", "It may have been deleted, or the link is incorrect.")}
+            </p>
+            <Button variant="outline" size="sm" onClick={() => router.push("/")}>
+                {t("storyboard.back_home", "Back to home")}
+            </Button>
         </div>
     );
 
