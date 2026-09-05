@@ -10,10 +10,13 @@ interface PlazaSectionHeaderProps {
     onSeeAll?: () => void;
 }
 
-/** 后端可能下发 i18n 键（snake_case，如 plaza_rail_trending_title），优先取已翻译文本。 */
+/** 后端可能下发 i18n 键（如 plaza_rail_trending_title，对应 plaza 段的 rail_trending_title），优先取已翻译文本。 */
 function localizedOr(raw: string | undefined, key: string | undefined, t: (k: string, d?: string) => string): string {
     if (raw) return raw;
-    if (key) return t(key.replace(/_/g, "."), key);
+    if (key) {
+        const stripped = key.replace(/^plaza_/, "");
+        return t(`plaza.${stripped}`, key);
+    }
     return "";
 }
 
