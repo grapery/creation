@@ -7,6 +7,7 @@ import { StoryboardCard } from "@/components/storyboard/storyboard-card";
 import { storyboards } from "@/lib/api/storyboards";
 import { Storyboard } from "@/lib/types";
 import { Loader2, Compass, Sparkles, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
@@ -125,7 +126,7 @@ export default function DashboardPage() {
           >
             <Search className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm text-muted-foreground">
-              {t("common.search", "Search")} stories, characters, users...
+              {t("discover.search_placeholder")}
             </span>
           </button>
 
@@ -195,10 +196,19 @@ export default function DashboardPage() {
                 ))}
               </div>
             ) : items.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
-                <p className="text-muted-foreground">
-                  {activeTab === Tab.FOLLOWING ? t("dashboard.no_stories_yet") : t("empty")}
-                </p>
+              <div className="flex flex-col items-center justify-center py-16 text-center space-y-3 rounded-xl border border-dashed border-border bg-card/40">
+                <Compass className="h-10 w-10 text-muted-foreground/60" />
+                <div>
+                  <p className="font-medium">
+                    {activeTab === Tab.FOLLOWING ? t("dashboard.no_stories_yet", "No stories from people you follow yet") : t("dashboard.explore_empty_title", "Nothing here yet")}
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {activeTab === Tab.FOLLOWING ? t("dashboard.following_hint", "Follow creators to see their storyboards here") : t("dashboard.explore_empty_hint", "New storyboards will appear here as the community publishes")}
+                  </p>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => router.push("/plaza")}>
+                  {t("dashboard.explore_cta", "Explore the Plaza")}
+                </Button>
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-4 md:grid-cols-3">

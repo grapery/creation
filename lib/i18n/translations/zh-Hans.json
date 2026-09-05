@@ -199,7 +199,11 @@
     "discover": "发现",
     "invites": "邀请",
     "start_here": "开始",
-    "trending_topics": "热门话题"
+    "trending_topics": "热门话题",
+    "explore_empty_title": "这里还空空的",
+    "explore_empty_hint": "社区发布新故事板后会出现在这里",
+    "explore_cta": "去广场逛逛",
+    "following_hint": "关注创作者后，他们的故事板会显示在这里"
   },
   "stories": {
     "create_story": "创建故事",

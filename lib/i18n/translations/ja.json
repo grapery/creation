@@ -199,7 +199,11 @@
     "discover": "発見",
     "invites": "招待",
     "start_here": "ここから始める",
-    "trending_topics": "トレンドトピック"
+    "trending_topics": "トレンドトピック",
+    "explore_empty_title": "まだ何もありません",
+    "explore_empty_hint": "コミュニティが新しいストーリーボードを公開するとここに表示されます",
+    "explore_cta": "プラザを見る",
+    "following_hint": "クリエイターをフォローすると、ここに作品が表示されます"
   },
   "stories": {
     "create_story": "ストーリーを作成",

@@ -199,7 +199,11 @@
     "discover": "Discover",
     "invites": "Invites",
     "start_here": "Start Here",
-    "trending_topics": "Trending Topics"
+    "trending_topics": "Trending Topics",
+    "explore_empty_title": "Nothing here yet",
+    "explore_empty_hint": "New storyboards will appear here as the community publishes",
+    "explore_cta": "Explore the Plaza",
+    "following_hint": "Follow creators to see their storyboards here"
   },
   "stories": {
     "create_story": "Create Story",
