@@ -66,7 +66,12 @@
     "create": "作成",
     "link_copied": "リンクをコピーしました",
     "share_failed": "共有に失敗しました",
-    "unknown": "不明"
+    "unknown": "不明",
+    "try_again": "再試行",
+    "view": "見る",
+    "open_draft": "下書きを開く",
+    "form_mode": "フォームモード",
+    "no_bookmarks": "ブックマークはまだありません"
   },
   "auth": {
     "sign_in": "ログイン",

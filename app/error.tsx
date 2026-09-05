@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/providers/language-provider";
 
 export default function Error({
     error,
@@ -10,6 +11,7 @@ export default function Error({
     error: Error & { digest?: string };
     reset: () => void;
 }) {
+    const { t } = useTranslation();
     useEffect(() => {
         console.error(error);
     }, [error]);
@@ -20,7 +22,7 @@ export default function Error({
             <p className="text-muted-foreground text-center max-w-md">
                 An unexpected error occurred. Please try again.
             </p>
-            <Button onClick={reset}>Try again</Button>
+            <Button onClick={reset}>{t("common.try_again")}</Button>
         </div>
     );
 }

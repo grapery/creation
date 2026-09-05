@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "@/providers/language-provider";
 import Image from "next/image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Bookmark as BookmarkIcon } from "lucide-react";
@@ -10,6 +11,7 @@ import Link from "next/link";
 import { RequireAuth } from "@/components/auth/require-auth";
 
 function BookmarksContent() {
+    const { t } = useTranslation();
     const [activeTab, setActiveTab] = useState<BookmarkType | "all">("all");
     const [loading, setLoading] = useState(true);
     const [bookmarkData, setBookmarkData] = useState<PagedBookmarks | null>(null);
@@ -42,7 +44,7 @@ function BookmarksContent() {
         <div className="container max-w-6xl px-4 py-6 md:px-6 mx-auto space-y-6">
             <div className="flex items-center gap-2">
                 <BookmarkIcon className="h-6 w-6" />
-                <h1 className="text-2xl font-bold">Bookmarks</h1>
+                <h1 className="text-2xl font-bold">{t("sidebar.bookmarks")}</h1>
             </div>
 
             <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as BookmarkType | "all")}>
@@ -69,7 +71,7 @@ function BookmarksContent() {
                         ) : (
                             <div className="text-center py-12 text-muted-foreground">
                                 <BookmarkIcon className="h-12 w-12 mx-auto mb-3 opacity-20" />
-                                <p>No bookmarks yet</p>
+                                <p>{t("common.no_bookmarks")}</p>
                             </div>
                         )}
                     </TabsContent>

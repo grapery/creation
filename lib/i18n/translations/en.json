@@ -66,7 +66,12 @@
     "create": "Create",
     "link_copied": "Link copied to clipboard",
     "share_failed": "Failed to share",
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "try_again": "Try again",
+    "view": "View",
+    "open_draft": "Open draft",
+    "form_mode": "Form mode",
+    "no_bookmarks": "No bookmarks yet"
   },
   "auth": {
     "sign_in": "Sign In",

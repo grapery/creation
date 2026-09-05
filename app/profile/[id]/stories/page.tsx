@@ -238,7 +238,7 @@ export default function ProfileStoriesPage() {
                             } : undefined}
                             actions={
                                 <Link href={`/stories/${story.id}`}>
-                                    <Button size="sm" variant="outline">View</Button>
+                                    <Button size="sm" variant="outline">{t("common.view")}</Button>
                                 </Link>
                             }
                             onClick={() => router.push(`/stories/${story.id}`)}

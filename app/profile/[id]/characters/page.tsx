@@ -236,7 +236,7 @@ export default function ProfileCharactersPage() {
                             } : undefined}
                             actions={
                                 <Link href={`/characters/${character.id}`}>
-                                    <Button size="sm" variant="outline">View</Button>
+                                    <Button size="sm" variant="outline">{t("common.view")}</Button>
                                 </Link>
                             }
                             onClick={() => router.push(`/characters/${character.id}`)}

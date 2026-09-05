@@ -237,7 +237,7 @@ export default function ProfileStoryboardsPage() {
                             } : undefined}
                             actions={
                                 <Link href={`/storyboards/${storyboard.id}`}>
-                                    <Button size="sm" variant="outline">View</Button>
+                                    <Button size="sm" variant="outline">{t("common.view")}</Button>
                                 </Link>
                             }
                             onClick={() => router.push(`/storyboards/${storyboard.id}`)}
