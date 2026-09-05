@@ -321,7 +321,9 @@
     "basic_info_desc": "输入角色的基本资料",
     "describe_your_character": "描述你的角色",
     "ai_generate": "AI 生成",
-    "generated_character": "已生成角色"
+    "generated_character": "已生成角色",
+    "not_found_title": "角色无法访问",
+    "not_found_hint": "该角色可能是私密的、已删除，或链接不正确。"
   },
   "chat": {
     "new_chat": "新聊天",

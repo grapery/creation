@@ -321,7 +321,9 @@
     "basic_info_desc": "Enter basic character details",
     "describe_your_character": "Describe Your Character",
     "ai_generate": "AI Generate",
-    "generated_character": "Generated Character"
+    "generated_character": "Generated Character",
+    "not_found_title": "Character unavailable",
+    "not_found_hint": "This character may be private, deleted, or the link is incorrect."
   },
   "chat": {
     "new_chat": "New Chat",

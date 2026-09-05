@@ -268,7 +268,9 @@
     "basic_info_desc": "基本情報を入力してください",
     "describe_your_character": "キャラクターを説明",
     "ai_generate": "AI 生成",
-    "generated_character": "生成されたキャラクター"
+    "generated_character": "生成されたキャラクター",
+    "not_found_title": "キャラクターを表示できません",
+    "not_found_hint": "このキャラクターは非公開・削除済み、またはリンクが正しくありません。"
   },
   "chat": {
     "new_chat": "新しいチャット",

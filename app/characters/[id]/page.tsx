@@ -8,8 +8,9 @@ import { Character } from "@/lib/types/character";
 import { Storyboard } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/providers/language-provider";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, MessageCircle, Share2, MoreHorizontal, Film, Image as ImageIcon, Info, Sparkles, User as UserIcon } from "lucide-react";
+import { Loader2, MessageCircle, Share2, MoreHorizontal, Film, Image as ImageIcon, Info, Sparkles, User as UserIcon , UserX } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -20,6 +21,7 @@ export default function CharacterDetailPage() {
     const searchParams = useSearchParams();
     const shareGrant = useMemo(() => parseShareGrant(searchParams), [searchParams]);
     const router = useRouter();
+    const { t } = useTranslation();
     const [character, setCharacter] = useState<Character | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -83,7 +85,18 @@ export default function CharacterDetailPage() {
     };
 
     if (loading) return <div className="min-h-screen flex items-center justify-center bg-background"><Loader2 className="animate-spin" /></div>;
-    if (!character) return <div className="min-h-screen flex items-center justify-center bg-background">Character not found</div>;
+    if (!character) return (
+        <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-3 px-4 text-center">
+            <UserX className="h-10 w-10 text-muted-foreground/60" />
+            <p className="font-medium">{t("characters.not_found_title", "Character unavailable")}</p>
+            <p className="text-sm text-muted-foreground max-w-sm">
+                {t("characters.not_found_hint", "This character may be private, deleted, or the link is incorrect.")}
+            </p>
+            <Button variant="outline" size="sm" onClick={() => router.push("/search")}>
+                {t("common.go_back", "Go Back")}
+            </Button>
+        </div>
+    );
 
     return (
         <>
