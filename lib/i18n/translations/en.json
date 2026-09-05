@@ -782,7 +782,14 @@
     "references_full": "Reference images are full (max 3)",
     "add": "Add",
     "new_chat": "New",
-    "upload_failed": "Upload failed"
+    "upload_failed": "Upload failed",
+    "plan_title": "Confirm the story elements",
+    "plan_desc": "Upload optional reference images per element, then generate.",
+    "generate": "Generate",
+    "upload": "Upload",
+    "replace": "Replace",
+    "remove": "Remove",
+    "skip_plan": "Skip & generate"
   },
   "sidebar": {
     "creator_center": "Creator Center",

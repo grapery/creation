@@ -782,7 +782,14 @@
     "references_full": "参考图已达上限（3 张）",
     "add": "添加",
     "new_chat": "新会话",
-    "upload_failed": "上传失败"
+    "upload_failed": "上传失败",
+    "plan_title": "确认故事元素",
+    "plan_desc": "可为各元素上传参考图（可选），然后开始生成。",
+    "generate": "开始生成",
+    "upload": "上传",
+    "replace": "更换",
+    "remove": "移除",
+    "skip_plan": "直接生成"
   },
   "sidebar": {
     "creator_center": "创作中心",

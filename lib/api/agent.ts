@@ -39,6 +39,16 @@ export interface AgentCreationMessageRequest {
         includeGenerationTrace?: boolean;
     };
 }
+/** 规划事件返回的故事元素槽位（角色/场景/物品等），用于参考图按槽上传 */
+export interface StoryElementSlot {
+    key: string;
+    label: string;
+    kind: string;
+    required?: boolean;
+    inputType?: string;
+    helperText?: string;
+}
+
 export interface AgentGenerationEventPayload {
     status?: string;
     message?: string;
@@ -54,6 +64,7 @@ export interface AgentGenerationEventPayload {
     storyboardId?: string;
     draftStoryboardId?: string;
     sceneCount?: number;
+    storyElements?: StoryElementSlot[];
     intent?: string;
     imageCount?: number;
     tokensUsed?: number;

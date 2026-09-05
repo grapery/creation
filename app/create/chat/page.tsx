@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Send, Square, Sparkles, Loader2, Eye, UploadCloud, AlertCircle, Image as ImageIcon, Clapperboard, Settings2, Plus, X, RotateCcw } from "lucide-react";
 import { RequireAuth } from "@/components/auth/require-auth";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/providers/auth-provider";
 import { useTranslation } from "@/providers/language-provider";
@@ -17,6 +18,7 @@ import { StyleConfig } from "@/lib/types";
 import {
     AgentCreationMessageRequest,
     AgentGenerationEventPayload,
+    StoryElementSlot,
     issueAgentAccessToken,
     streamCreationMessage,
 } from "@/lib/api/agent";
@@ -72,6 +74,9 @@ function CreateChatContent() {
     const [isStreaming, setIsStreaming] = useState(false);
     const [activity, setActivity] = useState<{ step: string; progress: number } | null>(null);
     const [result, setResult] = useState<CreationResult | null>(null);
+    // 碎片两阶段创作：规划返回的槽位确认卡（null = 不在规划阶段）
+    const [slotPlan, setSlotPlan] = useState<{ message: string; elements: StoryElementSlot[]; images: Record<string, string> } | null>(null);
+    const [isUploadingSlot, setIsUploadingSlot] = useState<string | null>(null);
     const [isPublishing, setIsPublishing] = useState(false);
     const [published, setPublished] = useState(false);
 
@@ -85,10 +90,13 @@ function CreateChatContent() {
     const [isUploading, setIsUploading] = useState(false);
 
     const sessionIdRef = useRef<string>("");
+    const plannedElementsRef = useRef<StoryElementSlot[]>([]);
     const draftRef = useRef<{ fragmentId: string; storyboardId: string }>({ fragmentId: "", storyboardId: "" });
     const abortRef = useRef<AbortController | null>(null);
     const bottomRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const slotInputRef = useRef<HTMLInputElement>(null);
+    const activeSlotKeyRef = useRef<string>("");
 
     const sessionId = useCallback((): string => {
         if (!sessionIdRef.current) sessionIdRef.current = `cs_${uid()}`;
@@ -199,6 +207,11 @@ function CreateChatContent() {
                 case "assistant_message":
                     if (data.message) push("assistant", data.message);
                     break;
+                case "planning":
+                    if (data.storyElements?.length) {
+                        plannedElementsRef.current = data.storyElements;
+                    }
+                    break;
                 case "task_started":
                     setActivity({ step: t("create_chat.step_generating", "Generating"), progress: 0.1 });
                     break;
@@ -301,20 +314,12 @@ function CreateChatContent() {
         }
     }, [referenceImages.length, t]);
 
-    const send = useCallback(async () => {
-        const text = input.trim();
-        if (!text || isStreaming) return;
-
-        setInput("");
-        setResult(null);
-        setPublished(false);
-        push("user", text);
+    /** 流式发送一条创作消息的公共实现 */
+    const streamMessage = useCallback(async (text: string, planningOnly: boolean, slotRefs?: Record<string, string>) => {
         setIsStreaming(true);
         setActivity({ step: t("create_chat.step_connecting", "Connecting"), progress: 0 });
-
         const controller = new AbortController();
         abortRef.current = controller;
-
         try {
             const token = await issueAgentAccessToken({
                 agent: target,
@@ -324,6 +329,13 @@ function CreateChatContent() {
             });
 
             const draftId = target === "fragment" ? draftRef.current.fragmentId : draftRef.current.storyboardId;
+            const slotList = Object.entries(slotRefs ?? {}).map(([key, imageUrl]) => ({
+                key,
+                imageUrl,
+                label: plannedElementsRef.current.find((el) => el.key === key)?.label,
+                kind: plannedElementsRef.current.find((el) => el.key === key)?.kind,
+            }));
+
             const body: AgentCreationMessageRequest = {
                 message: text,
                 clientRequestId: uid(),
@@ -344,8 +356,10 @@ function CreateChatContent() {
                         ? {
                               imageCount,
                               consistencyLevel: "standard",
+                              ...(planningOnly ? { planningOnly: true } : {}),
                               ...(selectedStyle ? { style: selectedStyle } : {}),
                               ...(referenceImages.length > 0 ? { referenceImages } : {}),
+                              ...(slotList.length > 0 ? { referenceSlots: slotList } : {}),
                           }
                         : { sceneCount },
             };
@@ -363,7 +377,57 @@ function CreateChatContent() {
             setActivity(null);
             abortRef.current = null;
         }
-    }, [input, isStreaming, push, handleEvent, sessionId, t, target, imageCount, sceneCount, selectedStyle, referenceImages]);
+    }, [push, handleEvent, sessionId, t, target, imageCount, sceneCount, selectedStyle, referenceImages]);
+
+    const send = useCallback(async () => {
+        const text = input.trim();
+        if (!text || isStreaming) return;
+
+        setInput("");
+        setResult(null);
+        setPublished(false);
+        push("user", text);
+
+        // 碎片首次创作：先规划出故事元素槽位，用户可按槽上传参考图后确认生成
+        if (target === "fragment" && !draftRef.current.fragmentId) {
+            plannedElementsRef.current = [];
+            await streamMessage(text, true);
+            const elements = plannedElementsRef.current;
+            if (elements.length > 0 && !abortRef.current?.signal.aborted) {
+                setSlotPlan({ message: text, elements, images: {} });
+                return;
+            }
+            if (elements.length === 0) {
+                await streamMessage(text, false);
+                return;
+            }
+        }
+        await streamMessage(text, false);
+    }, [input, isStreaming, push, streamMessage, t, target]);
+
+    /** 槽位确认卡上的「开始生成」 */
+    const confirmGenerate = useCallback(async () => {
+        if (!slotPlan || isStreaming) return;
+        const { message, images } = slotPlan;
+        setSlotPlan(null);
+        await streamMessage(message, false, images);
+    }, [slotPlan, isStreaming, streamMessage]);
+
+    /** 槽位上传参考图 */
+    const uploadSlotImage = useCallback(async (key: string, file?: File | null) => {
+        if (!file || !slotPlan) return;
+        setIsUploadingSlot(key);
+        try {
+            const res = await assets.uploadImage(file);
+            if (res.url) {
+                setSlotPlan((prev) => (prev ? { ...prev, images: { ...prev.images, [key]: res.url } } : prev));
+            }
+        } catch (e) {
+            showError(t("create_chat.upload_failed", "Upload failed"), e instanceof Error ? e.message : undefined);
+        } finally {
+            setIsUploadingSlot(null);
+        }
+    }, [slotPlan, t]);
 
     const stop = useCallback(() => {
         abortRef.current?.abort();
@@ -644,6 +708,77 @@ function CreateChatContent() {
                         </div>
                     </div>
                 )}
+
+                {/* Slot plan confirm card */}
+                {slotPlan && (
+                    <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+                        <div>
+                            <p className="text-sm font-semibold">{t("create_chat.plan_title", "Confirm the story elements")}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">{t("create_chat.plan_desc", "Upload optional reference images per element, then generate.")}</p>
+                        </div>
+                        <div className="space-y-2">
+                            {slotPlan.elements.map((el) => {
+                                const img = slotPlan.images[el.key];
+                                return (
+                                    <div key={el.key} className="flex items-center gap-3 rounded-lg border border-border/60 p-2">
+                                        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-md bg-muted">
+                                            {img ? (
+                                                <ImageWithFallback src={img} alt={el.label} fill sizes="56px" className="object-cover" fallbackText="" />
+                                            ) : (
+                                                <div className="flex h-full w-full items-center justify-center text-[10px] text-muted-foreground">{el.kind?.slice(0, 4)}</div>
+                                            )}
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <p className="truncate text-sm font-medium">
+                                                {el.label}
+                                                {el.required && <span className="ml-0.5 text-destructive">*</span>}
+                                            </p>
+                                            {el.helperText && <p className="truncate text-xs text-muted-foreground">{el.helperText}</p>}
+                                        </div>
+                                        {img ? (
+                                            <div className="flex shrink-0 gap-1">
+                                                <Button variant="ghost" size="sm" disabled={isUploadingSlot === el.key}
+                                                    onClick={() => { activeSlotKeyRef.current = el.key; slotInputRef.current?.click(); }}>
+                                                    {t("create_chat.replace", "Replace")}
+                                                </Button>
+                                                <Button variant="ghost" size="sm"
+                                                    onClick={() => setSlotPlan((prev) => {
+                                                        if (!prev) return prev;
+                                                        const images = { ...prev.images };
+                                                        delete images[el.key];
+                                                        return { ...prev, images };
+                                                    })}>
+                                                    {t("create_chat.remove", "Remove")}
+                                                </Button>
+                                            </div>
+                                        ) : (
+                                            <Button variant="outline" size="sm" className="shrink-0" disabled={isUploadingSlot === el.key}
+                                                onClick={() => { activeSlotKeyRef.current = el.key; slotInputRef.current?.click(); }}>
+                                                {isUploadingSlot === el.key ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : t("create_chat.upload", "Upload")}
+                                            </Button>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        <div className="flex gap-2 pt-1">
+                            <Button className="flex-1" onClick={() => void confirmGenerate()} disabled={isStreaming}>
+                                <Sparkles className="h-4 w-4" />
+                                {t("create_chat.generate", "Generate")}
+                            </Button>
+                        </div>
+                    </div>
+                )}
+                <input
+                    ref={slotInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                        void uploadSlotImage(activeSlotKeyRef.current, e.target.files?.[0]);
+                        e.target.value = "";
+                    }}
+                />
 
                 {/* Result card */}
                 {result && (

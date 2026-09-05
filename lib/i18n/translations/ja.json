@@ -782,7 +782,14 @@
     "references_full": "参考画像は上限です（3枚まで）",
     "add": "追加",
     "new_chat": "新規",
-    "upload_failed": "アップロードに失敗しました"
+    "upload_failed": "アップロードに失敗しました",
+    "plan_title": "ストーリー要素を確認",
+    "plan_desc": "各要素に参考画像をアップロード（任意）してから生成します。",
+    "generate": "生成する",
+    "upload": "アップロード",
+    "replace": "変更",
+    "remove": "削除",
+    "skip_plan": "このまま生成"
   },
   "sidebar": {
     "creator_center": "クリエイターセンター",
