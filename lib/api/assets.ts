@@ -18,6 +18,13 @@ export interface Asset {
 }
 
 export const assets = {
+    /** 上传单张图片（multipart），返回 OSS URL。创作参考图、封面等共用。 */
+    uploadImage: async (file: File): Promise<{ url: string }> => {
+        const formData = new FormData();
+        formData.append('file', file);
+        return request('/api/upload/image', 'POST', formData);
+    },
+
     // List assets
     list: async (params?: {
         type?: string;

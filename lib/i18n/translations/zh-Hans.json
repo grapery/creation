@@ -739,7 +739,17 @@
     "target_storyboard": "故事板",
     "result_storyboard_title": "你的故事板已就绪",
     "scenes": "个场景",
-    "completed": "生成完成。"
+    "completed": "生成完成。",
+    "options": "选项",
+    "image_count": "图片数",
+    "scene_count": "场景数",
+    "style": "画风",
+    "style_default": "默认",
+    "references": "参考图",
+    "references_full": "参考图已达上限（3 张）",
+    "add": "添加",
+    "new_chat": "新会话",
+    "upload_failed": "上传失败"
   },
   "sidebar": {
     "creator_center": "创作中心",

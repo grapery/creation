@@ -739,7 +739,17 @@
     "target_storyboard": "ストーリーボード",
     "result_storyboard_title": "ストーリーボードが完成しました",
     "scenes": "シーン",
-    "completed": "生成が完了しました。"
+    "completed": "生成が完了しました。",
+    "options": "オプション",
+    "image_count": "画像数",
+    "scene_count": "シーン数",
+    "style": "スタイル",
+    "style_default": "デフォルト",
+    "references": "参考画像",
+    "references_full": "参考画像は上限です（3枚まで）",
+    "add": "追加",
+    "new_chat": "新規",
+    "upload_failed": "アップロードに失敗しました"
   },
   "sidebar": {
     "creator_center": "クリエイターセンター",

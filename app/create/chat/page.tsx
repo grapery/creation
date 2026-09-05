@@ -2,13 +2,17 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Send, Square, Sparkles, Loader2, Eye, UploadCloud, AlertCircle, Image as ImageIcon, Clapperboard } from "lucide-react";
+import { Send, Square, Sparkles, Loader2, Eye, UploadCloud, AlertCircle, Image as ImageIcon, Clapperboard, Settings2, Plus, X, RotateCcw } from "lucide-react";
 import { RequireAuth } from "@/components/auth/require-auth";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/providers/auth-provider";
 import { useTranslation } from "@/providers/language-provider";
 import { showError, showSuccess } from "@/lib/toast-utils";
 import { fragments } from "@/lib/api/fragments";
 import { storyboards } from "@/lib/api/storyboards";
+import { stories } from "@/lib/api/stories";
+import { assets } from "@/lib/api/assets";
+import { StyleConfig } from "@/lib/types";
 import {
     AgentCreationMessageRequest,
     AgentGenerationEventPayload,
@@ -28,10 +32,17 @@ type CreationResult =
     | { kind: "fragment"; fragmentId: string; content?: string; images: string[] }
     | { kind: "storyboard"; storyboardId: string; content?: string; images: string[]; sceneCount?: number };
 
+const MAX_REFERENCE_IMAGES = 3;
+const MAX_HISTORY_MESSAGES = 40;
+
 function uid(): string {
     return typeof crypto !== "undefined" && "randomUUID" in crypto
         ? crypto.randomUUID()
         : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+function historyKey(userId: string, target: CreationTarget): string {
+    return `grapery:create_chat:${userId}:${target}`;
 }
 
 function clampProgress(value: number | undefined): number {
@@ -51,6 +62,7 @@ export default function CreateChatPage() {
 
 function CreateChatContent() {
     const { t } = useTranslation();
+    const { user } = useAuth();
     const router = useRouter();
 
     const [target, setTarget] = useState<CreationTarget>("fragment");
@@ -62,30 +74,95 @@ function CreateChatContent() {
     const [isPublishing, setIsPublishing] = useState(false);
     const [published, setPublished] = useState(false);
 
+    // 创作选项
+    const [showOptions, setShowOptions] = useState(false);
+    const [imageCount, setImageCount] = useState(4);
+    const [sceneCount, setSceneCount] = useState(3);
+    const [styles, setStyles] = useState<StyleConfig[]>([]);
+    const [selectedStyle, setSelectedStyle] = useState<string>("");
+    const [referenceImages, setReferenceImages] = useState<string[]>([]);
+    const [isUploading, setIsUploading] = useState(false);
+
     const sessionIdRef = useRef<string>("");
     const draftRef = useRef<{ fragmentId: string; storyboardId: string }>({ fragmentId: "", storyboardId: "" });
     const abortRef = useRef<AbortController | null>(null);
     const bottomRef = useRef<HTMLDivElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const sessionId = useCallback((): string => {
         if (!sessionIdRef.current) sessionIdRef.current = `cs_${uid()}`;
         return sessionIdRef.current;
     }, []);
 
-    // 切换目标 = 开启新创作会话（草稿引用、历史与结果一并重置）
+    // ---- 会话历史持久化（localStorage，按用户 + 目标隔离）----
+    const userId = user?.id ?? "";
+
+    useEffect(() => {
+        if (!userId) return;
+        try {
+            const raw = localStorage.getItem(historyKey(userId, target));
+            if (!raw) return;
+            const saved = JSON.parse(raw) as { sessionId?: string; draftId?: string; messages?: ChatMessage[] };
+            if (saved.sessionId) sessionIdRef.current = saved.sessionId;
+            draftRef.current[target === "fragment" ? "fragmentId" : "storyboardId"] = saved.draftId || "";
+            if (saved.messages?.length) setMessages(saved.messages);
+        } catch {
+            // 损坏的历史直接忽略
+        }
+    }, [userId, target]);
+
+    useEffect(() => {
+        if (!userId) return;
+        const payload = JSON.stringify({
+            sessionId: sessionIdRef.current,
+            draftId: draftRef.current[target === "fragment" ? "fragmentId" : "storyboardId"],
+            messages: messages.slice(-MAX_HISTORY_MESSAGES),
+        });
+        try {
+            localStorage.setItem(historyKey(userId, target), payload);
+        } catch {
+            // 存储满等异常不打断创作
+        }
+    }, [userId, target, messages]);
+
+    const resetConversation = useCallback(() => {
+        draftRef.current = { fragmentId: "", storyboardId: "" };
+        sessionIdRef.current = "";
+        setMessages([]);
+        setResult(null);
+        setPublished(false);
+        setActivity(null);
+        setInput("");
+        if (userId) {
+            try {
+                localStorage.removeItem(historyKey(userId, target));
+            } catch {
+                // ignore
+            }
+        }
+    }, [userId, target]);
+
+    // 切换目标 = 开启新创作会话
     const switchTarget = useCallback((next: CreationTarget) => {
         setTarget((prev) => {
             if (prev === next) return prev;
-            draftRef.current = { fragmentId: "", storyboardId: "" };
-            sessionIdRef.current = "";
-            setMessages([]);
-            setResult(null);
-            setPublished(false);
-            setActivity(null);
-            setInput("");
+            resetConversation();
+            setReferenceImages([]);
+            setSelectedStyle("");
             return next;
         });
-    }, []);
+    }, [resetConversation]);
+
+    // 画风列表懒加载（首次展开选项面板时拉取）
+    const loadStyles = useCallback(async () => {
+        if (styles.length > 0) return;
+        try {
+            const res = await stories.getStyles(20, 0);
+            setStyles(res.styles || []);
+        } catch {
+            // 画风列表失败不阻断创作，仅禁用选择
+        }
+    }, [styles.length]);
 
     useEffect(() => () => abortRef.current?.abort(), []);
 
@@ -199,6 +276,30 @@ function CreateChatContent() {
         [push, t, target]
     );
 
+    const uploadReferences = useCallback(async (files: FileList | null) => {
+        if (!files || files.length === 0) return;
+        const room = MAX_REFERENCE_IMAGES - referenceImages.length;
+        if (room <= 0) {
+            showError(t("create_chat.references_full", "Reference images are full"));
+            return;
+        }
+        setIsUploading(true);
+        try {
+            const picked = Array.from(files).slice(0, room);
+            const urls: string[] = [];
+            for (const file of picked) {
+                const res = await assets.uploadImage(file);
+                if (res.url) urls.push(res.url);
+            }
+            if (urls.length > 0) setReferenceImages((prev) => [...prev, ...urls].slice(0, MAX_REFERENCE_IMAGES));
+        } catch (e) {
+            showError(t("create_chat.upload_failed", "Upload failed"), e instanceof Error ? e.message : undefined);
+        } finally {
+            setIsUploading(false);
+            if (fileInputRef.current) fileInputRef.current.value = "";
+        }
+    }, [referenceImages.length, t]);
+
     const send = useCallback(async () => {
         const text = input.trim();
         if (!text || isStreaming) return;
@@ -218,7 +319,7 @@ function CreateChatContent() {
                 agent: target,
                 operation: "generate",
                 sessionId: sessionId(),
-                ...(target === "fragment" ? { maxImages: 4 } : {}),
+                ...(target === "fragment" ? { maxImages: imageCount } : {}),
             });
 
             const draftId = target === "fragment" ? draftRef.current.fragmentId : draftRef.current.storyboardId;
@@ -239,8 +340,13 @@ function CreateChatContent() {
                           },
                 options:
                     target === "fragment"
-                        ? { imageCount: 4, consistencyLevel: "standard" }
-                        : { sceneCount: 3 },
+                        ? {
+                              imageCount,
+                              consistencyLevel: "standard",
+                              ...(selectedStyle ? { style: selectedStyle } : {}),
+                              ...(referenceImages.length > 0 ? { referenceImages } : {}),
+                          }
+                        : { sceneCount },
             };
 
             for await (const ev of streamCreationMessage(sessionId(), token.agentAccessToken, body, controller.signal)) {
@@ -256,7 +362,7 @@ function CreateChatContent() {
             setActivity(null);
             abortRef.current = null;
         }
-    }, [input, isStreaming, push, handleEvent, sessionId, t, target]);
+    }, [input, isStreaming, push, handleEvent, sessionId, t, target, imageCount, sceneCount, selectedStyle, referenceImages]);
 
     const stop = useCallback(() => {
         abortRef.current?.abort();
@@ -293,41 +399,184 @@ function CreateChatContent() {
     return (
         <div className="max-w-3xl mx-auto flex flex-col min-h-[70vh]">
             {/* Header */}
-            <div className="pb-3">
-                <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-                    <Sparkles className="h-6 w-6 text-primary" />
-                    {t("create_chat.title", "AI Create")}
-                </h2>
-                <p className="text-muted-foreground text-sm mt-1">
-                    {t("create_chat.subtitle", "Describe your idea — the assistant drafts an illustrated fragment with you.")}
-                </p>
+            <div className="pb-3 flex items-start justify-between gap-2">
+                <div>
+                    <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+                        <Sparkles className="h-6 w-6 text-primary" />
+                        {t("create_chat.title", "AI Create")}
+                    </h2>
+                    <p className="text-muted-foreground text-sm mt-1">
+                        {t("create_chat.subtitle", "Describe your idea — the assistant drafts an illustrated fragment with you.")}
+                    </p>
+                </div>
+                {messages.length > 0 && (
+                    <Button variant="ghost" size="sm" onClick={resetConversation} disabled={isStreaming} className="shrink-0">
+                        <RotateCcw className="h-4 w-4" />
+                        {t("create_chat.new_chat", "New")}
+                    </Button>
+                )}
             </div>
 
-            {/* Target switcher */}
-            <div className="flex gap-1 p-1 rounded-xl border border-border bg-card w-fit mb-2">
+            {/* Target switcher + options toggle */}
+            <div className="flex items-center justify-between gap-2 mb-2">
+                <div className="flex gap-1 p-1 rounded-xl border border-border bg-card w-fit">
+                    <button
+                        type="button"
+                        onClick={() => switchTarget("fragment")}
+                        disabled={isStreaming}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${
+                            target === "fragment" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                        }`}
+                    >
+                        <ImageIcon className="h-4 w-4" />
+                        {t("create_chat.target_fragment", "Fragment")}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => switchTarget("storyboard")}
+                        disabled={isStreaming}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${
+                            target === "storyboard" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                        }`}
+                    >
+                        <Clapperboard className="h-4 w-4" />
+                        {t("create_chat.target_storyboard", "Storyboard")}
+                    </button>
+                </div>
                 <button
                     type="button"
-                    onClick={() => switchTarget("fragment")}
-                    disabled={isStreaming}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${
-                        target === "fragment" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                    onClick={() => {
+                        setShowOptions((v) => !v);
+                        void loadStyles();
+                    }}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm border transition-colors ${
+                        showOptions ? "border-primary text-primary" : "border-border text-muted-foreground hover:text-foreground"
                     }`}
                 >
-                    <ImageIcon className="h-4 w-4" />
-                    {t("create_chat.target_fragment", "Fragment")}
-                </button>
-                <button
-                    type="button"
-                    onClick={() => switchTarget("storyboard")}
-                    disabled={isStreaming}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${
-                        target === "storyboard" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-                    }`}
-                >
-                    <Clapperboard className="h-4 w-4" />
-                    {t("create_chat.target_storyboard", "Storyboard")}
+                    <Settings2 className="h-4 w-4" />
+                    {t("create_chat.options", "Options")}
                 </button>
             </div>
+
+            {/* Options panel */}
+            {showOptions && (
+                <div className="rounded-xl border border-border bg-card p-4 space-y-4 mb-2">
+                    {target === "fragment" ? (
+                        <>
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm font-medium">{t("create_chat.image_count", "Images")}</span>
+                                <div className="flex items-center gap-2">
+                                    <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => setImageCount((v) => Math.max(1, v - 1))} disabled={imageCount <= 1}>
+                                        <Plus className="h-3.5 w-3.5 rotate-45" />
+                                    </Button>
+                                    <span className="w-6 text-center text-sm font-semibold">{imageCount}</span>
+                                    <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => setImageCount((v) => Math.min(4, v + 1))} disabled={imageCount >= 4}>
+                                        <Plus className="h-3.5 w-3.5" />
+                                    </Button>
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <span className="text-sm font-medium">{t("create_chat.style", "Style")}</span>
+                                <div className="flex gap-2 overflow-x-auto pb-1">
+                                    <button
+                                        type="button"
+                                        onClick={() => setSelectedStyle("")}
+                                        className={`shrink-0 px-3 py-1.5 rounded-lg border text-xs transition-colors ${
+                                            !selectedStyle ? "border-primary text-primary bg-primary/5" : "border-border text-muted-foreground hover:text-foreground"
+                                        }`}
+                                    >
+                                        {t("create_chat.style_default", "Default")}
+                                    </button>
+                                    {styles.map((s) => (
+                                        <button
+                                            key={s.id}
+                                            type="button"
+                                            onClick={() => setSelectedStyle(s.style || s.name)}
+                                            className={`shrink-0 flex items-center gap-1.5 pl-1 pr-2.5 py-1 rounded-lg border text-xs transition-colors ${
+                                                selectedStyle === (s.style || s.name)
+                                                    ? "border-primary text-primary bg-primary/5"
+                                                    : "border-border text-muted-foreground hover:text-foreground"
+                                            }`}
+                                        >
+                                            {s.preview_image ? (
+                                                // eslint-disable-next-line @next/next/no-img-element
+                                                <img src={s.preview_image} alt={s.name} className="h-6 w-6 rounded object-cover" />
+                                            ) : (
+                                                <span className="h-6 w-6 rounded bg-muted" />
+                                            )}
+                                            <span className="max-w-24 truncate">{s.name}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm font-medium">{t("create_chat.references", "Reference images")}</span>
+                                    <span className="text-xs text-muted-foreground">
+                                        {referenceImages.length}/{MAX_REFERENCE_IMAGES}
+                                    </span>
+                                </div>
+                                <div className="flex gap-2 flex-wrap">
+                                    {referenceImages.map((url, i) => (
+                                        <div key={url} className="relative group">
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                            <img src={url} alt={`reference ${i + 1}`} className="h-16 w-16 rounded-lg object-cover border border-border" />
+                                            <button
+                                                type="button"
+                                                onClick={() => setReferenceImages((prev) => prev.filter((u) => u !== url))}
+                                                className="absolute -top-1.5 -right-1.5 rounded-full bg-destructive text-white p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                aria-label="Remove"
+                                            >
+                                                <X className="h-3 w-3" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                    {referenceImages.length < MAX_REFERENCE_IMAGES && (
+                                        <button
+                                            type="button"
+                                            onClick={() => fileInputRef.current?.click()}
+                                            disabled={isUploading}
+                                            className="h-16 w-16 rounded-lg border-2 border-dashed border-border flex flex-col items-center justify-center text-muted-foreground hover:border-primary/50 transition-colors disabled:opacity-50"
+                                        >
+                                            {isUploading ? (
+                                                <Loader2 className="h-4 w-4 animate-spin" />
+                                            ) : (
+                                                <>
+                                                    <Plus className="h-4 w-4" />
+                                                    <span className="text-[10px] mt-0.5">{t("create_chat.add", "Add")}</span>
+                                                </>
+                                            )}
+                                        </button>
+                                    )}
+                                </div>
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    multiple
+                                    className="hidden"
+                                    onChange={(e) => void uploadReferences(e.target.files)}
+                                />
+                            </div>
+                        </>
+                    ) : (
+                        <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium">{t("create_chat.scene_count", "Scenes")}</span>
+                            <div className="flex items-center gap-2">
+                                <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => setSceneCount((v) => Math.max(1, v - 1))} disabled={sceneCount <= 1}>
+                                    <Plus className="h-3.5 w-3.5 rotate-45" />
+                                </Button>
+                                <span className="w-6 text-center text-sm font-semibold">{sceneCount}</span>
+                                <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => setSceneCount((v) => Math.min(8, v + 1))} disabled={sceneCount >= 8}>
+                                    <Plus className="h-3.5 w-3.5" />
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
 
             {/* Messages */}
             <div className="flex-1 space-y-3 py-2">
@@ -448,6 +697,14 @@ function CreateChatContent() {
 
             {/* Input */}
             <div className="sticky bottom-0 pt-2 pb-4 bg-background">
+                {referenceImages.length > 0 && target === "fragment" && !showOptions && (
+                    <div className="flex gap-1.5 mb-2">
+                        {referenceImages.map((url) => (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img key={url} src={url} alt="reference" className="h-9 w-9 rounded-md object-cover border border-border" />
+                        ))}
+                    </div>
+                )}
                 <div className="flex items-end gap-2">
                     <textarea
                         value={input}

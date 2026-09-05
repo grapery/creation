@@ -739,7 +739,17 @@
     "target_storyboard": "Storyboard",
     "result_storyboard_title": "Your storyboard is ready",
     "scenes": "scenes",
-    "completed": "Generation completed."
+    "completed": "Generation completed.",
+    "options": "Options",
+    "image_count": "Images",
+    "scene_count": "Scenes",
+    "style": "Style",
+    "style_default": "Default",
+    "references": "Reference images",
+    "references_full": "Reference images are full (max 3)",
+    "add": "Add",
+    "new_chat": "New",
+    "upload_failed": "Upload failed"
   },
   "sidebar": {
     "creator_center": "Creator Center",
