@@ -164,7 +164,7 @@ export default function ProfileHeader({
                                 {user.followingCount || user.following || 0}
                             </span>
                             <span className="text-muted-foreground group-hover:text-muted-foreground/80">
-                                following
+                                {t("common.following_label")}
                             </span>
                         </div>
                         <div className="flex items-center gap-1.5 group cursor-pointer hover:text-foreground transition-colors">
@@ -172,7 +172,7 @@ export default function ProfileHeader({
                                 {user.followerCount || user.followers || 0}
                             </span>
                             <span className="text-muted-foreground group-hover:text-muted-foreground/80">
-                                followers
+                                {t("common.followers_label")}
                             </span>
                         </div>
                         <div className="flex items-center gap-1.5 group cursor-pointer hover:text-foreground transition-colors">
@@ -180,7 +180,7 @@ export default function ProfileHeader({
                                 {likesCount}
                             </span>
                             <span className="text-muted-foreground group-hover:text-muted-foreground/80">
-                                likes
+                                {t("common.likes_label")}
                             </span>
                         </div>
                     </div>

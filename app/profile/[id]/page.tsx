@@ -230,11 +230,12 @@ export default function ProfilePage() {
 }
 
 function OverviewTabContent() {
+    const { t } = useTranslation();
     return (
         <div className="py-4">
             <Card>
                 <CardContent className="p-6 text-center text-muted-foreground text-sm">
-                    Use the tabs above to browse stories, storyboards, and characters.
+                    {t("common.tabs_hint")}
                 </CardContent>
             </Card>
         </div>
