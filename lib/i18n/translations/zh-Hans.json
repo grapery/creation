@@ -1058,5 +1058,18 @@
     "no_storyboards": "这个故事还没有可阅读的故事板",
     "load_failed": "阅读器加载失败",
     "back_to_story": "返回故事"
+  },
+  "security": {
+    "security_title": "安全",
+    "security_subtitle": "密码与账号注销设置。",
+    "change_password": "修改密码",
+    "change_password_desc": "更新你的账号密码",
+    "current_password": "当前密码",
+    "new_password": "新密码",
+    "confirm_new_password": "确认新密码",
+    "delete_account": "注销账号",
+    "delete_account_desc": "需要绑定手机号。确认后将有一段宽限期，之后正式删除。",
+    "resend_sms": "重新发送短信验证码",
+    "send_sms": "发送短信验证码"
   }
 }

@@ -1058,5 +1058,18 @@
     "no_storyboards": "読めるストーリーボードはまだありません",
     "load_failed": "リーダーの読み込みに失敗しました",
     "back_to_story": "ストーリーに戻る"
+  },
+  "security": {
+    "security_title": "セキュリティ",
+    "security_subtitle": "パスワードとアカウント削除の設定。",
+    "change_password": "パスワード変更",
+    "change_password_desc": "アカウントのパスワードを更新します",
+    "current_password": "現在のパスワード",
+    "new_password": "新しいパスワード",
+    "confirm_new_password": "新しいパスワード（確認）",
+    "delete_account": "アカウント削除",
+    "delete_account_desc": "電話番号の連携が必要です。確認後、完全削除まで猶予期間があります。",
+    "resend_sms": "SMSコードを再送",
+    "send_sms": "SMS認証コードを送信"
   }
 }

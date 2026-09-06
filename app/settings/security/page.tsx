@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import { useTranslation } from "@/providers/language-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +13,7 @@ import { showError, showSuccess } from "@/lib/toast-utils";
 import { errorMessage } from "@/lib/utils";
 
 export default function SecuritySettingsPage() {
+    const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState("");
@@ -134,17 +136,17 @@ export default function SecuritySettingsPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-2xl font-bold tracking-tight">Security</h2>
-                <p className="text-muted-foreground">Password and account deletion controls.</p>
+                <h2 className="text-2xl font-bold tracking-tight">{t("security.security_title")}</h2>
+                <p className="text-muted-foreground">{t("security.security_subtitle")}</p>
             </div>
 
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-base">
                         <Lock className="h-5 w-5" />
-                        Change Password
+                        {t("security.change_password")}
                     </CardTitle>
-                    <CardDescription>Update your account password</CardDescription>
+                    <CardDescription>{t("security.change_password_desc")}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     {success && (
@@ -160,7 +162,7 @@ export default function SecuritySettingsPage() {
                     )}
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="old-password">Current Password</Label>
+                            <Label htmlFor="old-password">{t("security.current_password")}</Label>
                             <Input
                                 id="old-password"
                                 type="password"
@@ -170,7 +172,7 @@ export default function SecuritySettingsPage() {
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="new-password">New Password</Label>
+                            <Label htmlFor="new-password">{t("security.new_password")}</Label>
                             <Input
                                 id="new-password"
                                 type="password"
@@ -181,7 +183,7 @@ export default function SecuritySettingsPage() {
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="confirm-password">Confirm New Password</Label>
+                            <Label htmlFor="confirm-password">{t("security.confirm_new_password")}</Label>
                             <Input
                                 id="confirm-password"
                                 type="password"
@@ -192,7 +194,7 @@ export default function SecuritySettingsPage() {
                         </div>
                         <Button type="submit" disabled={loading}>
                             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Change Password
+                            {t("security.change_password")}
                         </Button>
                     </form>
                 </CardContent>
@@ -202,11 +204,10 @@ export default function SecuritySettingsPage() {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-base text-destructive">
                         <Trash2 className="h-5 w-5" />
-                        Delete account
+                        {t("security.delete_account")}
                     </CardTitle>
                     <CardDescription>
-                        Requires a bound phone. After confirmation there is a grace period before permanent
-                        deletion.
+                        {t("security.delete_account_desc")}
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -234,7 +235,7 @@ export default function SecuritySettingsPage() {
                                         disabled={deletionBusy}
                                     >
                                         {deletionBusy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                        {smsSent ? "Resend SMS code" : "Send SMS verification"}
+                                        {smsSent ? t("security.resend_sms") : t("security.send_sms")}
                                     </Button>
                                     {smsSent && (
                                         <div className="flex gap-2">
