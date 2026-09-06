@@ -1,6 +1,7 @@
 "use client";
 
 import "next/link";
+import { useTranslation } from "@/providers/language-provider";
 import Image from "next/image";
 import { User } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -31,6 +32,7 @@ export default function ProfileHeader({
     onFollow,
     onMessage,
 }: ProfileHeaderProps) {
+    const { t } = useTranslation();
     const formatJoinedDate = (timestamp?: number) => {
         if (!timestamp) return "";
         const date = new Date(timestamp * 1000);
@@ -86,7 +88,7 @@ export default function ProfileHeader({
                                     className="gap-2"
                                 >
                                     <Edit className="w-4 h-4" />
-                                    <span className="hidden sm:inline">Edit Profile</span>
+                                    <span className="hidden sm:inline">{t("common.edit_profile")}</span>
                                 </Button>
                                 <Button
                                     size="sm"
@@ -95,7 +97,7 @@ export default function ProfileHeader({
                                     className="gap-2"
                                 >
                                     <Share2 className="w-4 h-4" />
-                                    <span className="hidden sm:inline">Share</span>
+                                    <span className="hidden sm:inline">{t("common.share")}</span>
                                 </Button>
                             </>
                         ) : (
@@ -143,7 +145,7 @@ export default function ProfileHeader({
                         {user.createdAt && (
                             <>
                                 <span className="text-muted-foreground/50">·</span>
-                                <span>Joined {formatJoinedDate(user.createdAt)}</span>
+                                <span>{t("common.joined")} {formatJoinedDate(user.createdAt)}</span>
                             </>
                         )}
                     </div>

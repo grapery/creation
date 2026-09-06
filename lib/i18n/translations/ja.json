@@ -92,7 +92,14 @@
     "read": "読む",
     "continue": "続ける",
     "payment_history": "支払い履歴",
-    "finish": "完了"
+    "finish": "完了",
+    "joined": "登録日",
+    "following_label": "フォロー中",
+    "followers_label": "フォロワー",
+    "likes_label": "いいね",
+    "edit_profile": "プロフィール編集",
+    "share": "シェア",
+    "tabs_hint": "上のタブでストーリー・ストーリーボード・キャラクターを表示できます。"
   },
   "auth": {
     "sign_in": "ログイン",
@@ -367,7 +374,10 @@
     "no_data": "データなし",
     "no_data_for_month": "今月のデータはありません",
     "activities_count": "{count} 件のアクティビティ",
-    "follow": "フォロー"
+    "follow": "フォロー",
+    "activity": "アクティビティ",
+    "drafts": "下書き",
+    "bookmarks": "ブックマーク"
   },
   "notifications": {
     "mark_all_read": "すべて既読にする",

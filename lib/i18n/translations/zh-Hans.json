@@ -92,7 +92,14 @@
     "read": "阅读",
     "continue": "继续",
     "payment_history": "支付记录",
-    "finish": "完成"
+    "finish": "完成",
+    "joined": "加入于",
+    "following_label": "关注中",
+    "followers_label": "粉丝",
+    "likes_label": "获赞",
+    "edit_profile": "编辑资料",
+    "share": "分享",
+    "tabs_hint": "使用上方标签浏览故事、故事板与角色。"
   },
   "auth": {
     "sign_in": "登录",
@@ -420,7 +427,10 @@
     "no_data": "暂无数据",
     "no_data_for_month": "本月暂无数据",
     "activities_count": "{count} 条动态",
-    "follow": "关注"
+    "follow": "关注",
+    "activity": "动态",
+    "drafts": "草稿",
+    "bookmarks": "收藏"
   },
   "notifications": {
     "mark_all_read": "全部标为已读",

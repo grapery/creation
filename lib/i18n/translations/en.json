@@ -92,7 +92,14 @@
     "read": "Read",
     "continue": "Continue",
     "payment_history": "Payment History",
-    "finish": "Finish"
+    "finish": "Finish",
+    "joined": "Joined",
+    "following_label": "following",
+    "followers_label": "followers",
+    "likes_label": "likes",
+    "edit_profile": "Edit Profile",
+    "share": "Share",
+    "tabs_hint": "Use the tabs above to browse stories, storyboards, and characters."
   },
   "auth": {
     "sign_in": "Sign In",
@@ -420,7 +427,10 @@
     "no_data": "No data",
     "no_data_for_month": "No data for this month",
     "activities_count": "{count} activities",
-    "follow": "Follow"
+    "follow": "Follow",
+    "activity": "Activity",
+    "drafts": "Drafts",
+    "bookmarks": "Bookmarks"
   },
   "notifications": {
     "mark_all_read": "Mark all read",
