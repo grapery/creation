@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useTranslation } from "@/providers/language-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,14 +11,16 @@ import { feedback } from "@/lib/api/feedback";
 import type { FeedbackCategory } from "@/lib/types";
 import { Textarea } from "@/components/ui/textarea";
 
-const categories: { value: FeedbackCategory; label: string }[] = [
-    { value: "bug", label: "Bug Report" },
-    { value: "feature", label: "Feature Request" },
-    { value: "improvement", label: "Improvement" },
-    { value: "other", label: "Other" },
-];
+const categoryLabelKeys: Record<FeedbackCategory, string> = {
+    bug: "feedback_page.cat_bug",
+    feature: "feedback_page.cat_feature",
+    improvement: "feedback_page.cat_improvement",
+    other: "feedback_page.cat_other",
+};
 
 export default function FeedbackPage() {
+    const { t } = useTranslation();
+    const categories = (Object.keys(categoryLabelKeys) as FeedbackCategory[]).map((value) => ({ value, label: t(categoryLabelKeys[value]) }));
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const [category, setCategory] = useState<FeedbackCategory>("other");
@@ -45,9 +48,9 @@ export default function FeedbackPage() {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <MessageSquare className="h-5 w-5" />
-                        Send Feedback
+                        {t("feedback_page.title")}
                     </CardTitle>
-                    <CardDescription>Help us improve your experience</CardDescription>
+                    <CardDescription>{t("feedback_page.subtitle")}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     {success && (
@@ -58,7 +61,7 @@ export default function FeedbackPage() {
                     )}
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="space-y-2">
-                            <Label>Category</Label>
+                            <Label>{t("feedback_page.category")}</Label>
                             <div className="flex gap-2 flex-wrap">
                                 {categories.map((cat) => (
                                     <Button
@@ -74,28 +77,28 @@ export default function FeedbackPage() {
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="content">Your Feedback</Label>
+                            <Label htmlFor="content">{t("feedback_page.your_feedback")}</Label>
                             <Textarea
                                 id="content"
                                 value={content}
                                 onChange={(e) => setContent(e.target.value)}
-                                placeholder="Tell us what you think..."
+                                placeholder={t("feedback_page.tell_us")}
                                 className="min-h-[120px]"
                                 required
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="contact">Contact Info (optional)</Label>
+                            <Label htmlFor="contact">{t("feedback_page.contact_info")}</Label>
                             <Input
                                 id="contact"
                                 value={contactInfo}
                                 onChange={(e) => setContactInfo(e.target.value)}
-                                placeholder="Email or other contact method"
+                                placeholder={t("feedback_page.contact_placeholder")}
                             />
                         </div>
                         <Button type="submit" className="w-full" disabled={loading || !content.trim()}>
                             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Submit Feedback
+                            {t("feedback_page.submit")}
                         </Button>
                     </form>
                 </CardContent>

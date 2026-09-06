@@ -1106,5 +1106,19 @@
     "active": "アクティブ",
     "points_earned": "獲得ポイント",
     "copied": "コピーしました！"
+  },
+  "feedback_page": {
+    "title": "フィードバック送信",
+    "subtitle": "体験改善にご協力ください",
+    "category": "カテゴリー",
+    "cat_bug": "バグ報告",
+    "cat_feature": "機能リクエスト",
+    "cat_improvement": "改善提案",
+    "cat_other": "その他",
+    "your_feedback": "フィードバック",
+    "tell_us": "ご意見をお聞かせください…",
+    "contact_info": "連絡先（任意）",
+    "contact_placeholder": "メールやその他の連絡先",
+    "submit": "送信"
   }
 }

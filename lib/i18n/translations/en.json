@@ -1106,5 +1106,19 @@
     "active": "Active",
     "points_earned": "Points Earned",
     "copied": "Copied!"
+  },
+  "feedback_page": {
+    "title": "Send Feedback",
+    "subtitle": "Help us improve your experience",
+    "category": "Category",
+    "cat_bug": "Bug Report",
+    "cat_feature": "Feature Request",
+    "cat_improvement": "Improvement",
+    "cat_other": "Other",
+    "your_feedback": "Your Feedback",
+    "tell_us": "Tell us what you think...",
+    "contact_info": "Contact Info (optional)",
+    "contact_placeholder": "Email or other contact method",
+    "submit": "Submit Feedback"
   }
 }

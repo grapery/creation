@@ -1106,5 +1106,19 @@
     "active": "活跃",
     "points_earned": "已获积分",
     "copied": "已复制！"
+  },
+  "feedback_page": {
+    "title": "提交反馈",
+    "subtitle": "帮助我们改进你的体验",
+    "category": "类别",
+    "cat_bug": "问题反馈",
+    "cat_feature": "功能建议",
+    "cat_improvement": "体验优化",
+    "cat_other": "其他",
+    "your_feedback": "反馈内容",
+    "tell_us": "说说你的想法…",
+    "contact_info": "联系方式（可选）",
+    "contact_placeholder": "邮箱或其他联系方式",
+    "submit": "提交反馈"
   }
 }
