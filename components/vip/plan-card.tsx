@@ -77,7 +77,7 @@ export function PlanCard({ plan, isCurrent, onSubscribe, loading }: PlanCardProp
                     {plan.features.map((feature, i) => (
                         <li key={i} className="flex items-center gap-2 text-sm">
                             <Check className="h-4 w-4 text-green-500 shrink-0" />
-                            <span>{t(`common.vip.features.${feature}`, feature)}</span>
+                            <span>{t(`common.vip.features.${feature.replace(/^membership_feature_/, '')}`, feature.replace(/^membership_feature_/, ''))}</span>
                         </li>
                     ))}
                 </ul>

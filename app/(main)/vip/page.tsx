@@ -81,7 +81,7 @@ export default function VIPPage() {
                                 : "bg-muted text-muted-foreground hover:text-foreground"
                         }`}
                     >
-                        Monthly
+                        {t("common.vip.monthly")}
                     </button>
                     <button
                         onClick={() => setBillingCycle("yearly")}
@@ -91,8 +91,8 @@ export default function VIPPage() {
                                 : "bg-muted text-muted-foreground hover:text-foreground"
                         }`}
                     >
-                        Yearly
-                        <span className="ml-1.5 text-xs text-green-600 font-bold">Save 58%</span>
+                        {t("common.vip.yearly")}
+                        <span className="ml-1.5 text-xs text-green-600 font-bold">{t("common.vip.save_percent", { percent: "58%" })}</span>
                     </button>
                 </div>
             </div>

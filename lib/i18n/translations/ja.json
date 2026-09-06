@@ -41,8 +41,20 @@
         "unlimited_ai": "無制限のAI生成",
         "unlimited_roles": "無制限のキャラクター",
         "ultra_export": "ウルトラ高品質エクスポート",
-        "vip_support": "VIPサポート"
-      }
+        "vip_support": "VIPサポート",
+        "basic_credits": "毎月たっぷりAIポイント",
+        "premium_credits": "プレミアム毎月AIポイント",
+        "export_local": "ローカル品質エクスポート",
+        "share_unlimited": "無制限シェア",
+        "keep_forever": "作品を永久に保存",
+        "latest_models": "最新AIモデルを利用",
+        "basic_serial_creation": "連載ストーリー作成",
+        "premium_parallel_creation": "並行ストーリー作成",
+        "premium_higher_priority": "高い生成優先度"
+      },
+      "monthly": "月払い",
+      "yearly": "年払い",
+      "save_percent": "{percent}お得"
     },
     "error": "エラー",
     "success": "成功",

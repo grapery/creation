@@ -41,8 +41,20 @@
         "unlimited_ai": "无限 AI 生成",
         "unlimited_roles": "无限角色",
         "ultra_export": "超高质量导出",
-        "vip_support": "VIP 支持"
-      }
+        "vip_support": "VIP 支持",
+        "basic_credits": "每月充足 AI 创作点数",
+        "premium_credits": "高级档每月 AI 创作点数",
+        "export_local": "本地质量导出",
+        "share_unlimited": "无限分享",
+        "keep_forever": "作品永久保存",
+        "latest_models": "使用最新 AI 模型",
+        "basic_serial_creation": "连载故事创作",
+        "premium_parallel_creation": "并行故事创作",
+        "premium_higher_priority": "更高生成优先级"
+      },
+      "monthly": "按月",
+      "yearly": "按年",
+      "save_percent": "省 {percent}"
     },
     "error": "错误",
     "success": "成功",

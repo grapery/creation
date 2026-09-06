@@ -41,8 +41,20 @@
         "unlimited_ai": "Unlimited AI generations",
         "unlimited_roles": "Unlimited characters",
         "ultra_export": "Ultra quality export",
-        "vip_support": "VIP support"
-      }
+        "vip_support": "VIP support",
+        "basic_credits": "Generous monthly AI credits",
+        "premium_credits": "Premium monthly AI credits",
+        "export_local": "Local quality export",
+        "share_unlimited": "Unlimited sharing",
+        "keep_forever": "Keep your works forever",
+        "latest_models": "Access to latest AI models",
+        "basic_serial_creation": "Serial story creation",
+        "premium_parallel_creation": "Parallel story creation",
+        "premium_higher_priority": "Higher generation priority"
+      },
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "save_percent": "Save {percent}"
     },
     "error": "Error",
     "success": "Success",
