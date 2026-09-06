@@ -1076,5 +1076,13 @@
     "delete_account_desc": "電話番号の連携が必要です。確認後、完全削除まで猶予期間があります。",
     "resend_sms": "SMSコードを再送",
     "send_sms": "SMS認証コードを送信"
+  },
+  "usage_settings": {
+    "usage_title": "Token使用量",
+    "usage_overall": "合計使用量（{period}）",
+    "usage_this_month": "今月",
+    "tokens_used": "{count}ポイント使用",
+    "limit": "上限 {count}",
+    "unlimited": "無制限"
   }
 }

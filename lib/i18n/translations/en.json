@@ -1076,5 +1076,13 @@
     "delete_account_desc": "Requires a bound phone. After confirmation there is a grace period before permanent deletion.",
     "resend_sms": "Resend SMS code",
     "send_sms": "Send SMS verification"
+  },
+  "usage_settings": {
+    "usage_title": "Token Usage",
+    "usage_overall": "Overall Usage ({period})",
+    "usage_this_month": "This Month",
+    "tokens_used": "{count} tokens used",
+    "limit": "{count} limit",
+    "unlimited": "Unlimited"
   }
 }

@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "@/providers/language-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, BarChart3, Zap } from "lucide-react";
 import { tokenUsage } from "@/lib/api/token-usage";
 import type { TokenUsageStats } from "@/lib/types";
 
 export default function UsagePage() {
+    const { t } = useTranslation();
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState<TokenUsageStats | null>(null);
 
@@ -36,22 +38,24 @@ export default function UsagePage() {
         <div className="max-w-2xl mx-auto space-y-6">
             <div className="flex items-center gap-2">
                 <BarChart3 className="h-6 w-6" />
-                <h1 className="text-2xl font-bold">Token Usage</h1>
+                <h1 className="text-2xl font-bold">{t("usage_settings.usage_title")}</h1>
             </div>
 
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-base">
                         <Zap className="h-4 w-4" />
-                        Overall Usage ({stats?.period || "This Month"})
+                        {t("usage_settings.usage_overall", { period: stats?.period || t("usage_settings.usage_this_month") })}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-2">
                         <div className="flex justify-between text-sm">
-                            <span>{stats?.totalUsed.toLocaleString() || 0} tokens used</span>
+                            <span>{t("usage_settings.tokens_used", { count: (stats?.totalUsed ?? 0).toLocaleString() })}</span>
                             <span className="text-muted-foreground">
-                                {stats?.totalLimit === -1 ? "Unlimited" : `${stats?.totalLimit.toLocaleString()} limit`}
+                                {stats?.totalLimit == null || stats?.totalLimit === -1
+                                    ? t("usage_settings.unlimited")
+                                    : t("usage_settings.limit", { count: stats.totalLimit.toLocaleString() })}
                             </span>
                         </div>
                         {stats && stats.totalLimit > 0 && (

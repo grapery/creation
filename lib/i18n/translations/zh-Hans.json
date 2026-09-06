@@ -1076,5 +1076,13 @@
     "delete_account_desc": "需要绑定手机号。确认后将有一段宽限期，之后正式删除。",
     "resend_sms": "重新发送短信验证码",
     "send_sms": "发送短信验证码"
+  },
+  "usage_settings": {
+    "usage_title": "Token 用量",
+    "usage_overall": "总用量（{period}）",
+    "usage_this_month": "本月",
+    "tokens_used": "已使用 {count} 点数",
+    "limit": "上限 {count}",
+    "unlimited": "无上限"
   }
 }

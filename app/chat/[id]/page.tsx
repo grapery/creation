@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useTranslation } from "@/providers/language-provider";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { chat, ChatMessage, ChatSession } from "@/lib/api/chat";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -10,6 +11,7 @@ import { Loader2, ArrowLeft, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function ChatConversationPage() {
+    const { t } = useTranslation();
     const { id } = useParams();
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -181,7 +183,7 @@ export default function ChatConversationPage() {
                 <Input
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    placeholder="Type a message…"
+                    placeholder={t("chat.type_message", "Type a message…")}
                     disabled={sending || !sessionId}
                 />
                 <Button type="submit" size="icon" disabled={sending || !input.trim() || !sessionId}>
