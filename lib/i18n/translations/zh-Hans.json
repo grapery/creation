@@ -990,9 +990,9 @@
     "channels": "通知渠道",
     "channels_desc": "选择接收通知的方式",
     "email": "邮件通知",
-    "email_desc": "通过邮件接收通知",
+    "email_desc": "邮件摘要与提醒",
     "push": "推送通知",
-    "push_desc": "在浏览器中接收推送通知",
+    "push_desc": "移动端推送（iOS 应用）",
     "activity": "活动通知",
     "activity_desc": "当有人在您的内容上进行互动时通知您",
     "likes": "点赞通知",
@@ -1012,7 +1012,12 @@
     "marketing_email": "营销邮件",
     "marketing_email_desc": "接收功能更新、优惠活动等邮件",
     "cancel": "取消",
-    "save": "保存设置"
+    "save": "保存设置",
+    "in_app": "站内通知",
+    "in_app_desc": "通知中心与实时推送",
+    "direct_messages": "私信通知",
+    "email_marketing": "邮件营销",
+    "push_marketing": "推送营销"
   },
   "profile_settings": {
     "title": "个人资料设置",

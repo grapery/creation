@@ -990,9 +990,9 @@
     "channels": "通知チャンネル",
     "channels_desc": "通知の受け取り方法を選択",
     "email": "メール通知",
-    "email_desc": "メールで通知を受け取る",
+    "email_desc": "メールダイジェストと通知",
     "push": "プッシュ通知",
-    "push_desc": "ブラウザでプッシュ通知を受け取る",
+    "push_desc": "モバイルプッシュ（iOSアプリ）",
     "activity": "アクティビティ通知",
     "activity_desc": "コンテンツにインタラクションがあった時にお知らせ",
     "likes": "いいね通知",
@@ -1012,7 +1012,12 @@
     "marketing_email": "マーケティングメール",
     "marketing_email_desc": "機能アップデート、お得な情報などをお届け",
     "cancel": "キャンセル",
-    "save": "設定を保存"
+    "save": "設定を保存",
+    "in_app": "アプリ内通知",
+    "in_app_desc": "通知センターとリアルタイム配信",
+    "direct_messages": "ダイレクトメッセージ",
+    "email_marketing": "メールマーケティング",
+    "push_marketing": "プッシュマーケティング"
   },
   "profile_settings": {
     "title": "プロフィール設定",

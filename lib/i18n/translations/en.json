@@ -990,9 +990,9 @@
     "channels": "Notification Channels",
     "channels_desc": "Choose how to receive notifications",
     "email": "Email Notifications",
-    "email_desc": "Receive notifications via email",
+    "email_desc": "Email digests and alerts",
     "push": "Push Notifications",
-    "push_desc": "Receive push notifications in browser",
+    "push_desc": "Mobile push (iOS app)",
     "activity": "Activity Notifications",
     "activity_desc": "Notify when someone interacts with your content",
     "likes": "Like Notifications",
@@ -1012,7 +1012,12 @@
     "marketing_email": "Marketing Emails",
     "marketing_email_desc": "Receive feature updates, offers, etc.",
     "cancel": "Cancel",
-    "save": "Save Settings"
+    "save": "Save Settings",
+    "in_app": "In-app",
+    "in_app_desc": "Notification center & SSE",
+    "direct_messages": "Direct messages",
+    "email_marketing": "Email marketing",
+    "push_marketing": "Push marketing"
   },
   "profile_settings": {
     "title": "Profile Settings",

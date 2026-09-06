@@ -94,21 +94,21 @@ export default function NotificationSettingsPage() {
                     <Row
                         icon={<Mail className="h-5 w-5 text-primary" />}
                         title={t("notification_settings.email", "Email")}
-                        desc="Email digests and alerts"
+                        desc={t("notification_settings.email_desc")}
                         checked={prefs.email.enabled}
                         onChange={(v) => patchEmail("enabled", v)}
                     />
                     <Row
                         icon={<MessageSquare className="h-5 w-5 text-primary" />}
                         title={t("notification_settings.push", "Push")}
-                        desc="Mobile push (iOS app)"
+                        desc={t("notification_settings.push_desc")}
                         checked={prefs.push.enabled}
                         onChange={(v) => patchPush("enabled", v)}
                     />
                     <Row
                         icon={<Bell className="h-5 w-5 text-primary" />}
-                        title="In-app"
-                        desc="Notification center & SSE"
+                        title={t("notification_settings.in_app")}
+                        desc={t("notification_settings.in_app_desc")}
                         checked={prefs.inApp.enabled}
                         onChange={(v) => patchInApp("enabled", v)}
                     />
@@ -140,7 +140,7 @@ export default function NotificationSettingsPage() {
                     />
                     <Row
                         icon={<CheckCircle className="h-5 w-5 text-primary" />}
-                        title="Direct messages"
+                        title={t("notification_settings.direct_messages")}
                         checked={prefs.push.directMessage}
                         onChange={(v) => patchPush("directMessage", v)}
                     />
@@ -160,13 +160,13 @@ export default function NotificationSettingsPage() {
                 <CardContent className="space-y-4">
                     <Row
                         icon={<Mail className="h-5 w-5 text-primary" />}
-                        title="Email marketing"
+                        title={t("notification_settings.email_marketing")}
                         checked={prefs.email.marketing}
                         onChange={(v) => patchEmail("marketing", v)}
                     />
                     <Row
                         icon={<Bell className="h-5 w-5 text-primary" />}
-                        title="Push marketing"
+                        title={t("notification_settings.push_marketing")}
                         checked={prefs.push.marketing}
                         onChange={(v) => patchPush("marketing", v)}
                     />
