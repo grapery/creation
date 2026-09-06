@@ -139,7 +139,7 @@ export default function CreatorAnalyticsPage() {
                             {error}
                         </p>
                         <Button variant="outline" size="sm" className="mt-4" onClick={fetchAnalytics}>
-                            Try again
+                            {t("common.try_again")}
                         </Button>
                     </CardContent>
                 </Card>
