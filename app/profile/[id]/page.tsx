@@ -10,7 +10,7 @@ import { User } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { profile } from "@/lib/api/profile";
 import { useTranslation } from "@/providers/language-provider";
-import { getAuthToken } from "@/lib/api/client";
+import { getAuthToken, request } from "@/lib/api/client";
 import Link from "next/link";
 import ProfileHeader from "@/components/profile/profile-header-v2";
 import { ContentModerationMenu } from "@/components/moderation/content-moderation-menu";
@@ -123,23 +123,17 @@ export default function ProfilePage() {
                     headers['Authorization'] = `Bearer ${token}`;
                 }
 
-                const response = await fetch(`/api/users/${userId}`, {
-                    headers,
-                });
-
-                if (!response.ok) {
-                    // Handle 401 (Unauthorized) specifically
-                    if (response.status === 401) {
-                        throw new Error('Authentication required. Please log in again.');
-                    }
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
+                // 走真实后端路径（axios 客户端自动带 token 并解包信封）
+                const uid = (Array.isArray(userId) ? userId[0] : userId) ?? "";
+                const data = await request<User>(`/api/v1/users/${uid}`);
                 if (!isMounted) return;
 
-                setProfileUser(data.user);
-                setIsFollowing(data.isFollowing || false);
+                setProfileUser(data);
+                setIsFollowing(false);
+                // 关注状态单独查询（失败不阻塞资料展示）
+                profile.isFollowing(uid)
+                    .then((r) => { if (isMounted) setIsFollowing(!!r.isFollowing); })
+                    .catch(() => {});
                 hasLoadedRef.current = true;
             } catch (e) {
                 console.error("Failed to fetch profile:", e);
