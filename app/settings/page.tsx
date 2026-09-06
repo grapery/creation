@@ -27,7 +27,7 @@ const accountSettings: SettingsGroup = {
     items: [
         { label: "Profile Information", labelKey: "settings.profile_info", href: "/settings/profile" },
         { label: "Membership & Billing", labelKey: "settings.membership_billing", href: "/settings/membership" },
-        { label: "Payment History", labelKey: "Payment History", href: "/payment-history" },
+        { label: "Payment History", labelKey: "common.payment_history", href: "/payment-history" },
     ],
 };
 

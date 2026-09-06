@@ -144,7 +144,7 @@ export default function PaymentHistoryPage() {
             {/* Page Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-bold tracking-tight">Payment History</h2>
+                    <h2 className="text-2xl font-bold tracking-tight">{t("common.payment_history")}</h2>
                     <p className="text-muted-foreground">View and manage your payment records</p>
                 </div>
                 <Button onClick={exportHistory} variant="outline" size="sm">

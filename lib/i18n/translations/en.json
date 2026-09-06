@@ -78,7 +78,8 @@
     "stat_chars": "Chars",
     "stat_views": "Views",
     "read": "Read",
-    "continue": "Continue"
+    "continue": "Continue",
+    "payment_history": "Payment History"
   },
   "auth": {
     "sign_in": "Sign In",
@@ -547,7 +548,10 @@
     "no_results": "No results found.",
     "type_something": "Type something to search.",
     "no_fragments_found": "No fragments found for “{query}”",
-    "no_fragments_yet": "No fragments yet"
+    "no_fragments_yet": "No fragments yet",
+    "empty_cta_first": "Be the first to create a fragment!",
+    "empty_cta_follow": "Follow creators to see their fragments here",
+    "create_fragment": "Create Fragment"
   },
   "fragment": {
     "create_title": "Create Fragment",

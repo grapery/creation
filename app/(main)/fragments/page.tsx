@@ -215,11 +215,11 @@ export default function FragmentsPage() {
                     <h3 className="text-lg font-semibold mb-2">{t("discover.no_fragments_yet")}</h3>
                     <p className="text-sm text-muted-foreground mb-4">
                         {activeTab === "discover"
-                            ? "Be the first to create a fragment!"
-                            : "Follow creators to see their fragments here"}
+                            ? t("discover.empty_cta_first")
+                            : t("discover.empty_cta_follow")}
                     </p>
                     <button onClick={handleCreateClick} className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium">
-                        Create Fragment
+                        {t("discover.create_fragment")}
                     </button>
                 </div>
             ) : (

@@ -78,7 +78,8 @@
     "stat_chars": "字数",
     "stat_views": "浏览",
     "read": "阅读",
-    "continue": "继续"
+    "continue": "继续",
+    "payment_history": "支付记录"
   },
   "auth": {
     "sign_in": "登录",
@@ -547,7 +548,10 @@
     "no_results": "未找到结果。",
     "type_something": "输入关键词开始搜索。",
     "no_fragments_found": "没有找到与「{query}」相关的碎片",
-    "no_fragments_yet": "还没有碎片"
+    "no_fragments_yet": "还没有碎片",
+    "empty_cta_first": "来创作第一个碎片吧！",
+    "empty_cta_follow": "关注创作者，在这里看到他们的碎片",
+    "create_fragment": "创作碎片"
   },
   "fragment": {
     "create_title": "创建碎片",

@@ -78,7 +78,8 @@
     "stat_chars": "文字数",
     "stat_views": "閲覧",
     "read": "読む",
-    "continue": "続ける"
+    "continue": "続ける",
+    "payment_history": "支払い履歴"
   },
   "auth": {
     "sign_in": "ログイン",
@@ -547,7 +548,10 @@
     "no_results": "結果が見つかりません。",
     "type_something": "キーワードを入力して検索。",
     "no_fragments_found": "「{query}」に関連するフラグメントはありません",
-    "no_fragments_yet": "フラグメントはまだありません"
+    "no_fragments_yet": "フラグメントはまだありません",
+    "empty_cta_first": "最初のフラグメントを作ろう！",
+    "empty_cta_follow": "フォローしたクリエイターのフラグメントがここに表示されます",
+    "create_fragment": "フラグメントを作成"
   },
   "fragment": {
     "create_title": "断片を作成",
