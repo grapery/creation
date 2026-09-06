@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "@/providers/language-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Gift, Users, TrendingUp, Copy, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import { referrals } from "@/lib/api/referrals";
 import type { ReferralStats } from "@/lib/types";
 
 export default function ReferralsPage() {
+    const { t } = useTranslation();
     const [loading, setLoading] = useState(true);
     const [code, setCode] = useState("");
     const [stats, setStats] = useState<ReferralStats | null>(null);
@@ -44,15 +46,15 @@ export default function ReferralsPage() {
     return (
         <div className="max-w-lg mx-auto space-y-6">
             <div>
-                <h1 className="text-2xl font-bold">Invite Friends</h1>
-                <p className="text-muted-foreground">Share your referral code and earn rewards</p>
+                <h1 className="text-2xl font-bold">{t("referrals.title")}</h1>
+                <p className="text-muted-foreground">{t("referrals.subtitle")}</p>
             </div>
 
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Gift className="h-5 w-5" />
-                        Your Referral Code
+                        {t("referrals.your_code")}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -73,21 +75,21 @@ export default function ReferralsPage() {
                         <CardContent className="pt-4 text-center">
                             <Users className="h-5 w-5 mx-auto mb-1 text-muted-foreground" />
                             <div className="text-2xl font-bold">{stats.totalReferrals}</div>
-                            <div className="text-xs text-muted-foreground">Total Referrals</div>
+                            <div className="text-xs text-muted-foreground">{t("referrals.total_referrals")}</div>
                         </CardContent>
                     </Card>
                     <Card>
                         <CardContent className="pt-4 text-center">
                             <TrendingUp className="h-5 w-5 mx-auto mb-1 text-green-500" />
                             <div className="text-2xl font-bold">{stats.activeReferrals}</div>
-                            <div className="text-xs text-muted-foreground">Active</div>
+                            <div className="text-xs text-muted-foreground">{t("referrals.active")}</div>
                         </CardContent>
                     </Card>
                     <Card>
                         <CardContent className="pt-4 text-center">
                             <Gift className="h-5 w-5 mx-auto mb-1 text-yellow-500" />
                             <div className="text-2xl font-bold">{stats.earnedPoints}</div>
-                            <div className="text-xs text-muted-foreground">Points Earned</div>
+                            <div className="text-xs text-muted-foreground">{t("referrals.points_earned")}</div>
                         </CardContent>
                     </Card>
                 </div>

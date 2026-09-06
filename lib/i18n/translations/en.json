@@ -1097,5 +1097,14 @@
       "followers": "Followers",
       "likes_week": "Likes This Week"
     }
+  },
+  "referrals": {
+    "title": "Invite Friends",
+    "subtitle": "Share your referral code and earn rewards",
+    "your_code": "Your Referral Code",
+    "total_referrals": "Total Referrals",
+    "active": "Active",
+    "points_earned": "Points Earned",
+    "copied": "Copied!"
   }
 }

@@ -1097,5 +1097,14 @@
       "followers": "フォロワー",
       "likes_week": "今週のいいね"
     }
+  },
+  "referrals": {
+    "title": "友達を招待",
+    "subtitle": "招待コードを共有して報酬を獲得",
+    "your_code": "あなたの招待コード",
+    "total_referrals": "累計招待数",
+    "active": "アクティブ",
+    "points_earned": "獲得ポイント",
+    "copied": "コピーしました！"
   }
 }
