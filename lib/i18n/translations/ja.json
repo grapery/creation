@@ -91,7 +91,8 @@
     "stat_views": "閲覧",
     "read": "読む",
     "continue": "続ける",
-    "payment_history": "支払い履歴"
+    "payment_history": "支払い履歴",
+    "finish": "完了"
   },
   "auth": {
     "sign_in": "ログイン",

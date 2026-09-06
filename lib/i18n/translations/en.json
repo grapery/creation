@@ -91,7 +91,8 @@
     "stat_views": "Views",
     "read": "Read",
     "continue": "Continue",
-    "payment_history": "Payment History"
+    "payment_history": "Payment History",
+    "finish": "Finish"
   },
   "auth": {
     "sign_in": "Sign In",

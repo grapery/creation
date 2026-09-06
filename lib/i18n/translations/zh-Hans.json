@@ -91,7 +91,8 @@
     "stat_views": "浏览",
     "read": "阅读",
     "continue": "继续",
-    "payment_history": "支付记录"
+    "payment_history": "支付记录",
+    "finish": "完成"
   },
   "auth": {
     "sign_in": "登录",
