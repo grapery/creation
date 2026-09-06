@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "@/providers/language-provider";
 import { BarChart3, BookOpen, Layers, Users, Heart, TrendingUp, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,7 @@ interface SummaryCard {
 }
 
 export default function CreatorAnalyticsPage() {
+    const { t } = useTranslation();
     const [timeRange, setTimeRange] = useState<TimeRange>("7d");
     const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
     const [loading, setLoading] = useState(true);
@@ -54,28 +56,28 @@ export default function CreatorAnalyticsPage() {
     const summaryCards: SummaryCard[] = analytics
         ? [
               {
-                  title: "Total Stories",
+                  title: t("creator_analytics.cards.total_stories"),
                   value: analytics.totalStories,
                   icon: BookOpen,
                   color: "text-blue-500",
                   bgColor: "bg-blue-500/10",
               },
               {
-                  title: "Total Storyboards",
+                  title: t("creator_analytics.cards.total_storyboards"),
                   value: analytics.totalStoryboards,
                   icon: Layers,
                   color: "text-purple-500",
                   bgColor: "bg-purple-500/10",
               },
               {
-                  title: "Followers",
+                  title: t("creator_analytics.cards.followers"),
                   value: analytics.newFollowersThisWeek,
                   icon: Users,
                   color: "text-green-500",
                   bgColor: "bg-green-500/10",
               },
               {
-                  title: "Likes This Week",
+                  title: t("creator_analytics.cards.likes_week"),
                   value: analytics.likesThisWeek,
                   icon: Heart,
                   color: "text-red-500",
@@ -91,7 +93,7 @@ export default function CreatorAnalyticsPage() {
                 <div>
                     <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
                         <BarChart3 className="h-6 w-6" />
-                        Creator Analytics
+                        {t("creator_analytics.title")}
                     </h1>
                     <p className="text-muted-foreground mt-1">
                         Track your content performance and audience growth
@@ -104,7 +106,7 @@ export default function CreatorAnalyticsPage() {
                         onClick={() => setTimeRange("7d")}
                         className="rounded-md"
                     >
-                        Last 7 days
+                        {t("creator_analytics.last_7d")}
                     </Button>
                     <Button
                         variant={timeRange === "30d" ? "secondary" : "ghost"}
@@ -112,7 +114,7 @@ export default function CreatorAnalyticsPage() {
                         onClick={() => setTimeRange("30d")}
                         className="rounded-md"
                     >
-                        Last 30 days
+                        {t("creator_analytics.last_30d")}
                     </Button>
                 </div>
             </div>
@@ -121,7 +123,7 @@ export default function CreatorAnalyticsPage() {
             {loading && (
                 <div className="flex flex-col items-center justify-center py-16">
                     <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground mt-3">Loading analytics...</p>
+                    <p className="text-sm text-muted-foreground mt-3">{t("creator_analytics.loading")}</p>
                 </div>
             )}
 
@@ -131,7 +133,7 @@ export default function CreatorAnalyticsPage() {
                     <CardContent className="flex flex-col items-center justify-center py-16">
                         <BarChart3 className="h-12 w-12 text-muted-foreground/40" />
                         <p className="text-base font-medium text-foreground mt-4">
-                            Unable to load analytics
+                            {t("creator_analytics.load_failed")}
                         </p>
                         <p className="text-sm text-muted-foreground mt-1 text-center max-w-sm">
                             {error}

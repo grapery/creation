@@ -1084,5 +1084,18 @@
     "tokens_used": "已使用 {count} 点数",
     "limit": "上限 {count}",
     "unlimited": "无上限"
+  },
+  "creator_analytics": {
+    "title": "创作者分析",
+    "last_7d": "近 7 天",
+    "last_30d": "近 30 天",
+    "loading": "正在加载分析…",
+    "load_failed": "无法加载分析数据",
+    "cards": {
+      "total_stories": "故事总数",
+      "total_storyboards": "故事板总数",
+      "followers": "粉丝",
+      "likes_week": "本周获赞"
+    }
   }
 }

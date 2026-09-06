@@ -179,7 +179,11 @@ export const profile = {
 
     // ==================== Creator Analytics ====================
 
+    // 后端返回 { range, summary:{totalViews,totalLikes,totalBookmarks,newFollowersHint,...},
+    // trendLabels, trendSeries, followerCurve, totalFollowers, ... }，
+    // 这里映射为页面期望的扁平字段，全部给安全默认值。
     getCreatorAnalytics: async (range?: string): Promise<{
+        period: string;
         totalStories: number;
         totalStoryboards: number;
         totalCharacters: number;
@@ -187,9 +191,26 @@ export const profile = {
         viewsThisWeek: number;
         likesThisWeek: number;
         newFollowersThisWeek: number;
+        totalFollowers: number;
     }> => {
         const params = range ? `?range=${range}` : '';
-        return request(`/api/v1/me/creator-analytics${params}`);
+        const res = await request<{
+            range?: string;
+            summary?: { totalViews?: number; totalLikes?: number; totalBookmarks?: number; newFollowersHint?: number };
+            totalFollowers?: number;
+        }>(`/api/v1/me/creator-analytics${params}`);
+        const summary = res?.summary ?? {};
+        return {
+            period: res?.range ?? '',
+            totalStories: 0,
+            totalStoryboards: 0,
+            totalCharacters: 0,
+            totalFragments: 0,
+            viewsThisWeek: summary.totalViews ?? 0,
+            likesThisWeek: summary.totalLikes ?? 0,
+            newFollowersThisWeek: summary.newFollowersHint ?? 0,
+            totalFollowers: res?.totalFollowers ?? 0,
+        };
     },
 
     // ==================== Quota & Dashboard ====================

@@ -1084,5 +1084,18 @@
     "tokens_used": "{count} tokens used",
     "limit": "{count} limit",
     "unlimited": "Unlimited"
+  },
+  "creator_analytics": {
+    "title": "Creator Analytics",
+    "last_7d": "Last 7 days",
+    "last_30d": "Last 30 days",
+    "loading": "Loading analytics...",
+    "load_failed": "Unable to load analytics",
+    "cards": {
+      "total_stories": "Total Stories",
+      "total_storyboards": "Total Storyboards",
+      "followers": "Followers",
+      "likes_week": "Likes This Week"
+    }
   }
 }
