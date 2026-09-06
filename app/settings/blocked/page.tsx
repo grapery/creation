@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "@/providers/language-provider";
 import { ShieldOff, Loader2, UserX } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,7 @@ interface BlockedUser {
 }
 
 export default function BlockedUsersPage() {
+    const { t } = useTranslation();
     const [blockedUsers, setBlockedUsers] = useState<BlockedUser[]>([]);
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -192,7 +194,7 @@ export default function BlockedUsersPage() {
                                                 </AlertDialogDescription>
                                             </AlertDialogHeader>
                                             <AlertDialogFooter>
-                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <AlertDialogCancel>{t("common.cancel_btn")}</AlertDialogCancel>
                                                 <AlertDialogAction
                                                     onClick={() => handleUnblock(user.id)}
                                                     className="bg-primary text-primary-foreground"

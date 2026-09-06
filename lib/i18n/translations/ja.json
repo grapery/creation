@@ -99,7 +99,13 @@
     "likes_label": "いいね",
     "edit_profile": "プロフィール編集",
     "share": "シェア",
-    "tabs_hint": "上のタブでストーリー・ストーリーボード・キャラクターを表示できます。"
+    "tabs_hint": "上のタブでストーリー・ストーリーボード・キャラクターを表示できます。",
+    "title_label": "タイトル",
+    "content_label": "内容",
+    "read_btn": "読む",
+    "location_label": "場所",
+    "time_of_day": "時間帯",
+    "cancel_btn": "キャンセル"
   },
   "auth": {
     "sign_in": "ログイン",
@@ -744,7 +750,8 @@
     "link_copied": "リンクをクリップボードにコピーしました",
     "copy_failed": "リンクのコピーに失敗しました",
     "save_before_collab": "协作者を招待する前にストーリーを保存してください",
-    "opening_collab": "协作者設定を開いています..."
+    "opening_collab": "协作者設定を開いています...",
+    "title": "ストーリーボードエディター"
   },
   "story_settings": {
     "visibility": "公開範囲",
@@ -1054,7 +1061,8 @@
     "per_month": "/月"
   },
   "settings_misc": {
-    "app_version": "Voyager v1.0.0 (Web)"
+    "app_version": "Voyager v1.0.0 (Web)",
+    "redirecting_terms": "利用規約へ移動中…"
   },
   "legal": {
     "last_updated": "最終更新"

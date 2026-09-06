@@ -99,7 +99,13 @@
     "likes_label": "获赞",
     "edit_profile": "编辑资料",
     "share": "分享",
-    "tabs_hint": "使用上方标签浏览故事、故事板与角色。"
+    "tabs_hint": "使用上方标签浏览故事、故事板与角色。",
+    "title_label": "标题",
+    "content_label": "内容",
+    "read_btn": "阅读",
+    "location_label": "地点",
+    "time_of_day": "时间",
+    "cancel_btn": "取消"
   },
   "auth": {
     "sign_in": "登录",
@@ -744,7 +750,8 @@
     "link_copied": "链接已复制到剪贴板",
     "copy_failed": "复制链接失败",
     "save_before_collab": "请先保存故事再邀请协作者",
-    "opening_collab": "正在打开协作者设置..."
+    "opening_collab": "正在打开协作者设置...",
+    "title": "故事板编辑器"
   },
   "story_settings": {
     "visibility": "可见范围",
@@ -1054,7 +1061,8 @@
     "per_month": "/月"
   },
   "settings_misc": {
-    "app_version": "未择 v1.0.0 (网页版)"
+    "app_version": "未择 v1.0.0 (网页版)",
+    "redirecting_terms": "正在跳转到服务条款…"
   },
   "legal": {
     "last_updated": "最后更新"

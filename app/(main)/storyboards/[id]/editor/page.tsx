@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "@/providers/language-provider";
 import { useParams, useRouter } from "next/navigation";
 import { storyboards } from "@/lib/api/storyboards";
 import { creation } from "@/lib/api/creation";
@@ -22,6 +23,7 @@ function SimpleTextarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>
 }
 
 export default function EditorPage() {
+    const { t } = useTranslation();
     const { id } = useParams();
     const router = useRouter();
     const [parent, setParent] = useState<Storyboard | null>(null);
@@ -99,7 +101,7 @@ export default function EditorPage() {
                     </div>
 
                     <div className="space-y-2">
-                        <SimpleLabel htmlFor="title">Title</SimpleLabel>
+                        <SimpleLabel htmlFor="title">{t("common.title_label")}</SimpleLabel>
                         <Input
                             id="title"
                             value={formData.title}
@@ -108,7 +110,7 @@ export default function EditorPage() {
                     </div>
 
                     <div className="space-y-2">
-                        <SimpleLabel htmlFor="content">Content</SimpleLabel>
+                        <SimpleLabel htmlFor="content">{t("common.content_label")}</SimpleLabel>
                         <SimpleTextarea
                             id="content"
                             value={formData.content}

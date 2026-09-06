@@ -97,7 +97,7 @@ function NewStorySceneForm() {
                         </div>
                         <div className="grid gap-4 sm:grid-cols-2">
                             <div className="space-y-2">
-                                <Label htmlFor="location">Location</Label>
+                                <Label htmlFor="location">{t("common.location_label")}</Label>
                                 <Input
                                     id="location"
                                     value={location}
@@ -107,7 +107,7 @@ function NewStorySceneForm() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="timeOfDay">Time of day</Label>
+                                <Label htmlFor="timeOfDay">{t("common.time_of_day")}</Label>
                                 <Input
                                     id="timeOfDay"
                                     value={timeOfDay}

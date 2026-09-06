@@ -4,6 +4,26 @@ const nextConfig: NextConfig = {
   /* config options here */
   output: 'standalone',
 
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          // 防点击劫持：本站无合法嵌入场景
+          { key: 'X-Frame-Options', value: 'DENY' },
+          // 防 MIME 嗅探
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          // 只在同源降级时发送 Referer（分享落地页仍能拿到必要参数）
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          // 关闭未使用的高危浏览器能力
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), payment=()' },
+          // 全站 HTTPS（www.rankquantity.xyz 强制 HTTPS）
+          { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
+        ],
+      },
+    ];
+  },
+
   images: {
     // UGC 图片来自 OSS / 第三方头像 / 支付二维码等多个已知与动态域名，
     // 统一经 Next 优化器代理；SVG 允许以保持与 <img> 时代一致的渲染行为。

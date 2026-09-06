@@ -99,7 +99,13 @@
     "likes_label": "likes",
     "edit_profile": "Edit Profile",
     "share": "Share",
-    "tabs_hint": "Use the tabs above to browse stories, storyboards, and characters."
+    "tabs_hint": "Use the tabs above to browse stories, storyboards, and characters.",
+    "title_label": "Title",
+    "content_label": "Content",
+    "read_btn": "Read",
+    "location_label": "Location",
+    "time_of_day": "Time of day",
+    "cancel_btn": "Cancel"
   },
   "auth": {
     "sign_in": "Sign In",
@@ -744,7 +750,8 @@
     "link_copied": "Link copied to clipboard",
     "copy_failed": "Failed to copy link",
     "save_before_collab": "Save the story first before inviting collaborators",
-    "opening_collab": "Opening collaborator settings..."
+    "opening_collab": "Opening collaborator settings...",
+    "title": "Storyboard Editor"
   },
   "story_settings": {
     "visibility": "Visibility",
@@ -1054,7 +1061,8 @@
     "per_month": "/mo"
   },
   "settings_misc": {
-    "app_version": "Voyager v1.0.0 (Web)"
+    "app_version": "Voyager v1.0.0 (Web)",
+    "redirecting_terms": "Redirecting to Terms of Service..."
   },
   "legal": {
     "last_updated": "Last updated"

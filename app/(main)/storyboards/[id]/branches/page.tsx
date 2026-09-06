@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "@/providers/language-provider";
 import { useParams } from "next/navigation";
 import { storyboards } from "@/lib/api/storyboards";
 import { Storyboard } from "@/lib/types";
@@ -44,6 +45,7 @@ function buildTree(items: Storyboard[], currentId: string): TreeNode | null {
 }
 
 export default function BranchingPage() {
+    const { t } = useTranslation();
     const { id } = useParams();
     const [loading, setLoading] = useState(true);
     const [tree, setTree] = useState<TreeNode | null>(null);
@@ -89,6 +91,7 @@ export default function BranchingPage() {
 }
 
 function TreeNodeComponent({ node }: { node: TreeNode }) {
+    const { t } = useTranslation();
     return (
         <div className="flex flex-col items-center">
             <div className={`z-10 p-4 rounded-lg border bg-card hover:border-primary transition-colors w-64 mb-8 relative ${node.isCurrent ? 'ring-2 ring-primary' : ''}`}>
@@ -99,7 +102,7 @@ function TreeNodeComponent({ node }: { node: TreeNode }) {
                 <div className="text-xs text-muted-foreground mt-1">by {node.author}</div>
                 <div className="mt-2 flex gap-2">
                     <Button size="sm" variant="outline" className="h-7 text-xs" asChild>
-                        <Link href={`/storyboards/${node.id}`}>Read</Link>
+                        <Link href={`/storyboards/${node.id}`}>{t("common.read_btn")}</Link>
                     </Button>
                 </div>
                 {node.children.length > 0 && <div className="absolute bottom-[-2rem] left-1/2 w-0.5 h-8 bg-border" />}

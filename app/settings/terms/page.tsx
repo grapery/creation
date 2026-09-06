@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
+import { useTranslation } from "@/providers/language-provider";
 import { useRouter } from "next/navigation";
 
 export default function TermsSettingsPage() {
+    const { t } = useTranslation();
     const router = useRouter();
 
     useEffect(() => {
@@ -14,7 +16,7 @@ export default function TermsSettingsPage() {
     return (
         <div className="min-h-screen bg-background flex items-center justify-center">
             <div className="text-center">
-                <p className="text-muted-foreground">Redirecting to Terms of Service...</p>
+                <p className="text-muted-foreground">{t("settings_misc.redirecting_terms", "Redirecting to Terms of Service...")}</p>
             </div>
         </div>
     );
