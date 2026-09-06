@@ -207,7 +207,7 @@ export default function OnboardingPage() {
                                 </Button>
                                 <Button className="flex-1" onClick={finish} disabled={saving}>
                                     {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                                    Finish
+                                    {t("common.finish", "Finish")}
                                 </Button>
                             </div>
                         </>
